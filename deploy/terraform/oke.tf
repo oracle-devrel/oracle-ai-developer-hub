@@ -8,7 +8,7 @@ locals {
 
 module "oke" {
   source  = "oracle-terraform-modules/oke/oci"
-  version = "5.1.5"
+  version = "5.2.4"
 
   tenancy_id     = var.tenancy_ocid
   compartment_id = var.compartment_ocid

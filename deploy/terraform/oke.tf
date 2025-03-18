@@ -8,7 +8,7 @@ locals {
 
 module "oke" {
   source  = "oracle-terraform-modules/oke/oci"
-  version = "5.1.5"
+  version = "5.2.4"
 
   tenancy_id     = var.tenancy_ocid
   compartment_id = var.compartment_ocid
@@ -39,6 +39,7 @@ module "oke" {
   create_iam_kms_policy        = "never"
   create_iam_operator_policy   = "never"
   create_iam_worker_policy     = "never"
+  
   # Network module - VCN
   subnets = {
     bastion = {
@@ -66,14 +67,15 @@ module "oke" {
       create = "never"
     }
   }
+  
   nsgs = {
-    bastion  = { create = "never" }
-    operator = { create = "never" }
     cp       = { create = "always" }
-    int_lb   = { create = "never" }
     pub_lb   = { create = "always" } // never
     workers  = { create = "always" }
     pods     = { create = "always" } // never
+    bastion  = { create = "never" }
+    operator = { create = "never" }
+    int_lb   = { create = "never" }
   }
 
   assign_dns    = true
@@ -93,12 +95,14 @@ module "oke" {
   # enable_waf                        = false
   # load_balancers                    = "public"
   # preferred_load_balancer = "public"
-  # worker_is_public = false
+  worker_is_public = false
 
   # Cluster module
   create_cluster = true
   cni_type       = "npn"
   cluster_type   = "enhanced"
+
+  # pod_nsg_ids    = [] # don't solve the problem
 
   pods_cidr         = "10.244.0.0/16"
   services_cidr     = "10.96.0.0/16"

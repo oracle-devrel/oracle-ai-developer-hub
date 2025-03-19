@@ -1,19 +1,38 @@
 package dev.victormartin.oci.genai.backend.backend.service;
 
-import com.oracle.bmc.generativeaiinference.model.*;
-import com.oracle.bmc.generativeaiinference.model.Message;
-import com.oracle.bmc.generativeaiinference.requests.ChatRequest;
-import com.oracle.bmc.generativeaiinference.responses.ChatResponse;
-import dev.victormartin.oci.genai.backend.backend.dao.GenAiModel;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.oracle.bmc.generativeaiinference.model.BaseChatResponse;
+import com.oracle.bmc.generativeaiinference.model.ChatChoice;
+import com.oracle.bmc.generativeaiinference.model.ChatContent;
+import com.oracle.bmc.generativeaiinference.model.ChatDetails;
+import com.oracle.bmc.generativeaiinference.model.ChatResult;
+import com.oracle.bmc.generativeaiinference.model.CohereChatRequest;
+import com.oracle.bmc.generativeaiinference.model.CohereChatResponse;
+import com.oracle.bmc.generativeaiinference.model.GenericChatRequest;
+import com.oracle.bmc.generativeaiinference.model.GenericChatResponse;
+import com.oracle.bmc.generativeaiinference.model.Message;
+import com.oracle.bmc.generativeaiinference.model.OnDemandServingMode;
+import com.oracle.bmc.generativeaiinference.model.TextContent;
+import com.oracle.bmc.generativeaiinference.model.UserMessage;
+import com.oracle.bmc.generativeaiinference.requests.ChatRequest;
+import com.oracle.bmc.generativeaiinference.responses.ChatResponse;
 
+import dev.victormartin.oci.genai.backend.backend.dao.GenAiModel;
+
+/**
+ * Provides an implementation of the OCI Gen AI service, allowing users to interact with various AI models
+ * from different vendors such as Cohere and Meta.
+ *
+ * This service enables features like text generationand summarisation.
+ */
 @Service
 public class OCIGenAIService {
 
@@ -52,7 +71,7 @@ public class OCIGenAIService {
                                         .frequencyPenalty((double) 0)
                                         .topP(0.75)
                                         .topK(0)
-                                        .isStream(false) // TODO websockets and streams
+                                        .isStream(false)
                                         .build();
 
                                 chatDetails = ChatDetails.builder()
@@ -60,7 +79,7 @@ public class OCIGenAIService {
                                         .compartmentId(COMPARTMENT_ID)
                                         .chatRequest(cohereChatRequest)
                                         .build();
-                                break;
+                                break;›
                         case "meta":
                                 ChatContent content = TextContent.builder()
                                         .text(inputText)

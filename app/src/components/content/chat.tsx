@@ -77,30 +77,34 @@ export const Chat = ({ testId, data, questionChanged, question }: Props) => {
   };
 
   return (
-    <>
-      <div class="oj-flex-item">
-        <oj-list-view
-          id="chatlist"
-          ref={listRef}
-          data-oj-context="true"
-          aria-label="list of questions and answers"
-          data={dataProvider.current}
-          selectionMode="none"
-          scrollPosition={scrollPos}
-          class="oj-sm-width-full demo-chat-layout"
-        >
-          <template slot="itemTemplate" render={chatItemTemplate}></template>
-          <template slot="noData" render={chatNoDataTemplate}></template>
-        </oj-list-view>
+    <div class="chat-wrapper">
+      <div class="chat-container">
+        <div class="chat-list-container">
+          <oj-list-view
+            id="chatlist"
+            ref={listRef}
+            data-oj-context="true"
+            aria-label="list of questions and answers"
+            data={dataProvider.current}
+            selectionMode="none"
+            scrollPosition={scrollPos}
+            class="oj-sm-width-full demo-chat-layout"
+          >
+            <template slot="itemTemplate" render={chatItemTemplate}></template>
+            <template slot="noData" render={chatNoDataTemplate}></template>
+          </oj-list-view>
+        </div>
+        <div class="chat-input-container">
+          <oj-input-search
+            id="search1"
+            class="oj-input-search-hero oj-sm-width-3"
+            value={question?.current}
+            placeholder="ask me anything..."
+            aria-label="enter a question"
+            onojValueAction={handleQuestionChange}
+          ></oj-input-search>
+        </div>
       </div>
-      <oj-input-search
-        id="search1"
-        class="oj-input-search-hero oj-sm-width-3"
-        value={question?.current}
-        placeholder="ask me anything..."
-        aria-label="enter a question"
-        onojValueAction={handleQuestionChange}
-      ></oj-input-search>
-    </>
+    </div>
   );
 };

@@ -55,7 +55,7 @@ config.set("ocir_user_token", ocir_user_token);
 await containerLogin(namespace, ocir_user, ocir_user_token, ocirUrl);
 // await releaseWeb();
 await releaseApp();
-await releaseBackend();
+// await releaseBackend();
 
 async function releaseWeb() {
   const service = "web";

@@ -44,7 +44,7 @@ export const Answer = ({ item, sim }: Props) => {
       {!sim && (
         <li class="oj-flex demo-answer-layout">
           <div class="oj-flex-item">
-            <div class="oj-sm-justify-content-flex-end oj-sm-padding-2x-end oj-sm-12 demo-copy-paste oj-color-invert">
+            <div class="oj-sm-justify-content-flex-end oj-sm-padding-2x-end oj-sm-12 demo-copy-paste">
               <md-wrapper
                 id="TestingOne"
                 class="oj-sm-12"

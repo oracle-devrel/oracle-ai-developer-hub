@@ -7,13 +7,15 @@
 */
 
 :root {
-  --oj-sp-header-welcome-banner-background-color: rgb(98, 55, 31) !important;
+  --oj-sp-header-welcome-banner-background-color: rgb(248, 250, 252) !important;
   --oj-sp-header-welcome-banner-background-color-darker-shade: rgb(
-    98,
-    55,
-    31
+    241,
+    245,
+    249
   ) !important;
   --oj-body-bg-color: rgb(var(--oj-palette-neutral-rgb-10));
+  --chat-answer-bg: rgb(248, 250, 252);
+  --chat-question-bg: rgb(241, 245, 249);
 }
 
 body {
@@ -32,16 +34,7 @@ header.oj-web-applayout-header {
   margin-left: -8px;
 }
 
-oj-sample-markdown-viewer .legacyStyling pre {
-  color: black;
-  white-space:pre-wrap;
-  margin: unset;
 
-}
-oj-sample-markdown-viewer .legacyStyling p {
-  margin-right: 10px;
-
-}
 
 .copy-to-clip-btn {
   position: relative;
@@ -74,21 +67,62 @@ oj-sample-markdown-viewer .legacyStyling p {
 code,
 kbd,
 samp {
-  font-family: monospace, monospace;
-  font-size: 1em;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  background-color: #000000;
+  color: #00ff00;
+  padding: 2px 4px;
+  border-radius: 3px;
+  border: 1px solid #00ff00;
+}
+
+/* Code blocks in markdown */
+oj-sample-markdown-viewer .legacyStyling pre {
+  background-color: #000000 !important;
+  color: #00ff00 !important;
+  border: 2px solid #00ff00;
+  border-radius: 6px;
+  padding: 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85em;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  margin: 10px 0;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+oj-sample-markdown-viewer .legacyStyling pre code {
+  background-color: transparent;
+  color: #00ff00;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Inline code styling */
+oj-sample-markdown-viewer .legacyStyling p code,
+oj-sample-markdown-viewer .legacyStyling li code {
+  background-color: #000000;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85em;
 }
 
 .demo-answer-layout {
   min-height: 50px;
-  /* background-color: #506e23; */
-  background-color: var(--oj-sp-header-welcome-banner-background-color);
+  background-color: var(--chat-answer-bg);
   display: inherit;
   margin: 20px 10px 50px 10px;
-  border: 2px black;
-  border-radius: 10px;
-  padding: 10px;
+  border: 1px solid #e1e5e9;
+  border-radius: 12px;
+  padding: 16px;
   text-align: start;
   max-width: 1440px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .demo-answer-padding {
@@ -106,14 +140,14 @@ samp {
 }
 .demo-question-layout {
   min-height: 50px;
-  /* background-color: #226b95; */
-  background-color: var(--oj-sp-header-welcome-banner-background-color);
+  background-color: var(--chat-question-bg);
   display: inherit;
   margin: 20px 10px 10px 10px;
-  border: 2px black;
-  border-radius: 10px;
-  padding: 10px;
+  border: 1px solid #e1e5e9;
+  border-radius: 12px;
+  padding: 16px;
   text-align: start;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .demo-sim-question-layout {
   min-height: 50px;
@@ -137,16 +171,16 @@ samp {
 }
 
 .demo-header {
-  background-color: var(
-    --oj-sp-header-welcome-banner-background-color
-  ) !important;
+  background-color: rgb(98, 55, 31) !important;
   max-height: 150px;
 }
-.demo-header-end {
-  background-image: url(images/welcomeBanner-foreground2.png);
-  width: 600px;
-  justify-content: end;
+
+/* Make hamburger menu icon white in header */
+header.oj-web-applayout-header .oj-button .oj-ux-ico-menu {
+  color: #ffffff !important;
+  fill: #ffffff !important;
 }
+
 
 .demo-no-data-content {
   /* background-image: url(images/welcomeBanner-foreground2.png); */

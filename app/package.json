@@ -25,5 +25,10 @@
   "engines": {
     "node": ">=16.0.0"
   },
+  "scripts": {
+    "dev": "ojet serve --server-port=8000",
+    "build": "ojet build",
+    "serve": "ojet serve"
+  },
   "private": true
 }

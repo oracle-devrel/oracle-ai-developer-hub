@@ -1,0 +1,87 @@
+[
+  {
+    "id": "cohere.command-a-03-2025",
+    "provider": "cohere",
+    "family": "command-a",
+    "tasks": ["chat", "summarize", "text"],
+    "modes": ["ON_DEMAND", "DEDICATED"],
+    "regions": [
+      "us-ashburn-1",
+      "us-chicago-1",
+      "us-phoenix-1",
+      "eu-frankfurt-1",
+      "uk-london-1",
+      "ap-hyderabad-1",
+      "ap-osaka-1",
+      "me-dubai-1",
+      "me-riyadh-1",
+      "sa-saopaulo-1"
+    ],
+    "contextTokens": 256000,
+    "maxOutputTokens": { "onDemand": 4000, "dedicated": null },
+    "notes": []
+  },
+  {
+    "id": "google.gemini-2.5-pro",
+    "provider": "google",
+    "family": "gemini-2.5-pro",
+    "tasks": ["chat", "multimodal"],
+    "modes": ["ON_DEMAND"],
+    "regions": ["us-ashburn-1", "us-chicago-1", "us-phoenix-1"],
+    "contextTokens": 1000000,
+    "maxOutputTokens": { "onDemand": 65536 },
+    "notes": ["external_hosting", "approval_required"]
+  },
+  {
+    "id": "meta.llama-4-maverick",
+    "provider": "meta",
+    "family": "llama-4-maverick",
+    "tasks": ["chat", "text"],
+    "modes": ["ON_DEMAND", "DEDICATED"],
+    "regions": ["us-ashburn-1", "us-chicago-1", "us-phoenix-1", "eu-frankfurt-1", "uk-london-1"],
+    "contextTokens": 131072,
+    "maxOutputTokens": { "onDemand": 4096, "dedicated": null },
+    "notes": []
+  },
+  {
+    "id": "cohere.embed-english-3",
+    "provider": "cohere",
+    "family": "embed-english-3",
+    "tasks": ["embed"],
+    "modes": ["ON_DEMAND", "DEDICATED"],
+    "regions": [
+      "us-ashburn-1",
+      "us-chicago-1",
+      "us-phoenix-1",
+      "eu-frankfurt-1",
+      "uk-london-1",
+      "ap-hyderabad-1",
+      "ap-osaka-1",
+      "me-dubai-1",
+      "me-riyadh-1",
+      "sa-saopaulo-1"
+    ],
+    "dim": 1024,
+    "notes": []
+  },
+  {
+    "id": "cohere.rerank-3.5",
+    "provider": "cohere",
+    "family": "rerank-3.5",
+    "tasks": ["rerank"],
+    "modes": ["ON_DEMAND"],
+    "regions": [
+      "us-ashburn-1",
+      "us-chicago-1",
+      "us-phoenix-1",
+      "eu-frankfurt-1",
+      "uk-london-1",
+      "ap-hyderabad-1",
+      "ap-osaka-1",
+      "me-dubai-1",
+      "me-riyadh-1",
+      "sa-saopaulo-1"
+    ],
+    "notes": []
+  }
+]

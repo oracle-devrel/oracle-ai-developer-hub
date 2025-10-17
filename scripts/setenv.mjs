@@ -144,48 +144,42 @@ async function createCerts() {
   config.set("certPrivateKey", path.join(certPath, "tls.key"));
 }
 
-async function setLatestGenAIModelChat() {
-  const latestVersionModel = await getLatestGenAIModels(
-    profile,
-    compartmentId,
-    regionName,
-    "cohere",
-    "CHAT"
-  );
+async function setLatestGenAIModel(capability, configKey) {
+  const vendors = ["cohere", "meta", "xai"];
+  let allModels = [];
 
-  const { id, vendor: vendorName, version, capabilities } = latestVersionModel;
-  const displayName = latestVersionModel["display-name"];
-  const timeCreated = moment(latestVersionModel["time-created"]).fromNow();
-  console.log(
-    `Using GenAI Model ${chalk.green(vendorName)}:${chalk.green(
-      version
-    )} (${chalk.green(displayName)}) with ${chalk.green(
-      capabilities.join(",")
-    )} created ${timeCreated} (${id})`
-  );
+  for (const vendor of vendors) {
+    const models = await getLatestGenAIModels(
+      profile,
+      compartmentId,
+      regionName,
+      vendor,
+      capability
+    );
+    allModels = allModels.concat(models);
+  }
 
-  config.set("genAiModelChat", id);
+  // Sort by timeCreated descending and pick the latest
+  allModels.sort((a, b) => new Date(b["time-created"]) - new Date(a["time-created"]));
+  const latestModel = allModels[0];
+
+  if (latestModel) {
+    const { id, vendor: vendorName, version, capabilities } = latestModel;
+    const displayName = latestModel["display-name"];
+    const timeCreated = moment(latestModel["time-created"]).fromNow();
+    console.log(
+      `Using latest GenAI Model ${chalk.green(vendorName)}:${chalk.green(
+        version
+      )} (${chalk.green(displayName)}) with ${chalk.green(
+        capabilities.join(",")
+      )} created ${timeCreated} (${id}) for ${capability}`
+    );
+    config.set(configKey, id);
+  } else {
+    console.error(`No models found for ${capability}`);
+  }
 }
 
-async function setLatestGenAIModelSummarization() {
-  const latestVersionModel = await getLatestGenAIModels(
-    profile,
-    compartmentId,
-    regionName,
-    "cohere",
-    "CHAT"
-  );
-
-  const { id, vendor: vendorName, version, capabilities } = latestVersionModel;
-  const displayName = latestVersionModel["display-name"];
-  const timeCreated = moment(latestVersionModel["time-created"]).fromNow();
-  console.log(
-    `Using GenAI Model ${chalk.green(vendorName)}:${chalk.green(
-      version
-    )} (${chalk.green(displayName)}) with ${chalk.green(
-      capabilities.join(",")
-    )} created ${timeCreated} (${id})`
-  );
-
-  config.set("genAiModelSummarization", id);
-}
+// Call for CHAT and Summarization (assuming summarization uses CHAT capable models)
+setLatestGenAIModel("CHAT", "genAiModelChat");
+setLatestGenAIModel("CHAT", "genAiModelSummarization");

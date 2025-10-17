@@ -1,0 +1,8 @@
+{
+    "compartment_id": "ocid1.compartment.oc1..aaaaaaaaut7vieqsewqr4nezosxg4ikf2mszg4roiimlbvhqtinrpgevy6uq",
+    "config_profile": "DEFAULT",
+    "service_endpoint": "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
+    "model_type": "cohere",
+    "cohere_model_id": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceya7ozidbukxwtun4ocm4ngco2jukoaht5mygpgr6gq2lgq",
+    "llama_model_id": "ocid1.generativeaimodel.oc1.us-chicago-1.amaaaaaask7dceyarleil5jr7k2rykljkhapnvhrqvzx4cwuvtfedlfxet4q"
+}

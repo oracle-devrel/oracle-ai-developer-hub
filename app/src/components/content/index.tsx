@@ -37,7 +37,12 @@ type Model = {
 const defaultServiceType: string = localStorage.getItem("service") || "text";
 const defaultBackendType: string = localStorage.getItem("backend") || "java";
 
-const Content = () => {
+type ContentProps = {
+  settingsOpened: boolean;
+  setSettingsOpened: (opened: boolean) => void;
+};
+
+const Content = ({ settingsOpened, setSettingsOpened }: ContentProps) => {
   const conversationId = useContext(ConvoCtx);
   const [update, setUpdate] = useState<Array<object>>([]);
   const [busy, setBusy] = useState<boolean>(false);
@@ -50,7 +55,7 @@ const Content = () => {
   const [backendType, setBackendType] = useState<BackendTypes>(
     defaultBackendType as BackendTypes
   );
-  const [settingsOpened, setSettingsOpened] = useState<boolean>(false);
+  const [ragEnabled, setRagEnabled] = useState<boolean>(false);
   const question = useRef<string>();
   const chatData = useRef<Array<object>>([]);
   const socket = useRef<WebSocket>();
@@ -173,21 +178,64 @@ const Content = () => {
 
       if (backendType === "python") {
         socket.current?.send(
-          JSON.stringify({ msgType: "question", data: question.current })
+          JSON.stringify({ msgType: "question", data: question.current, modelId: modelId })
         );
       } else {
-        sendPrompt(
-          client,
-          question.current!,
-          modelId!,
-          conversationId!,
-          finetune.current
-        );
+        if (ragEnabled) {
+          // Use RAG endpoint for Java backend when RAG is enabled
+          fetch("/api/genai/rag", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              question: question.current,
+              tenantId: "default"
+            }),
+          })
+            .then((response) => response.text())
+            .then((answer) => {
+              let tempArray = [...chatData.current];
+              // Remove loading indicator
+              tempArray.pop();
+              // Add the answer
+              tempArray.push({
+                id: tempArray.length as number,
+                answer: answer,
+              });
+              chatData.current = tempArray;
+              setUpdate(chatData.current);
+              setBusy(false);
+            })
+            .catch((error) => {
+              console.error("RAG request failed:", error);
+              let tempArray = [...chatData.current];
+              tempArray.pop(); // Remove loading
+              tempArray.push({
+                id: tempArray.length as number,
+                answer: "Sorry, I encountered an error while processing your question with RAG.",
+              });
+              chatData.current = tempArray;
+              setUpdate(chatData.current);
+              setBusy(false);
+            });
+        } else {
+          sendPrompt(
+            client,
+            question.current!,
+            modelId!,
+            conversationId!,
+            finetune.current
+          );
+        }
       }
+
+      // Clear the input field after question is published
+      question.current = "";
     }
   };
 
-  const handleFileUpload = (file: ArrayBuffer) => {
+  const handleFileUpload = (file: ArrayBuffer | Uint8Array) => {
     socket.current?.send(file);
   };
 
@@ -240,8 +288,10 @@ const Content = () => {
         <Settings
           aiServiceType={serviceType}
           backendType={backendType}
+          ragEnabled={ragEnabled}
           aiServiceChange={serviceTypeChangeHandler}
           backendChange={backendTypeChangeHandler}
+          ragToggle={setRagEnabled}
           modelIdChange={modelIdChangeHandler}
         />
       </oj-c-drawer-popup>
@@ -251,11 +301,6 @@ const Content = () => {
           position="top"
           onojClose={handleToastClose}
         ></oj-c-message-toast>
-        <div class="oj-flex-bar-end oj-color-invert demo-header-end">
-          <oj-button onojAction={toggleDrawer} label="Toggle" display="icons">
-            <span slot="startIcon" class="oj-ux-ico-menu"></span>
-          </oj-button>
-        </div>
       </div>
       {serviceType === "text" && (
         <Chat
@@ -279,6 +324,7 @@ const Content = () => {
           clear={clearSummary}
           prompt={updateSummaryPrompt}
           backendType={backendType}
+          modelId={modelId}
         />
       )}
     </div>

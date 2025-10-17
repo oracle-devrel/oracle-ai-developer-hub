@@ -5,6 +5,7 @@ import "ojs/ojbutton";
 
 type Props = Readonly<{
   appName: string;
+  onToggleDrawer?: () => void;
 }>;
 
 export const Header = (props: Props) => {
@@ -42,7 +43,11 @@ export const Header = (props: Props) => {
             {props.appName}
           </h1>
         </div>
-        <div class="oj-flex-bar-end"></div>
+        <div class="oj-flex-bar-end">
+          <oj-button onojAction={props.onToggleDrawer} label="Toggle" display="icons">
+            <span slot="startIcon" class="oj-ux-ico-menu"></span>
+          </oj-button>
+        </div>
       </div>
     </header>
   );

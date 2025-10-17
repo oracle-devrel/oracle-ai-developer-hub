@@ -23,12 +23,13 @@ declare global {
   }
 }
 type Props = {
-  fileChanged: (file: ArrayBuffer) => void;
+  fileChanged: (file: ArrayBuffer | Uint8Array) => void;
   clear: () => void;
   prompt: (val: string) => void;
   summaryChanged: (summary: string) => void;
   summary: string;
   backendType: any;
+  modelId: string | null;
 };
 const protocol = window.location.protocol === "http:" ? "ws://" : "wss://";
 const hostname =
@@ -47,6 +48,7 @@ export const Summary = ({
   summaryChanged,
   summary,
   backendType,
+  modelId,
 }: Props) => {
   const conversationId = useContext(ConvoCtx);
   const [invalidMessage, setInvalidMessage] = useState<string | null>(null);
@@ -91,7 +93,7 @@ export const Summary = ({
       mode: "cors",
       referrerPolicy: "strict-origin-when-cross-origin",
       body: formData,
-      headers: { conversationID: conversationId, modelId: "" },
+      headers: { conversationID: conversationId, modelId: modelId ?? "" },
     });
     console.log("Response: ", res);
     const responseData = await res.json();
@@ -133,6 +135,7 @@ export const Summary = ({
     const metaJson = {
       type: "summary",
       msgPrompt: summaryPrompt,
+      modelId: modelId,
     };
 
     // _must_ do this to encode as a ArrayBuffer / Uint8Array

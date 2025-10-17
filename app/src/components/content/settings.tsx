@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import "oj-c/radioset";
 import "oj-c/form-layout";
 import "oj-c/select-single";
+import "ojs/ojswitch";
 import "ojs/ojlistitemlayout";
 import "ojs/ojhighlighttext";
+import "ojs/ojmessages";
 import MutableArrayDataProvider = require("ojs/ojmutablearraydataprovider");
 import { ojSelectSingle } from "@oracle/oraclejet/ojselectsingle";
 
@@ -16,8 +18,10 @@ type Services = {
 type Props = {
   aiServiceType: ServiceTypeVal;
   backendType: BackendTypeVal;
+  ragEnabled: boolean;
   aiServiceChange: (service: ServiceTypeVal) => void;
   backendChange: (backend: BackendTypeVal) => void;
+  ragToggle: (enabled: boolean) => void;
   modelIdChange: (modelId: any, modelData: any) => void;
 };
 
@@ -56,6 +60,8 @@ const backendOptionsDP = new MutableArrayDataProvider<
 >(backendTypes, { keyAttributes: "value" });
 
 export const Settings = (props: Props) => {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const handleServiceTypeChange = (event: any) => {
     if (event.detail.updatedFrom === "internal")
       props.aiServiceChange(event.detail.value);
@@ -72,26 +78,48 @@ export const Settings = (props: Props) => {
   );
   const endpoints = useRef<Array<Endpoint>>();
 
-  const fetchModels = async () => {
-    try {
-      const response = await fetch("/api/genai/models");
-      if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
+  const fetchModels = async (retries = 3) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const isHttps = window.location.protocol === "https:";
+        const pythonUrl = `${isHttps ? "https://" : "http://"}${window.location.hostname}:1987/models`;
+        const primaryUrl =
+          props.backendType === "python" && !isHttps ? pythonUrl : "/api/genai/models";
+
+        let response: Response;
+        try {
+          response = await fetch(primaryUrl);
+          if (!response.ok) throw new Error(`Response status: ${response.status}`);
+        } catch (e) {
+          // Fallback: if Python endpoint refused or blocked (mixed content), use Java endpoint
+          if (primaryUrl !== "/api/genai/models") {
+            response = await fetch("/api/genai/models");
+            if (!response.ok) throw new Error(`Response status: ${response.status}`);
+          } else {
+            throw e;
+          }
+        }
+        const json = await response.json();
+        const result = json.filter((model: Model) => {
+          if (
+            model.capabilities.includes("CHAT") &&
+            (model.vendor === "cohere" || model.vendor === "meta" || model.vendor === "xai")
+          )
+            return model;
+        });
+        modelDP.current.data = result;
+        setErrorMessage(null);
+        return; // Success, exit function
+      } catch (error: any) {
+        console.error(`Model fetch attempt ${attempt} failed (${props.backendType}): `, error.message);
+        if (attempt === retries) {
+          // All retries failed
+          modelDP.current.data = []; // Clear models on error
+          setErrorMessage("Failed to fetch models after retries. Please check your backend connection.");
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+        }
       }
-      const json = await response.json();
-      const result = json.filter((model: Model) => {
-        if (
-          model.capabilities.includes("CHAT") &&
-          (model.vendor == "cohere" || model.vendor == "meta")
-        )
-          return model;
-      });
-      modelDP.current.data = result;
-    } catch (error: any) {
-      console.log(
-        "Java service not available for fetching list of Models: ",
-        error.message
-      );
     }
   };
   const fetchEndpoints = async () => {
@@ -118,6 +146,11 @@ export const Settings = (props: Props) => {
     fetchEndpoints();
     fetchModels();
   }, []);
+
+  // Re-fetch models when backend selection changes so Python uses OCI directly
+  useEffect(() => {
+    fetchModels();
+  }, [props.backendType]);
 
   const modelChangeHandler = async (
     event: ojSelectSingle.valueChanged<string, {}>
@@ -167,6 +200,11 @@ export const Settings = (props: Props) => {
 
   return (
     <div class="oj-sm-margin-4x">
+      {errorMessage && (
+        <oj-messages
+          messages={[{ severity: "error", summary: errorMessage }]}
+        ></oj-messages>
+      )}
       <h2 class="oj-typography-heading-sm">AI service types</h2>
       <oj-c-form-layout>
         <oj-c-radioset
@@ -187,7 +225,24 @@ export const Settings = (props: Props) => {
           onvalueChanged={handleBackendTypeChange}
         ></oj-c-radioset>
       </oj-c-form-layout>
-      {props.aiServiceType == "text" && props.backendType == "java" && (
+      {props.backendType === "java" && (
+        <>
+          <h2 class="oj-typography-heading-sm">RAG Options</h2>
+          <oj-c-form-layout>
+            <oj-switch
+              id="ragSwitch"
+              value={props.ragEnabled}
+              labelHint="Enable Retrieval-Augmented Generation (RAG)"
+              onvalueChanged={(event: any) => {
+                if (event.detail.updatedFrom === "internal") {
+                  props.ragToggle(event.detail.value);
+                }
+              }}
+            ></oj-switch>
+          </oj-c-form-layout>
+        </>
+      )}
+      {props.aiServiceType == "text" && (props.backendType == "java" || props.backendType == "python") && (
         <>
           <h2 class="oj-typography-heading-sm">Model options</h2>
           <oj-c-form-layout>

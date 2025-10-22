@@ -1,130 +1,94 @@
-# Accelerating AI Application Deployment Using Cloud Native Strategies
+# Cloud‑Native Deployment on OKE: Enterprise RAG Blueprint
 
-## Introduction
-
-Kubernetes has become the standard for managing containerized applications, and Oracle Cloud Infrastructure Container Engine for Kubernetes (OKE) is a managed Kubernetes service that delivers outstanding cloud reliability. Now, imagine using OKE with AI to create powerful, scalable, highly available AI applications.
-
-This project deploys an AI pipeline with a multipurpose front end for text generation and summarization. The pipeline integrates with a database to track interactions, enabling fine-tuning and performance monitoring for application optimization. It leverages OCI Generative AI APIs on a Kubernetes cluster.
-
-## Getting Started
-
-### 0. Prerequisites and setup
-
-- Oracle Cloud Infrastructure (OCI) Account - [sign-up page](https://www-sites.oracle.com/artificial-intelligence/solutions/deploy-ai-apps-fast/#:~:text=Oracle%20Cloud%20account%E2%80%94-,sign%2Dup%20page,-Oracle%20Cloud%20Infrastructure)
-- Oracle Cloud Infrastructure (OCI) Generative AI Service - [Getting Started with Generative AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/getting-started.htm)
-- Oracle Cloud Infrastructure Documentation - [Generative AI](https://docs.oracle.com/en-us/iaas/Content/generative-ai/home.htm)
-- Oracle Cloud Infrastructure (OCI) Generative AI Service SDK - [Oracle Cloud Infrastructure Python SDK](https://pypi.org/project/oci/)
-- Node v18 - [Node homepage](https://nodejs.org/en)
-- Oracle JET v15 - [Oracle JET Homepage](https://www.oracle.com/webfolder/technetwork/jet/index.html)
-- OCI Container Engine for Kubernetes — [documentation](https://docs.oracle.com/en-us/iaas/Content/ContEng/Concepts/contengoverview.htm)
-- Oracle Autonomous Database — [documentation](https://docs.oracle.com/en/database/autonomous-database-cloud-services.html)
-- Spring Boot framework — [documentation](https://docs.spring.io/spring-boot/docs/3.2.5/reference/htmlsingle/)
+This guide operationalizes the Data → Model → Service (DMS) architecture on Oracle Cloud:
+- Oracle Database 26ai (via Autonomous Database) for durable context, memory, telemetry, and KB for RAG
+- OCI Generative AI for model inference (Cohere, Meta, xAI via Inference)
+- Spring Boot backend and Oracle JET web app on OKE (Oracle Container Engine for Kubernetes)
+- Terraform + Kustomize for reproducible environments
 
 ![Architecture](./images/architecture.png)
 
-Get troubleshoot help on the [FAQ](FAQ.md)
+## Prerequisites
 
-## Requirements
+- OCI tenancy with permissions to manage OKE, Networking, ADB, and OCIR
+- Terraform and kubectl installed
+- Node.js 18+ for repository scripts
+- Unzipped ADB wallet (for JDBC wallet connectivity)
+- OCI credentials available for image push and Generative AI access
 
-You need to be an administrator.
+Helpful docs:
+- OKE: https://docs.oracle.com/en-us/iaas/Content/ContEng/Concepts/contengoverview.htm
+- Autonomous Database: https://docs.oracle.com/en/database/autonomous-database-cloud-services.html
 
-> If not should have enough privileges for OKE, Network, and Database services. Plus others like tenancy inspect. See example:
->
-> ```
-> Allow group 'Default'/'GroupName' to inspect tenancies in tenancy
-> ```
-
-## Set Up environment
-
-On Cloud Shell, clone the repository:
+## Environment setup
 
 ```bash
 git clone https://github.com/oracle-devrel/oci-generative-ai-jet-ui.git
-```
-
-Change to the new folder:
-
-```bash
 cd oci-generative-ai-jet-ui
-```
-
-Install Node.js 16 on Cloud Shell.
-
-```bash
 nvm install 18 && nvm use 18
+cd scripts && npm install && cd ..
 ```
 
-Install dependencies for scripts.
+### Generate environment and tfvars
+
+These scripts create `genai.json` and `deploy/terraform/terraform.tfvars` from prompts:
 
 ```bash
-cd scripts/ && npm install && cd ..
+npx zx scripts/setenv.mjs      # writes genai.json
+npx zx scripts/tfvars.mjs      # writes deploy/terraform/terraform.tfvars
 ```
 
-### Set the environment variables
+> Tip: When asked, provide the Compartment where you want to deploy. Root compartment is the default.
 
-Generate `genai.json` file with all environment variables.
-
-```bash
-npx zx scripts/setenv.mjs
-```
-
-> Answer the Compartment name where you want to deploy the infrastructure. Root compartment is the default.
-
-### Deploy Infrastructure
-
-Generate `terraform.tfvars` file for Terraform.
+## Provision OKE + ADB with Terraform
 
 ```bash
-npx zx scripts/tfvars.mjs
-```
-
-```bash
-cd deploy/terraform && terraform init && terraform apply --auto-approve
-```
-
-Init Terraform providers:
-
-```bash
+cd deploy/terraform
 terraform init
-```
-
-Apply deployment:
-
-```bash
 terraform apply --auto-approve
-```
-
-```bash
 cd ../..
 ```
 
-## Release and create Kustomization files
+After apply, a kubeconfig is generated at `deploy/terraform/generated/kubeconfig`.
 
-Build and push images:
+## Build and publish images to OCIR
+
+Use the release script to version, build, login, and push images to OCIR:
 
 ```bash
 npx zx scripts/release.mjs
 ```
 
-Create Kustomization files
+## Generate Kustomize overlays
+
+Create kustomization files that reference the newly published images:
 
 ```bash
 npx zx scripts/kustom.mjs
 ```
 
-### ADB Wallet for Backend (Required)
+Overlays are under:
 
-You selected Autonomous Database (ADB) with Wallet for production. Before deploying the backend, create a Kubernetes Secret from your downloaded ADB Wallet and mount it into the backend pod. Then set `TNS_ADMIN` so the JDBC driver can find `sqlnet.ora` and `tnsnames.ora`.
+- `deploy/k8s/backend/*`
+- `deploy/k8s/web/*`
+- `deploy/k8s/ingress/*`
+- `deploy/k8s/overlays/prod/*`
+
+## ADB Wallet for Backend (Required)
+
+You selected ADB with Wallet for production. Before deploying the backend, create a Kubernetes Secret from your unzipped ADB Wallet and mount it into the backend pod. Then set `TNS_ADMIN` so the JDBC driver can find `sqlnet.ora` and `tnsnames.ora`.
 
 1) Create the wallet secret (use the path to your unzipped wallet directory):
+
 ```bash
-# Namespace 'backend' is used by the provided manifests
+# Namespace 'backend' is used by provided manifests
 kubectl create secret generic adb-wallet \
   --from-file=/ABSOLUTE/PATH/TO/WALLET/DIR \
   -n backend
 ```
 
-2) Mount the secret and set TNS_ADMIN in the backend Deployment (deploy/k8s/backend/backend.yaml):
+2) Mount the secret and set `TNS_ADMIN` in the backend Deployment (`deploy/k8s/backend/backend.yaml`):
+
 ```yaml
 spec:
   template:
@@ -143,61 +107,41 @@ spec:
               value: /opt/adb/wallet
 ```
 
-3) Ensure your Spring datasource uses the _high service and the same TNS_ADMIN:
-- application.yaml:
-  ```yaml
-  spring:
-    datasource:
-      driver-class-name: oracle.jdbc.OracleDriver
-      url: jdbc:oracle:thin:@DB_SERVICE_high?TNS_ADMIN=/opt/adb/wallet
-      username: ADMIN
-      password: "YOUR_PASSWORD"
-      type: oracle.ucp.jdbc.PoolDataSource
-  ```
-  You can also inject these via env vars/ConfigMap if preferred.
+3) Ensure your Spring datasource uses the `_high` service and the same `TNS_ADMIN`:
 
-4) Verify after rollout:
-- Check pods:
-  ```bash
-  kubectl get pods -n backend
-  kubectl logs deploy/backend -n backend
-  ```
-- Validate schema (via SQL Developer Web for your ADB):
-  ```sql
-  SELECT COUNT(*) FROM conversations;
-  SELECT COUNT(*) FROM kb_documents;
-  ```
+```yaml
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@DB_SERVICE_high?TNS_ADMIN=/opt/adb/wallet
+    driver-class-name: oracle.jdbc.OracleDriver
+    username: ADMIN
+    password: "YOUR_PASSWORD"
+    type: oracle.ucp.jdbc.PoolDataSource
+```
 
-### Kubernetes Deployment
+You can inject these via env vars/ConfigMap if preferred. See `DATABASE.md` for schema details.
+
+## Deploy to the cluster
+
+Export kubeconfig created by Terraform and apply the Kustomize overlay:
 
 ```bash
 export KUBECONFIG="$(pwd)/deploy/terraform/generated/kubeconfig"
-```
-
-```bash
 kubectl cluster-info
-```
-
-```bash
 kubectl apply -k deploy/k8s/overlays/prod
 ```
 
-Run `get deploy` a few times:
+Check deployments and wait until `READY` equals desired replicas:
 
 ```bash
 kubectl get deploy -n backend
+kubectl get deploy -n web
+kubectl get deploy -n ingress-nginx
 ```
 
-Wait for all deployments to be `Ready` and `Available`.
+## Access the application
 
-```
-NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
-backend                    1/1     1            1           3m28s
-ingress-nginx-controller   1/1     1            1           3m17s
-web                        1/1     1            1           3m21s
-```
-
-Access your application:
+Fetch the public IP of the LoadBalancer service:
 
 ```bash
 echo $(kubectl get service \
@@ -205,48 +149,90 @@ echo $(kubectl get service \
   -o jsonpath='{.items[?(@.spec.type=="LoadBalancer")].status.loadBalancer.ingress[0].ip}')
 ```
 
-> This command will list the Load Balancer services on the `backend` namespace. If the response is an empty string, wait a bit and execute the command again. The Load Balancer takes a bit of time to create the Public IP address.
+If empty, wait a few minutes and retry; provisioning may take time. Open the IP in your browser to access the web UI.
 
-Paste the Public IP address on your browser and test your new Generative AI website deployed in Kubernetes.
+## OCI authentication options on OKE
 
-Remember to visit SQL Developer Web on the OCI Console for your Oracle Database and run some queries to investigate the historical of prompts.
+- Workload Identity (recommended) or Instance Principals for the backend
+- Avoid local file dependencies in cluster
+- Configure `genai.region` and `compartment_id` via environment or application config
 
-```sql
-SELECT * FROM interactions;
-```
+## Operational guardrails
+
+- Vendor‑aware parameter handling (avoid sending unsupported params to specific models)
+- Telemetry via `interactions` table (latency, tokens, costs) for observability and budgeting
+- Resource requests/limits and optional HPA (add to kustomize if desired)
+- Pod Disruption Budgets for high availability
+- Secrets and ConfigMaps for environment separation and secure configuration
+
+## Verification
+
+Backend logs and pod status:
 
 ```bash
-cd ../..
+kubectl get pods -n backend
+kubectl logs deploy/backend -n backend
 ```
 
-## Clean up
+Schema checks (via SQL Developer Web on ADB, or your SQL tool):
 
-Delete Kubernetes components
+```sql
+SELECT COUNT(*) FROM conversations;
+SELECT COUNT(*) FROM kb_documents;
+SELECT COUNT(*) FROM interactions;
+```
+
+Quick API checks:
+
+```bash
+# Models list
+kubectl port-forward -n backend deploy/backend 8080:8080 &
+curl http://localhost:8080/api/genai/models
+
+# RAG (ensure you uploaded PDFs first)
+curl -X POST http://localhost:8080/api/genai/rag \
+  -H "Content-Type: application/json" \
+  -d '{"question":"What does section 2 cover?","modelId":"ocid1.generativeaimodel.oc1...."}'
+```
+
+## Troubleshooting
+
+- Wallet path or `TNS_ADMIN` mismatch → backend fails to connect; verify secret mount and JDBC URL path.
+- Invalid model parameters → see `MODELS.md` for vendor-specific constraints; the backend adapts where possible.
+- Ingress provisioning delay → LoadBalancer IP may take several minutes; re-check `kubectl get svc`.
+- Database objects missing → confirm Liquibase ran; see logs and `DATABASE.md` (delimiter notes, schemas).
+- More scenarios: `TROUBLESHOOTING.md`.
+
+## Cleanup
+
+Delete Kubernetes components:
 
 ```bash
 kubectl delete -k deploy/k8s/overlays/prod
 ```
 
-Destroy infrastructure with Terraform.
+Destroy infrastructure with Terraform:
 
 ```bash
 cd deploy/terraform
-```
-
-```bash
 terraform destroy -auto-approve
-```
-
-```bash
 cd ../..
 ```
 
-Clean up the artifacts on Object Storage
+Clean up build artifacts in Object Storage:
 
 ```bash
 npx zx scripts/clean.mjs
 ```
 
-## Local deployment
+## LLM‑friendly documentation patterns
 
-Run locally with these steps [Local](LOCAL.md)
+- JSON‑first configuration and payload examples
+- Q&A pairs to validate RAG behavior
+- Mermaid diagrams (see README) for architecture and flows
+- Numbered procedures with clear prerequisites and outputs
+
+## Notes
+
+- This blueprint targets Oracle Database 26ai features through ADB for vector‑ready, assistant‑grade persistence.
+- See `DATABASE.md` for Liquibase migrations and table layouts, `RAG.md` for RAG pipeline usage, and `README.md` for the broader “From GUIs to RAG” story.

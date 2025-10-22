@@ -1,91 +1,101 @@
-# OCI Generative AI JET UI – Conversational App with RAG and Oracle ADB
+# From GUIs to RAG: Building a Cloud‑Native RAG on Oracle Cloud
+Practical deployment blueprint using Oracle Database 26ai, OCI Generative AI, Spring Boot and Oracle JET with Victor Martin and John "JB" Brock (aka. peppertech)
 
-[![License: UPL](https://img.shields.io/badge/license-UPL-green)](https://img.shields.io/badge/license-UPL-green) [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=oracle-devrel_oci-generative-ai-jet-ui)](https://sonarcloud.io/dashboard?id=oracle-devrel_oci-generative-ai-jet-ui)
+We don’t use computers the way we used to. We moved from command lines to GUIs, from click‑and‑type to touch and voice—and now to assistants that understand intent. The next leap isn’t a new button; it’s software that adapts to people. Assistants and agents shift the unit of work from “click these 7 controls” to “state your intent.”
 
-## What's New
+Shipping that shift in the enterprise takes more than calling an LLM API. It requires architecture, guardrails, and production‑ready foundations: durable context, observability, safe parameters, and a UI people trust. A decade of shipping software taught a simple lesson: people don’t want more features; they want more understanding. Assistants are how we ship understanding.
 
-See CHANGES.md for the latest updates to RAG ingestion, diagnostics, UI improvements, and logging behavior.
+This repository provides a runnable blueprint:
+- Web UI: Oracle JET for an enterprise‑grade chat interface with upload and settings.
+- Service: Spring Boot backend with vendor‑aware calls to OCI Generative AI (Cohere, Meta, xAI).
+- Data: Oracle Database 26ai (via Autonomous Database) for durable chat history, memory, telemetry, and a knowledge base (KB) for RAG.
 
-## Overview
+Quick links
+- Frontend deep dive (Oracle JET): [JET.md](JET.md)
+- Cloud‑native deployment (OKE, Terraform, Kustomize): [K8S.md](K8S.md)
+- RAG pipeline and usage: [RAG.md](RAG.md)
+- Database schema and Liquibase: [DATABASE.md](DATABASE.md)
+- Models and parameters: [MODELS.md](MODELS.md)
+- Troubleshooting: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+- FAQ: [FAQ.md](FAQ.md)
 
-A production-ready, end-to-end template for building Generative AI applications on OCI:
-- Oracle JET web UI for chat, RAG Q&A, and settings
-- Spring Boot backend with vendor-aware model calls (Cohere, Meta, xAI Grok)
-- Retrieval-Augmented Generation (RAG) over your documents
-- Oracle Autonomous Database (ADB) for durable chat history, memory, KB, and telemetry (Liquibase-managed)
+## The Data‑Model‑Service (DMS) Architecture
 
-Related guides:
-- Enhance engagement using OCI Generative AI: [JET.md](JET.md)
-- Cloud-native deployment patterns (OKE, Terraform, Kustomize): [K8S.md](K8S.md)
+- Data Layer: Oracle Database 26ai via ADB
+  - Durable chat history (conversations, messages)
+  - Memory (key/value and long‑form)
+  - Telemetry (interactions: latency, tokens, cost)
+  - Knowledge Base (KB) tables enabling Retrieval‑Augmented Generation
 
-## Architecture
+- Model Layer: OCI Generative AI
+  - Inference with Cohere, Meta, and xAI models
+  - Prompt shaping and grounding via RAG
+  - Vendor‑aware parameter validation to avoid invalid‑argument errors
+
+- Service Layer: Spring Boot
+  - REST + WebSocket endpoints for chat, RAG, PDF upload, model discovery
+  - Liquibase migrations for schema evolution
+  - OCI auth: local config, OKE Workload Identity, or Instance Principals
+
+- Web UI: Oracle JET
+  - Chat, Upload, Settings (Use RAG)
+  - Opt‑in debug logs, fixed input bar UX, database keepalive
+
+### Architecture (Mermaid)
 
 ```mermaid
 flowchart LR
   subgraph Web UI (Oracle JET)
-    A[Chat UI / Settings / Upload]
+    A[Chat / Upload / Settings]
   end
-
-  subgraph Spring Boot Backend
-    B1[Controllers
-      - GenAIController (/api/genai/*)
-      - PDFConvertorController (/api/upload)
-      - SummaryController
-      - ModelsController]
-    B2[Services
-      - OCIGenAIService (chat/summarize)
-      - RagService (RAG pipeline)
-      - GenAIModelsService (list models)
-      - GenAiClientService (GenerativeAiClient)
-      - GenAiInferenceClientService (GenerativeAiInferenceClient)]
-    B3[Liquibase at startup
-      - V1: Conversations/Messages/Memory/Telemetry
-      - V2: KB (RAG) tables]
+  subgraph Service (Spring Boot)
+    B1[Controllers: GenAI, Upload/PDF, Models, Summary]
+    B2[Services: OCIGenAI, RagService, GenAIModelsService]
+    B3[Liquibase Migrations]
   end
-
-  subgraph Oracle ADB
-    D1[(Schema via Liquibase)]
-    D2[(UCP Pool via JDBC/Wallet)]
+  subgraph Data (Oracle Database 26ai via ADB)
+    D1[(Conversations / Messages / Memory)]
+    D2[(Telemetry: interactions)]
+    D3[(KB Tables for RAG)]
   end
-
-  subgraph OCI Services
-    C1[Generative AI Inference
-      - Cohere, Meta, xAI Grok]
+  subgraph Models (OCI Generative AI)
+    C1[Cohere / Meta / xAI via Inference]
   end
-
-  A <-- WebSocket/REST --> B1
-  B1 --> B2
-  B2 -->|Chat/Summary| C1
-  B2 -->|Store/Read RAG, telemetry| D1
-  B1 -->|File Upload (PDF)| B2
+  A <-- REST & WebSocket --> B1 --> B2
+  B2 <---> D1 & D3
   B2 --> C1
-  B2 <---> D2
+  B2 --> D2
 ```
 
-Key backend enhancements:
-- Vendor-aware parameters: avoids sending unsupported params (e.g., no presencePenalty for xAI Grok) to prevent 400 errors
-- Liquibase schema:
-  - V1: conversations, messages, memory_kv, memory_long, interactions (telemetry)
-  - V2: knowledge base (KB) tables for RAG
-- Transparent OCI auth modes: local config (~/.oci/config), OKE Workload Identity, Instance Principals
+## What we will build
+
+- Part 1 (this document): The DMS model and why it matters for assistants.
+- Part 2: Data + Model implementation (KB ingestion, vendor‑aware inference, RAG queries).
+- Part 3: Oracle JET interface that turns RAG into a usable, delightful assistant.
+
+## Why this works
+
+- Modularity: Clear separation of concerns per layer with evolution paths.
+- Enterprise‑ready: Database‑backed context, schema migrations, auditable usage.
+- Developer‑friendly: Spring Boot + Oracle JET; simple scripts for release and deploy.
 
 ## Features
 
-- Chat and Summarization with multiple vendors/models
-- RAG over your PDF documents (upload → index → ask)
-- Telemetry and audit trails for model calls (latency, tokens, costs)
-- Long-term memory and key/value memory per conversation
-- ADB + Liquibase for reliable, evolvable data layer
+- Chat and summarization with multiple vendors/models.
+- RAG over your PDFs (upload → index → ask).
+- Telemetry and audit trails for model calls.
+- Long‑term memory and key/value memory per conversation.
+- Liquibase‑managed schema for a reliable data layer.
 
-## Quickstart (Local)
+## Local quickstart
 
-Prereqs:
+Prerequisites
 - JDK 17+
 - Node.js 18+
-- OCI credentials (local ~/.oci/config) with access to Generative AI
-- Oracle ADB Wallet (download from your ADB)
+- OCI credentials with access to Generative AI (e.g., ~/.oci/config)
+- Oracle ADB wallet (downloaded and unzipped)
 
-1) Configure backend DB and OCI in `backend/src/main/resources/application.yaml`:
+1) Configure backend in backend/src/main/resources/application.yaml
 ```yaml
 spring:
   datasource:
@@ -100,7 +110,6 @@ spring:
       initial-pool-size: 5
       min-pool-size: 5
       max-pool-size: 10
-
 genai:
   region: "US_CHICAGO_1"
   config:
@@ -109,84 +118,57 @@ genai:
   compartment_id: "ocid1.compartment.oc1..xxxx"
 ```
 
-2) Run backend:
+2) Run backend
 ```bash
 cd backend
 ./gradlew clean build
 ./gradlew bootRun
-# Server on http://localhost:8080
+# http://localhost:8080
 ```
 
-3) Run web UI:
+3) Run web UI
 ```bash
-cd app
+cd ../app
 npm ci
 npm run serve
-# UI on http://localhost:8000 (or as printed)
+# http://localhost:8000
 ```
 
-## RAG: Upload and Ask
+## RAG: upload and ask
 
 - Upload a PDF
 ```bash
 curl -F "file=@/path/to/file.pdf" http://localhost:8080/api/upload
 ```
 
-- Ask a question over your KB (RAG)
+- Ask a question over KB
 ```bash
 curl -X POST http://localhost:8080/api/genai/rag \
   -H "Content-Type: application/json" \
-  -d '{"question": "What does section 2 cover?", "modelId": "ocid1.generativeaimodel.oc1...."}'
+  -d '{"question":"What does section 2 cover?","modelId":"ocid1.generativeaimodel.oc1...."}'
 ```
 
-UI flow:
-- Open the app, upload PDFs in the Upload panel, then use Chat with your selected model to RAG over indexed content.
+## Production deploy on OKE (overview)
 
-See detailed guide: [RAG.md](RAG.md)
+- Provision OKE + ADB with Terraform.
+- Build/push images to OCIR using scripts/release.mjs.
+- Generate Kustomize overlays with scripts/kustom.mjs.
+- Create an ADB wallet secret; mount and set TNS_ADMIN in backend.
+- Apply deploy/k8s/overlays/prod.
+- Full guide: [K8S.md](K8S.md)
 
-## Database and Liquibase
+## LLM optimization patterns
 
-- On backend startup, Liquibase applies schema migrations:
-  - V1 (core): conversations, messages, memory_kv, memory_long, interactions
-  - V2 (kb): KB tables that enable RAG
-- Benefits:
-  - Durable conversation and memory
-  - Telemetry and audit for observability and cost
-  - Structured KB for accurate retrieval
+- JSON‑first examples:
+  {"compartment_id":"ocid1.compartment.oc1..example","model_id":"cohere.command-r-plus"}
 
-Details and tips (including PL/SQL + DDL delimiter notes): [DATABASE.md](DATABASE.md)
+- Q&A pairs:
+  Q: How to parse data? A: Use the backend’s PDF endpoint to extract and chunk, then persist to KB tables.
 
-## Models and Parameters
-
-- Supported vendors: Cohere, Meta, xAI Grok (via OCI Generative AI Inference)
-- The backend adapts parameters per vendor to avoid invalid-argument errors (e.g., xAI Grok does not receive presencePenalty)
-- Discover available models:
-```bash
-curl http://localhost:8080/api/genai/models
-```
-More info: [MODELS.md](MODELS.md)
-
-## Deploy to OKE (ADB with Wallet)
-
-- Build and push images, create K8S resources (Terraform + Kustomize)
-- Create a secret from your ADB Wallet, mount in the backend pod, set `TNS_ADMIN` to the mount path
-- Use the `_high` service in JDBC URL with that `TNS_ADMIN` path
-
-Full steps: [K8S.md](K8S.md)
-
-## Local, Troubleshooting, and Extras
-
-- Local recipes and environment setup: [LOCAL.md](LOCAL.md)
-- Troubleshooting common issues (param validation, Liquibase delimiter, UnknownHost, wallet paths): [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-- FAQ: [FAQ.md](FAQ.md)
-
-## Contributing
-
-This project is open source. Submit contributions by forking this repository and opening a pull request.
+- Annotate code with purpose, inputs, outputs.
+- Use Mermaid for architecture and numbered steps for reproducibility.
 
 ## License
-
-Copyright (c) 2024 Oracle and/or its affiliates.
 
 Licensed under the Universal Permissive License (UPL), Version 1.0. See [LICENSE](LICENSE).
 

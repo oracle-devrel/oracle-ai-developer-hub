@@ -1,188 +1,195 @@
-Title: From GUIs to GenAI: Building a Cloud‑Native AI Assistant on Oracle Cloud with Java + Spring Boot
+# From GUIs to RAG: Shipping Understanding on Oracle Cloud
 
-Subtitle: A story about why assistants matter now — and a practical, production‑ready blueprint using Oracle Database 23ai, OCI Generative AI, Spring Boot, and Oracle JET
+We don’t use computers the way we used to. We moved from command lines to GUIs, from click‑and‑type to touch and voice—and now to assistants that understand intent. The next leap isn’t a new button; it’s software that adapts to people. Assistants change the unit of work from “click these seven controls” to “state your intent.”
 
-Hook
-We don’t use computers the way we used to. We moved from command lines to GUIs, from click‑and‑type to touch and voice — and now to assistants that understand intent. The next leap isn’t a new button; it’s software that adapts to people.
+But shipping that leap in the enterprise takes more than calling a model API. It takes durable context, guardrails, observability, and a user experience people trust. This post is a practical story and blueprint for that shift—grounded in an open repository you can run today—built with Oracle Database 26ai, OCI Generative AI, Spring Boot, and Oracle JET.
 
-This article is a story about that leap and a blueprint you can apply today with a familiar stack: Java + Spring Boot on the backend, Oracle JET for the web UI, OCI Generative AI for models, and Oracle Database 23ai for durable context and vector search. Whether your goal is a support assistant, internal knowledge search, or workflow automation, one simple pattern scales: Data → Model → Service.
+- Project repo: oci-generative-ai-jet-ui
+- Architecture: Data → Model → Service (DMS)
+- Use cases: Support assistants, internal knowledge search, workflow copilots
+- Demo: Chat with RAG (Retrieval‑Augmented Generation) over your own documents
 
-Why assistants, why now
-For years we added features and hoped users could navigate them. It worked — until cognitive overload became the norm. The shift to assistants changes the unit of work: from “click these 7 controls” to “state your intent.” But making that shift enterprise‑grade takes more than calling an LLM API. It requires architecture, guardrails, and production‑ready foundations.
+## The story: From features to understanding
+
+For years, we added features and hoped users could navigate them. It worked—until cognitive overload became the norm. Teams designed tabs, toggles, and toolbars; power‑users thrived; everyone else stalled.
+
+Assistants flip the model. The UI becomes a conversation, the system does the tedious work, and outcomes matter more than pathways. Yet the “hello world” prototype often hides the real effort: How does the assistant remember what matters? How do you ground responses in your own knowledge? How do you audit cost, latency, and behavior?
 
 A decade of shipping software taught a simple lesson: people don’t want more features; they want more understanding. Assistants are how we ship understanding.
 
-Why Oracle for AI assistants
-- Oracle Database 23ai: Native vector search, JSON‑first data, and Select AI — all governed by the same SQL‑era controls enterprises trust.
-- OCI Generative AI: Enterprise‑grade access to Cohere, Meta (and others), with tenancy‑level permissions, compartments, and cost visibility.
-- Integration excellence: IAM, networking, logging, observability, and secrets without stitching a dozen point tools.
-- Production path: A clear journey from laptop to OKE (Kubernetes) with Terraform and Kustomize.
-- Developer‑friendly (Java first): Spring Boot and Gradle, OCI Java SDKs, and Oracle JET for a responsive, trustworthy UI.
+## The problem: Turning intent into enterprise‑grade outcomes
 
-The problem teams hit
-The pattern is common: a prototype that “works on my laptop” stalls when it faces identity, governance, observability, cost, and user trust. You need:
-- Governable data (provenance, versioning, and explainability)
-- Model access that’s secure, observable, and cost‑aware
-- Services that encapsulate business logic and scale
-- A UI that explains answers and earns trust (citations, context)
+Prototypes break down in production because:
+- Statelessness: Chats don’t persist, so context resets constantly.
+- No grounding: Answers drift without retrieval from your sources.
+- Parameter hazards: Model knobs differ by vendor; invalid combinations cause brittle failures.
+- Lack of observability: No record of latency, tokens, or content flow to debug or forecast cost.
+- Fragile UX: Uploads, streaming, and error states need robust UI patterns.
 
-The solution: DMS — Data → Model → Service
-We’ll use a simple but powerful pattern:
-- Data Layer: Where knowledge lives and evolves (documents, FAQ pairs, embeddings, telemetry)
-- Model Layer: Where you access LLMs (chat, summarize, embed) with parameters and guardrails
-- Service Layer: Where state, policy, retrieval, and APIs live (REST/WebSocket)
+What’s needed is a simple but reliable architecture that scales: Data → Model → Service.
 
-Architecture (Mermaid)
+## Oracle solution: The DMS architecture
+
+We apply a straightforward pattern:
+
+- Data (Oracle Database 26ai via Autonomous Database)
+  - Durable chat history (conversations, messages)
+  - Memory (key/value and long‑form)
+  - Knowledge Base (KB) tables for RAG
+  - Telemetry (interactions: latency, tokens, cost)
+- Model (OCI Generative AI)
+  - Vendor‑aware inference for Cohere, Meta, xAI
+  - Prompt shaping and retrieval grounding
+  - Parameter safety rails per vendor
+- Service (Spring Boot)
+  - REST + WebSocket endpoints for chat, RAG, uploads, and models list
+  - Liquibase migrations for evolution‑safe schema
+  - OCI auth: local config, OKE Workload Identity, or Instance Principals
+- Interface (Oracle JET)
+  - Chat, Upload, Settings (Use RAG toggle)
+  - Accessible, responsive, enterprise‑grade components
+  - Opt‑in debug logs; robust error states
+
+### Visualizing the flow
+
 ```mermaid
 flowchart LR
-  subgraph Client
-    JET[Oracle JET Web UI<br/>Chat • Upload • Settings]
+  subgraph Web UI (Oracle JET)
+    A[Chat / Upload / Settings]
   end
-
-  subgraph Service_Layer["Service Layer (Java, Spring Boot)"]
-    API[REST + STOMP API]
-    RAG[RAG Orchestrator<br/>Retrieval • Citations]
-    Telemetry[Telemetry & Cost<br/>Tokens • Latency • Audit]
+  subgraph Service (Spring Boot)
+    B1[Controllers: GenAI, Upload/PDF, Models, Summary]
+    B2[Services: OCIGenAI, RagService, GenAIModelsService]
+    B3[Liquibase Migrations]
   end
-
-  subgraph Model_Layer["Model Layer (OCI GenAI)"]
-    GENAI[Generative AI Inference<br/>(Cohere • Meta)]
-    SELECTAI[Select AI (DB 23ai)]
+  subgraph Data (Oracle Database 26ai via ADB)
+    D1[(Conversations / Messages / Memory)]
+    D2[(Telemetry: interactions)]
+    D3[(KB Tables for RAG)]
   end
-
-  subgraph Data_Layer["Data Layer (Oracle DB 23ai)"]
-    KB[(KB: Documents • Chunks • Embeddings<br/>VECTOR(1024, FLOAT32))]
-    ADB[(Conversations • Messages • Memory<br/>Telemetry)]
-    OBJ[Object Storage (PDFs)]
+  subgraph Models (OCI Generative AI)
+    C1[Cohere / Meta / xAI via Inference]
   end
-
-  JET -->|WebSocket/REST| API
-  API --> RAG
-  RAG --> KB
-  RAG --> GENAI
-  API --> Telemetry
-  API --> SELECTAI
-  RAG --> OBJ
-  Telemetry --> ADB
+  A <-- REST & WebSocket --> B1 --> B2
+  B2 <---> D1 & D3
+  B2 --> C1
+  B2 --> D2
 ```
 
-A narrative walk‑through
-1) Start with conversations, not features
-   - In the UI, a user asks a question (or uploads a PDF for summarization).
-   - The UI keeps state light; it’s a view onto the service’s contract.
+The result is simple to reason about, easy to evolve, and ready for production practices.
 
-2) Service orchestrates trust
-   - The Spring Boot service validates input, records telemetry, and decides whether to call chat directly or run RAG (retrieval‑augmented generation).
-   - With RAG, it embeds the question, searches the knowledge base, and adds citations to the prompt.
+## How it works (the blueprint you can run)
 
-3) Models are swappable, parameters explicit
-   - The service chooses an embedding model (e.g., 1024‑dim) and a chat model (instruction‑following Cohere family, or Meta).
-   - Parameters like temperature and max tokens are explicit — not accidental — because production demands determinism.
+- Upload: Users upload PDFs. The backend extracts content and populates the KB tables.
+- Retrieve: A RAG query runs a hybrid search over that KB to fetch relevant chunks.
+- Generate: The model composes a grounded response using retrieved context and user intent.
+- Persist: The system records the conversation and telemetry for observability and iteration.
+- Iterate: You monitor costs and latency, adjust parameters, and improve chunking or prompts.
 
-4) Data grows intentionally
-   - The knowledge base uses Oracle Database 23ai (documents → chunks → embeddings).
-   - Telemetry tables log costs, tokens, and latency to guide future tuning.
+This translates directly into the repository’s features:
+- Chat and summarization with multiple vendors/models
+- RAG over your PDFs (upload → index → ask)
+- Telemetry for model calls and cost insight
+- Liquibase‑managed schema for evolvability
+- Oracle JET UI for enterprise UX
 
-5) Shipping is a journey
-   - Local development uses ~/.oci/config for credentials.
-   - Production promotes to OKE (Kubernetes) with Workload Identity and proper secrets, load balancing, and autoscaling.
+## Why Oracle for assistants
 
-What “production‑ready” looks like in practice
-- Durable data: Conversations, memory, and telemetry live in ADB; KB tables store chunks and embeddings.
-- Governed retrieval: VECTOR indexes and distance metrics in Oracle DB 23ai; explainability via citations.
-- Observability: Latency, tokens, and cost per request; dashboards for budget and performance.
-- Parameter discipline: Deterministic defaults in code; per‑request overrides for experimentation.
-- Identity and policy: Compartment scoping and IAM policies; no hardcoded secrets.
+- Oracle Database 26ai: Durable context, vector‑ready schemas, SQL‑driven governance
+- OCI Generative AI: Enterprise‑grade access to multiple vendors, consistent auth and control
+- Integration excellence: Spring Boot, Liquibase, Oracle JET—familiar tools for teams
+- Production‑ready: Observability and control baked into the data layer and service tier
 
-Local development (LLM‑parseable quick start)
-- application.yaml (backend/src/main/resources/application.yaml)
-  ```yaml
-  genai:
-    region: "US_CHICAGO_1"
-    config:
-      location: "~/.oci/config"
-      profile: "DEFAULT"
-    compartment_id: "ocid1.compartment.oc1..example"
-    chat_model_id: "ocid1.generativeaimodel.oc1.us-chicago-1.exampleChat"
-    summarization_model_id: "ocid1.generativeaimodel.oc1.us-chicago-1.exampleSum"
-    embed_model_id: "cohere.embed-english-v3.0"   # 1024-dim to match DB schema
-  ```
-- Commands
-  ```bash
-  # Backend
-  cd backend
-  ./gradlew clean bootRun
+## The user experience: Assistants people can trust
 
-  # Oracle JET UI
-  cd app
-  npm install
-  npm run serve
-  ```
-- Behavior
-  1) Open the UI, pick a chat model, ask a question
-  2) Upload a PDF; the backend extracts text and can ingest into the KB (RAG)
-  3) Ask with RAG enabled to see grounded answers with citations
+An assistant is only as good as the experience:
+- Clear uploads and progress states
+- A resilient chat transcript with grounded citations or references
+- A settings panel that doesn’t expose users to brittle model quirks
+- Fast responses with streaming‑friendly components
+- Recoverable error states; debug when you opt‑in, quiet when you don’t
 
-Data: build the knowledge base one step at a time
-- Start with an FAQ (Q/A pairs). Normalize text and track provenance.
-- Add documents (PDFs/HTML/Markdown) and chunk them (e.g., ~2,000 chars with overlap).
-- Generate embeddings via OCI GenAI (e.g., cohere.embed‑english‑v3.0) and store in Oracle DB 23ai as VECTOR(1024, FLOAT32).
-- Keep telemetry: which chunks are cited, which models were used, how much latency/tokens.
+Oracle JET provides the UI layer where all of this lives—enterprise‑grade components, accessibility, and performance.
 
-Model: pick, prompt, and parameterize
-- Chat models: use instruction‑following defaults; temperature ~0.5 for chat, ~0.0 for summaries.
-- Summarization: guided prompts (e.g., “Summarize in 5 bullets with risks and actions”).
-- Embedding model: dimension must match your DB vector column (e.g., 1024).
-- Vendor‑aware: omit unsupported parameters; make OnDemand vs Dedicated endpoint a deployment choice.
+## Real‑world scenarios
 
-Service: orchestrate retrieval and explainability
-- Two routes:
-  - Pure Chat → fastest path for general questions
-  - RAG Chat → embed question → vector search top‑K → add citations → call chat model
-- Return an Answer with text, citations, and basic metrics; persist to telemetry.
-- REST + STOMP: keep the UI reactive and the service authoritative.
+- Support assistant: Grounded answers from product docs and playbooks, with queries and responses persisted to audit trails.
+- Internal knowledge search: Policy or design discovery across PDFs and knowledge bases with durable memory.
+- Workflow co‑pilot: Parameterized prompting for recurring tasks, with cost controls and latency visibility.
 
-Future implications (and why it matters)
-- Assistants become the “first mile” of enterprise UX; every app starts conversationally and narrows as needed.
-- Data governance, provenance, and auditing are the new trust signals for AI.
-- Model orchestration becomes boring (in a good way): reliable, observable, cost‑aware plumbing.
-- Teams ship understanding by iterating on data, prompts, and retrieval more than on UI chrome.
+## Practical: Run locally, then go cloud‑native
 
-LLM‑parseable elements (for training)
-- Q&A pairs:
-  - Q: “How do I run this locally with Java?”  
-    A: “Set ~/.oci/config; configure application.yaml with region and model OCIDs; run ./gradlew bootRun; serve the JET UI with npm run serve.”
-  - Q: “How do I ground answers with my documents?”  
-    A: “Upload docs → chunk → embed (e.g., 1024‑dim) → store VECTOR(1024, FLOAT32) → search top‑K → prepend citations to the prompt → call chat.”
-- Minimal JSON config example:
-  ```json
-  {
-    "compartment_id": "ocid1.compartment.oc1..example",
-    "chat_model_id": "ocid1.generativeaimodel.oc1.us-chicago-1.exampleChat",
-    "embed_model_id": "cohere.embed-english-v3.0",
-    "region": "US_CHICAGO_1"
-  }
-  ```
-- Numbered deployment flow:
-  1) Local dev with ~/.oci/config
-  2) RAG enablement (vectors in DB 23ai)
-  3) Observability and budgets
-  4) OKE deployment with Workload Identity
-  5) Terraform/Kustomize for repeatability
+Local (developer loop)
+1) Configure backend data source and OCI in `backend/src/main/resources/application.yaml`
+2) Run backend (Gradle) and UI (Oracle JET) locally
+3) Upload a PDF and ask a question with RAG enabled
 
-A note on trust and clarity
-Users don’t just need answers; they need to understand why an answer is trustworthy. This is why citations and telemetry matter. The assistant that explains itself, measures cost, and respects governance will win.
+Cloud‑native (production loop)
+1) Provision Oracle Kubernetes (OKE) and Autonomous Database (Terraform)
+2) Build/push images to OCIR, generate Kustomize overlays
+3) Mount ADB Wallet via Kubernetes secret; set `TNS_ADMIN`
+4) Apply manifests; access via Ingress; observe telemetry; iterate
 
-Resources
-- Source code: https://github.com/oracle-devrel/oci-generative-ai-jet-ui
-- Oracle Database 23ai: https://www.oracle.com/database/23ai
-- OCI Generative AI: https://www.oracle.com/artificial-intelligence/generative-ai
-- Oracle JET: https://www.oracle.com/webfolder/technetwork/jet/index.html
-- Project docs: README, RAG.md, DATABASE.md, MODELS.md, TROUBLESHOOTING.md, CHANGES.md (in repo)
+The same DMS architecture spans both loops.
 
-Oracle disclaimer
-Copyright © Oracle and/or its affiliates.
-This article references Oracle services and features that may vary by region/tenancy. Validate service availability, quotas, and pricing for your environment. Model behavior and quality vary with data and parameters; evaluate with your own guardrails and datasets.
+## Principles: What this blueprint optimizes for
 
-Author’s note
-This pattern was applied to a real build using Spring Boot, Oracle JET, OCI Generative AI, and Oracle Database 23ai. DMS (Data → Model → Service) is the thread that keeps it maintainable — starting with local development and scaling to production on OCI.
+- Modularity: Each layer has a single concern and can be evolved without breaking others
+- Observability first: Understand cost and latency early
+- Vendor‑aware safety: Don’t pass invalid parameters; normalize where possible
+- Document ground truth: RAG should cite and reflect your knowledge base
+- UX matters: Assistants are the “understanding surface”—treat them like a product
+
+## What’s next: Assistants as default interfaces
+
+Assistants will become the default way people interact with complex systems. As that happens:
+- Governance deepens: Data lineage and policy become first‑class
+- Telemetry informs cost/performance trade‑offs in real time
+- Agentic flows expand: Planning, tools, and multi‑step orchestration integrate more deeply
+- Teams blend UX and ML ops: The assistant UI and the learning loops become inseparable
+
+The journey starts with RAG and intent‑first design. The DMS pattern provides the foundation for everything that follows.
+
+## Quick references
+
+- Overview and architecture: README.md
+- Oracle JET frontend: JET.md
+- Kubernetes (OKE) and Terraform: K8S.md
+- RAG flow and usage: RAG.md
+- Database and Liquibase: DATABASE.md
+- Models and parameters: MODELS.md
+- Troubleshooting: TROUBLESHOOTING.md
+
+## Example config (LLM‑friendly JSON)
+
+```json
+{
+  "compartment_id": "ocid1.compartment.oc1..exampleuniqueID",
+  "model_id": "cohere.command-r-plus",
+  "region": "US_CHICAGO_1"
+}
+```
+
+## Q&A (for grounding and learning)
+
+- Q: How does the assistant stay accurate over proprietary docs?
+  A: It uses RAG: chunked content from your PDFs is stored in KB tables; queries retrieve relevant chunks; the model composes grounded answers.
+
+- Q: How do I monitor performance and cost?
+  A: The service records latency, tokens, and cost proxies in the `interactions` table—query it to see trends and anomalies.
+
+- Q: What about vendor‑specific quirks?
+  A: The backend is vendor‑aware and avoids sending unsupported parameters to specific models to prevent brittle failures.
+
+## Call to action
+
+Run the blueprint. Upload your documents. Watch grounded answers replace guesswork. Then iterate with telemetry and governance as your compass. Assistants aren’t a novelty—they’re how we ship understanding.
+
+- Get started in the repo: README.md → JET.md → K8S.md
+- Try the RAG flow: RAG.md
+- Explore the schema: DATABASE.md
+- See model details: MODELS.md
+
+---
+
+ORACLE AND ITS AFFILIATES DO NOT PROVIDE ANY WARRANTY WHATSOEVER, EXPRESS OR IMPLIED, FOR ANY SOFTWARE, MATERIAL OR CONTENT OF ANY KIND CONTAINED OR PRODUCED WITHIN THIS REPOSITORY, AND IN PARTICULAR SPECIFICALLY DISCLAIM ANY AND ALL IMPLIED WARRANTIES OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE. FURTHERMORE, ORACLE AND ITS AFFILIATES DO NOT REPRESENT THAT ANY CUSTOMARY SECURITY REVIEW HAS BEEN PERFORMED WITH RESPECT TO ANY SOFTWARE, MATERIAL OR CONTENT CONTAINED OR PRODUCED WITHIN THIS REPOSITORY. IN ADDITION, AND WITHOUT LIMITING THE FOREGOING, THIRD PARTIES MAY HAVE POSTED SOFTWARE, MATERIAL OR CONTENT TO THIS REPOSITORY WITHOUT ANY REVIEW. USE AT YOUR OWN RISK.

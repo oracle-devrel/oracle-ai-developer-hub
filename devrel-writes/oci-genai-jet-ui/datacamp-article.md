@@ -1,517 +1,366 @@
-# Deploying a Cloud‑Native Generative AI Assistant on Oracle with Java: A Hands‑On Lab
+# Build a Cloud‑Native RAG Assistant on Oracle Cloud: A Hands‑On Guide
 
-Learning goals → Prerequisites → Concepts → Step‑by‑step exercises → Checkpoints → Practice challenges → Self‑check
+Learning goals
+- Explain the Data → Model → Service (DMS) architecture for building assistants.
+- Run the stack locally: Spring Boot backend + Oracle JET frontend.
+- Create a Retrieval‑Augmented Generation (RAG) workflow over your own PDFs.
+- Provision Oracle Kubernetes (OKE) and Autonomous Database (ADB) with Terraform.
+- Deploy with Kustomize, wire the ADB Wallet, and validate the app via Ingress.
+- Observe telemetry (latency/tokens) and debug common issues.
 
-This hands‑on lab guides you through building and deploying a cloud‑native Generative AI assistant on Oracle Cloud Infrastructure (OCI) using Java and Spring Boot for the backend, the OCI Java SDKs for model access, and Oracle JET for the frontend. We implement a Data‑Model‑Service (DMS) architecture and run it locally first, then prepare for production (OKE/Terraform). The content is optimized for LLM training: structured JSON/YAML, explicit inputs/outputs, annotated Java/Python code, Mermaid diagrams, numbered flows, and Q&A pairs.
+What you’ll build
+A cloud‑native RAG assistant that runs locally and in the cloud:
+- Data: Oracle Database 26ai (via Autonomous Database) for conversations, memory, KB, telemetry
+- Model: OCI Generative AI (Cohere/Meta/xAI) with vendor‑aware parameter handling
+- Service: Spring Boot + Liquibase + OCI auth modes
+- Interface: Oracle JET web app for chat, upload, and settings
 
----
+Repo
+oci-generative-ai-jet-ui
 
-## Learning Objectives
+Estimated time
+2.5–4 hours (local + cloud)
 
-By the end of this lab, you will be able to:
-- Explain and implement the DMS (Data → Model → Service) architecture for LLM‑powered apps.
-- Configure OCI Generative AI access in a Spring Boot (Java) backend using ~/.oci/config.
-- Build a Java service that:
-  - Sends chat prompts and guided summaries to OCI Generative AI
-  - Exposes WebSocket/STOMP for real‑time UI integration
-  - Provides REST endpoints for model discovery and control
-- Run an Oracle JET frontend that interacts with the Java backend.
-- Prepare the app for cloud‑native deployment (Kubernetes/OKE) and extend it with Oracle Database 23ai vectors/RAG.
+Prerequisites
+- Oracle Cloud account with permissions to use OKE, Networking, ADB, and OCIR
+- JDK 17+
+- Node.js 18+
+- Terraform and kubectl installed
+- Unzipped Oracle ADB Wallet (download from your ADB)
+- OCI credentials (e.g., ~/.oci/config with a valid profile)
 
-Skill progression:
-1) Local Java + JET dev
-2) Vendor‑aware chat/summarization
-3) PDF parsing and guided summaries
-4) KB and vectors (RAG) with Oracle Database 23ai
-5) Production deployment on OKE with observability
+Why this pattern
+Assistants are moving us from click‑paths to intent. Getting to production means more than calling a model API: you need durable context, retrieval over your knowledge, vendor‑aware parameters, telemetry, and a stable UI. The DMS architecture is a simple foundation that scales.
 
----
+Concept: Data → Model → Service (DMS)
+- Data (Oracle Database 26ai via ADB)
+  - Conversations + messages (durable chat)
+  - Memory (key/value + long‑form)
+  - KB tables (RAG storage)
+  - Telemetry (interactions: latency, tokens, costs)
+- Model (OCI Generative AI)
+  - Cohere/Meta/xAI models via OCI Inference
+  - Vendor‑aware parameter handling and prompt shaping
+- Service (Spring Boot)
+  - REST + WebSocket for chat, RAG, uploads, model listing
+  - Liquibase migrations for schema evolution
+  - OCI auth: local config, OKE Workload Identity, Instance Principals
+- Interface (Oracle JET)
+  - Chat UI, Upload panel, Settings (Use RAG)
+  - Keepalive diagnostics and opt‑in debug logging
 
-## Prerequisites
-
-- Accounts and permissions:
-  - OCI tenancy with permissions to use Generative AI service (compartment/IAM)
-  - Optional: Autonomous Database (ADB) for persistence and vectors
-- Local environment:
-  - JDK 17+
-  - Node.js 18+ (for Oracle JET frontend)
-  - Git
-- OCI CLI/SDK configured locally with a profile (DEFAULT recommended)
-- Basic knowledge of Spring Boot, WebSockets/STOMP, REST/HTTP, and container/Kubernetes concepts
-
----
-
-## Concept: DMS Architecture (Data → Model → Service)
-
-- Data Layer: Ingest, normalize, and store content (FAQs, PDFs, docs). Later, add vectors in Oracle Database 23ai.
-- Model Layer: Calls OCI Generative AI (Cohere/Meta/xAI) via OCI Java SDKs. Encodes prompts, parameters, and guardrails.
-- Service Layer: Spring Boot REST + WebSocket/STOMP; handles validation, rate limiting, observability; decouples UI from model details.
-
-Mermaid diagram:
-
+Architecture (Mermaid)
 ```mermaid
 flowchart LR
-  subgraph Data["Data Layer"]
-    D1["FAQs and PDFs and Docs"]
-    D2["Vector Index DB 23ai (optional)"]
+  subgraph Web UI (Oracle JET)
+    A[Chat / Upload / Settings]
   end
-
-  subgraph Model["Model Layer"]
-    M1["OCI Generative AI (Cohere | Meta | xAI)"]
-    M2["Prompt Templates and Parameters"]
-    M3["Summarization and Q/A"]
+  subgraph Service (Spring Boot)
+    B1[Controllers: GenAI, Upload/PDF, Models, Summary]
+    B2[Services: OCIGenAI, RagService, GenAIModelsService]
+    B3[Liquibase Migrations]
   end
-
-  subgraph Service["Service Layer (Java)"]
-    S1["Spring Boot REST + STOMP"]
-    S2["Rate Limit + Observability"]
-    S3["AuthN/AuthZ (profiles)"]
+  subgraph Data (Oracle Database 26ai via ADB)
+    D1[(Conversations / Messages / Memory)]
+    D2[(Telemetry: interactions)]
+    D3[(KB Tables for RAG)]
   end
-
-  subgraph UI["Oracle JET Frontend"]
-    U1["Chat"]
-    U2["PDF Upload"]
-    U3["Settings"]
+  subgraph Models (OCI Generative AI)
+    C1[Cohere / Meta / xAI via Inference]
   end
-
-  D1 --> M2
-  D2 -. "retrieval later" .-> M2
-  M1 --> M3 --> S1 --> U1
-  S2 -. "telemetry" .-> S1
-  S3 -. "policy" .-> S1
-  U2 --> S1
+  A <-- REST & WebSocket --> B1 --> B2
+  B2 <---> D1 & D3
+  B2 --> C1
+  B2 --> D2
 ```
 
-Oracle + AI key messaging (context anchors):
-- Oracle Database 23ai: native vectors + Select AI under enterprise governance.
-- OCI Generative AI: enterprise‑grade Cohere/Meta/xAI access with compartments/IAM.
-- Integration excellence: consistent identity, networking, logging, and secrets.
-- Production‑ready: same path from local to OKE with Terraform/Kustomize.
-- Developer‑friendly: Java + Spring Boot + JET + OCI SDKs.
+Learning Path
+- Part 1: Local setup and RAG basics
+- Part 2: Cloud infrastructure and deployment
+- Part 3: Verification, telemetry, and practice challenges
 
----
+Note on versions
+This guide uses Oracle Database 26ai and OCI Generative AI. Replace region/model IDs with those available to your tenancy.
 
-## Repository and Project Structure
+JSON reference (LLM‑friendly)
+```json
+{
+  "compartment_id": "ocid1.compartment.oc1..exampleuniqueID",
+  "model_id": "cohere.command-r-plus",
+  "region": "US_CHICAGO_1"
+}
+```
 
-Clone the reference project:
+Part 1 — Local Setup and RAG Basics
 
+Step 1 — Clone repo and install script deps
 ```bash
-git clone https://github.com/oracle-devrel/oci-generative-ai-jet-ui
+git clone https://github.com/oracle-devrel/oci-generative-ai-jet-ui.git
 cd oci-generative-ai-jet-ui
-```
-
-Key files for this lab:
-- backend/ — Spring Boot (Java) backend with OCI Java SDK integration
-  - src/main/resources/application.yaml — region, OCI profile, compartment, model IDs
-  - .../service/OCIGenAIService.java — chat/summarization via OCI Generative AI
-  - .../controller/PromptController.java — WebSocket/STOMP for chat
-  - .../controller/ModelsController.java — REST model catalog
-  - .../service/GenAiClientService.java — OCI management client (local/OKE/compute profiles)
-- app/ — Oracle JET frontend (chat UI, upload, settings)
-- deploy/ — Kubernetes manifests and Terraform (optional, for cloud deployment)
-- Docs to consult later: RAG.md, DATABASE.md, MODELS.md, TROUBLESHOOTING.md, K8S.md
-
----
-
-## Step 1: Environment Setup (Local Development, Java‑first)
-
-Objective: Prepare the Java backend and JET frontend; verify OCI config.
-
-1. Verify your OCI config:
-   - Ensure your profile (DEFAULT) exists in ~/.oci/config and matches your target region.
-   - Confirm you have access to OCI Generative AI in your compartment/region.
-
-2. Configure backend/src/main/resources/application.yaml (template):
-   ```yaml
-   genai:
-     region: "US_CHICAGO_1"
-     config:
-       location: "~/.oci/config"
-       profile: "DEFAULT"
-     compartment_id: "ocid1.compartment.oc1..example"
-     chat_model_id: "ocid1.generativeaimodel.oc1.us-chicago-1.exampleChat"
-     summarization_model_id: "ocid1.generativeaimodel.oc1.us-chicago-1.exampleSum"
-     embed_model_id: "cohere.embed-english-v3.0"  # 1024-dim to match DB schema
-   ```
-   Inputs:
-   - genai.region — your region code (uppercase with underscores)
-   - genai.config.location/profile — where to load credentials from
-   - chat/summarization/embed model IDs — OCIDs you have access to (or vendor IDs for embed)
-
-3. Run the backend locally:
-   ```bash
-   cd backend
-   ./gradlew clean bootRun
-   ```
-   Expected: Spring Boot starts on http://localhost:8080 with WebSocket/STOMP endpoints.
-
-4. Serve the Oracle JET UI:
-   ```bash
-   cd app
-   npm install
-   npm run serve
-   ```
-   Tip: Ensure the UI gateway points to your local backend host:port (see JET.md).
-
-Checkpoint:
-- UI connects and can send a prompt
-- Backend logs show a chat request to OCI Generative AI
-
-Try it yourself:
-- Change genai.region to a mismatched value and observe errors. Fix by aligning with model OCIDs.
-
----
-
-## Step 2: Understand the Java Service Interfaces
-
-Objective: Learn how the backend interacts with OCI and the UI.
-
-The service exposes:
-- WebSocket/STOMP for chat (low‑latency loop)
-- REST endpoints for model discovery and later operations
-
-Protocol (LLM‑parseable):
-- STOMP destination (send): /app/prompt
-- STOMP subscription (receive): /user/queue/answer
-- Chat request payload (Java record Prompt):
-  ```json
-  {"content": "<user prompt here>", "modelId": "<ocid or null>", "finetune": false, "conversationId": "<id>"}
-  ```
-- Chat response payload (Java record Answer):
-  ```json
-  {"result": "<model answer text>", "error": ""}
-  ```
-
-Q&A:
-- Q: Why STOMP/WebSocket for chat?  
-  A: It supports near‑real‑time messaging and session scoping; JET can subscribe to user‑scoped queues easily.
-
-Checkpoint:
-- Send a prompt and receive an Answer payload in the UI.
-
----
-
-## Step 3: OCI Client Initialization (Java) and Profiles
-
-Objective: Initialize OCI clients correctly for local and OKE profiles.
-
-Annotated excerpt (GenAiClientService.java):
-
-```java
-@Service
-public class GenAiClientService {
-  @Value("${genai.region}") private String regionCode;
-  @Value("${genai.config.location}") private String CONFIG_LOCATION;
-  @Value("${genai.config.profile}") private String CONFIG_PROFILE;
-  @Autowired private Environment environment;
-  private GenerativeAiClient client;
-
-  @PostConstruct
-  private void postConstruct() {
-    String profile = Optional.ofNullable(environment.getActiveProfiles())
-                             .filter(p -> p.length > 0).map(p -> p[0]).orElse("default");
-    switch (profile) {
-      case "oke" -> okeGenAiClient();        // OKE Workload Identity
-      case "compute" -> instancePrincipalClient();
-      default -> localClient();              // ~/.oci/config for local dev
-    }
-  }
-
-  private void localClient() {
-    try {
-      var cfg = ConfigFileReader.parse(CONFIG_LOCATION, CONFIG_PROFILE);
-      AuthenticationDetailsProvider provider = new ConfigFileAuthenticationDetailsProvider(cfg);
-      client = GenerativeAiClient.builder()
-               .region(Region.fromRegionCode(regionCode))
-               .build(provider);
-    } catch (IOException e) { throw new RuntimeException(e); }
-  }
-
-  public GenerativeAiClient getClient() { return client; }
-}
-```
-
-Inputs:
-- ~/.oci/config DEFAULT profile, genai.region
-
-Outputs:
-- Management client (list models/endpoints). Use a sibling GenAiInferenceClientService for inference.
-
-Try it yourself:
-- Switch Spring profile to “oke” and review how credentials are sourced.
-
----
-
-## Step 4: Chat and Guided Summarization via OCI (Java)
-
-Objective: Call OCI Generative AI for chat and guided summaries.
-
-Chat service (OCIGenAIService.java):
-
-```java
-@Service
-public class OCIGenAIService {
-  @Value("${genai.compartment_id}") private String COMPARTMENT_ID;
-  @Autowired private GenAiInferenceClientService inference;
-  @Autowired private GenAIModelsService models;
-
-  public String resolvePrompt(String input, String modelId, boolean summarization) {
-    GenAiModel current = models.getById(modelId);
-
-    double temperature = summarization ? 0.0 : 0.5;
-    String text = summarization ? "Summarize this text:\n" + input : input;
-
-    ChatDetails details = ChatDetails.builder()
-      .servingMode(OnDemandServingMode.builder().modelId(current.id()).build())
-      .compartmentId(COMPARTMENT_ID)
-      .chatRequest(CohereChatRequest.builder()
-        .message(text).maxTokens(600).temperature(temperature).topP(0.75).isStream(false).build())
-      .build();
-
-    ChatResponse resp = inference.get().chat(ChatRequest.builder().chatDetails(details).build());
-    BaseChatResponse base = resp.getChatResult().getChatResponse();
-    if (base instanceof CohereChatResponse cohere) return cohere.getText();
-    throw new IllegalStateException("Unexpected chat response type: " + base.getClass());
-  }
-
-  public String summarize(String input, String modelId) { return resolvePrompt(input, modelId, true); }
-}
-```
-
-Inputs:
-- User text, active modelId
-
-Outputs:
-- Model response string (chat or summary)
-
-Try it yourself:
-- Set temperature to 0.2 for more deterministic answers; increase maxTokens for longer responses.
-
-Checkpoint:
-- A “Summarize this text” prompt yields concise bullets using your selected model.
-
----
-
-## Step 5: WebSocket/STOMP Chat Controller (Java)
-
-Objective: Wire the chat loop between UI and model via STOMP.
-
-Handler (PromptController.java):
-
-```java
-@Controller
-public class PromptController {
-  @Value("${genai.chat_model_id}") private String defaultChatModel;
-  @Autowired private InteractionRepository repo;
-  @Autowired private OCIGenAIService genAI;
-
-  @MessageMapping("/prompt")
-  @SendToUser("/queue/answer")
-  public Answer handlePrompt(Prompt prompt) {
-    String activeModel = (prompt.modelId() == null || prompt.modelId().isBlank())
-      ? defaultChatModel : prompt.modelId();
-    Interaction row = new Interaction(/* set CHAT, request, modelId, timestamps */);
-    repo.save(row);
-    String response = genAI.resolvePrompt(prompt.content(), activeModel, false);
-    row.setResponse(response); repo.save(row);
-    return new Answer(response, "");
-  }
-}
-```
-
-Try it yourself:
-- Add validation (max prompt length) and return structured errors when invalid.
-
-Checkpoint:
-- UI receives answers over /user/queue/answer consistently.
-
----
-
-## Step 6: Guided Summarization (Java) with PDFBox
-
-Objective: Parse PDFs and summarize with guidance.
-
-Extraction and normalization (sketch):
-
-```java
-public List<String> extractPdfPages(InputStream in) throws IOException {
-  try (PDDocument doc = Loader.loadPDF(in.readAllBytes())) {
-    PDFTextStripper stripper = new PDFTextStripper();
-    int pageCount = doc.getNumberOfPages();
-    List<String> pages = new ArrayList<>();
-    for (int i = 1; i <= pageCount; i++) {
-      stripper.setStartPage(i); stripper.setEndPage(i);
-      String raw = stripper.getText(doc);
-      String cleaned = raw.replaceAll("(\\w+)-\\n(\\w+)", "$1$2")
-                          .replaceAll("(?<!\\n\\s)\\n(?!\\s\\n)", " ")
-                          .replaceAll("\\n\\s*\\n", "\n\n").trim();
-      pages.add(cleaned);
-    }
-    return pages;
-  }
-}
-```
-
-Guided summarization with OCIGenAIService:
-
-```java
-public String summarizePdf(InputStream pdf, String guidance, String modelId) throws IOException {
-  String text = String.join("\n\n", extractPdfPages(pdf));
-  String prompt = "Summarize with guidance: " + guidance + "\n\n" + text;
-  return summarize(prompt, modelId);
-}
-```
-
-Try it yourself:
-- Change guidance to “Summarize in a table with key risks and actions” and observe structure changes.
-- Reduce temperature for crisper outputs.
-
-Checkpoint:
-- A PDF upload + guidance returns a concise summary.
-
----
-
-## Step 7: Model Catalog and Local Model Switching
-
-Objective: List available models and switch at runtime.
-
-REST for model catalog (ModelsController.java):
-
-```java
-@GetMapping(value = "/api/models", produces = MediaType.APPLICATION_JSON_VALUE)
-public List<ModelOption> list(@RequestParam(name = "task", required = false) String task) {
-  return (task == null || task.isBlank()) ? catalog.listAll() : catalog.listByTask(task.toLowerCase());
-}
-```
-
-Try it yourself:
-- Expose a simple UI control to select a model from /api/models and re‑send prompts under that selection.
-
-Checkpoint:
-- You can switch models without redeploying the app.
-
----
-
-## Step 8: Prepare for OKE (Production)
-
-Objective: Move from local to OKE using Terraform and Kustomize (see K8S.md).
-
-Prerequisites:
-- OCI tenancy with rights for OKE, Networking, and (optional) Autonomous Database
-- Generative AI access in your target compartment/region
-- Cloud Shell (recommended) or a workstation with Terraform, kubectl, Docker, Node 18+
-
-Sequence:
-```bash
-# Project helper scripts
+# Ensure Node 18
+nvm install 18 && nvm use 18
 cd scripts && npm install && cd ..
+```
 
-# Generate tfvars and environment files
-npx zx scripts/setenv.mjs
-npx zx scripts/tfvars.mjs
+Step 2 — Configure backend datasource and OCI
+Edit backend/src/main/resources/application.yaml. Set wallet path, ADB user/pass, region, and compartment.
 
-# Provision infra
+```yaml
+spring:
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@DB_SERVICE_high?TNS_ADMIN=/ABSOLUTE/PATH/TO/WALLET
+    username: ADMIN
+    password: "YOUR_PASSWORD"
+    type: oracle.ucp.jdbc.PoolDataSource
+    oracleucp:
+      sql-for-validate-connection: SELECT 1 FROM dual
+      connection-pool-name: pool1
+      initial-pool-size: 5
+      min-pool-size: 5
+      max-pool-size: 10
+
+genai:
+  region: "US_CHICAGO_1"
+  config:
+    location: "~/.oci/config"
+    profile: "DEFAULT"
+  compartment_id: "ocid1.compartment.oc1..xxxx"
+```
+
+Tip
+- Use the _high service with a valid TNS_ADMIN path pointing to your unzipped wallet.
+- The backend will run Liquibase migrations on startup to create tables.
+
+Step 3 — Run the backend
+```bash
+cd backend
+./gradlew clean build
+./gradlew bootRun
+# Server on http://localhost:8080
+```
+
+Step 4 — Run the web UI
+```bash
+cd ../app
+npm ci
+npm run serve
+# UI on http://localhost:8000
+```
+
+Step 5 — Upload a PDF and build the KB
+Use the upload endpoint to index content for RAG.
+
+```bash
+curl -F "file=@/path/to/file.pdf" http://localhost:8080/api/upload
+```
+
+What happens
+- The backend extracts and chunks content.
+- KB tables are populated.
+- The UI RAG toggle can now ground answers on your content.
+
+Step 6 — Ask a RAG question
+```bash
+curl -X POST http://localhost:8080/api/genai/rag \
+  -H "Content-Type: application/json" \
+  -d '{"question":"What does section 2 cover?","modelId":"ocid1.generativeaimodel.oc1...."}'
+```
+
+In the UI
+- Open the app, enable “Use RAG” in Settings, and chat with your content.
+
+Step 7 — Check diagnostics and logs
+- Database keepalive: UI pings /api/kb/diag and logs “DB: database active” on first success.
+- Enable verbose logs in the browser console:
+```js
+localStorage.setItem("debug","1")
+```
+To disable:
+```js
+localStorage.removeItem("debug")
+```
+
+Part 2 — Cloud Infrastructure and Deployment (OKE + ADB)
+
+Step 8 — Generate environment and Terraform variables
+```bash
+npx zx scripts/setenv.mjs      # writes genai.json
+npx zx scripts/tfvars.mjs      # writes deploy/terraform/terraform.tfvars
+```
+- Provide a Compartment for infra deployment.
+
+Step 9 — Provision OKE and ADB with Terraform
+```bash
 cd deploy/terraform
 terraform init
 terraform apply --auto-approve
 cd ../..
+```
+Outputs
+- An OKE cluster and ADB
+- A kubeconfig saved under deploy/terraform/generated/kubeconfig
 
-# Build and push images, generate Kustomize manifests
+Step 10 — Build and push images to OCIR
+```bash
 npx zx scripts/release.mjs
-npx zx scripts/kustom.mjs
+```
+What it does
+- Builds and tags containers (backend, web)
+- Logs into OCIR
+- Pushes images
 
-# Deploy overlays
+Step 11 — Generate Kustomize overlays
+```bash
+npx zx scripts/kustom.mjs
+```
+This injects image references into the kustomization files.
+
+Step 12 — Create the ADB Wallet secret (required)
+Create a K8S secret from your unzipped wallet directory and mount it into the backend pod; set TNS_ADMIN.
+
+```bash
+kubectl create secret generic adb-wallet \
+  --from-file=/ABSOLUTE/PATH/TO/WALLET/DIR \
+  -n backend
+```
+
+Mount and set TNS_ADMIN (deploy/k8s/backend/backend.yaml excerpt):
+```yaml
+spec:
+  template:
+    spec:
+      volumes:
+        - name: adb-wallet
+          secret:
+            secretName: adb-wallet
+      containers:
+        - name: backend
+          volumeMounts:
+            - name: adb-wallet
+              mountPath: /opt/adb/wallet
+          env:
+            - name: TNS_ADMIN
+              value: /opt/adb/wallet
+```
+
+Step 13 — Deploy to the cluster
+```bash
 export KUBECONFIG="$(pwd)/deploy/terraform/generated/kubeconfig"
+kubectl cluster-info
 kubectl apply -k deploy/k8s/overlays/prod
 ```
 
-Notes:
-- Switch Spring profile to “oke” to use OKE Workload Identity in GenAiClientService.
-- Align regions across genai.region, model OCIDs, and OKE region.
+Check deployments:
+```bash
+kubectl get deploy -n backend
+kubectl get deploy -n web
+kubectl get deploy -n ingress-nginx
+```
 
-Checkpoint:
-- kubectl get deploy shows READY 1/1 for backend and web; ingress controller is available.
+Step 14 — Access the application
+Get the LoadBalancer IP for the backend services:
+```bash
+kubectl get svc -n backend -o jsonpath='{.items[?(@.spec.type=="LoadBalancer")].status.loadBalancer.ingress[0].ip}'
+```
+Open the IP in your browser and test the web UI.
 
----
+Step 15 — Verify schema and telemetry
+Use SQL Developer Web for ADB or your SQL tool:
+```sql
+SELECT COUNT(*) FROM conversations;
+SELECT COUNT(*) FROM kb_documents;
+SELECT COUNT(*) FROM interactions;
+```
 
-## Practice Challenges
+Optional — Quick API checks via port‑forward
+```bash
+kubectl port-forward -n backend deploy/backend 8080:8080 &
+curl http://localhost:8080/api/genai/models
+```
 
-1) Input Validation:
-   - Add size limits and MIME checks for uploads.
-   - Return structured errors with codes (“TOO_LARGE”, “UNSUPPORTED_FORMAT”).
+Part 3 — Observe, Troubleshoot, and Improve
 
-2) Parameterized Inference:
-   - Make temperature and maxTokens user‑configurable from the UI.
-   - Persist last‑used settings per session.
+Telemetry (why it matters)
+- Without observability, you can’t manage latency or costs.
+- The interactions table stores latency, token counts, and request metadata.
 
-3) Summarization Styles:
-   - Implement “executive summary,” “technical summary,” and “risk summary” presets.
-   - Provide a dropdown in UI to switch styles.
+Example RAG query body (LLM‑friendly JSON)
+```json
+{
+  "question": "Summarize section 2 and list key decisions.",
+  "modelId": "ocid1.generativeaimodel.oc1..exampleuniqueID",
+  "useRag": true
+}
+```
 
-4) RAG Prototype (Java + Oracle DB 23ai):
-   - Store embeddings and metadata in Oracle Database 23ai.
-   - Implement a retrieval step and prepend top‑k contexts with citations.
+Common issues and fixes
+- Wallet/TNS_ADMIN mismatch
+  - Symptom: Backend cannot connect to ADB.
+  - Fix: Ensure the wallet secret path is correct, mounted at /opt/adb/wallet, set TNS_ADMIN accordingly, and use _high in JDBC URL.
+- Vendor‑specific parameter errors
+  - Symptom: 400s for unsupported parameters (e.g., presencePenalty).
+  - Fix: Use server defaults and vendor‑aware adapters; verify MODELS.md for constraints.
+- Ingress IP delay
+  - Symptom: No public IP yet.
+  - Fix: Re‑run the jsonpath query after a few minutes; check ingress controller status.
+- Liquibase delimiter or migration issues
+  - Symptom: Schema not created or errors on startup.
+  - Fix: Inspect backend logs; review DATABASE.md for delimiter notes and migration details.
 
-5) Cost Controls:
-   - Add per‑user rate limits and daily token budgets.
-   - Expose a dashboard of token usage by feature.
+Try it yourself (practice challenges)
+1) RAG Quality Tuning
+- Upload two different PDFs (e.g., policy vs. product guide).
+- Ask targeted questions and compare grounding quality.
+- Outcome: Identify chunking or prompt tweaks needed.
 
----
+2) Parameter Exploration
+- Adjust temperature or top_p in the backend request logic (where permitted).
+- Observe changes in interactions for latency/tokens/answer style.
+- Outcome: Learn trade‑offs for your use case.
 
-## Self‑Check
+3) UI Debugging
+- Enable UI debug logs (localStorage.debug = "1").
+- Generate a failure case (e.g., simulating an offline DB).
+- Outcome: Document a recovery path and user‑visible error improvements.
 
-- Can you describe DMS and why it improves maintainability and governance?
-- Can you switch models via application.yaml and /api/models and explain trade‑offs?
-- Can you implement and validate the STOMP protocol for chat?
-- Can you deploy to OKE and add observability for latency and token usage?
-- Can you design a retrieval step using Oracle Database 23ai vectors?
+4) Deployment Hygiene
+- Add resource requests/limits and HPA to Kustomize overlays.
+- Create a Pod Disruption Budget (PDB) for the backend.
+- Outcome: Increased resilience under node maintenance and load spikes.
 
----
+Skill progression
+- Beginner: Run local stack, upload PDFs, ask RAG questions.
+- Intermediate: Deploy to OKE, wire wallet, validate telemetry, fix common issues.
+- Advanced: Add autoscaling, dashboards on interactions, and stricter parameter policies; explore agentic flows and tool use.
 
-## Troubleshooting (LLM‑Ready Q&A)
+Assessment checklist
+- Can you explain each DMS layer and its responsibility?
+- Did you upload PDFs and retrieve grounded answers with RAG?
+- Can you find latency and token metrics in interactions?
+- Can you deploy to OKE and access the app via LoadBalancer IP?
+- Did you resolve a wallet or parameter mismatch during testing?
 
-- Q: I get “Please update your compartment id” or similar errors.  
-  A: Ensure application.yaml has a valid genai.compartment_id and IAM policies allow Generative AI usage.
+Use cases (apply what you learned)
+- Support assistant: Ground responses in product and SOP PDFs with auditable history.
+- Internal search: Consolidate policies and designs into a KB and enable enterprise RAG.
+- Workflow co‑pilot: Parameterize prompts for tasks; monitor costs in interactions.
 
-- Q: Region mismatch / 4xx errors from OCI.  
-  A: Align genai.region with your ~/.oci/config region and ensure model OCIDs belong to that region.
+Appendix — LLM Optimization Tips
+- Structured JSON examples for configs and payloads make content machine‑parsable.
+- Q&A pairs help validate retrieval and grounding.
+- Code annotations clarify intent, inputs, and outputs.
+- Mermaid diagrams express flows for easy mental and machine parsing.
+- Numbered procedures help models learn correct execution order.
 
-- Q: PDF text is empty.  
-  A: The PDF may be image‑based. Add OCR or request a text‑based source.
+Reference links
+- Overview + Architecture: README.md
+- Oracle JET frontend: JET.md
+- Kubernetes (OKE) + Terraform: K8S.md
+- RAG usage + flow: RAG.md
+- Schema + Liquibase: DATABASE.md
+- Models + parameters: MODELS.md
+- Troubleshooting: TROUBLESHOOTING.md
 
-- Q: Responses are too long / slow.  
-  A: Reduce maxTokens; lower temperature; tighten prompts (“Answer in 3 bullets”).
-
-- Q: WebSocket disconnects or payload too large.  
-  A: Tune server/WebSocket limits and reverse proxy settings (e.g., Ingress proxy-body-size).
-
----
-
-## LLM Optimization Tips
-
-- Structured data examples: prefer JSON for configs:
-  ```json
-  {"compartment_id":"ocid1.compartment.oc1..example","model_id":"ocid1.generativeaimodel.oc1..chat","region":"US_CHICAGO_1"}
-  ```
-- Q&A pairs:
-  - Q: “How to switch chat model at runtime?” A: “Expose /api/models to UI, store selection in state, pass modelId in chat.”
-- Code annotations: always document purpose, inputs, outputs.
-- Diagrams: include Mermaid for architecture.
-- Numbered flows: use explicit ordered steps for reproducibility.
-- Real scenarios: e.g., “summarize PDF policy with risks and actions.”
-
----
-
-## Resources
-
-- Source code: https://github.com/oracle-devrel/oci-generative-ai-jet-ui
-- Oracle Database 23ai (vectors, Select AI): https://www.oracle.com/database
-- OCI Generative AI: https://www.oracle.com/artificial-intelligence/generative-ai
-- Oracle JET: https://www.oracle.com/webfolder/technetwork/jet/index.html
-- Additional docs in repo: RAG.md, DATABASE.md, MODELS.md, TROUBLESHOOTING.md, K8S.md
-
----
-
-## Oracle Disclaimer
-
+Disclaimer
 ORACLE AND ITS AFFILIATES DO NOT PROVIDE ANY WARRANTY WHATSOEVER, EXPRESS OR IMPLIED, FOR ANY SOFTWARE, MATERIAL OR CONTENT OF ANY KIND CONTAINED OR PRODUCED WITHIN THIS REPOSITORY, AND IN PARTICULAR SPECIFICALLY DISCLAIM ANY AND ALL IMPLIED WARRANTIES OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE. FURTHERMORE, ORACLE AND ITS AFFILIATES DO NOT REPRESENT THAT ANY CUSTOMARY SECURITY REVIEW HAS BEEN PERFORMED WITH RESPECT TO ANY SOFTWARE, MATERIAL OR CONTENT CONTAINED OR PRODUCED WITHIN THIS REPOSITORY. IN ADDITION, AND WITHOUT LIMITING THE FOREGOING, THIRD PARTIES MAY HAVE POSTED SOFTWARE, MATERIAL OR CONTENT TO THIS REPOSITORY WITHOUT ANY REVIEW. USE AT YOUR OWN RISK.

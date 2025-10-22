@@ -1,12 +1,7 @@
 package dev.victormartin.oci.genai.backend.backend.controller;
 
-import com.oracle.bmc.model.BmcException;
-import dev.victormartin.oci.genai.backend.backend.dao.Answer;
-import dev.victormartin.oci.genai.backend.backend.dao.SummaryRequest;
-import dev.victormartin.oci.genai.backend.backend.data.Interaction;
-import dev.victormartin.oci.genai.backend.backend.data.InteractionRepository;
-import dev.victormartin.oci.genai.backend.backend.data.InteractionType;
-import dev.victormartin.oci.genai.backend.backend.service.OCIGenAIService;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +12,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
-import java.util.Date;
+import com.oracle.bmc.model.BmcException;
+
+import dev.victormartin.oci.genai.backend.backend.dao.Answer;
+import dev.victormartin.oci.genai.backend.backend.dao.SummaryRequest;
+import dev.victormartin.oci.genai.backend.backend.data.Conversation;
+import dev.victormartin.oci.genai.backend.backend.data.ConversationRepository;
+import dev.victormartin.oci.genai.backend.backend.data.InteractionEvent;
+import dev.victormartin.oci.genai.backend.backend.data.InteractionEventRepository;
+import dev.victormartin.oci.genai.backend.backend.data.Message;
+import dev.victormartin.oci.genai.backend.backend.data.MessageRepository;
+import dev.victormartin.oci.genai.backend.backend.service.MemoryService;
+import dev.victormartin.oci.genai.backend.backend.service.OCIGenAIService;
 
 @RestController
 public class SummaryController {
@@ -30,7 +36,16 @@ public class SummaryController {
     OCIGenAIService ociGenAIService;
 
     @Autowired
-    private InteractionRepository interactionRepository;
+    private ConversationRepository conversationRepository;
+
+    @Autowired
+    private MessageRepository messageRepository;
+
+    @Autowired
+    private InteractionEventRepository interactionEventRepository;
+
+    @Autowired
+    private MemoryService memoryService;
 
     @PostMapping("/api/genai/summary")
     public Answer postSummaryText(@RequestBody SummaryRequest summaryRequest,
@@ -38,40 +53,70 @@ public class SummaryController {
                                   @RequestHeader("modelId") String modelId) {
         logger.info("postSummaryText()");
         String contentEscaped = HtmlUtils.htmlEscape(summaryRequest.content());
-        logger.info("contentEscaped: {}...", contentEscaped.substring(0, 50));
-        Interaction interaction = new Interaction();
-        interaction.setType(InteractionType.SUMMARY_TEXT);
-        interaction.setConversationId(conversationId);
-        interaction.setDatetimeRequest(new Date());
-        interaction.setModelId(summarizationModelId);
-        interaction.setRequest(contentEscaped);
-        Interaction saved = interactionRepository.save(interaction);
+        String activeModel = (modelId == null || modelId.isBlank()) ? summarizationModelId : modelId;
+        logger.info("contentEscaped: {}...", contentEscaped.substring(0, Math.min(50, contentEscaped.length())));
+
+        // Ensure conversation exists (tenant=default)
         try {
-            String summaryText = ociGenAIService.summaryText(contentEscaped, summarizationModelId, false);
-            saved.setDatetimeResponse(new Date());
-            saved.setResponse(summaryText);
-            interactionRepository.save(saved);
-            logger.info("summaryText: {}...", summaryText.substring(0, 50));
+            if (!conversationRepository.existsById(conversationId)) {
+                conversationRepository.save(new Conversation(conversationId, "default", null, "active"));
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to ensure conversation exists: {}", e.getMessage());
+        }
+
+        long t0 = System.nanoTime();
+        try {
+            // user message (what the user sent to be summarized)
+            Message mUser = new Message(UUID.randomUUID().toString(), conversationId, "user", contentEscaped);
+            messageRepository.save(mUser);
+
+            // call model
+            String summaryText = ociGenAIService.summaryText(contentEscaped, activeModel, false);
+
+            // assistant message (summary produced)
+            Message mAsst = new Message(UUID.randomUUID().toString(), conversationId, "assistant", summaryText);
+            messageRepository.save(mAsst);
+            // update rolling memory
+            memoryService.updateRollingSummary(conversationId);
+
+            // telemetry
+            long latencyMs = (System.nanoTime() - t0) / 1_000_000L;
+            InteractionEvent ev = new InteractionEvent("default", "summary_text", activeModel);
+            ev.setLatencyMs(latencyMs);
+            interactionEventRepository.save(ev);
+
             Answer answer = new Answer();
             answer.setContent(summaryText);
             answer.setErrorMessage("");
             return answer;
+
         } catch (BmcException e) {
             String unmodifiedMessage = e.getUnmodifiedMessage();
             int statusCode = e.getStatusCode();
             String errorMessage = statusCode + " " + unmodifiedMessage;
             logger.error(errorMessage);
-            saved.setErrorMessage(errorMessage);
-            interactionRepository.save(saved);
-            Answer answer = new Answer("", errorMessage);
-            return answer;
+
+            try {
+                long latencyMs = (System.nanoTime() - t0) / 1_000_000L;
+                InteractionEvent ev = new InteractionEvent("default", "summary_text", activeModel);
+                ev.setLatencyMs(latencyMs);
+                interactionEventRepository.save(ev);
+            } catch (Exception ignore) {}
+
+            return new Answer("", errorMessage);
         } catch (Exception e) {
             String errorMessage = e.getLocalizedMessage();
             logger.error(errorMessage);
-            saved.setErrorMessage(errorMessage);
-            interactionRepository.save(saved);
-            Answer answer = new Answer("", errorMessage);
-            return answer;
+
+            try {
+                long latencyMs = (System.nanoTime() - t0) / 1_000_000L;
+                InteractionEvent ev = new InteractionEvent("default", "summary_text", activeModel);
+                ev.setLatencyMs(latencyMs);
+                interactionEventRepository.save(ev);
+            } catch (Exception ignore) {}
+
+            return new Answer("", errorMessage);
         }
     }
 }

@@ -1,0 +1,8 @@
+{
+  "compartment_id": "ocid1.compartment.oc1..REPLACE_ME",
+  "config_profile": "DEFAULT",
+  "service_endpoint": "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
+  "model_type": "cohere",
+  "cohere_model_id": "ocid1.generativeaimodel.oc1..REPLACE_ME",
+  "llama_model_id": "ocid1.generativeaimodel.oc1..REPLACE_ME"
+}

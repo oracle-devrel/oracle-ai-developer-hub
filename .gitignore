@@ -2,7 +2,7 @@
 .DS_Store
 .AppleDouble
 .LSOverride
-*/config.json
+**/config.json
 
 # Icon must end with two \r
 Icon
@@ -48,6 +48,9 @@ context/
 generated/
 
 .env.json
+.env
+.env.*
+*.env
 *.bkp
 *.zip
 kubeconfig

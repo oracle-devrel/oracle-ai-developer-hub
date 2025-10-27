@@ -41,9 +41,11 @@ const defaultBackendType: string = localStorage.getItem("backend") || "java";
 type ContentProps = {
   settingsOpened: boolean;
   setSettingsOpened: (opened: boolean) => void;
+  theme: string;
+  setTheme: (theme: string) => void;
 };
 
-const Content = ({ settingsOpened, setSettingsOpened }: ContentProps) => {
+const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: ContentProps) => {
   const conversationId = useContext(ConvoCtx);
   const [update, setUpdate] = useState<Array<object>>([]);
   const [busy, setBusy] = useState<boolean>(false);
@@ -290,9 +292,11 @@ const Content = ({ settingsOpened, setSettingsOpened }: ContentProps) => {
           aiServiceType={serviceType}
           backendType={backendType}
           ragEnabled={ragEnabled}
+          theme={theme}
           aiServiceChange={serviceTypeChangeHandler}
           backendChange={backendTypeChangeHandler}
           ragToggle={setRagEnabled}
+          themeChange={setTheme}
           modelIdChange={modelIdChangeHandler}
         />
       </oj-c-drawer-popup>
@@ -308,6 +312,7 @@ const Content = ({ settingsOpened, setSettingsOpened }: ContentProps) => {
           data={update}
           question={question}
           questionChanged={handleQuestionChange}
+          settingsOpened={settingsOpened}
         />
       )}
       {serviceType === "sim" && (

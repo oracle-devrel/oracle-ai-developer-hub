@@ -14,6 +14,7 @@ type Props = {
   data: any;
   questionChanged: (event: any) => void;
   question: MutableRef<string | undefined>;
+  settingsOpened: boolean;
 };
 
 type Item = {
@@ -28,7 +29,7 @@ const madp = new MutableArrayDataProvider<Item["id"], Item>([], {
   keyAttributes: "id",
 });
 
-export const Chat = ({ testId, data, questionChanged, question }: Props) => {
+export const Chat = ({ testId, data, questionChanged, question, settingsOpened }: Props) => {
   const dataProvider = useRef(madp);
   const listRef = useRef<ojListView<Item["id"], Item>>(null);
   const [lastKey, setLastKey] = useState<number>(0);
@@ -84,7 +85,7 @@ export const Chat = ({ testId, data, questionChanged, question }: Props) => {
         <template slot="itemTemplate" render={chatItemTemplate}></template>
         <template slot="noData" render={chatNoDataTemplate}></template>
       </oj-list-view>
-      <div class="chat-input-bar">
+      <div class={`chat-input-bar ${settingsOpened ? 'drawer-open' : ''}`}>
         <oj-input-search
           id="search1"
           class="oj-input-search-hero oj-sm-width-3"

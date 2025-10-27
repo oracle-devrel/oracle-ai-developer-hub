@@ -1,6 +1,6 @@
 # Models and Parameters
 
-This application calls OCI Generative AI Inference with vendor-aware request builders. It adapts parameters per vendor/model to prevent invalid-argument errors (for example, xAI Grok does not support `presencePenalty`).
+This application calls OCI Generative AI Inference with vendor-aware request builders. It adapts parameters per vendor/model to prevent invalid-argument errors.
 
 ## Discovering available models
 
@@ -36,11 +36,6 @@ The backend resolves vendor and uses the appropriate request type and parameters
   - Typical params: `messages`, `maxTokens`, `temperature`, `topP`, `isStream`
   - Not sent: `presencePenalty`, `frequencyPenalty`, `topK`
   - Reason: Grok models return 400 if unsupported parameters are included
-
-- Default (other vendors)
-  - Request: `GenericChatRequest`
-  - Typical params: `messages`, `maxTokens`, `temperature`, `topP`, `topK`, `isStream`
-  - Notes: `presencePenalty` is not sent to avoid cross-vendor incompatibility
 
 ## Parameter guidance
 

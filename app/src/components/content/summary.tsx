@@ -338,7 +338,7 @@ export const Summary = ({
         {invalidFiles.current.length !== 1 && fileNames && summary && (
           <div
             id="summaryContent"
-            class="oj-panel oj-sm-width-full oj-color-invert oj-sm-padding-4x oj-sm-margin-6x-top"
+            class="oj-panel oj-sm-width-full oj-sm-padding-4x oj-sm-margin-6x-top"
             style="background-color: var(--oj-sp-header-welcome-banner-background-color);"
           >
             <md-wrapper

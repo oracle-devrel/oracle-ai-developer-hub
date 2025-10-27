@@ -77,3 +77,4 @@ build/
 bin/
 dist/
 application-local.yaml
+devrel-writes/oci-genai-jet-ui/medium-article.md

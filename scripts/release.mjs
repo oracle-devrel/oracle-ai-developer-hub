@@ -57,7 +57,7 @@ async function releaseApp() {
   const service = "app";
   await cd(service);
   // Build Oracle JET web assets before building the container image
-  // await $`./node_modules/.bin/ojet build web --release`;
+  await $`./node_modules/.bin/ojet build web --release`;
   const imageName = `${projectName}/${service}`;
   await buildImage(`localhost/${imageName}`, appVersion);
   const localImage = `localhost/${imageName}:${appVersion}`;

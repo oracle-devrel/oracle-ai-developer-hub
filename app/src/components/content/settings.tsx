@@ -20,9 +20,11 @@ type Props = {
   aiServiceType: ServiceTypeVal;
   backendType: BackendTypeVal;
   ragEnabled: boolean;
+  theme: string;
   aiServiceChange: (service: ServiceTypeVal) => void;
   backendChange: (backend: BackendTypeVal) => void;
   ragToggle: (enabled: boolean) => void;
+  themeChange: (theme: string) => void;
   modelIdChange: (modelId: any, modelData: any) => void;
 };
 
@@ -238,6 +240,19 @@ export const Settings = (props: Props) => {
           labelHint="Backend options"
           options={backendOptionsDP}
           onvalueChanged={handleBackendTypeChange}
+        ></oj-c-radioset>
+      </oj-c-form-layout>
+      <h2 class="oj-typography-heading-sm">Theme</h2>
+      <oj-c-form-layout>
+        <oj-c-radioset
+          id="themeRadioset"
+          value={props.theme}
+          labelHint="Theme options"
+          options={new MutableArrayDataProvider([{ value: "light", label: "Light" }, { value: "dark", label: "Dark" }], { keyAttributes: "value" })}
+          onvalueChanged={(event: any) => {
+            if (event.detail.updatedFrom === "internal")
+              props.themeChange(event.detail.value);
+          }}
         ></oj-c-radioset>
       </oj-c-form-layout>
       {props.backendType === "java" && (

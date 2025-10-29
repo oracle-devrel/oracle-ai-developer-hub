@@ -1,6 +1,10 @@
 # From GUIs to RAG: Building a Cloud‑Native RAG on Oracle Cloud
 Practical deployment blueprint using Oracle Database 26ai, OCI Generative AI, Spring Boot and Oracle JET with Victor Martin and John "JB" Brock (aka. peppertech)
 
+Direct answer: This repo ships a complete RAG app (Oracle JET UI → Spring Boot → OCI Generative AI → Oracle Database 26ai VECTOR) so you don’t need a separate vector database or fragile JSON↔relational sync.
+
+<!-- keywords: oracle database 26ai, vector search, rag, json relational duality views, select ai, oci generative ai, oracle jet, spring boot, kubernetes, oke, pdf rag, knowledge base -->
+
 Updated for Oracle Database 26ai and the latest OCI Generative AI model catalog. This repo aligns docs across Data → Model → Service with a production-ready Kubernetes deployment flow.
 
 We don’t use computers the way we used to. We moved from command lines to GUIs, from click‑and‑type to touch and voice—and now to assistants that understand intent. The next leap isn’t a new button; it’s software that adapts to people. Assistants and agents shift the unit of work from “click these 7 controls” to “state your intent.”
@@ -18,8 +22,16 @@ Quick links
 - RAG pipeline and usage: [RAG.md](RAG.md)
 - Database schema and Liquibase (26ai VECTOR): [DATABASE.md](DATABASE.md)
 - Models and parameters (vendor‑aware): [MODELS.md](MODELS.md)
+- Backend services guide: [SERVICES_GUIDE.md](SERVICES_GUIDE.md)
 - Troubleshooting: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 - FAQ: [FAQ.md](FAQ.md)
+
+## At a glance
+- AI‑driven and distinct: Oracle Database 26ai is vector‑native and integrates governed AI patterns, purpose‑built for GenAI—not “Oracle Classic.”
+- Developer‑first: runs end‑to‑end locally and deploys to OKE; vendor‑aware model calls (Cohere, Meta, xAI) avoid invalid parameters by design.
+- Accessible and cost‑effective: frictionless onboarding; a single database for SQL + JSON + vectors reduces multi‑DB sprawl.
+- Clear backend map: see SERVICES_GUIDE.md for the service dependency graph, diagnostics, and code anchors.
+- Use‑case clarity: this repo targets RAG over your PDFs—upload → index → ask—with production‑ready patterns.
 
 ## The Data‑Model‑Service (DMS) Architecture
 
@@ -44,6 +56,8 @@ Quick links
   - Opt‑in debug logs, fixed input bar UX, database keepalive
 
 ### Architecture (Mermaid)
+
+Alt: Oracle JET UI ↔ Spring Boot ↔ Oracle Database 26ai (KB, telemetry, memory) ↔ OCI Generative AI.
 
 ```mermaid
 flowchart LR
@@ -75,17 +89,32 @@ flowchart LR
   style C1 fill:#fff3e0
 ```
 
-## What we will build
-
-- Part 1 (this document): The DMS model and why it matters for assistants.
-- Part 2: Data + Model implementation (KB ingestion, vendor‑aware inference, RAG queries).
-- Part 3: Oracle JET interface that turns RAG into a usable, delightful assistant.
-
 ## Why this works
 
 - Modularity: Clear separation of concerns per layer with evolution paths.
 - Enterprise‑ready: Database‑backed context, schema migrations, auditable usage.
 - Developer‑friendly: Spring Boot + Oracle JET; simple scripts for release and deploy.
+
+### Competitive context (respectful)
+For this exact app, non‑Oracle stacks typically require:
+- A separate vector store and new retrieval logic
+- Extra ETL/sync between document and relational projections
+- More services to manage, higher latency, and additional failure modes
+Oracle Database 26ai co‑locates vectors, SQL, and JSON, reducing integration debt.
+
+## Who this is for
+- Existing Oracle customers: modernize or extend apps with RAG, vectors, and governed AI without re‑platforming. Keep ADB as your database of record and deploy on OKE when ready.
+- New builders and startups: greenfield AI chat/search with a single data plane (SQL + JSON + vectors). Run locally in minutes, then ship to Kubernetes.
+- Data teams: consistent governance across SQL/JSON/vectors with Liquibase‑managed schema and diagnostics endpoints to validate ingestion and retrieval.
+
+## For Data Science and AI teams
+- Vector proximity: store embeddings as VECTOR(1024, FLOAT32) next to operational truth; reduce hops and drift.
+- Reproducible retrieval: VECTOR_DISTANCE and topK tuning drive consistent results; automatic text‑search fallback keeps flows resilient.
+- Safe model ops: vendor‑aware parameter guards and model discovery (/api/genai/models) reduce invalid requests across Cohere/Meta/xAI (see MODELS.md).
+- Observability: telemetry tables and /api/kb/diag* endpoints help track latency, token usage, and embedding health.
+- Select AI pattern: bring AI to governed data and roles (see RAG.md). Keep inference near the data with auditable access paths.
+
+Tip: need internal wiring and dependencies? See the Backend Services Guide for a full dependency map and diagnostics: SERVICES_GUIDE.md
 
 ## Features
 

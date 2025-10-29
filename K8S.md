@@ -1,4 +1,6 @@
-# Cloud‑Native Deployment on OKE: Enterprise RAG Blueprint
+# Deploying RAG Assistants on Kubernetes with Oracle Kubernetes Engine (OKE) and OCI
+
+Deploy Retrieval‑Augmented Generation (RAG) assistants on Kubernetes using Oracle Kubernetes Engine (OKE) and Oracle Cloud Infrastructure (OCI). This guide covers Terraform provisioning, Kustomize overlays, OCI Container Registry (OCIR) image publishing, and secure connectivity to Oracle Autonomous Database for vector‑enabled RAG with OCI Generative AI.
 
 This guide operationalizes the Data → Model → Service (DMS) architecture on Oracle Cloud:
 - Oracle Database 26ai (via Autonomous Database) for durable context, memory, telemetry, and KB for RAG
@@ -6,7 +8,26 @@ This guide operationalizes the Data → Model → Service (DMS) architecture on 
 - Spring Boot backend and Oracle JET web app on OKE (Oracle Container Engine for Kubernetes)
 - Terraform + Kustomize for reproducible environments
 
-![Architecture](./images/architecture.png)
+![RAG on Kubernetes architecture: OKE, Spring Boot, Oracle JET, OCI Generative AI, Oracle Database 26ai](images/architecture.png)
+
+## Table of Contents
+- [Deploying RAG Assistants on Kubernetes with Oracle Kubernetes Engine (OKE) and OCI](#deploying-rag-assistants-on-kubernetes-with-oracle-kubernetes-engine-oke-and-oci)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+  - [Environment setup](#environment-setup)
+    - [Generate environment and tfvars](#generate-environment-and-tfvars)
+  - [Provision OKE (Oracle Kubernetes Engine) and Autonomous Database with Terraform](#provision-oke-oracle-kubernetes-engine-and-autonomous-database-with-terraform)
+  - [Build and publish container images to OCI Container Registry (OCIR)](#build-and-publish-container-images-to-oci-container-registry-ocir)
+  - [Generate and apply Kustomize overlays](#generate-and-apply-kustomize-overlays)
+  - [Deploy to the OKE Kubernetes cluster](#deploy-to-the-oke-kubernetes-cluster)
+  - [Expose and access the application (Kubernetes Ingress on OKE)](#expose-and-access-the-application-kubernetes-ingress-on-oke)
+  - [OCI authentication options on OKE (Workload Identity, Instance Principals)](#oci-authentication-options-on-oke-workload-identity-instance-principals)
+  - [Kubernetes operational guardrails](#kubernetes-operational-guardrails)
+  - [Verification and health checks](#verification-and-health-checks)
+  - [Troubleshooting and FAQ](#troubleshooting-and-faq)
+  - [Cleanup](#cleanup)
+  - [Notes](#notes)
+  - [Keywords](#keywords)
 
 ## Prerequisites
 
@@ -40,7 +61,7 @@ npx zx scripts/tfvars.mjs      # writes deploy/terraform/terraform.tfvars
 
 > Tip: When asked, provide the Compartment where you want to deploy. Root compartment is the default.
 
-## Provision OKE + ADB with Terraform
+## Provision OKE (Oracle Kubernetes Engine) and Autonomous Database with Terraform
 
 ```bash
 cd deploy/terraform
@@ -51,7 +72,7 @@ cd ../..
 
 After apply, a kubeconfig is generated at `deploy/terraform/generated/kubeconfig`.
 
-## Build and publish images to OCIR
+## Build and publish container images to OCI Container Registry (OCIR)
 
 Use the release script to version, build, login, and push images to OCIR:
 
@@ -59,7 +80,7 @@ Use the release script to version, build, login, and push images to OCIR:
 npx zx scripts/release.mjs
 ```
 
-## Generate Kustomize overlays
+## Generate and apply Kustomize overlays
 
 Create kustomization files that reference the newly published images:
 
@@ -68,15 +89,14 @@ npx zx scripts/kustom.mjs
 ```
 
 Overlays are under:
+- [deploy/k8s/backend/](deploy/k8s/backend/)
+- [deploy/k8s/web/](deploy/k8s/web/)
+- [deploy/k8s/ingress/](deploy/k8s/ingress/)
+- [deploy/k8s/overlays/prod/](deploy/k8s/overlays/prod/)
 
-- `deploy/k8s/backend/*`
-- `deploy/k8s/web/*`
-- `deploy/k8s/ingress/*`
-- `deploy/k8s/overlays/prod/*`
+You can inject these via env vars/ConfigMap if preferred. See [DATABASE.md](DATABASE.md) for schema details and [RAG.md](RAG.md) for pipeline endpoints.
 
-You can inject these via env vars/ConfigMap if preferred. See `DATABASE.md` for schema details.
-
-## Deploy to the cluster
+## Deploy to the OKE Kubernetes cluster
 
 Export kubeconfig created by Terraform and apply the Kustomize overlay:
 
@@ -94,7 +114,7 @@ kubectl get deploy -n web
 kubectl get deploy -n ingress-nginx
 ```
 
-## Access the application
+## Expose and access the application (Kubernetes Ingress on OKE)
 
 Fetch the public IP of the LoadBalancer service:
 
@@ -106,13 +126,16 @@ echo $(kubectl get service \
 
 If empty, wait a few minutes and retry; provisioning may take time. Open the IP in your browser to access the web UI.
 
-## OCI authentication options on OKE
+Ingress manifests live under [deploy/k8s/ingress/](deploy/k8s/ingress/). For a custom domain, create a DNS A record pointing to the LoadBalancer IP and, if needed, configure TLS in your Ingress (see ingress manifests for examples).
 
-- Workload Identity (recommended) or Instance Principals for the backend
-- Avoid local file dependencies in cluster
-- Configure `genai.region` and `compartment_id` via environment or application config
+## OCI authentication options on OKE (Workload Identity, Instance Principals)
 
-## Operational guardrails
+- Workload Identity (recommended) or Instance Principals for the backend. See service account and RBAC in [deploy/k8s/backend/service-account.yaml](deploy/k8s/backend/service-account.yaml).
+- Avoid local file dependencies in cluster (use Kubernetes Secrets and ConfigMaps).
+- Configure `genai.region` and `compartment_id` via environment or application config.
+- Push/pull images via OCIR with proper auth; see [scripts/release.mjs](scripts/release.mjs).
+
+## Kubernetes operational guardrails
 
 - Vendor‑aware parameter handling (avoid sending unsupported params to specific models)
 - Telemetry via `interactions` table (latency, tokens, costs) for observability and budgeting
@@ -120,7 +143,7 @@ If empty, wait a few minutes and retry; provisioning may take time. Open the IP 
 - Pod Disruption Budgets for high availability
 - Secrets and ConfigMaps for environment separation and secure configuration
 
-## Verification
+## Verification and health checks
 
 Backend logs and pod status:
 
@@ -137,7 +160,7 @@ SELECT COUNT(*) FROM kb_documents;
 SELECT COUNT(*) FROM interactions;
 ```
 
-Quick API checks:
+Quick API checks (see [RAG.md](RAG.md) for details):
 
 ```bash
 # Models list
@@ -150,7 +173,7 @@ curl -X POST http://localhost:8080/api/genai/rag \
   -d '{"question":"What does section 2 cover?","modelId":"ocid1.generativeaimodel.oc1...."}'
 ```
 
-## Troubleshooting
+## Troubleshooting and FAQ
 
 - Wallet path or `TNS_ADMIN` mismatch → backend fails to connect; verify secret mount and JDBC URL path.
 - Invalid model parameters → see `MODELS.md` for vendor-specific constraints; the backend adapts where possible.
@@ -180,14 +203,10 @@ Clean up build artifacts in Object Storage:
 npx zx scripts/clean.mjs
 ```
 
-## LLM‑friendly documentation patterns
-
-- JSON‑first configuration and payload examples
-- Q&A pairs to validate RAG behavior
-- Mermaid diagrams (see README) for architecture and flows
-- Numbered procedures with clear prerequisites and outputs
-
 ## Notes
 
 - This blueprint targets Oracle Database 26ai features through ADB for vector‑ready, assistant‑grade persistence.
-- See `DATABASE.md` for Liquibase migrations and table layouts, `RAG.md` for RAG pipeline usage, and `README.md` for the broader “From GUIs to RAG” story.
+- See [DATABASE.md](DATABASE.md) for Liquibase migrations and table layouts, [RAG.md](RAG.md) for RAG pipeline usage, and [README.md](README.md) for the broader “From GUIs to RAG” story.
+
+## Keywords
+Kubernetes, Oracle Kubernetes Engine, OKE, Oracle Cloud Infrastructure, OCI, OCI Generative AI, Autonomous Database, Oracle Database 26ai, RAG, Retrieval‑Augmented Generation, Terraform on OCI, Kustomize, Kubernetes Ingress, OCIR, Oracle JET, Spring Boot on Kubernetes, vector search, embeddings, ANN index, Workload Identity, Instance Principals

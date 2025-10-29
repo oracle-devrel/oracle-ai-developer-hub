@@ -51,7 +51,7 @@ Why it helps:
 
 Why it helps:
 - Structured storage of document chunks for retrieval
-- Oracle 23ai VECTOR support for embeddings and ANN search (HNSW/IVF)
+- Oracle Database 26ai VECTOR support for embeddings and ANN search (HNSW/IVF)
 - KB supports accurate and explainable RAG pipelines
 
 ## ADB Connection (JDBC + Wallet)
@@ -132,9 +132,23 @@ Connect with SQL Developer Web or SQL*Plus and run:
 SELECT COUNT(*) FROM conversations;
 SELECT COUNT(*) FROM kb_documents;
 
--- Check vector index exists (23ai):
+-- Check vector index exists (26ai):
 SELECT index_name FROM user_indexes WHERE index_name = 'KB_VEC_IDX';
+
+-- Optional: quick vector distance sanity check (requires embeddings)
+-- Replace :tenant with your tenant; the vector literal below is illustrative only
+SELECT c.id, VECTOR_DISTANCE(e.embedding, VECTOR('[0,0,0]')) AS dist
+FROM kb_chunks c
+JOIN kb_embeddings e ON e.chunk_id = c.id
+WHERE c.tenant_id = 'default'
+ORDER BY dist
+FETCH FIRST 5 ROWS ONLY;
 ```
+
+Quick REST diagnostics:
+- GET /api/kb/diag?tenantId=default
+- GET /api/kb/diag/schema
+- GET /api/kb/diag/embed?text=test
 
 ## Troubleshooting
 
@@ -143,7 +157,7 @@ SELECT index_name FROM user_indexes WHERE index_name = 'KB_VEC_IDX';
 - UnknownHost / DB connection:
   - Verify tnsnames.ora service name matches URL, and TNS_ADMIN points to wallet directory.
 - Vector index creation:
-  - The script tries multiple syntaxes (HNSW/IVF). If none work (older DB), embeddings still persist, but ANN search is disabled until supported.
+  - The script tries multiple syntaxes (HNSW/IVF). If none work (older DB version), embeddings still persist, but ANN search is disabled until supported.
 
 ## Additional notes
 

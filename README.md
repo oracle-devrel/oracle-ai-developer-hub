@@ -1,6 +1,8 @@
 # From GUIs to RAG: Building a Cloud‑Native RAG on Oracle Cloud
 Practical deployment blueprint using Oracle Database 26ai, OCI Generative AI, Spring Boot and Oracle JET with Victor Martin and John "JB" Brock (aka. peppertech)
 
+Updated for Oracle Database 26ai and the latest OCI Generative AI model catalog. This repo aligns docs across Data → Model → Service with a production-ready Kubernetes deployment flow.
+
 We don’t use computers the way we used to. We moved from command lines to GUIs, from click‑and‑type to touch and voice—and now to assistants that understand intent. The next leap isn’t a new button; it’s software that adapts to people. Assistants and agents shift the unit of work from “click these 7 controls” to “state your intent.”
 
 Shipping that shift in the enterprise takes more than calling an LLM API. It requires architecture, guardrails, and production‑ready foundations: durable context, observability, safe parameters, and a UI people trust. A decade of shipping software taught a simple lesson: people don’t want more features; they want more understanding. Assistants are how we ship understanding.
@@ -14,8 +16,8 @@ Quick links
 - Frontend deep dive (Oracle JET): [JET.md](JET.md)
 - Cloud‑native deployment (OKE, Terraform, Kustomize): [K8S.md](K8S.md)
 - RAG pipeline and usage: [RAG.md](RAG.md)
-- Database schema and Liquibase: [DATABASE.md](DATABASE.md)
-- Models and parameters: [MODELS.md](MODELS.md)
+- Database schema and Liquibase (26ai VECTOR): [DATABASE.md](DATABASE.md)
+- Models and parameters (vendor‑aware): [MODELS.md](MODELS.md)
 - Troubleshooting: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 - FAQ: [FAQ.md](FAQ.md)
 
@@ -45,26 +47,32 @@ Quick links
 
 ```mermaid
 flowchart LR
-  subgraph Web UI (Oracle JET)
-    A[Chat / Upload / Settings]
+  subgraph "Web UI<br/>(Oracle JET)"
+    A["Chat / Upload<br/>Settings"]
   end
-  subgraph Service (Spring Boot)
-    B1[Controllers: GenAI, Upload/PDF, Models, Summary]
-    B2[Services: OCIGenAI, RagService, GenAIModelsService]
-    B3[Liquibase Migrations]
+  subgraph "Service<br/>(Spring Boot)"
+    B1["Controllers:<br/>GenAI, Upload, Models"]
+    B2["Services:<br/>OCIGenAI, Rag, Models"]
+    B3["Liquibase<br/>Migrations"]
   end
-  subgraph Data (Oracle Database 26ai via ADB)
-    D1[(Conversations / Messages / Memory)]
-    D2[(Telemetry: interactions)]
-    D3[(KB Tables for RAG)]
+  subgraph "Data<br/>(Oracle DB 26ai via ADB)"
+    D1["Conversations / Messages<br/>Memory"]
+    D2["Telemetry:<br/>interactions"]
+    D3["KB Tables<br/>for RAG"]
   end
-  subgraph Models (OCI Generative AI)
-    C1[Cohere / Meta / xAI via Inference]
+  subgraph "Models<br/>(OCI GenAI)"
+    C1["Cohere / Meta / xAI<br/>via Inference"]
   end
-  A <-- REST & WebSocket --> B1 --> B2
-  B2 <---> D1 & D3
-  B2 --> C1
+  A <-->|"REST & WebSocket"| B1
+  B1 --> B2
+  B2 <--> D1
+  B2 <--> D3
+  B2 <--> C1
   B2 --> D2
+  style A fill:#e1f5fe
+  style B2 fill:#f3e5f5
+  style D1 fill:#e8f5e8
+  style C1 fill:#fff3e0
 ```
 
 ## What we will build
@@ -94,6 +102,7 @@ Prerequisites
 - Node.js 18+
 - OCI credentials with access to Generative AI (e.g., ~/.oci/config)
 - Oracle ADB wallet (downloaded and unzipped)
+- An OCI compartment with access to Cohere / Meta / xAI chat and an embedding model (1024‑dim recommended)
 
 1) Configure backend in backend/src/main/resources/application.yaml
 ```yaml
@@ -148,19 +157,26 @@ curl -X POST http://localhost:8080/api/genai/rag \
   -d '{"question":"What does section 2 cover?","modelId":"ocid1.generativeaimodel.oc1...."}'
 ```
 
+- Quick diagnostics (REST)
+  - GET http://localhost:8080/api/kb/diag?tenantId=default
+  - GET http://localhost:8080/api/kb/diag/schema
+  - GET http://localhost:8080/api/kb/diag/embed?text=test
+
 ## Production deploy on OKE (overview)
 
-- Provision OKE + ADB with Terraform.
-- Build/push images to OCIR using scripts/release.mjs.
-- Generate Kustomize overlays with scripts/kustom.mjs.
-- Create an ADB wallet secret; mount and set TNS_ADMIN in backend.
-- Apply deploy/k8s/overlays/prod.
+- Provision OKE + ADB with Terraform (deploy/terraform).
+- Build/push images to OCIR using scripts/release.mjs (tags include git sha).
+- Generate Kustomize overlays with scripts/kustom.mjs (env‑specific config).
+- Create an ADB wallet secret; mount and set TNS_ADMIN in backend (see DATABASE.md).
+- Apply deploy/k8s/overlays/prod and verify ingress endpoint.
 - Full guide: [K8S.md](K8S.md)
 
 ## LLM optimization patterns
 
 - JSON‑first examples:
   {"compartment_id":"ocid1.compartment.oc1..example","model_id":"cohere.command-r-plus"}
+- Prefer topP to topK for broader vendor compatibility; avoid presencePenalty for Grok
+- Use temperature ≈0.0 for summarization, ≈0.5 for chat; adjust maxTokens for cost control
 
 - Q&A pairs:
   Q: How to parse data? A: Use the backend’s PDF endpoint to extract and chunk, then persist to KB tables.

@@ -1,6 +1,6 @@
 # RAG (Retrieval-Augmented Generation) Guide
 
-This app supports Retrieval-Augmented Generation over your own PDFs. You upload documents, the backend indexes them into Oracle ADB (via Liquibase KB tables), and questions are answered by augmenting prompts with retrieved content.
+This app supports Retrieval-Augmented Generation over your own PDFs. You upload documents; the backend indexes them into Oracle Database 26ai (ADB) via Liquibase-managed KB tables. Questions are answered by grounding prompts with retrieved content using embeddings stored as VECTOR(1024, FLOAT32).
 
 ## How it works (high level)
 
@@ -39,17 +39,18 @@ curl -X POST http://localhost:8080/api/genai/rag \
 
 Notes:
 - Use GET /api/genai/models to list supported models in your compartment and pick a modelId.
-- The backend adapts parameters per vendor to avoid invalid-argument errors (e.g., presencePenalty is not sent to xAI Grok).
+- Vendor-aware parameters: for xAI Grok the backend omits presencePenalty, frequencyPenalty, and topK to avoid 400 errors; see MODELS.md for full guidance.
 
 ## UI flow
 
 - Open the web UI.
-- Use the upload panel to upload PDFs.
-- In Chat, select a model and ask questions; the backend will use your KB to enhance prompts.
+- Use the Upload panel to upload PDFs.
+- In Settings, enable "Use RAG" and set Tenant (default is "default").
+- In Chat, select a chat model and ask questions; the backend will use your KB to enhance prompts.
 
 ## Where data is stored
 
-- Liquibase migrations create core tables (conversations, messages, memory, telemetry) and KB tables for RAG.
+- Liquibase migrations create core tables (conversations, messages, memory, telemetry) and KB tables for RAG, including embeddings stored as VECTOR(1024, FLOAT32) with an ANN index where supported.
 - See DATABASE.md for the exact schema overview and Liquibase details.
 
 ## Tips
@@ -57,6 +58,7 @@ Notes:
 - Large PDFs: ingestion can take longer; watch backend logs.
 - Models: if you see 400 invalid parameter errors, switch to another model or vendor. The backend already omits unsupported parameters for xAI Grok.
 - Validation: after uploading, ask targeted questions about the document content to verify KB ingestion.
+- Tenant alignment: ensure the same tenant is used for both upload and chat queries; mismatch results in empty retrievals.
 
 ## End-to-end flow (detailed)
 
@@ -79,6 +81,7 @@ Notes:
 
 ## API quick reference
 
+- `GET /api/genai/models` — list available chat and embedding models in your compartment
 - `POST /api/upload` (multipart)
   - form-data: `file=@...`
   - headers:

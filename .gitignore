@@ -81,3 +81,4 @@ build/
 bin/
 dist/
 application-local.yaml
+/writeup

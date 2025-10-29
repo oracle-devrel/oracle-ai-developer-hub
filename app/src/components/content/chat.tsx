@@ -13,7 +13,7 @@ type Props = {
   testId?: string;
   data: any;
   questionChanged: (event: any) => void;
-  question: MutableRef<string | undefined>;
+  question: string;
   settingsOpened: boolean;
 };
 
@@ -89,7 +89,7 @@ export const Chat = ({ testId, data, questionChanged, question, settingsOpened }
         <oj-input-search
           id="search1"
           class="oj-input-search-hero oj-sm-width-3"
-          value={question?.current}
+          value={question}
           placeholder="ask me anything..."
           aria-label="enter a question"
           onojValueAction={questionChanged}

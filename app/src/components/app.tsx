@@ -16,16 +16,10 @@ export const ConvoCtx = createContext("");
 export const App = registerCustomElement("app-root", (props: Props) => {
   props.appName = "Generative AI JET UI";
   const [settingsOpened, setSettingsOpened] = useState<boolean>(false);
-  const [theme, setTheme] = useState<string>(localStorage.getItem("theme") || "light");
 
   const toggleDrawer = () => {
     setSettingsOpened(!settingsOpened);
   };
-
-  useEffect(() => {
-    document.body.className = theme;
-    localStorage.setItem("theme", theme);
-  }, [theme]);
 
   // DB connectivity ping + keepalive (quiet success; info on first success/recovery; warn on failure)
   useEffect(() => {
@@ -76,7 +70,7 @@ export const App = registerCustomElement("app-root", (props: Props) => {
       <ConvoCtx.Provider value={convoUUID[0].toString()}>
         {debugLog("UUID:", convoUUID[0].toString())}
         <Header appName={props.appName} onToggleDrawer={toggleDrawer} />
-        <Content settingsOpened={settingsOpened} setSettingsOpened={setSettingsOpened} theme={theme} setTheme={setTheme} />
+        <Content settingsOpened={settingsOpened} setSettingsOpened={setSettingsOpened} />
       </ConvoCtx.Provider>
     </div>
   );

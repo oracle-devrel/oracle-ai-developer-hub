@@ -1,6 +1,5 @@
 import { Chat } from "./chat";
 import { Summary } from "./summary";
-import { Simulation } from "./simulation";
 import { Settings } from "./settings";
 import { Upload } from "./upload";
 import "preact";
@@ -11,14 +10,13 @@ import MutableArrayDataProvider = require("ojs/ojmutablearraydataprovider");
 import { MessageToastItem } from "oj-c/message-toast";
 import { InputSearchElement } from "ojs/ojinputsearch";
 import { useState, useEffect, useRef, useContext } from "preact/hooks";
-import * as Questions from "text!./data/questions.json";
-import * as Answers from "text!./data/answers.json";
+
 import { initWebSocket } from "./websocket-interface";
 import { InitStomp, sendPrompt } from "./stomp-interface";
 import { Client } from "@stomp/stompjs";
 import { ConvoCtx } from "../app";
 
-type ServiceTypes = "text" | "summary" | "sim" | "upload";
+type ServiceTypes = "text" | "summary" | "upload";
 type BackendTypes = "java" | "python";
 type Chat = {
   id?: number;
@@ -36,16 +34,12 @@ type Model = {
 };
 
 const defaultServiceType: string = localStorage.getItem("service") || "text";
-const defaultBackendType: string = localStorage.getItem("backend") || "java";
-
 type ContentProps = {
   settingsOpened: boolean;
   setSettingsOpened: (opened: boolean) => void;
-  theme: string;
-  setTheme: (theme: string) => void;
 };
 
-const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: ContentProps) => {
+const Content = ({ settingsOpened, setSettingsOpened }: ContentProps) => {
   const conversationId = useContext(ConvoCtx);
   const [update, setUpdate] = useState<Array<object>>([]);
   const [busy, setBusy] = useState<boolean>(false);
@@ -55,11 +49,9 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
   const [serviceType, setServiceType] = useState<ServiceTypes>(
     defaultServiceType as ServiceTypes
   );
-  const [backendType, setBackendType] = useState<BackendTypes>(
-    defaultBackendType as BackendTypes
-  );
+  const backendType: BackendTypes = "java";
   const [ragEnabled, setRagEnabled] = useState<boolean>(false);
-  const question = useRef<string>();
+  const [question, setQuestion] = useState<string>("");
   const chatData = useRef<Array<object>>([]);
   const socket = useRef<WebSocket>();
   const finetune = useRef<boolean>(false);
@@ -72,69 +64,20 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
     )
   );
 
-  // Simulation code
-  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-  const runSimulation = async () => {
-    let Q = true;
-    let x: number = 0;
-    let y: number = 0;
-    let tempArray: Array<Chat> = [];
-    for (let index = 0; index < 8; index++) {
-      if (Q) {
-        if (x > 0) tempArray.pop();
-        tempArray.push({ question: JSON.parse(Questions)[x] });
-        Q = false;
-        x++;
-      } else {
-        tempArray.push({ answer: JSON.parse(Answers)[y] });
-        if (y < JSON.parse(Answers).length - 1)
-          tempArray.push({ loading: "loading" });
-        Q = true;
-        y++;
-      }
-      setUpdate([...tempArray]);
-      await sleep(2000);
-    }
-  };
+
 
   useEffect(() => {
     switch (serviceType) {
       case "text":
-        if (backendType === "python") {
-          initWebSocket(
-            setSummaryResults,
-            setBusy,
-            setUpdate,
-            messagesDP,
-            socket,
-            chatData
-          );
-        } else {
-          setClient(
-            InitStomp(setBusy, setUpdate, messagesDP, chatData, serviceType)
-          );
-        }
+        setClient(
+          InitStomp(setBusy, setUpdate, messagesDP, chatData, serviceType)
+        );
         console.log("Running Generative service");
         return;
-      case "sim":
-        runSimulation();
-        console.log("Running simulation");
-        return;
       case "summary":
-        if (backendType === "python") {
-          initWebSocket(
-            setSummaryResults,
-            setBusy,
-            setUpdate,
-            messagesDP,
-            socket,
-            chatData
-          );
-        } else {
-          setClient(
-            InitStomp(setBusy, setUpdate, messagesDP, chatData, serviceType)
-          );
-        }
+        setClient(
+          InitStomp(setBusy, setUpdate, messagesDP, chatData, serviceType)
+        );
         console.log("Running Summarization service");
         return;
     }
@@ -160,11 +103,11 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
       return;
     }
     if (event.detail.value) {
-      question.current = event.detail.value;
+      setQuestion(event.detail.value);
       let tempArray = [...chatData.current];
       tempArray.push({
         id: tempArray.length as number,
-        question: question.current,
+        question: question,
       });
       chatData.current = tempArray;
       setUpdate(chatData.current);
@@ -179,62 +122,56 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
       setUpdate(chatData.current);
       setBusy(true);
 
-      if (backendType === "python") {
-        socket.current?.send(
-          JSON.stringify({ msgType: "question", data: question.current, modelId: modelId })
-        );
-      } else {
-        if (ragEnabled) {
-          // Use RAG endpoint for Java backend when RAG is enabled
-          fetch("/api/genai/rag", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              question: question.current,
-              tenantId: "default"
-            }),
-          })
-            .then((response) => response.text())
-            .then((answer) => {
-              let tempArray = [...chatData.current];
-              // Remove loading indicator
-              tempArray.pop();
-              // Add the answer
-              tempArray.push({
-                id: tempArray.length as number,
-                answer: answer,
-              });
-              chatData.current = tempArray;
-              setUpdate(chatData.current);
-              setBusy(false);
-            })
-            .catch((error) => {
-              console.error("RAG request failed:", error);
-              let tempArray = [...chatData.current];
-              tempArray.pop(); // Remove loading
-              tempArray.push({
-                id: tempArray.length as number,
-                answer: "Sorry, I encountered an error while processing your question with RAG.",
-              });
-              chatData.current = tempArray;
-              setUpdate(chatData.current);
-              setBusy(false);
+      if (ragEnabled) {
+        // Use RAG endpoint for Java backend when RAG is enabled
+        fetch("/api/genai/rag", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: question,
+            tenantId: "default"
+          }),
+        })
+          .then((response) => response.text())
+          .then((answer) => {
+            let tempArray = [...chatData.current];
+            // Remove loading indicator
+            tempArray.pop();
+            // Add the answer
+            tempArray.push({
+              id: tempArray.length as number,
+              answer: answer,
             });
-        } else {
-          sendPrompt(
-            client,
-            question.current!,
-            modelId!,
-            conversationId!,
-            finetune.current
-          );
-        }
+            chatData.current = tempArray;
+            setUpdate(chatData.current);
+            setBusy(false);
+          })
+          .catch((error) => {
+            console.error("RAG request failed:", error);
+            let tempArray = [...chatData.current];
+            tempArray.pop(); // Remove loading
+            tempArray.push({
+              id: tempArray.length as number,
+              answer: "Sorry, I encountered an error while processing your question with RAG.",
+            });
+            chatData.current = tempArray;
+            setUpdate(chatData.current);
+            setBusy(false);
+          });
+      } else {
+        sendPrompt(
+          client,
+          question,
+          modelId!,
+          conversationId!,
+          finetune.current
+        );
       }
 
       // Clear the input field after question is published
-      question.current = "";
+      setQuestion("");
     }
   };
 
@@ -258,13 +195,7 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
     chatData.current = [];
     setServiceType(service);
   };
-  const backendTypeChangeHandler = (backend: BackendTypes) => {
-    setUpdate([]);
-    chatData.current = [];
-    setBackendType(backend);
-    localStorage.setItem("backend", backend);
-    location.reload();
-  };
+
   const modelIdChangeHandler = (value: string, modelType: boolean) => {
     if (value != null) setModelId(value);
     finetune.current = modelType;
@@ -292,11 +223,8 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
           aiServiceType={serviceType}
           backendType={backendType}
           ragEnabled={ragEnabled}
-          theme={theme}
           aiServiceChange={serviceTypeChangeHandler}
-          backendChange={backendTypeChangeHandler}
           ragToggle={setRagEnabled}
-          themeChange={setTheme}
           modelIdChange={modelIdChangeHandler}
         />
       </oj-c-drawer-popup>
@@ -315,13 +243,7 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
           settingsOpened={settingsOpened}
         />
       )}
-      {serviceType === "sim" && (
-        <Simulation
-          data={update}
-          question={question}
-          questionChanged={handleQuestionChange}
-        />
-      )}
+
       {serviceType === "summary" && (
         <Summary
           fileChanged={handleFileUpload}

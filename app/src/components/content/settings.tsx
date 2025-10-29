@@ -10,7 +10,7 @@ import "oj-c/button";
 import MutableArrayDataProvider = require("ojs/ojmutablearraydataprovider");
 import { ojSelectSingle } from "@oracle/oraclejet/ojselectsingle";
 
-type ServiceTypeVal = "text" | "summary" | "sim" | "upload";
+type ServiceTypeVal = "text" | "summary" | "upload";
 type BackendTypeVal = "java" | "python";
 type Services = {
   label: string;
@@ -20,11 +20,8 @@ type Props = {
   aiServiceType: ServiceTypeVal;
   backendType: BackendTypeVal;
   ragEnabled: boolean;
-  theme: string;
   aiServiceChange: (service: ServiceTypeVal) => void;
-  backendChange: (backend: BackendTypeVal) => void;
   ragToggle: (enabled: boolean) => void;
-  themeChange: (theme: string) => void;
   modelIdChange: (modelId: any, modelData: any) => void;
 };
 
@@ -70,10 +67,7 @@ export const Settings = (props: Props) => {
     if (event.detail.updatedFrom === "internal")
       props.aiServiceChange(event.detail.value);
   };
-  const handleBackendTypeChange = (event: any) => {
-    if (event.detail.updatedFrom === "internal")
-      props.backendChange(event.detail.value);
-  };
+
 
   const modelDP = useRef(
     new MutableArrayDataProvider<string, {}>([], {
@@ -85,24 +79,8 @@ export const Settings = (props: Props) => {
   const fetchModels = async (retries = 3) => {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        const isHttps = window.location.protocol === "https:";
-        const pythonUrl = `${isHttps ? "https://" : "http://"}${window.location.hostname}:1987/models`;
-        const primaryUrl =
-          props.backendType === "python" && !isHttps ? pythonUrl : "/api/genai/models";
-
-        let response: Response;
-        try {
-          response = await fetch(primaryUrl);
-          if (!response.ok) throw new Error(`Response status: ${response.status}`);
-        } catch (e) {
-          // Fallback: if Python endpoint refused or blocked (mixed content), use Java endpoint
-          if (primaryUrl !== "/api/genai/models") {
-            response = await fetch("/api/genai/models");
-            if (!response.ok) throw new Error(`Response status: ${response.status}`);
-          } else {
-            throw e;
-          }
-        }
+        const response = await fetch("/api/genai/models");
+        if (!response.ok) throw new Error(`Response status: ${response.status}`);
         const json = await response.json();
         const result = json.filter((model: Model) => {
           if (
@@ -115,7 +93,7 @@ export const Settings = (props: Props) => {
         setErrorMessage(null);
         return; // Success, exit function
       } catch (error: any) {
-        console.error(`Model fetch attempt ${attempt} failed (${props.backendType}): `, error.message);
+        console.error(`Model fetch attempt ${attempt} failed: `, error.message);
         if (attempt === retries) {
           // All retries failed
           modelDP.current.data = []; // Clear models on error
@@ -151,10 +129,7 @@ export const Settings = (props: Props) => {
     fetchModels();
   }, []);
 
-  // Re-fetch models when backend selection changes so Python uses OCI directly
-  useEffect(() => {
-    fetchModels();
-  }, [props.backendType]);
+
 
   const modelChangeHandler = async (
     event: ojSelectSingle.valueChanged<string, {}>
@@ -232,50 +207,27 @@ export const Settings = (props: Props) => {
           onvalueChanged={handleServiceTypeChange}
         ></oj-c-radioset>
       </oj-c-form-layout>
-      <h2 class="oj-typography-heading-sm">Backend service types</h2>
-      <oj-c-form-layout>
-        <oj-c-radioset
-          id="backendTypeRadioset"
-          value={props.backendType}
-          labelHint="Backend options"
-          options={backendOptionsDP}
-          onvalueChanged={handleBackendTypeChange}
-        ></oj-c-radioset>
-      </oj-c-form-layout>
-      <h2 class="oj-typography-heading-sm">Theme</h2>
-      <oj-c-form-layout>
-        <oj-c-radioset
-          id="themeRadioset"
-          value={props.theme}
-          labelHint="Theme options"
-          options={new MutableArrayDataProvider([{ value: "light", label: "Light" }, { value: "dark", label: "Dark" }], { keyAttributes: "value" })}
-          onvalueChanged={(event: any) => {
-            if (event.detail.updatedFrom === "internal")
-              props.themeChange(event.detail.value);
-          }}
-        ></oj-c-radioset>
-      </oj-c-form-layout>
-      {props.backendType === "java" && (
-        <>
-          <h2 class="oj-typography-heading-sm">RAG Options</h2>
-          <oj-c-form-layout>
-            <oj-switch
-              id="ragSwitch"
-              value={props.ragEnabled}
-              labelHint="Enable Retrieval-Augmented Generation (RAG)"
-              onvalueChanged={(event: any) => {
-                if (event.detail.updatedFrom === "internal") {
-                  props.ragToggle(event.detail.value);
-                }
-              }}
-            ></oj-switch>
-          </oj-c-form-layout>
-          <oj-c-form-layout>
-            <oj-c-button label="Check RAG status" onojAction={runDiag}></oj-c-button>
-          </oj-c-form-layout>
-        </>
-      )}
-      {props.aiServiceType == "text" && (props.backendType == "java" || props.backendType == "python") && (
+
+
+      <>
+        <h2 class="oj-typography-heading-sm">RAG Options</h2>
+        <oj-c-form-layout>
+          <oj-switch
+            id="ragSwitch"
+            value={props.ragEnabled}
+            labelHint="Enable Retrieval-Augmented Generation (RAG)"
+            onvalueChanged={(event: any) => {
+              if (event.detail.updatedFrom === "internal") {
+                props.ragToggle(event.detail.value);
+              }
+            }}
+          ></oj-switch>
+        </oj-c-form-layout>
+        <oj-c-form-layout>
+          <oj-c-button label="Check RAG status" onojAction={runDiag}></oj-c-button>
+        </oj-c-form-layout>
+      </>
+      {props.aiServiceType == "text" && (
         <>
           <h2 class="oj-typography-heading-sm">Model options</h2>
           <oj-c-form-layout>

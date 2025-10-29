@@ -18,58 +18,6 @@
   --chat-question-bg: rgb(241, 245, 249);
 }
 
-body.dark {
-  --oj-body-bg-color: rgb(31, 31, 31);
-  --chat-answer-bg: rgb(45, 45, 45);
-  --chat-question-bg: rgb(55, 55, 55);
-  --oj-sp-header-welcome-banner-background-color: rgb(45, 45, 45) !important;
-  --oj-sp-header-welcome-banner-background-color-darker-shade: rgb(55, 55, 55) !important;
-}
-
-body.dark header.oj-web-applayout-header {
-  background-color: #1a1a1a;
-}
-
-body.dark .demo-header {
-  background-color: rgb(45, 31, 18) !important;
-}
-
-body.dark .demo-answer-layout,
-body.dark .demo-question-layout {
-  border-color: #555;
-  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
-}
-
-/* Oracle JET component theming for dark mode */
-body.dark oj-c-radioset,
-body.dark oj-c-select-single,
-body.dark oj-c-button,
-body.dark oj-c-input-text,
-body.dark oj-c-file-picker,
-body.dark oj-switch {
-  --oj-c-button-bg-color: rgb(55, 55, 55);
-  --oj-c-button-border-color: #555;
-  --oj-c-button-text-color: #ffffff;
-}
-
-body.dark oj-c-radioset::part(label),
-body.dark oj-c-select-single::part(label),
-body.dark oj-c-input-text::part(label) {
-  color: #ffffff;
-}
-
-body.dark .oj-typography-heading-sm,
-body.dark .oj-typography-body-md,
-body.dark .oj-typography-body-sm,
-body.dark .oj-text-color-primary,
-body.dark .oj-text-color-secondary {
-  color: #ffffff !important;
-}
-
-body.dark {
-  color: #ffffff;
-}
-
 body {
   /* background-color: #4b3b2b; */
   --oj-current-bg-color: var(--oj-body-bg-color);
@@ -245,10 +193,7 @@ oj-sample-markdown-viewer .legacyStyling li code {
   z-index: 900;
 }
 
-body.dark .chat-input-bar {
-  background-color: rgb(31, 31, 31);
-  border-top: 1px solid #555;
-}
+
 
 .demo-no-data-layout {
   height: 100%;

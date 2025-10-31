@@ -3,6 +3,7 @@
 Deploy Retrieval‑Augmented Generation (RAG) assistants on Kubernetes using Oracle Kubernetes Engine (OKE) and Oracle Cloud Infrastructure (OCI). This guide covers Terraform provisioning, Kustomize overlays, OCI Container Registry (OCIR) image publishing, and secure connectivity to Oracle Autonomous Database for vector‑enabled RAG with OCI Generative AI.
 
 This guide operationalizes the Data → Model → Service (DMS) architecture on Oracle Cloud:
+
 - Oracle Database 26ai (via Autonomous Database) for durable context, memory, telemetry, and KB for RAG
 - OCI Generative AI for model inference (Cohere, Meta, xAI via Inference)
 - Spring Boot backend and Oracle JET web app on OKE (Oracle Container Engine for Kubernetes)
@@ -11,6 +12,7 @@ This guide operationalizes the Data → Model → Service (DMS) architecture on 
 ![RAG on Kubernetes architecture: OKE, Spring Boot, Oracle JET, OCI Generative AI, Oracle Database 26ai](images/architecture.png)
 
 ## Table of Contents
+
 - [Deploying RAG Assistants on Kubernetes with Oracle Kubernetes Engine (OKE) and OCI](#deploying-rag-assistants-on-kubernetes-with-oracle-kubernetes-engine-oke-and-oci)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
@@ -38,6 +40,7 @@ This guide operationalizes the Data → Model → Service (DMS) architecture on 
 - OCI credentials available for image push and Generative AI access
 
 Helpful docs:
+
 - OKE: https://docs.oracle.com/en-us/iaas/Content/ContEng/Concepts/contengoverview.htm
 - Autonomous Database: https://docs.oracle.com/en/database/autonomous-database-cloud-services.html
 
@@ -89,6 +92,7 @@ npx zx scripts/kustom.mjs
 ```
 
 Overlays are under:
+
 - [deploy/k8s/backend/](deploy/k8s/backend/)
 - [deploy/k8s/web/](deploy/k8s/web/)
 - [deploy/k8s/ingress/](deploy/k8s/ingress/)
@@ -110,8 +114,6 @@ Check deployments and wait until `READY` equals desired replicas:
 
 ```bash
 kubectl get deploy -n backend
-kubectl get deploy -n web
-kubectl get deploy -n ingress-nginx
 ```
 
 ## Expose and access the application (Kubernetes Ingress on OKE)
@@ -209,4 +211,5 @@ npx zx scripts/clean.mjs
 - See [DATABASE.md](DATABASE.md) for Liquibase migrations and table layouts, [RAG.md](RAG.md) for RAG pipeline usage, and [README.md](README.md) for the broader “From GUIs to RAG” story.
 
 ## Keywords
+
 Kubernetes, Oracle Kubernetes Engine, OKE, Oracle Cloud Infrastructure, OCI, OCI Generative AI, Autonomous Database, Oracle Database 26ai, RAG, Retrieval‑Augmented Generation, Terraform on OCI, Kustomize, Kubernetes Ingress, OCIR, Oracle JET, Spring Boot on Kubernetes, vector search, embeddings, ANN index, Workload Identity, Instance Principals

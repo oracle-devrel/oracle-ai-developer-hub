@@ -73,7 +73,7 @@ async function releaseBackend() {
   await buildJarGradle();
   const currentVersion = await getVersionGradle();
   const imageName = `${projectName}/${service}`;
-  await buildImage(`localhost/${imageName}`, currentVersion);
+  await buildImage(`localhost/${imageName}`, currentVersion, false);
   const localImage = `localhost/${imageName}:${currentVersion}`;
   const remoteImage = `${ocirUrl}/${namespace}/${imageName}:${currentVersion}`;
   await tagImage(localImage, remoteImage);

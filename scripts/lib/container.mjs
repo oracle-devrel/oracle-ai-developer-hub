@@ -64,10 +64,16 @@ export async function pushImage(remote) {
   }
 }
 
-export async function buildImage(name, version) {
-  console.log(`${ce} build --network=host --platform linux/amd64 . -t ${name}:${version}`);
+export async function buildImage(name, version, usePlatformFlag = true) {
+  const platformArg = usePlatformFlag ? "--platform linux/amd64" : "";
+  const buildCmd = `${ce} build --network=host ${platformArg} . -t ${name}:${version}`.trim().replace(/\s+/g, ' ');
+  console.log(buildCmd);
   try {
-    await $`${ce} build --network=host --platform linux/amd64 . -t ${name}:${version}`;
+    if (usePlatformFlag) {
+      await $`${ce} build --network=host --platform linux/amd64 . -t ${name}:${version}`;
+    } else {
+      await $`${ce} build --network=host . -t ${name}:${version}`;
+    }
   } catch (error) {
     exitWithError(error.stderr);
   }

@@ -16,8 +16,15 @@ type Props = {
   sim: boolean;
 };
 
+const enhanceCitations = (text: string) => {
+  return text.replace(/\[(\d+)\]/g, (match, num) => {
+    return `<a href="#" onclick="alert('Citation ${num}: Source details not available yet.'); return false;" style="color: blue; text-decoration: underline;">${match}</a>`;
+  });
+};
+
 export const Answer = ({ item, sim }: Props) => {
-  const answer = item.data.answer;
+  const originalAnswer = item.data.answer;
+  const enhancedAnswer = enhanceCitations(originalAnswer);
   return (
     <>
       {sim && (
@@ -27,7 +34,7 @@ export const Answer = ({ item, sim }: Props) => {
               <md-wrapper
                 id="TestingOne"
                 class="oj-sm-width-full"
-                markdown={answer}
+                markdown={enhancedAnswer}
               />
             </div>
             <div class="oj-flex-bar-end">
@@ -48,7 +55,7 @@ export const Answer = ({ item, sim }: Props) => {
               <md-wrapper
                 id="TestingOne"
                 class="oj-sm-12"
-                markdown={answer}
+                markdown={enhancedAnswer}
               />
             </div>
             {/* <div class="oj-flex-bar-end">

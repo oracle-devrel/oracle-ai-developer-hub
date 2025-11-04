@@ -51,9 +51,11 @@ type ContentProps = {
   setSettingsOpened: (opened: boolean) => void;
   theme: string;
   setTheme: (theme: string) => void;
+  language: string;
+  setLanguage: (language: string) => void;
 };
 
-const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: ContentProps) => {
+const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme, language, setLanguage }: ContentProps) => {
   const conversationId = useContext(ConvoCtx);
   const [update, setUpdate] = useState<Array<object>>([]);
   const [busy, setBusy] = useState<boolean>(false);
@@ -105,6 +107,7 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
   }, [serviceType]);
 
   const handleQuestionChange = (question: string) => {
+    const modifiedQuestion = language === "english" ? question : `Respond in ${language}: ${question}`;
     // if we are waiting for an answer to be returned, throw an alert and return
     if (busy) {
       messagesDP.current.data = [
@@ -143,8 +146,10 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            question: question,
-            tenantId: "default"
+            question: modifiedQuestion,
+            tenantId: "default",
+            conversationId: conversationId,
+            language: language
           }),
         })
           .then((response) => response.text())
@@ -176,7 +181,7 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
       } else {
         sendPrompt(
           client,
-          question!,
+          modifiedQuestion,
           modelId!,
           conversationId!,
           finetune.current
@@ -372,6 +377,7 @@ const Content = ({ settingsOpened, setSettingsOpened, theme, setTheme }: Content
           ragToggle={setRagEnabled}
           themeChange={setTheme}
           modelIdChange={modelIdChangeHandler}
+          onLanguageChange={setLanguage}
         />
       </oj-c-drawer-popup>
       <div class="oj-flex-bar oj-flex-item demo-header oj-sm-12">

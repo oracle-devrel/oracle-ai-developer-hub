@@ -25,12 +25,21 @@ type Props = {
   ragToggle: (enabled: boolean) => void;
   themeChange: (theme: string) => void;
   modelIdChange: (modelId: any, modelData: any) => void;
+  onLanguageChange?: (language: string) => void;
 };
 
 const serviceTypes = [
   { value: "text", label: "Generative Text" },
   { value: "summary", label: "Summarize" },
   { value: "upload", label: "RAG Knowledge Base" },
+];
+
+const languages = [
+  { value: "english", label: "English" },
+  { value: "polish", label: "Polish" },
+  { value: "spanish", label: "Spanish" },
+  { value: "french", label: "French" },
+  { value: "german", label: "German" },
 ];
 
 type Model = {
@@ -53,6 +62,11 @@ const serviceOptionsDP = new MutableArrayDataProvider<
   Services
 >(serviceTypes, { keyAttributes: "value" });
 
+const languageOptionsDP = new MutableArrayDataProvider<
+  string,
+  { label: string; value: string }
+>(languages, { keyAttributes: "value" });
+
 export const Settings = (props: Props) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -69,6 +83,7 @@ export const Settings = (props: Props) => {
   const endpoints = useRef<Array<Endpoint>>();
   const conversationId = useContext(ConvoCtx);
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("english");
   const [prefsLoaded, setPrefsLoaded] = useState<boolean>(false);
   const [modelsLoaded, setModelsLoaded] = useState<boolean>(false);
 
@@ -172,19 +187,35 @@ export const Settings = (props: Props) => {
     props.modelIdChange(selected, finetune);
     setSelectedModelId(selected as string);
     try {
-      await setKv(conversationId, "userPrefs", { modelId: selected }, 3600);
+      await setKv(conversationId, "userPrefs", { modelId: selected, language: selectedLanguage }, 3600);
     } catch (e) {
       console.warn("savePrefs failed", e);
     }
   };
 
 
+  const languageChangeHandler = async (event: any) => {
+    if (event.detail.updatedFrom === "internal") {
+      const lang = event.detail.value;
+      setSelectedLanguage(lang);
+      props.onLanguageChange?.(lang);
+      try {
+        await setKv(conversationId, "userPrefs", { modelId: selectedModelId, language: lang }, 3600);
+      } catch (e) {
+        console.warn("savePrefs failed", e);
+      }
+    }
+  };
+
   // KV-backed prefs
   async function loadPrefs(conversationId: string) {
-    const prefs = (await getKv(conversationId, "userPrefs")) || { modelId: null, theme: "light" };
+    const prefs = (await getKv(conversationId, "userPrefs")) || { modelId: null, language: "english" };
     try {
       if (prefs.modelId) {
         setSelectedModelId(prefs.modelId as string);
+      }
+      if (prefs.language) {
+        setSelectedLanguage(prefs.language as string);
       }
     } finally {
       setPrefsLoaded(true);
@@ -193,7 +224,7 @@ export const Settings = (props: Props) => {
 
   async function savePrefs(conversationId: string) {
     try {
-      const prefs = { modelId: selectedModelId };
+      const prefs = { modelId: selectedModelId, language: selectedLanguage };
       await setKv(conversationId, "userPrefs", prefs, 3600);
     } catch (e) {
       console.warn("savePrefs failed", e);
@@ -233,7 +264,7 @@ export const Settings = (props: Props) => {
 
       setSelectedModelId(chosen);
       props.modelIdChange(chosen, finetune);
-      await setKv(conversationId, "userPrefs", { modelId: chosen }, 3600);
+      await setKv(conversationId, "userPrefs", { modelId: chosen, language: selectedLanguage }, 3600);
     } catch (e) {
       console.warn("ensureDefaultModel failed", e);
     }
@@ -298,6 +329,18 @@ export const Settings = (props: Props) => {
               }
             }}
           ></oj-switch>
+        </oj-c-form-layout>
+      </>
+      <>
+        <h2 class="oj-typography-heading-sm">Language Preference</h2>
+        <oj-c-form-layout>
+          <oj-c-select-single
+            data={languageOptionsDP}
+            labelHint="Preferred Language"
+            itemText="label"
+            value={selectedLanguage}
+            onvalueChanged={languageChangeHandler}
+          ></oj-c-select-single>
         </oj-c-form-layout>
       </>
     </div>

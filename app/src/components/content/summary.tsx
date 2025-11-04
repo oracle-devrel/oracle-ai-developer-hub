@@ -28,7 +28,6 @@ type Props = {
   prompt: (val: string) => void;
   summaryChanged: (summary: string) => void;
   summary: string;
-  backendType: any;
   modelId: string | null;
 };
 const protocol = window.location.protocol === "http:" ? "ws://" : "wss://";
@@ -39,7 +38,7 @@ const hostname =
 const serviceRootURL = `${protocol}${hostname}`;
 const acceptArr: string[] = ["application/pdf", "*.pdf", "text/plain", "*.txt"];
 const messages: { id: number; severity: string; summary: string }[] = [];
-const FILE_SIZE = 120000;
+const FILE_SIZE = 100 * 1024 * 1024;
 
 export const Summary = ({
   fileChanged,
@@ -47,7 +46,6 @@ export const Summary = ({
   prompt,
   summaryChanged,
   summary,
-  backendType,
   modelId,
 }: Props) => {
   const conversationId = useContext(ConvoCtx);
@@ -112,23 +110,11 @@ export const Summary = ({
     setInvalidMessage("");
     const files: FileList = event.detail.files;
     const filesArray: File[] = Array.from(files);
-    let names = filesArray.map((file: File) => {
-      return file?.name;
-    });
+    let names = filesArray.map((file: File) => file?.name);
 
-    if (backendType === "java") {
-      setFile(files[0]);
-      setFileNames(names);
-    } else {
-      const fr = new FileReader();
-      let ab = new ArrayBuffer(200000000);
-      fr.onload = (ev: ProgressEvent<FileReader>) => {
-        let ab = fr.result;
-        setPDFFile(ab as ArrayBuffer);
-      };
-      fr.readAsArrayBuffer(files[0]);
-      setFileNames(names);
-    }
+    // Java-only: simply keep the selected file and names
+    setFile(files[0]);
+    setFileNames(names);
   };
 
   const buildSummaryData = (rawData: ArrayBuffer) => {
@@ -193,7 +179,7 @@ export const Summary = ({
           summary:
             "File " +
             invalidFiles.current[0] +
-            ` is too big. The maximum size is ${FILE_SIZE / 1000}KB.`,
+            ` is too big. The maximum size is ${Math.round(FILE_SIZE / (1024 * 1024))}MB.`,
         });
         setMessages(temp);
       } else {
@@ -205,7 +191,7 @@ export const Summary = ({
           summary:
             "These files are too big: " +
             fileNames +
-            `. The maximum size is ${FILE_SIZE / 1000}KB.`,
+            `. The maximum size is ${Math.round(FILE_SIZE / (1024 * 1024))}MB.`,
         });
         setMessages(temp);
       }
@@ -246,14 +232,11 @@ export const Summary = ({
     const valid = _checkValidationGroup();
     if (valid) {
       clear();
-      console.log("Calling websocket API to process PDF");
+      console.log("Processing PDF via Java backend");
       console.log("Filename: ", fileNames);
       console.log("Prompt: ", summaryPrompt);
-      if (backendType === "python") {
-        fileChanged(buildSummaryData(pdfFile as ArrayBuffer));
-      } else {
-        sendToJavaBackend(file!, summaryPrompt);
-      }
+      // Java-only mode
+      sendToJavaBackend(file!, summaryPrompt);
       setLoading(true);
     }
   };
@@ -284,22 +267,8 @@ export const Summary = ({
             onojSelect={selectListener}
             onojInvalidSelect={invalidListener}
             onojBeforeSelect={beforeSelectListener}
-            secondaryText={`Maximum file size is ${
-              FILE_SIZE / 1000
-            }KB per PDF or TXT file.`}
+            secondaryText={`Maximum file size is ${Math.round(FILE_SIZE / (1024 * 1024))}MB per PDF or TXT file.`}
           ></oj-c-file-picker>
-          {backendType === "python" && (
-            <oj-c-input-text
-              id="promptInput"
-              ref={promptInputRef}
-              required
-              aria-label="enter document summary prompt"
-              class="oj-sm-width-full oj-md-width-1/2 oj-sm-margin-4x-top oj-sm-margin-4x-bottom"
-              labelHint="Enter the document summary prompt"
-              labelEdge="top"
-              onvalueChanged={submitPrompt}
-            ></oj-c-input-text>
-          )}
         </oj-validation-group>
         {invalidFiles.current.length !== 1 && fileNames && (
           <>

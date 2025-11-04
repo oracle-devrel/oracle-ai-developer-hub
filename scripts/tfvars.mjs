@@ -52,7 +52,5 @@ async function generateTFVars() {
 
   console.log(`File ${chalk.green(tfVarsPath)} created`);
 
-  console.log(`1. ${chalk.yellow("cd deploy/terraform/")}`);
-  console.log(`2. ${chalk.yellow("terraform init")}`);
-  console.log(`3. ${chalk.yellow("terraform apply -auto-approve")}`);
+  console.log(`Run ${chalk.yellow("cd deploy/terraform && terraform init && terraform apply --auto-approve && cd ../..")}`);
 }

@@ -71,8 +71,10 @@ public class SummaryController {
             Message mUser = new Message(UUID.randomUUID().toString(), conversationId, "user", contentEscaped);
             messageRepository.save(mUser);
 
-            // call model
-            String summaryText = ociGenAIService.summaryText(contentEscaped, activeModel, false);
+            // call model (capture usage if available)
+            dev.victormartin.oci.genai.backend.backend.service.OCIGenAIService.ModelResponse modelResp =
+                ociGenAIService.resolvePromptWithUsage(contentEscaped, activeModel, false, true);
+            String summaryText = modelResp.getContent();
 
             // assistant message (summary produced)
             Message mAsst = new Message(UUID.randomUUID().toString(), conversationId, "assistant", summaryText);
@@ -84,6 +86,15 @@ public class SummaryController {
             long latencyMs = (System.nanoTime() - t0) / 1_000_000L;
             InteractionEvent ev = new InteractionEvent("default", "summary_text", activeModel);
             ev.setLatencyMs(latencyMs);
+            if (modelResp.getTokensIn() != null) {
+                ev.setTokensIn(modelResp.getTokensIn().longValue());
+            }
+            if (modelResp.getTokensOut() != null) {
+                ev.setTokensOut(modelResp.getTokensOut().longValue());
+            }
+            if (modelResp.getCost() != null) {
+                ev.setCostEst(java.math.BigDecimal.valueOf(modelResp.getCost()));
+            }
             interactionEventRepository.save(ev);
 
             Answer answer = new Answer();

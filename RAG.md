@@ -1,6 +1,6 @@
 # RAG (Retrieval-Augmented Generation) Guide
 
-This app supports Retrieval-Augmented Generation over your own PDFs. You upload documents; the backend indexes them into Oracle Database 26ai (ADB) via Liquibase-managed KB tables. Questions are answered by grounding prompts with retrieved content using embeddings stored as VECTOR(1024, FLOAT32).
+This app supports Retrieval-Augmented Generation over your own PDFs. You upload documents; the backend indexes them into Oracle AI Database via Liquibase-managed KB tables. Questions are answered by grounding prompts with retrieved content using embeddings stored as VECTOR(1024, FLOAT32).
 
 ## How it works (high level)
 

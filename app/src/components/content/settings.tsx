@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState, useContext } from "preact/hooks";
 import "oj-c/radioset";
 import "oj-c/form-layout";
 import "oj-c/select-single";
@@ -9,20 +9,19 @@ import "ojs/ojmessages";
 import "oj-c/button";
 import MutableArrayDataProvider = require("ojs/ojmutablearraydataprovider");
 import { ojSelectSingle } from "@oracle/oraclejet/ojselectsingle";
+import { getKv, setKv } from "../../libs/memory";
+import { ConvoCtx } from "../app";
 
-type ServiceTypeVal = "text" | "summary" | "sim" | "upload";
-type BackendTypeVal = "java" | "python";
+type ServiceTypeVal = "text" | "summary" | "upload";
 type Services = {
   label: string;
   value: ServiceTypeVal;
 };
 type Props = {
   aiServiceType: ServiceTypeVal;
-  backendType: BackendTypeVal;
   ragEnabled: boolean;
   theme: string;
   aiServiceChange: (service: ServiceTypeVal) => void;
-  backendChange: (backend: BackendTypeVal) => void;
   ragToggle: (enabled: boolean) => void;
   themeChange: (theme: string) => void;
   modelIdChange: (modelId: any, modelData: any) => void;
@@ -31,14 +30,9 @@ type Props = {
 const serviceTypes = [
   { value: "text", label: "Generative Text" },
   { value: "summary", label: "Summarize" },
-  { value: "upload", label: "Upload" },
+  { value: "upload", label: "RAG Knowledge Base" },
 ];
-// { value: "sim", label: "Simulation" },
 
-const backendTypes = [
-  { value: "java", label: "Java" },
-  { value: "python", label: "Python" },
-];
 type Model = {
   id: string;
   name: string;
@@ -58,10 +52,6 @@ const serviceOptionsDP = new MutableArrayDataProvider<
   Services["value"],
   Services
 >(serviceTypes, { keyAttributes: "value" });
-const backendOptionsDP = new MutableArrayDataProvider<
-  Services["value"],
-  Services
->(backendTypes, { keyAttributes: "value" });
 
 export const Settings = (props: Props) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -70,10 +60,6 @@ export const Settings = (props: Props) => {
     if (event.detail.updatedFrom === "internal")
       props.aiServiceChange(event.detail.value);
   };
-  const handleBackendTypeChange = (event: any) => {
-    if (event.detail.updatedFrom === "internal")
-      props.backendChange(event.detail.value);
-  };
 
   const modelDP = useRef(
     new MutableArrayDataProvider<string, {}>([], {
@@ -81,14 +67,15 @@ export const Settings = (props: Props) => {
     })
   );
   const endpoints = useRef<Array<Endpoint>>();
+  const conversationId = useContext(ConvoCtx);
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+  const [prefsLoaded, setPrefsLoaded] = useState<boolean>(false);
+  const [modelsLoaded, setModelsLoaded] = useState<boolean>(false);
 
   const fetchModels = async (retries = 3) => {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        const isHttps = window.location.protocol === "https:";
-        const pythonUrl = `${isHttps ? "https://" : "http://"}${window.location.hostname}:1987/models`;
-        const primaryUrl =
-          props.backendType === "python" && !isHttps ? pythonUrl : "/api/genai/models";
+        const primaryUrl = "/api/genai/models";
 
         let response: Response;
         try {
@@ -113,13 +100,15 @@ export const Settings = (props: Props) => {
         });
         modelDP.current.data = result;
         setErrorMessage(null);
+        setModelsLoaded(true);
         return; // Success, exit function
-      } catch (error: any) {
-        console.error(`Model fetch attempt ${attempt} failed (${props.backendType}): `, error.message);
+        } catch (error: any) {
+          console.error(`Model fetch attempt ${attempt} failed: `, error.message);
         if (attempt === retries) {
           // All retries failed
           modelDP.current.data = []; // Clear models on error
           setErrorMessage("Failed to fetch models after retries. Please check your backend connection.");
+          setModelsLoaded(true);
         } else {
           await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
         }
@@ -147,14 +136,17 @@ export const Settings = (props: Props) => {
   };
 
   useEffect(() => {
-    fetchEndpoints();
-    fetchModels();
+    (async () => {
+      await fetchEndpoints();
+      await fetchModels();
+      try {
+        await loadPrefs(conversationId);
+      } catch (e) {
+        console.warn("loadPrefs failed", e);
+      }
+    })();
   }, []);
 
-  // Re-fetch models when backend selection changes so Python uses OCI directly
-  useEffect(() => {
-    fetchModels();
-  }, [props.backendType]);
 
   const modelChangeHandler = async (
     event: ojSelectSingle.valueChanged<string, {}>
@@ -178,23 +170,84 @@ export const Settings = (props: Props) => {
       selected = endpointId ? endpointId.id : event.detail.value;
     }
     props.modelIdChange(selected, finetune);
-  };
-
-  const runDiag = async (_ev: any) => {
+    setSelectedModelId(selected as string);
     try {
-      const res = await fetch("/api/kb/diag?tenantId=default");
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-      const json = await res.json();
-      console.log("KB DIAG:", json);
-      setErrorMessage(null);
-    } catch (e: any) {
-      setErrorMessage(`KB diag failed: ${e?.message || e}`);
-      console.error("KB DIAG failed:", e);
+      await setKv(conversationId, "userPrefs", { modelId: selected }, 3600);
+    } catch (e) {
+      console.warn("savePrefs failed", e);
     }
   };
 
+
+  // KV-backed prefs
+  async function loadPrefs(conversationId: string) {
+    const prefs = (await getKv(conversationId, "userPrefs")) || { modelId: null, theme: "light" };
+    try {
+      if (prefs.modelId) {
+        setSelectedModelId(prefs.modelId as string);
+      }
+    } finally {
+      setPrefsLoaded(true);
+    }
+  }
+
+  async function savePrefs(conversationId: string) {
+    try {
+      const prefs = { modelId: selectedModelId };
+      await setKv(conversationId, "userPrefs", prefs, 3600);
+    } catch (e) {
+      console.warn("savePrefs failed", e);
+    }
+  }
+
+  // Auto-select default model on first load when KV has no model
+  async function ensureDefaultModel() {
+    try {
+      if (selectedModelId) return; // nothing to do
+      const asyncIterator = modelDP.current.fetchFirst()[Symbol.asyncIterator]();
+      const result = await asyncIterator.next();
+      const data = (result.value?.data as Array<Model>) || [];
+      if (data.length === 0) return;
+
+      let defaultId: string | null = null;
+      try {
+        const res = await fetch("/api/genai/default-model");
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.modelId) defaultId = json.modelId as string;
+        }
+      } catch {
+        // ignore; will fallback
+      }
+
+      let chosen = (defaultId && data.find((m) => m.id === defaultId)) ? defaultId! : data[0].id;
+
+      // Resolve finetune/endpoint mapping similar to modelChangeHandler
+      let finetune = false;
+      const idx = data.find((e: Model) => e.id === chosen);
+      if (idx?.capabilities.includes("FINE_TUNE")) {
+        finetune = true;
+        const endpointId = endpoints.current?.find((e: Endpoint) => e.model === chosen)?.id;
+        if (endpointId) chosen = endpointId;
+      }
+
+      setSelectedModelId(chosen);
+      props.modelIdChange(chosen, finetune);
+      await setKv(conversationId, "userPrefs", { modelId: chosen }, 3600);
+    } catch (e) {
+      console.warn("ensureDefaultModel failed", e);
+    }
+  }
+
+  useEffect(() => {
+    if (modelsLoaded && prefsLoaded && !selectedModelId) {
+      ensureDefaultModel();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modelsLoaded, prefsLoaded, selectedModelId]);
+
   const modelTemplate = (item: any) => {
-    return (
+  return (
       <oj-list-item-layout class="oj-listitemlayout-padding-off">
         <span class="oj-typography-body-md oj-text-color-primary">
           <oj-highlight-text
@@ -232,64 +285,21 @@ export const Settings = (props: Props) => {
           onvalueChanged={handleServiceTypeChange}
         ></oj-c-radioset>
       </oj-c-form-layout>
-      <h2 class="oj-typography-heading-sm">Backend service types</h2>
-      <oj-c-form-layout>
-        <oj-c-radioset
-          id="backendTypeRadioset"
-          value={props.backendType}
-          labelHint="Backend options"
-          options={backendOptionsDP}
-          onvalueChanged={handleBackendTypeChange}
-        ></oj-c-radioset>
-      </oj-c-form-layout>
-      <h2 class="oj-typography-heading-sm">Theme</h2>
-      <oj-c-form-layout>
-        <oj-c-radioset
-          id="themeRadioset"
-          value={props.theme}
-          labelHint="Theme options"
-          options={new MutableArrayDataProvider([{ value: "light", label: "Light" }, { value: "dark", label: "Dark" }], { keyAttributes: "value" })}
-          onvalueChanged={(event: any) => {
-            if (event.detail.updatedFrom === "internal")
-              props.themeChange(event.detail.value);
-          }}
-        ></oj-c-radioset>
-      </oj-c-form-layout>
-      {props.backendType === "java" && (
-        <>
-          <h2 class="oj-typography-heading-sm">RAG Options</h2>
-          <oj-c-form-layout>
-            <oj-switch
-              id="ragSwitch"
-              value={props.ragEnabled}
-              labelHint="Enable Retrieval-Augmented Generation (RAG)"
-              onvalueChanged={(event: any) => {
-                if (event.detail.updatedFrom === "internal") {
-                  props.ragToggle(event.detail.value);
-                }
-              }}
-            ></oj-switch>
-          </oj-c-form-layout>
-          <oj-c-form-layout>
-            <oj-c-button label="Check RAG status" onojAction={runDiag}></oj-c-button>
-          </oj-c-form-layout>
-        </>
-      )}
-      {props.aiServiceType == "text" && (props.backendType == "java" || props.backendType == "python") && (
-        <>
-          <h2 class="oj-typography-heading-sm">Model options</h2>
-          <oj-c-form-layout>
-            <oj-c-select-single
-              data={modelDP.current}
-              labelHint={"Model"}
-              itemText={"name"}
-              onvalueChanged={modelChangeHandler}
-            >
-              <template slot="itemTemplate" render={modelTemplate}></template>
-            </oj-c-select-single>
-          </oj-c-form-layout>
-        </>
-      )}
+      <>
+        <h2 class="oj-typography-heading-sm">RAG Options</h2>
+        <oj-c-form-layout>
+          <oj-switch
+            id="ragSwitch"
+            value={props.ragEnabled}
+            labelHint="Enable Retrieval-Augmented Generation (RAG)"
+            onvalueChanged={(event: any) => {
+              if (event.detail.updatedFrom === "internal") {
+                props.ragToggle(event.detail.value);
+              }
+            }}
+          ></oj-switch>
+        </oj-c-form-layout>
+      </>
     </div>
   );
 };

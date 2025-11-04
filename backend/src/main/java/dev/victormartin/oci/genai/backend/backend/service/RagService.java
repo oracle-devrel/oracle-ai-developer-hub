@@ -28,7 +28,7 @@ import dev.victormartin.oci.genai.backend.backend.dto.RagQuestionDto;
 /**
  * Retrieval service:
  * 1) Embed question
- * 2) Vector search top-k (filters by tenant/doc/tags) [NOTE: requires Oracle DB 23ai VECTOR SQL]
+ * 2) Vector search top-k (filters by tenant/doc/tags) [NOTE: requires Oracle AI Database VECTOR SQL]
  * 3) Assemble prompt with citations
  * 4) Call chat (delegated to OCIGenAIService)
  */
@@ -60,7 +60,7 @@ public class RagService {
         // 1) Embed the question (OnDemand path by default)
         List<Float> qEmbed = embedQuestion(req.question());
 
-        // 2) Retrieve top-k chunks from Oracle DB 23ai
+        // 2) Retrieve top-k chunks from Oracle AI Database
         List<KbChunk> topk = topK(tenantId, qEmbed, req.docIds(), req.tags(), k, req.question());
 
         // 3) Assemble prompt with citations
@@ -147,28 +147,24 @@ public class RagService {
 
     /**
      * Perform a vector top-k search.
-     * NOTE: This requires Oracle Database 23ai VECTOR support and proper binding of the query vector.
-     * The SQL below is a placeholder; replace VECTOR_DISTANCE(...) with the exact function for your DB version,
+     * NOTE: This requires Oracle AI Database VECTOR support and proper binding of the query vector.
      * and use appropriate binding for vector values (e.g. JSON array -> VECTOR).
      */
     private List<KbChunk> topK(String tenantId, List<Float> qEmbed, List<String> docIds, List<String> tags, int k, String question) {
         List<KbChunk> out = new ArrayList<>();
 
-        // Fallback: if VECTOR SQL isn't configured yet, return empty list (chat will answer without context)
         String sql =
                 "SELECT c.id AS chunk_id, c.doc_id, d.title, d.uri, c.text, c.source_meta, c.chunk_ix, c.tenant_id " +
                 "FROM kb_embeddings e " +
                 "JOIN kb_chunks c ON c.id = e.chunk_id " +
                 "JOIN kb_documents d ON d.doc_id = c.doc_id " +
                 "WHERE c.tenant_id = ? " +
-                // Optional filters can be appended when implemented:
-                // (docIds IN ...) and tags_json filters using JSON_EXISTS
                 "FETCH FIRST ? ROWS ONLY";
 
         try (Connection conn = dataSource.getConnection()) {
             boolean usedVector = false;
 
-            // 1) Try Oracle 23ai VECTOR path when we have a query embedding
+            // 1) Try Oracle AI Database VECTOR path when we have a query embedding
             if (qEmbed != null && !qEmbed.isEmpty()) {
                 // Build JSON array for TO_VECTOR(?)
                 StringBuilder vsb = new StringBuilder();
@@ -250,13 +246,11 @@ public class RagService {
                     }
                 }
 
-                // If we have some tokens, use a case-insensitive regex over CLOB
                 if (!tokens.isEmpty()) {
                     StringBuilder regex = new StringBuilder();
                     regex.append('(');
                     for (int i = 0; i < tokens.size(); i++) {
                         if (i > 0) regex.append('|');
-                        // strictly alnum to avoid regex injection
                         String safe = tokens.get(i).replaceAll("[^a-z0-9]", "");
                         if (!safe.isEmpty()) {
                             regex.append(safe);
@@ -309,8 +303,6 @@ public class RagService {
                         log.warn("Fallback text search failed ({}): {}", e2.getClass().getSimpleName(), e2.getMessage());
                     }
                 }
-
-                // If still empty, last resort: fetch recent chunks for tenant
                 if (out.isEmpty()) {
                     StringBuilder sqlAny = new StringBuilder();
                     sqlAny.append("SELECT c.id AS chunk_id, c.doc_id, d.title, d.uri, c.text, c.source_meta, c.chunk_ix, c.tenant_id ");

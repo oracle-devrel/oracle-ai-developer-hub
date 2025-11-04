@@ -9,4 +9,6 @@ secretGenerator:
     - .certs/tls.crt
     - .certs/tls.key
   type: "kubernetes.io/tls"
+generatorOptions:
+  disableNameSuffixHash: true
 namespace: backend

@@ -51,7 +51,7 @@ Why it helps:
 
 Why it helps:
 - Structured storage of document chunks for retrieval
-- Oracle Database 26ai VECTOR support for embeddings and ANN search (HNSW/IVF)
+- Oracle AI Database VECTOR support for embeddings and ANN search (HNSW/IVF)
 - KB supports accurate and explainable RAG pipelines
 
 ## ADB Connection (JDBC + Wallet)
@@ -132,7 +132,7 @@ Connect with SQL Developer Web or SQL*Plus and run:
 SELECT COUNT(*) FROM conversations;
 SELECT COUNT(*) FROM kb_documents;
 
--- Check vector index exists (26ai):
+-- Check vector index exists:
 SELECT index_name FROM user_indexes WHERE index_name = 'KB_VEC_IDX';
 
 -- Optional: quick vector distance sanity check (requires embeddings)

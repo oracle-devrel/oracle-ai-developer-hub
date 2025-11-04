@@ -23,12 +23,14 @@
       "marked/*": ["./node_modules/marked/*"],
       "oj-sample/*": ["./src/components/oj-sample/types/*"],
       "md-wrapper": ["./src/components/md-wrapper/types/index"],
+      "md-wrapper/loader": ["./src/components/md-wrapper/loader.js"],
       "stompjs": ["./node_modules/@stomp/stompjs/index"]
     },
     "declaration": true,
     "noEmitOnError": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
+    "ignoreDeprecations": "5.0",
     "removeComments": true
   },
   "include": ["./src/**/*"]

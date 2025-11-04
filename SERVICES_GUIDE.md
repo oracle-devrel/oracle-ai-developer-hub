@@ -264,7 +264,7 @@ Error Cases and Guards
   - Tries configured genai.embed_model_id, then cohere.embed‑english‑v3.0, cohere.embed‑multilingual‑v3.0, cohere.embed‑english‑light‑v3.0
   - On 404, falls through candidates; on other errors, rethrows
 - Vector retrieval:
-  - Uses VECTOR_DISTANCE(e.embedding, TO_VECTOR(?)) if available (Oracle Database 26ai)
+  - Uses VECTOR_DISTANCE(e.embedding, TO_VECTOR(?)) if available (Oracle AI Database)
   - On SQL error or if embedding missing → fallback to REGEXP_LIKE‑based text search
   - If still empty → fallback to recent chunks for the tenant
 

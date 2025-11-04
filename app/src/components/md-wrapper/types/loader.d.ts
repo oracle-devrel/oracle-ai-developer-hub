@@ -1,9 +1,1 @@
-declare global {
-  namespace preact.JSX {
-    interface IntrinsicElements {
-      "md-wrapper": any;
-    }
-  }
-}
-
-export {};
+declare module "md-wrapper/loader";

@@ -12,8 +12,9 @@ import { debugLog } from "../../libs/debug";
 type Props = {
   testId?: string;
   data: any;
-  questionChanged: (event: any) => void;
-  question: MutableRef<string | undefined>;
+  questionValue: string;
+  onQuestionValueChange: (value: string) => void;
+  onQuestionSubmit: (question: string) => void;
   settingsOpened: boolean;
 };
 
@@ -29,7 +30,7 @@ const madp = new MutableArrayDataProvider<Item["id"], Item>([], {
   keyAttributes: "id",
 });
 
-export const Chat = ({ testId, data, questionChanged, question, settingsOpened }: Props) => {
+export const Chat = ({ testId, data, questionValue, onQuestionValueChange, onQuestionSubmit, settingsOpened }: Props) => {
   const dataProvider = useRef(madp);
   const listRef = useRef<ojListView<Item["id"], Item>>(null);
   const [lastKey, setLastKey] = useState<number>(0);
@@ -49,6 +50,11 @@ export const Chat = ({ testId, data, questionChanged, question, settingsOpened }
       setLastKey(data.length - 1);
     });
   }, [data, busyContext]);
+
+  useEffect(() => {
+    const lv = document.getElementById("chatlist") as HTMLElement | null;
+    lv?.scrollTo({ top: lv.scrollHeight, behavior: "smooth" });
+  }, [data]);
 
   const chatNoDataTemplate = () => {
     return (
@@ -89,10 +95,11 @@ export const Chat = ({ testId, data, questionChanged, question, settingsOpened }
         <oj-input-search
           id="search1"
           class="oj-input-search-hero oj-sm-width-3"
-          value={question?.current}
+          value={questionValue}
           placeholder="ask me anything..."
           aria-label="enter a question"
-          onojValueAction={questionChanged}
+          onvalueChanged={(e: any) => onQuestionValueChange(e.detail.value)}
+          onojValueAction={() => onQuestionSubmit(questionValue)}
         ></oj-input-search>
       </div>
     </div>

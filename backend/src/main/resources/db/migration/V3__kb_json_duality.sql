@@ -1,7 +1,7 @@
 -- liquibase formatted sql
 -- Introduce JSON-first source of truth for documents and a JSON Relational Duality View.
 -- This keeps ingestion JSON-native while preserving relational projections via the duality view.
--- Tested syntax may vary slightly across Oracle Database 23ai/26ai releases; this script is defensive.
+-- Tested syntax may vary across Oracle AI Database releases; this script is defensive.
 
 -- changeset victor:kb_json_duality_1_drop endDelimiter:/
 -- comment: Drop DV + JSON table if present (idempotent dev workflow). Set v_drop=FALSE in prod.

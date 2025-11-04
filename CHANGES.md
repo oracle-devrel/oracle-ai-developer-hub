@@ -1,10 +1,31 @@
 # Changelog
 
-This project recently received multiple backend and frontend enhancements to stabilize RAG ingestion/retrieval with Oracle Database 23ai and reduce noisy logs in the UI.
+## [2025-11-03]
+### Changed
+- Updated branding in README to "Oracle AI Database"; removed legacy 23ai/26ai phrasing in keywords and branding mentions.
+- Clarified references to "Oracle Autonomous Database (ADB)" where appropriate.
+- UI: Moved model selector to the top of the main content and auto-selected the default model.
+- UI: Removed backend service selection controls from Settings.
+- UI: Removed the "Check RAG status" button from Settings.
+- UI: Renamed "Document Upload" to "RAG Knowledge Base" and updated the "Upload" option label under "AI service options" to "RAG Knowledge Base".
+- UI: Removed theme selector; UI is fixed to light mode.
+- Backend/Runtime: Java-only backend for both local development and production; removed Python backend usage from UI and scripts.
+- Security: Removed mixed-content calls and localhost Python endpoints; all frontend requests use same-origin Java /api/* paths.
+- Scripts: Hardened serverStart.sh with set -euo pipefail, Node.js ≥ 18 and Java ≥ 17 checks, backend health readiness (Actuator), and graceful shutdown trap.
+- Frontend: Removed WebSocket Python paths and websocket-interface usage; STOMP/REST is used universally for chat; RAG always uses Java endpoint.
+- Upload/Summary: Document upload and summarization call only Java endpoints; "RAG Knowledge Base" wording applied consistently.
+- Cleanup: Removed backend selection logic and Python-specific fallbacks; minimized attack surface by deleting unused code paths.
+
+- Upload: Increased max PDF/TXT upload size to 100 MB across frontend and backend; UI messages updated to show MB.
+- Backend: Configured spring.servlet.multipart max-file-size and max-request-size to 100MB in application.yaml and application-local.yaml; /api/upload now validates up to 100 MB.
+- PDF parsing: Switched to PDFBox RandomAccessReadBufferedFile + Loader.loadPDF(RandomAccessRead) for streaming large, image-heavy PDFs.
+- Kubernetes: Added nginx.ingress.kubernetes.io/proxy-body-size: "100m" to Ingress to allow 100 MB uploads.
+
+This project recently received multiple backend and frontend enhancements to stabilize RAG ingestion/retrieval with Oracle AI Database and reduce noisy logs in the UI.
 
 ## 2025-10-21
 
-### RAG ingestion stabilized (Oracle DB 23ai + Liquibase V2)
+### RAG ingestion stabilized (Oracle AI Database + Liquibase V2)
 - Fix: chunk inserts now persist even when the Oracle driver cannot return generated keys via `getGeneratedKeys()`.
   - KbIngestService wraps `getGeneratedKeys()` in try/catch and falls back to:
     ```sql

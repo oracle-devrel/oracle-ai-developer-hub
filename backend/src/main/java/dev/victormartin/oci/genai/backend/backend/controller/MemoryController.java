@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import dev.victormartin.oci.genai.backend.backend.data.MemoryLong;
 import dev.victormartin.oci.genai.backend.backend.data.MemoryLongRepository;
 import dev.victormartin.oci.genai.backend.backend.service.MemoryService;
+import dev.victormartin.oci.genai.backend.backend.data.Conversation;
+import dev.victormartin.oci.genai.backend.backend.data.ConversationRepository;
 
 @RestController
 public class MemoryController {
@@ -25,10 +27,12 @@ public class MemoryController {
 
   private final MemoryService memoryService;
   private final MemoryLongRepository memoryLongRepository;
+  private final ConversationRepository conversationRepository;
 
-  public MemoryController(MemoryService memoryService, MemoryLongRepository memoryLongRepository) {
+  public MemoryController(MemoryService memoryService, MemoryLongRepository memoryLongRepository, ConversationRepository conversationRepository) {
     this.memoryService = memoryService;
     this.memoryLongRepository = memoryLongRepository;
+    this.conversationRepository = conversationRepository;
   }
 
   // -------- memory_kv --------
@@ -38,6 +42,13 @@ public class MemoryController {
                                        @PathVariable("key") String key,
                                        @RequestParam(value = "ttlSeconds", required = false) Long ttlSeconds,
                                        @RequestBody String valueJson) {
+    try {
+      if (!conversationRepository.existsById(conversationId)) {
+        conversationRepository.save(new Conversation(conversationId, "default", null, "active"));
+      }
+    } catch (Exception e) {
+      log.warn("Failed to ensure conversation exists: {}", e.getMessage());
+    }
     memoryService.setKv(conversationId, key, valueJson, ttlSeconds);
     return ResponseEntity.noContent().build();
   }

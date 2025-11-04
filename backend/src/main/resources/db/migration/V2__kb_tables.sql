@@ -1,6 +1,6 @@
 -- liquibase formatted sql
 -- Knowledge Base (RAG) schema: documents, chunks, embeddings, and vector index
--- Adjust VECTOR(...) DDL to match your DB 23ai version and embedding dimension.
+-- Adjust VECTOR(...) DDL to match your Oracle AI Database version and embedding dimension.
 
 -- changeset victor:kb_1_drop endDelimiter:/
 -- comment: Drop existing KB objects if present (idempotent)

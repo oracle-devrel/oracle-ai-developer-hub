@@ -48,7 +48,7 @@ This guide covers common issues across the backend (Spring Boot), frontend (Orac
 - Cause:
   - Oracle version may not support the attempted index syntax or VECTOR feature.
 - Fix:
-  - Ensure you’re using Oracle 23ai (or version supporting VECTOR).
+  - Ensure you’re using Oracle AI Database (version details for compatibility only) with VECTOR support.
   - The script tries multiple syntaxes; if none apply, embeddings are stored but ANN search is unavailable. Retrieval may fall back to basic filters. Upgrade DB for best results.
 
 ### Embedding dimension mismatch

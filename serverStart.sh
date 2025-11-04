@@ -3,7 +3,7 @@
 # OCI Generative AI JET UI - One-Shot Local Deployment Script
 # This script sets up and runs the complete application locally
 
-set -e  # Exit on any error
+set -euo pipefail  # Exit on error, unset var, and pipeline fails
 
 echo "🚀 OCI Generative AI JET UI - Local Deployment"
 echo "=============================================="
@@ -13,93 +13,74 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Function to setup Python virtual environment
-setup_python_env() {
-    echo "🐍 Setting up Python virtual environment..."
-
-    # Check if Python 3 is available
-    if ! command_exists python3; then
-        echo "❌ Python 3 is required but not found. Please install Python 3."
+# Function to start Oracle DB container
+start_oracle_db() {
+    echo "🗄️ Setting up local Oracle Autonomous Database Free container..."
+    
+    if ! command_exists docker; then
+        echo "❌ Docker is required but not found. Please install Docker."
         exit 1
     fi
-
-    # Check Python version (should be 3.8+)
-    PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
-    if python3 -c 'import sys; exit(0 if sys.version_info >= (3, 8) else 1)'; then
-        echo "✅ Python $PYTHON_VERSION detected"
-    else
-        echo "❌ Python 3.8+ is required. Current version: $PYTHON_VERSION"
-        exit 1
+    
+    local container_name="adb-free"
+    local wallet_dir="$HOME/adb_wallet"
+    local admin_password="Welcome123456#"
+    local wallet_password="WalletPass123#"
+    
+    # Cleanup old oracle-free if exists
+    if docker ps -a | grep -q oracle-free; then
+        echo "🧹 Removing old oracle-free container to free ports..."
+        docker rm -f oracle-free
     fi
-
-    # Create virtual environment if it doesn't exist
-    if [ ! -d "service/python/venv" ]; then
-        echo "📦 Creating Python virtual environment..."
-        cd service/python
-        python3 -m venv venv
-        cd ../..
-    else
-        echo "✅ Python virtual environment already exists"
+    
+    # Remove any existing adb-free container for clean start
+    if docker ps -a --filter "name=^${container_name}$" | grep -q ${container_name}; then
+        echo "🧹 Removing existing ${container_name} container for clean start..."
+        docker rm -f ${container_name}
     fi
-
-    # Activate virtual environment and install dependencies
-    echo "📥 Installing Python dependencies..."
-    cd service/python
-    source venv/bin/activate
-    pip install --upgrade pip
-    pip install -r requirements.txt
-    cd ../..
-
-    echo "✅ Python environment setup complete"
-}
-
-# Function to check OCI configuration
-check_oci_config() {
-    echo "🔐 Checking OCI configuration..."
-
-    # Check if OCI config directory exists
-    if [ ! -d "$HOME/.oci" ]; then
-        echo "⚠️  OCI configuration directory not found: $HOME/.oci"
-        echo "   This may be okay if you're using instance principals or other auth methods"
-        echo "   Proceeding without OCI validation..."
-        return 0
-    fi
-
-    # Check if config file exists
-    if [ ! -f "$HOME/.oci/config" ]; then
-        echo "⚠️  OCI config file not found: $HOME/.oci/config"
-        echo "   This may be okay if you're using instance principals or other auth methods"
-        echo "   Proceeding without OCI validation..."
-        return 0
-    fi
-
-    # Try to read key_file from config (may not exist)
-    CONFIG_PROFILE="DEFAULT"
-    KEY_FILE=$(grep "^key_file" "$HOME/.oci/config" 2>/dev/null | head -1 | cut -d'=' -f2 | tr -d ' ' | sed 's/~/$HOME/')
-
-    if [ -n "$KEY_FILE" ]; then
-        # Expand ~ to $HOME if present
-        KEY_FILE="${KEY_FILE/#\~/$HOME}"
-
-        if [ ! -f "$KEY_FILE" ]; then
-            echo "⚠️  Private key file not found: $KEY_FILE"
-            echo "   This may be okay if you're using different authentication methods"
-            echo "   Proceeding without strict key validation..."
-        else
-            echo "✅ OCI private key found: $KEY_FILE"
+    
+    echo "📥 Pulling Oracle ADB Free image..."
+    docker pull container-registry.oracle.com/database/adb-free:latest-23ai
+    
+    echo "🚀 Creating and starting ADB container..."
+    docker run -d --name ${container_name} \
+        -p 1522:1522 -p 8443:8443 -p 27017:27017 \
+        -e WORKLOAD_TYPE=ATP \
+        -e WALLET_PASSWORD="${wallet_password}" \
+        -e ADMIN_PASSWORD="${admin_password}" \
+        --cap-add SYS_ADMIN \
+        --device /dev/fuse \
+        container-registry.oracle.com/database/adb-free:latest-23ai
+    
+    # Wait for DB to be ready
+    echo "⏳ Waiting for ADB to be ready (this may take up to 10 minutes on first run)..."
+    local tries=600
+    while [ $tries -gt 0 ]; do
+        if docker logs ${container_name} 2>&1 | grep -q "DATABASE IS READY TO USE!"; then
+            echo "✅ ADB is ready"
+            break
         fi
+        sleep 1
+        tries=$((tries - 1))
+    done
+    if [ $tries -eq 0 ]; then
+        echo "❌ ADB did not start in time"
+        return 1
+    fi
+    
+    # Copy wallet to host if not exists
+    if [ ! -d "${wallet_dir}" ]; then
+        echo "📂 Copying wallet to ${wallet_dir}..."
+        mkdir -p "${wallet_dir}"
+        docker cp ${container_name}:/u01/app/oracle/wallets/tls_wallet/. "${wallet_dir}/"
     else
-        echo "ℹ️  No key_file specified in OCI config (may be using instance principals)"
+        echo "✅ Wallet already exists at ${wallet_dir}"
     fi
-
-    echo "✅ OCI configuration check completed"
-
-    # Check if server.py has been configured (just a warning)
-    if grep -q "ocid1.compartment.oc1" service/python/server.py 2>/dev/null; then
-        echo "⚠️  WARNING: server.py still contains placeholder compartment_id"
-        echo "   Please update service/python/server.py with your actual compartment_id"
-    fi
+    
+    return 0
 }
+
+
 
 # Function to check Node.js and setup frontend
 setup_frontend() {
@@ -108,16 +89,16 @@ setup_frontend() {
     # Check if Node.js is available
     if ! command_exists node; then
         echo "❌ Node.js is required but not found."
-        echo "   Please install Node.js 16+: https://nodejs.org/"
+        echo "   Please install Node.js 18+: https://nodejs.org/"
         exit 1
     fi
 
     # Check Node version
     NODE_VERSION=$(node -v | sed 's/v//')
-    if node -e "const v=process.version.match(/^v(\d+)/)[1]; process.exit(v>=16?0:1)"; then
+    if node -e "const v=process.version.match(/^v(\d+)/)[1]; process.exit(v>=18?0:1)"; then
         echo "✅ Node.js $NODE_VERSION detected"
     else
-        echo "❌ Node.js 16+ is required. Current version: $NODE_VERSION"
+        echo "❌ Node.js 18+ is required. Current version: $NODE_VERSION"
         exit 1
     fi
 
@@ -132,23 +113,66 @@ setup_frontend() {
     fi
 
     echo "✅ Frontend setup complete"
+
 }
 
+# Function to check Java (>=17)
+check_java() {
+    echo "☕ Checking Java runtime..."
+    if ! command_exists java; then
+        echo "❌ Java (JDK) is required but not found. Please install Java 17+."
+        exit 1
+    fi
+    JAVA_VERSION_RAW=$(java -version 2>&1 | awk -F\" '/version/ {print $2}')
+    JAVA_MAJOR=${JAVA_VERSION_RAW%%.*}
+    if [[ "$JAVA_MAJOR" =~ ^[0-9]+$ ]] && [ "$JAVA_MAJOR" -ge 17 ]; then
+        echo "✅ Java $JAVA_VERSION_RAW detected"
+    else
+        echo "❌ Java 17+ is required. Current version: $JAVA_VERSION_RAW"
+        exit 1
+    fi
+}
+
+# Wait for Java backend health to be UP
+wait_for_java() {
+    echo "⏳ Waiting for Java backend health at http://localhost:8080/actuator/health ..."
+    local tries=60
+    while [ $tries -gt 0 ]; do
+        if curl -sf http://localhost:8080/actuator/health | grep -q "\"status\":\"UP\""; then
+            echo "✅ Java backend is UP"
+            return 0
+        fi
+        sleep 1
+        tries=$((tries - 1))
+    done
+    echo "❌ Java backend did not become ready in time"
+    return 1
+}
 # Function to start the application
 start_application() {
-    echo "🎯 Starting OCI Generative AI JET UI..."
+    echo "🎯 Starting OCI Generative AI JET UI (Java backend + JET frontend)..."
     echo ""
 
-    # Start Python backend in background
-    echo "🔧 Starting Python backend server..."
-    cd service/python
-    source venv/bin/activate
-    python server.py &
-    BACKEND_PID=$!
-    cd ../..
+    # Start Oracle DB first
+    start_oracle_db || {
+        echo "❌ Failed to start ADB"
+        exit 1
+    }
+    
+    # Start Java backend with local profile and TNS_ADMIN
+    echo "🔧 Starting Java backend server (local profile)..."
+    cd backend
+    export TNS_ADMIN="$HOME/adb_wallet"
+    SPRING_PROFILES_ACTIVE=local ./gradlew bootRun &
+    JAVA_PID=$!
+    cd ..
 
-    # Wait a moment for backend to start
-    sleep 3
+    # Wait for backend readiness
+    wait_for_java || {
+        echo "❌ Backend failed to start. Stopping..."
+        kill $JAVA_PID 2>/dev/null || true
+        exit 1
+    }
 
     # Start frontend
     echo "🌟 Starting frontend development server..."
@@ -161,13 +185,13 @@ start_application() {
     echo "🎉 Application started successfully!"
     echo ""
     echo "📱 Frontend: http://localhost:8000 (or check npm output for exact port)"
-    echo "🔌 Backend: WebSocket on ws://localhost:1986, HTTP on http://localhost:1987"
+    echo "🔌 Backend (Java): http://localhost:8080 (health: /actuator/health)"
     echo ""
     echo "🛑 To stop the application, press Ctrl+C"
     echo ""
 
     # Wait for user interrupt
-    trap "echo '🛑 Stopping application...'; kill $BACKEND_PID $FRONTEND_PID 2>/dev/null; exit" INT
+    trap "echo '🛑 Stopping application...'; kill $JAVA_PID $FRONTEND_PID 2>/dev/null || true; exit" INT TERM
 
     # Wait for processes
     wait
@@ -179,8 +203,8 @@ show_usage() {
     echo ""
     echo "Options:"
     echo "  -h, --help     Show this help message"
-    echo "  -s, --skip-checks  Skip OCI configuration checks"
-    echo "  --backend-only     Start only the Python backend"
+    echo "  -s, --skip-checks  Reserved (no-op)"
+    echo "  --backend-only     Start only the Java backend"
     echo "  --frontend-only    Start only the frontend"
     echo ""
     echo "Examples:"
@@ -224,10 +248,7 @@ done
 main() {
     # Run setup steps
     if [ "$FRONTEND_ONLY" = false ]; then
-        setup_python_env
-        if [ "$SKIP_CHECKS" = false ]; then
-            check_oci_config
-        fi
+        check_java
     fi
 
     if [ "$BACKEND_ONLY" = false ]; then
@@ -236,12 +257,11 @@ main() {
 
     # Start application based on flags
     if [ "$BACKEND_ONLY" = true ]; then
-        echo "🔧 Starting backend only..."
-        cd service/python
-        source venv/bin/activate
-        python server.py
+        echo "🔧 Starting backend only (Java)..."
+        cd backend
+        ./gradlew bootRun
     elif [ "$FRONTEND_ONLY" = true ]; then
-        echo "🌐 Starting frontend only..."
+        echo "� Starting frontend only..."
         cd app
         npm run dev
     else

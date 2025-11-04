@@ -19,6 +19,11 @@ spring:
     hibernate:
       use-new-id-generator-mappings: false
       ddl-auto: none
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      file-size-threshold: 2MB
 oracle:
   jdbc:
     fanEnabled: true

@@ -129,8 +129,9 @@ public class PromptController {
             String context = buildContext(summary, recentAsc);
             String modelInput = context + "[User]\n" + promptEscaped;
 
-            // call model
-            String responseFromGenAI = genAI.resolvePrompt(modelInput, activeModel, finetune, false);
+            // call model (capture usage if available)
+            OCIGenAIService.ModelResponse modelResp = genAI.resolvePromptWithUsage(modelInput, activeModel, finetune, false);
+            String responseFromGenAI = modelResp.getContent();
 
             // assistant message
             Message mAsst = new Message(UUID.randomUUID().toString(), conversationId, "assistant", responseFromGenAI);
@@ -142,6 +143,15 @@ public class PromptController {
             long latencyMs = (System.nanoTime() - t0) / 1_000_000L;
             InteractionEvent ev = new InteractionEvent("default", "chat", activeModel);
             ev.setLatencyMs(latencyMs);
+            if (modelResp.getTokensIn() != null) {
+                ev.setTokensIn(modelResp.getTokensIn().longValue());
+            }
+            if (modelResp.getTokensOut() != null) {
+                ev.setTokensOut(modelResp.getTokensOut().longValue());
+            }
+            if (modelResp.getCost() != null) {
+                ev.setCostEst(java.math.BigDecimal.valueOf(modelResp.getCost()));
+            }
             interactionEventRepository.save(ev);
 
             return new Answer(responseFromGenAI, "");

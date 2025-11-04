@@ -2,7 +2,7 @@
 
 This UI turns the Data → Model → Service (DMS) architecture into a usable assistant: a fast, accessible Oracle JET web app for chat, RAG, upload, and settings.
 
-We moved from command lines to GUIs, from click-and-type to touch and voice—and now to assistants that understand intent. This frontend is the “understanding surface” for the blueprint: Oracle JET on the web, Spring Boot in the middle, OCI Generative AI for models, and Oracle Database 26ai for durable context and retrieval.
+We moved from command lines to GUIs, from click-and-type to touch and voice—and now to assistants that understand intent. This frontend is the “understanding surface” for the blueprint: Oracle JET on the web, Spring Boot in the middle, OCI Generative AI for models, and Oracle AI Database for durable context and retrieval.
 
 ## Why JET for assistants
 

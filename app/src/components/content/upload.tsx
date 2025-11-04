@@ -10,15 +10,16 @@ import { CFilePickerElement } from "oj-c/file-picker";
 import { CButtonElement } from "oj-c/button";
 import { ConvoCtx } from "../app";
 import { debugLog } from "../../libs/debug";
+import { setKv, deleteKv } from "../../libs/memory";
 
 type Props = {
-  backendType: "java" | "python";
+  backendType: "java";
   modelId: string | null;
 };
 
 const acceptArr: string[] = ["application/pdf", "*.pdf"];
-// Keep client-side limit conservative to match backend PDFConvertorController (currently ~1MB)
-const FILE_SIZE = 900_000;
+// Client-side limit aligned with backend: 100 MB
+const FILE_SIZE = 100 * 1024 * 1024;
 
 export const Upload = ({ backendType, modelId }: Props) => {
   const conversationId = useContext(ConvoCtx);
@@ -56,7 +57,7 @@ export const Upload = ({ backendType, modelId }: Props) => {
         {
           id: 2,
           severity: "Error",
-          summary: `File "${f.name}" is too big. Maximum size is ${Math.round(FILE_SIZE / 1000)}KB.`,
+          summary: `File "${f.name}" is too big. Maximum size is ${Math.round(FILE_SIZE / (1024 * 1024))}MB.`,
         },
       ]);
       accept(Promise.reject());
@@ -80,13 +81,14 @@ export const Upload = ({ backendType, modelId }: Props) => {
     setFile(files[0]);
     setFileNames([files[0].name]);
     setMessages([]);
+    try {
+      await setKv(conversationId, 'pendingUpload', { name: files[0].name, size: files[0].size, lastModified: files[0].lastModified }, 300);
+    } catch (e) {
+      // non-blocking
+    }
   };
 
   const doUpload = async (_ev: CButtonElement.ojAction) => {
-    if (backendType !== "java") {
-      setMessages([{ id: 3, severity: "Warning", summary: "Upload is supported by the Java backend only." }]);
-      return;
-    }
     if (!file) {
       setMessages([{ id: 4, severity: "Error", summary: "Please select a PDF file to upload." }]);
       return;
@@ -133,6 +135,11 @@ export const Upload = ({ backendType, modelId }: Props) => {
         setMessages([{ id: 6, severity: "Error", summary: `Server error: ${errorMessage}` }]);
       } else {
         setMessages([{ id: 7, severity: "Confirmation", summary: "Upload successful. You can now use RAG to ask about this document." }]);
+        try {
+          await deleteKv(conversationId, 'pendingUpload');
+        } catch (e) {
+          // non-blocking
+        }
         // Auto-run KB diagnostics after a successful upload and log to console
         try {
           const diagRes = await fetch("/api/kb/diag?tenantId=default");
@@ -153,11 +160,16 @@ export const Upload = ({ backendType, modelId }: Props) => {
     }
   };
 
-  const clearSelection = (_ev: CButtonElement.ojAction) => {
+  const clearSelection = async (_ev: CButtonElement.ojAction) => {
     setFile(null);
     setFileNames(null);
     setMessages([]);
     setLoading(false);
+    try {
+      await deleteKv(conversationId, 'pendingUpload');
+    } catch (e) {
+      // non-blocking
+    }
   };
 
   useEffect(() => {
@@ -169,7 +181,7 @@ export const Upload = ({ backendType, modelId }: Props) => {
       <oj-c-message-toast data={messagesDP} onojClose={closeMessage}></oj-c-message-toast>
 
       <div class="oj-flex-item oj-sm-margin-4x">
-        <h1>Document Upload</h1>
+        <h1>RAG Knowledge Base</h1>
         <div class="oj-typography-body-md oj-sm-padding-1x-bottom">
           Upload a PDF to add it to your knowledge base. The backend will ingest and index it for RAG.
         </div>
@@ -181,7 +193,7 @@ export const Upload = ({ backendType, modelId }: Props) => {
           onojBeforeSelect={beforeSelectListener}
           onojInvalidSelect={invalidListener}
           onojSelect={selectListener}
-          secondaryText={`Maximum file size is ${Math.round(FILE_SIZE / 1000)}KB.`}
+          secondaryText={`Maximum file size is ${Math.round(FILE_SIZE / (1024 * 1024))}MB.`}
         ></oj-c-file-picker>
 
         {fileNames && (

@@ -66,8 +66,8 @@ public class PDFConvertorController {
             if (filename.contains("..")) {
                 throw new Exception("Filename contains invalid path sequence");
             }
-            if (multipartFile.getBytes().length > (1024 * 1024)) {
-                throw new Exception("File size exceeds maximum limit");
+            if (multipartFile.getSize() > (100L * 1024 * 1024)) {
+                throw new Exception("File size exceeds maximum 100MB limit");
             }
             String fileDestinationPath = StringUtils.cleanPath(storagePath);
             File file = new File(fileDestinationPath + File.separator + filename);

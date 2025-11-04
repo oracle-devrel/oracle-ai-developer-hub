@@ -1,11 +1,11 @@
 # From GUIs to RAG: Building a Cloud‑Native RAG on Oracle Cloud
-Practical deployment blueprint using Oracle Database 26ai, OCI Generative AI, Spring Boot and Oracle JET
+Practical deployment blueprint using Oracle AI Database, OCI Generative AI, Spring Boot and Oracle JET
 
-Direct answer: This repo ships a complete RAG app (Oracle JET UI → Spring Boot → OCI Generative AI → Oracle Database 26ai VECTOR) so you don’t need a separate vector database or fragile JSON↔relational sync.
+Direct answer: This repo ships a complete RAG app (Oracle JET UI → Spring Boot → OCI Generative AI → Oracle AI Database) so you don’t need a separate vector database or fragile JSON↔relational sync.
 
-<!-- keywords: oracle database 26ai, vector search, rag, json relational duality views, select ai, oci generative ai, oracle jet, spring boot, kubernetes, oke, pdf rag, knowledge base -->
+<!-- keywords: oracle ai database, vector search, rag, json relational duality views, select ai, oci generative ai, oracle jet, spring boot, kubernetes, oke, pdf rag, knowledge base -->
 
-Updated for Oracle Database 26ai and the latest OCI Generative AI model catalog.
+Updated for Oracle AI Database and the latest OCI Generative AI model catalog.
 
 We don’t use computers the way we used to. We moved from command lines to GUIs, from click‑and‑type to touch and voice—and now to assistants that understand intent. The next leap isn’t a new button; it’s software that adapts to people.
 
@@ -14,20 +14,20 @@ Shipping that shift in the enterprise takes more than calling an LLM API. It req
 This repository provides a runnable blueprint:
 - Web UI: Oracle JET for an enterprise‑grade chat interface with upload and settings.
 - Service: Spring Boot backend with vendor‑aware calls to OCI Generative AI (Cohere, Meta, xAI).
-- Data: Oracle Database 26ai (via Autonomous Database) for durable chat history, memory, telemetry, and a knowledge base (KB) for RAG.
+- Data: Oracle AI Database for durable chat history, memory, telemetry, and a knowledge base (KB) for RAG.
 
 Quick links
 - Frontend deep dive (Oracle JET): [JET.md](JET.md)
 - Cloud‑native deployment (OKE, Terraform, Kustomize): [K8S.md](K8S.md)
 - RAG pipeline and usage: [RAG.md](RAG.md)
-- Database schema and Liquibase (26ai VECTOR): [DATABASE.md](DATABASE.md)
+- Database schema and Liquibase: [DATABASE.md](DATABASE.md)
 - Models and parameters (vendor‑aware): [MODELS.md](MODELS.md)
 - Backend services guide: [SERVICES_GUIDE.md](SERVICES_GUIDE.md)
 - Troubleshooting: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 - FAQ: [FAQ.md](FAQ.md)
 
 ## At a glance
-- AI‑driven and distinct: Oracle Database 26ai is vector‑native and integrates governed AI patterns, purpose‑built for GenAI—not “Oracle Classic.”
+- AI‑driven and distinct: Oracle AI Database is vector‑native and integrates governed AI patterns
 - Developer‑first: runs end‑to‑end locally and deploys to OKE; vendor‑aware model calls (Cohere, Meta, xAI) avoid invalid parameters by design.
 - Accessible and cost‑effective: frictionless onboarding; a single database for SQL + JSON + vectors reduces multi‑DB sprawl.
 - Clear backend map: see SERVICES_GUIDE.md for the service dependency graph, diagnostics, and code anchors.
@@ -35,7 +35,7 @@ Quick links
 
 ## The Data‑Model‑Service (DMS) Architecture
 
-- Data Layer: Oracle Database 26ai via ADB
+- Data Layer: Oracle AI Database
   - Durable chat history (conversations, messages)
   - Memory (key/value and long‑form)
   - Telemetry (interactions: latency, tokens, cost)
@@ -57,7 +57,7 @@ Quick links
 
 ### Architecture (Mermaid)
 
-Alt: Oracle JET UI ↔ Spring Boot ↔ Oracle Database 26ai (KB, telemetry, memory) ↔ OCI Generative AI.
+Alt: Oracle JET UI ↔ Spring Boot ↔ Oracle AI Database (KB, telemetry, memory) ↔ OCI Generative AI.
 
 ```mermaid
 flowchart LR
@@ -69,7 +69,7 @@ flowchart LR
     B2["Services:<br/>OCIGenAI, Rag, Models"]
     B3["Liquibase<br/>Migrations"]
   end
-  subgraph "Data<br/>(Oracle DB 26ai via ADB)"
+  subgraph "Data<br/>(Oracle AI Database via ADB)"
     D1["Conversations / Messages<br/>Memory"]
     D2["Telemetry:<br/>interactions"]
     D3["KB Tables<br/>for RAG"]
@@ -100,7 +100,7 @@ For this exact app, non‑Oracle stacks typically require:
 - A separate vector store and new retrieval logic
 - Extra ETL/sync between document and relational projections
 - More services to manage, higher latency, and additional failure modes
-Oracle Database 26ai co‑locates vectors, SQL, and JSON, reducing integration debt.
+Oracle AI Database co‑locates vectors, SQL, and JSON, reducing integration debt.
 
 ## Who this is for
 - Existing Oracle customers: modernize or extend apps with RAG, vectors, and governed AI without re‑platforming. Keep ADB as your database of record and deploy on OKE when ready.

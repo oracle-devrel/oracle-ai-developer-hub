@@ -1,19 +1,19 @@
-# Deploying RAG Assistants on Kubernetes with Oracle Kubernetes Engine (OKE) and OCI
+# Deploying RAG Assistant on Kubernetes with Oracle AI Database and Oracle Cloud Infrastructure  
 
-Deploy Retrieval‑Augmented Generation (RAG) assistants on Kubernetes using Oracle Kubernetes Engine (OKE) and Oracle Cloud Infrastructure (OCI). This guide covers Terraform provisioning, Kustomize overlays, OCI Container Registry (OCIR) image publishing, and secure connectivity to Oracle Autonomous Database for vector‑enabled RAG with OCI Generative AI.
+Deploy Retrieval‑Augmented Generation (RAG) assistant on Kubernetes using Oracle Kubernetes Engine (OKE) and Oracle Cloud Infrastructure (OCI). This guide covers Terraform provisioning, Kustomize overlays, OCI Container Registry (OCIR) image publishing, and secure connectivity to Oracle AI Database for vector‑enabled RAG with OCI Generative AI.
 
 This guide operationalizes the Data → Model → Service (DMS) architecture on Oracle Cloud:
 
-- Oracle Database 26ai (via Autonomous Database) for durable context, memory, telemetry, and KB for RAG
+- Oracle AI Database for durable context, memory, telemetry, and Knowledge Base (KB) for RAG
 - OCI Generative AI for model inference (Cohere, Meta, xAI via Inference)
 - Spring Boot backend and Oracle JET web app on OKE (Oracle Container Engine for Kubernetes)
 - Terraform + Kustomize for reproducible environments
 
-![RAG on Kubernetes architecture: OKE, Spring Boot, Oracle JET, OCI Generative AI, Oracle Database 26ai](images/architecture.png)
+![RAG on Kubernetes architecture: OKE, Spring Boot, Oracle JET, OCI Generative AI, Oracle AI Database](images/architecture.png)
 
 ## Table of Contents
 
-- [Deploying RAG Assistants on Kubernetes with Oracle Kubernetes Engine (OKE) and OCI](#deploying-rag-assistants-on-kubernetes-with-oracle-kubernetes-engine-oke-and-oci)
+- [Deploying RAG Assistant on Kubernetes with Oracle AI Database and Oracle Cloud Infrastructure](#deploying-rag-assistant-on-kubernetes-with-oracle-ai-database-and-oracle-cloud-infrastructure)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
   - [Environment setup](#environment-setup)
@@ -73,6 +73,10 @@ terraform apply --auto-approve
 cd ../..
 ```
 
+```bash
+cd deploy/terraform && terraform init && terraform apply --auto-approve && cd ../..
+```
+
 After apply, a kubeconfig is generated at `deploy/terraform/generated/kubeconfig`.
 
 ## Build and publish container images to OCI Container Registry (OCIR)
@@ -80,7 +84,7 @@ After apply, a kubeconfig is generated at `deploy/terraform/generated/kubeconfig
 Use the release script to version, build, login, and push images to OCIR:
 
 ```bash
-npx zx scripts/release.mjs
+npx zx scripts/release.mjs 
 ```
 
 ## Generate and apply Kustomize overlays
@@ -207,9 +211,9 @@ npx zx scripts/clean.mjs
 
 ## Notes
 
-- This blueprint targets Oracle Database 26ai features through ADB for vector‑ready, assistant‑grade persistence.
+- This blueprint targets Oracle AI Database features through ADB for vector‑ready, assistant‑grade persistence.
 - See [DATABASE.md](DATABASE.md) for Liquibase migrations and table layouts, [RAG.md](RAG.md) for RAG pipeline usage, and [README.md](README.md) for the broader “From GUIs to RAG” story.
 
 ## Keywords
 
-Kubernetes, Oracle Kubernetes Engine, OKE, Oracle Cloud Infrastructure, OCI, OCI Generative AI, Autonomous Database, Oracle Database 26ai, RAG, Retrieval‑Augmented Generation, Terraform on OCI, Kustomize, Kubernetes Ingress, OCIR, Oracle JET, Spring Boot on Kubernetes, vector search, embeddings, ANN index, Workload Identity, Instance Principals
+Kubernetes, Oracle Kubernetes Engine, OKE, Oracle Cloud Infrastructure, OCI, OCI Generative AI, Autonomous Database, Oracle AI Database, RAG, Retrieval‑Augmented Generation, Terraform on OCI, Kustomize, Kubernetes Ingress, OCIR, Oracle JET, Spring Boot on Kubernetes, vector search, embeddings, ANN index, Workload Identity, Instance Principals

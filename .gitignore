@@ -82,3 +82,4 @@ bin/
 dist/
 application-local.yaml
 /writeup
+/.clinerules

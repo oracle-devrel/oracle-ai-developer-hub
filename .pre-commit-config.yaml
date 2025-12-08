@@ -22,6 +22,7 @@ repos:
           (?x)^(
             .*\.min\.js|
             .*\.min\.css|
+            .*\.ipynb|
             node_modules/.*|
             .*\.lock
           )$

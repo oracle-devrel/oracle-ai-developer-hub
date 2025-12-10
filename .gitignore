@@ -141,3 +141,4 @@ logs/
 *.classpath
 *.project
 .settings/
+.wallet/

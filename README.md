@@ -10,8 +10,8 @@ This repository is organized into several key areas:
 
 Applications and reference implementations demonstrating how to build AI-powered solutions with Oracle technologies. These complete, working examples showcase end-to-end implementations of AI applications, agents, and systems that leverage Oracle AI Database and OCI services. Each application includes source code, deployment configurations, and documentation to help developers understand architectural patterns, integration approaches, and best practices for building production-grade AI solutions.
 
-| Name                     | Description                                                                                                                       | Link                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Name                     | Description                                                                                                                      | Link                                                                                                           |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | oci-generative-ai-jet-ui | Full-stack AI application with Oracle JET UI, OCI Generative AI integration, Kubernetes deployment, and Terraform infrastructure | [![View App](https://img.shields.io/badge/View%20App-blue?style=flat-square)](./apps/oci-generative-ai-jet-ui) |
 
 ### 📓 **Notebooks** (`/notebooks`)
@@ -24,11 +24,11 @@ Jupyter notebooks and interactive tutorials covering:
 - Data preparation and analysis workflows
 - Agent development and orchestration examples
 
-| Name                              | Description                                                                                                                                    | Stack                                         | Link                                                                                                                                           |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| memory_context_engineering_agents | Build AI agents with 6 types of persistent memory. Covers memory engineering, context window management, and just-in-time retrieval patterns. | LangChain, Oracle AI Database, OpenAI, Tavily | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/memory_context_engineering_agents.ipynb) |
-| oracle_rag_agents_zero_to_hero    | Learn to build RAG agents from scratch using Oracle AI Database.                                                                               | Oracle AI Database, OpenAI, OpenAI Agents SDK | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_agents_zero_to_hero.ipynb)    |
-| oracle_rag_with_evals             | Build RAG systems with comprehensive evaluation metrics                                                                                        | Oracle AI Database, OpenAI, BEIR, Galileo     | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_with_evals.ipynb)             |
+| Name                              | Description                                                      | Stack                                         | Link                                                                                                                                           |
+| --------------------------------- | ---------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| memory_context_engineering_agents | Build AI agents with 6 types of persistent memory.               | LangChain, Oracle AI Database, OpenAI, Tavily | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/memory_context_engineering_agents.ipynb) |
+| oracle_rag_agents_zero_to_hero    | Learn to build RAG agents from scratch using Oracle AI Database. | Oracle AI Database, OpenAI, OpenAI Agents SDK | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_agents_zero_to_hero.ipynb)    |
+| oracle_rag_with_evals             | Build RAG systems with comprehensive evaluation metrics          | Oracle AI Database, OpenAI, BEIR, Galileo     | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_with_evals.ipynb)             |
 
 ### 🎓 **Workshops** (`/workshops`)
 

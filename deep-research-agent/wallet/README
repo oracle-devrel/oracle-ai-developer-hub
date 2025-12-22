@@ -1,0 +1,43 @@
+Wallet Expiry Date
+-----------------------
+This wallet was downloaded on 2025-12-18 17:40:03.863027414 UTC.
+The SSL certificates provided in this wallet will expire on 2030-12-17 17:38:50.838272 UTC.
+In order to avoid any service interruptions due to an expired SSL certificate, you must re-download the wallet before this date.
+
+Autonomous Database Tools and Resources
+---------------------------------------
+
+Database Actions
+----------------
+Load, explore, transform, model, and catalog your data. Use an SQL worksheet, build REST interfaces and low-code apps, manage users and connections, build and apply machine learning models. 
+Access Link:
+
+https://GB73D7D0E607B74-RESEARCHDB.adb.ap-hyderabad-1.oraclecloudapps.com/ords/sql-developer
+
+Graph Studio
+------------
+Oracle Graph Studio lets you create scalable property graph databases. Graph Studio automates the creation of graph models and in-memory graphs from database tables. It includes notebooks and developer APIs that allow you to execute graph queries using PGQL (an SQL-like graph query language) and over 50 built-in graph algorithms. Graph Studio also offers dozens of visualization, including native graph visualization. 
+Access Link:
+
+https://GB73D7D0E607B74-RESEARCHDB.adb.ap-hyderabad-1.oraclecloudapps.com/graphstudio/
+
+Oracle Application Express
+--------------------------
+Oracle Application Express (APEX) is a low-code development platform that enables you to build scalable, secure enterprise apps that can be deployed anywhere. 
+Access Link:
+
+https://GB73D7D0E607B74-RESEARCHDB.adb.ap-hyderabad-1.oraclecloudapps.com/ords/apex
+
+Oracle Machine Learning User Interface
+--------------------------------------
+The Oracle Machine Learning User Interface provides immediate access to the Oracle Machine Learning components and functionality on Autonomous Database, including OML Notebooks, OML AutoML UI, OML Models, and template example notebooks. Through OML Notebooks, users can develop notebooks comprised of SQL, PL/SQL, R, Python, and markdown paragraphs and use OML4SQL, OML4R, and OML4Py APIs.These APIs provide access to over 30 parallelized, scalable in-database machine learningalgorithms, supporting classification, regression, anomaly detection, clustering, associations, attribute importance, feature extraction, and times series forecasting, among others. Through OML4Py and OML4R, users can invoke user-defined Python and R functions in engines spawned and controlled by the database environment, with optional data-parallel and task-parallel invocation, as well as deploy those user-defined functions from SQL and REST APIs.
+Access Link:
+
+https://GB73D7D0E607B74-RESEARCHDB.adb.ap-hyderabad-1.oraclecloudapps.com/oml/
+
+SODA Drivers
+------------
+Simple Oracle Document Access (SODA) is a set of APIs that let you work with JSON documents managed by the Oracle Database without needing to use SQL. SODA drivers are available for REST, Java, Node.js, Python, PL/SQL, and C. 
+Access Link:
+
+https://www.oracle.com/database/technologies/appdev/json.html#sodadrivers

@@ -1,8 +1,8 @@
 # FitTrack Product Requirements Document
 
-**Version:** 1.0 | **Status:** Draft - For Development Review  
-**Date:** January 2026  
-**Target Platform:** Oracle Cloud Infrastructure (OCI)  
+**Version:** 1.0 | **Status:** Draft - For Development Review
+**Date:** January 2026
+**Target Platform:** Oracle Cloud Infrastructure (OCI)
 **Target Market:** United States (18+, sweepstakes-compliant states)
 
 ---
@@ -40,23 +40,23 @@ FitTrack transforms fitness activity into a competitive, rewarding experience. U
 
 ### 1.3 Value Proposition
 
-| Stakeholder | Value |
-|-------------|-------|
-| **Users** | Tangible rewards for fitness effort, fair competition within peer groups, community engagement, access to professional fitness guidance (premium) |
-| **Sponsors** | Access to highly engaged, health-conscious demographic with measurable brand exposure through prize sponsorship |
-| **Platform** | Sustainable revenue through premium subscriptions and sponsor partnerships without relying on intrusive advertising |
+| Stakeholder  | Value                                                                                                                                             |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Users**    | Tangible rewards for fitness effort, fair competition within peer groups, community engagement, access to professional fitness guidance (premium) |
+| **Sponsors** | Access to highly engaged, health-conscious demographic with measurable brand exposure through prize sponsorship                                   |
+| **Platform** | Sustainable revenue through premium subscriptions and sponsor partnerships without relying on intrusive advertising                               |
 
 ### 1.4 MVP Scope Summary
 
-| Dimension | MVP Scope |
-|-----------|-----------|
-| Geography | United States only, sweepstakes-compliant states |
-| User Age | 18+ only |
-| Platforms | Responsive web application (mobile apps in v1.1+) |
-| Integrations | Apple Health, Google Fit, Fitbit |
-| Data Sync | Batch processing (15-minute intervals) |
-| Monetization | Premium subscriptions only (ads deferred) |
-| Prize Admin | Manual admin management (sponsor self-service deferred) |
+| Dimension    | MVP Scope                                               |
+| ------------ | ------------------------------------------------------- |
+| Geography    | United States only, sweepstakes-compliant states        |
+| User Age     | 18+ only                                                |
+| Platforms    | Responsive web application (mobile apps in v1.1+)       |
+| Integrations | Apple Health, Google Fit, Fitbit                        |
+| Data Sync    | Batch processing (15-minute intervals)                  |
+| Monetization | Premium subscriptions only (ads deferred)               |
+| Prize Admin  | Manual admin management (sponsor self-service deferred) |
 
 ---
 
@@ -64,46 +64,46 @@ FitTrack transforms fitness activity into a competitive, rewarding experience. U
 
 ### 2.1 Primary Persona: The Motivated Beginner
 
-| Attribute | Detail |
-|-----------|--------|
-| **Name** | Sarah Chen |
-| **Age** | 32 |
-| **Occupation** | Marketing Manager |
-| **Fitness Level** | Beginner to Intermediate |
-| **Goals** | Lose 20 pounds, establish consistent exercise routine, find accountability |
-| **Pain Points** | Has tried and abandoned multiple fitness apps, lacks motivation without external rewards, feels intimidated by hardcore fitness communities |
-| **Tech Comfort** | High - uses smartphone apps daily, comfortable with wearables |
-| **Devices** | iPhone, Apple Watch |
+| Attribute         | Detail                                                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Name**          | Sarah Chen                                                                                                                                  |
+| **Age**           | 32                                                                                                                                          |
+| **Occupation**    | Marketing Manager                                                                                                                           |
+| **Fitness Level** | Beginner to Intermediate                                                                                                                    |
+| **Goals**         | Lose 20 pounds, establish consistent exercise routine, find accountability                                                                  |
+| **Pain Points**   | Has tried and abandoned multiple fitness apps, lacks motivation without external rewards, feels intimidated by hardcore fitness communities |
+| **Tech Comfort**  | High - uses smartphone apps daily, comfortable with wearables                                                                               |
+| **Devices**       | iPhone, Apple Watch                                                                                                                         |
 
 **Why FitTrack:** The prize incentive provides tangible motivation she lacks intrinsically. Tiered competition means she competes against others at her level, not marathon runners.
 
 ### 2.2 Secondary Persona: The Competitive Athlete
 
-| Attribute | Detail |
-|-----------|--------|
-| **Name** | Marcus Johnson |
-| **Age** | 28 |
-| **Occupation** | Software Developer |
-| **Fitness Level** | Advanced |
-| **Goals** | Maintain peak fitness, find new competitive outlets, connect with like-minded community |
-| **Pain Points** | Traditional fitness apps feel stale, wants recognition for effort, seeks additional motivation beyond personal records |
-| **Tech Comfort** | Very High - early adopter |
-| **Devices** | Android, Fitbit |
+| Attribute         | Detail                                                                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Name**          | Marcus Johnson                                                                                                         |
+| **Age**           | 28                                                                                                                     |
+| **Occupation**    | Software Developer                                                                                                     |
+| **Fitness Level** | Advanced                                                                                                               |
+| **Goals**         | Maintain peak fitness, find new competitive outlets, connect with like-minded community                                |
+| **Pain Points**   | Traditional fitness apps feel stale, wants recognition for effort, seeks additional motivation beyond personal records |
+| **Tech Comfort**  | Very High - early adopter                                                                                              |
+| **Devices**       | Android, Fitbit                                                                                                        |
 
 **Why FitTrack:** Premium tier offers access to professional coaching and exclusive prize pools. Leaderboard competition satisfies competitive drive.
 
 ### 2.3 Tertiary Persona: The Health-Conscious Professional
 
-| Attribute | Detail |
-|-----------|--------|
-| **Name** | Linda Rodriguez |
-| **Age** | 45 |
-| **Occupation** | Financial Analyst |
-| **Fitness Level** | Moderate |
-| **Goals** | Maintain health as she ages, prevent chronic conditions, balanced approach to fitness |
-| **Pain Points** | Time-constrained, needs flexible options, wants age-appropriate competition |
-| **Tech Comfort** | Moderate |
-| **Devices** | iPhone, basic Fitbit |
+| Attribute         | Detail                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------- |
+| **Name**          | Linda Rodriguez                                                                       |
+| **Age**           | 45                                                                                    |
+| **Occupation**    | Financial Analyst                                                                     |
+| **Fitness Level** | Moderate                                                                              |
+| **Goals**         | Maintain health as she ages, prevent chronic conditions, balanced approach to fitness |
+| **Pain Points**   | Time-constrained, needs flexible options, wants age-appropriate competition           |
+| **Tech Comfort**  | Moderate                                                                              |
+| **Devices**       | iPhone, basic Fitbit                                                                  |
 
 **Why FitTrack:** Age-bracketed competition is fair and motivating. Premium access to nutritionists aligns with holistic health goals.
 
@@ -113,63 +113,63 @@ FitTrack transforms fitness activity into a competitive, rewarding experience. U
 
 ### 3.1 User Registration & Onboarding
 
-| ID | User Story | Priority | Acceptance Criteria |
-|----|------------|----------|---------------------|
-| US-001 | As a new user, I want to register using my email address so that I can create my FitTrack account. | Must Have | Email verification sent within 60 seconds; duplicate emails rejected with friendly error |
-| US-002 | As a new user, I want to verify my age (18+) during registration so that I can participate in sweepstakes legally. | Must Have | System rejects DOB indicating age < 18; clear error messaging |
-| US-003 | As a new user, I want to confirm my state of residence so the system can determine my eligibility for sweepstakes. | Must Have | Ineligible states display appropriate messaging and alternative options |
-| US-004 | As a new user, I want to complete a fitness profile (age, sex, current fitness level) so I can be placed in appropriate competition tiers. | Must Have | Profile completion required before accessing main features |
-| US-005 | As a new user, I want to connect my fitness tracker (Apple Health, Google Fit, or Fitbit) so my activities can be automatically tracked. | Must Have | OAuth flow completes successfully; initial data sync within 5 minutes |
-| US-006 | As a user, I want to review and accept the terms of service and sweepstakes rules so I understand my rights and obligations. | Must Have | ToS acceptance timestamp recorded; rules accessible at any time |
+| ID     | User Story                                                                                                                                 | Priority  | Acceptance Criteria                                                                      |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ---------------------------------------------------------------------------------------- |
+| US-001 | As a new user, I want to register using my email address so that I can create my FitTrack account.                                         | Must Have | Email verification sent within 60 seconds; duplicate emails rejected with friendly error |
+| US-002 | As a new user, I want to verify my age (18+) during registration so that I can participate in sweepstakes legally.                         | Must Have | System rejects DOB indicating age < 18; clear error messaging                            |
+| US-003 | As a new user, I want to confirm my state of residence so the system can determine my eligibility for sweepstakes.                         | Must Have | Ineligible states display appropriate messaging and alternative options                  |
+| US-004 | As a new user, I want to complete a fitness profile (age, sex, current fitness level) so I can be placed in appropriate competition tiers. | Must Have | Profile completion required before accessing main features                               |
+| US-005 | As a new user, I want to connect my fitness tracker (Apple Health, Google Fit, or Fitbit) so my activities can be automatically tracked.   | Must Have | OAuth flow completes successfully; initial data sync within 5 minutes                    |
+| US-006 | As a user, I want to review and accept the terms of service and sweepstakes rules so I understand my rights and obligations.               | Must Have | ToS acceptance timestamp recorded; rules accessible at any time                          |
 
 ### 3.2 Activity Tracking & Points
 
-| ID | User Story | Priority | Acceptance Criteria |
-|----|------------|----------|---------------------|
-| US-010 | As a user, I want my fitness activities to be automatically synced from my connected tracker so I don't have to manually log workouts. | Must Have | Activities appear within 15 minutes of completion |
-| US-011 | As a user, I want to earn points based on my activities (steps, workouts, active minutes) so I can accumulate rewards. | Must Have | Points calculated correctly per rate table; balance updates immediately |
-| US-012 | As a user, I want to see my current point balance prominently displayed so I know how many tickets I can purchase. | Must Have | Balance visible on all primary screens; updates in real-time after transactions |
-| US-013 | As a user, I want to view my point earning history so I can understand how my activities translate to rewards. | Should Have | History shows date, activity, points earned; filterable by date range |
-| US-014 | As a user, I want points to be awarded at different rates for different activities so that diverse exercise is rewarded fairly. | Must Have | Rate table implemented correctly; vigorous activity earns more than light |
+| ID     | User Story                                                                                                                             | Priority    | Acceptance Criteria                                                             |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------- |
+| US-010 | As a user, I want my fitness activities to be automatically synced from my connected tracker so I don't have to manually log workouts. | Must Have   | Activities appear within 15 minutes of completion                               |
+| US-011 | As a user, I want to earn points based on my activities (steps, workouts, active minutes) so I can accumulate rewards.                 | Must Have   | Points calculated correctly per rate table; balance updates immediately         |
+| US-012 | As a user, I want to see my current point balance prominently displayed so I know how many tickets I can purchase.                     | Must Have   | Balance visible on all primary screens; updates in real-time after transactions |
+| US-013 | As a user, I want to view my point earning history so I can understand how my activities translate to rewards.                         | Should Have | History shows date, activity, points earned; filterable by date range           |
+| US-014 | As a user, I want points to be awarded at different rates for different activities so that diverse exercise is rewarded fairly.        | Must Have   | Rate table implemented correctly; vigorous activity earns more than light       |
 
 ### 3.3 Competition & Leaderboards
 
-| ID | User Story | Priority | Acceptance Criteria |
-|----|------------|----------|---------------------|
-| US-020 | As a user, I want to be automatically placed in a competition tier based on my profile so I compete against similar users. | Must Have | Tier assignment matches profile attributes; user can view their tier |
-| US-021 | As a user, I want to view my ranking within my competition tier so I know where I stand. | Must Have | Rank displayed prominently; updates within 15 minutes of activity |
-| US-022 | As a user, I want to see daily, weekly, and monthly leaderboards so I can track competition across different timeframes. | Must Have | All three leaderboard types functional; correct reset timing |
-| US-023 | As a user, I want to view other users' public profiles (username, tier, rank) so I can see my competition. | Should Have | Profile shows only public info; privacy respected |
+| ID     | User Story                                                                                                                 | Priority    | Acceptance Criteria                                                  |
+| ------ | -------------------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------- |
+| US-020 | As a user, I want to be automatically placed in a competition tier based on my profile so I compete against similar users. | Must Have   | Tier assignment matches profile attributes; user can view their tier |
+| US-021 | As a user, I want to view my ranking within my competition tier so I know where I stand.                                   | Must Have   | Rank displayed prominently; updates within 15 minutes of activity    |
+| US-022 | As a user, I want to see daily, weekly, and monthly leaderboards so I can track competition across different timeframes.   | Must Have   | All three leaderboard types functional; correct reset timing         |
+| US-023 | As a user, I want to view other users' public profiles (username, tier, rank) so I can see my competition.                 | Should Have | Profile shows only public info; privacy respected                    |
 
 ### 3.4 Sweepstakes & Prizes
 
-| ID | User Story | Priority | Acceptance Criteria |
-|----|------------|----------|---------------------|
-| US-030 | As a user, I want to view available prize drawings (daily, weekly, monthly, annual) so I can decide how to spend my points. | Must Have | All active drawings visible; prize details, odds, and closing time clear |
-| US-031 | As a user, I want to purchase sweepstakes tickets using my points so I can enter prize drawings. | Must Have | Transaction completes; points deducted; ticket count confirmed |
-| US-032 | As a user, I want to buy multiple tickets for a single drawing so I can increase my chances of winning. | Must Have | No limit on ticket quantity (points permitting); bulk purchase supported |
-| US-033 | As a user, I want to receive notification when I win a prize so I can claim my reward. | Must Have | Email and in-app notification within 5 minutes of drawing |
-| US-034 | As a user, I want to provide shipping information for physical prizes so they can be delivered. | Must Have | Address validation; confirmation before submission |
-| US-035 | As a user, I want to see past drawing results so I can verify the system is fair and see winners. | Should Have | Results include winner usernames, ticket counts, total entries |
+| ID     | User Story                                                                                                                  | Priority    | Acceptance Criteria                                                      |
+| ------ | --------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------ |
+| US-030 | As a user, I want to view available prize drawings (daily, weekly, monthly, annual) so I can decide how to spend my points. | Must Have   | All active drawings visible; prize details, odds, and closing time clear |
+| US-031 | As a user, I want to purchase sweepstakes tickets using my points so I can enter prize drawings.                            | Must Have   | Transaction completes; points deducted; ticket count confirmed           |
+| US-032 | As a user, I want to buy multiple tickets for a single drawing so I can increase my chances of winning.                     | Must Have   | No limit on ticket quantity (points permitting); bulk purchase supported |
+| US-033 | As a user, I want to receive notification when I win a prize so I can claim my reward.                                      | Must Have   | Email and in-app notification within 5 minutes of drawing                |
+| US-034 | As a user, I want to provide shipping information for physical prizes so they can be delivered.                             | Must Have   | Address validation; confirmation before submission                       |
+| US-035 | As a user, I want to see past drawing results so I can verify the system is fair and see winners.                           | Should Have | Results include winner usernames, ticket counts, total entries           |
 
 ### 3.5 Premium Features (v1.1)
 
-| ID | User Story | Priority | Acceptance Criteria |
-|----|------------|----------|---------------------|
+| ID     | User Story                                                                                                       | Priority           | Acceptance Criteria                              |
+| ------ | ---------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------ |
 | US-040 | As a free user, I want to upgrade to premium so I can access exclusive prize drawings and professional services. | Should Have (v1.1) | Payment flow completes; premium status immediate |
-| US-041 | As a premium user, I want to access premium-only prize pools with higher-value rewards. | Should Have (v1.1) | Premium drawings visible only to premium users |
-| US-042 | As a premium user, I want to book sessions with fitness professionals through the platform. | Should Have (v1.1) | Booking system functional; calendar integration |
+| US-041 | As a premium user, I want to access premium-only prize pools with higher-value rewards.                          | Should Have (v1.1) | Premium drawings visible only to premium users   |
+| US-042 | As a premium user, I want to book sessions with fitness professionals through the platform.                      | Should Have (v1.1) | Booking system functional; calendar integration  |
 
 ### 3.6 Administration
 
-| ID | User Story | Priority | Acceptance Criteria |
-|----|------------|----------|---------------------|
-| US-050 | As an admin, I want to create and configure prize drawings (type, date, ticket cost, prizes) so users have opportunities to win. | Must Have | Drawing creation workflow complete; validation of required fields |
-| US-051 | As an admin, I want to register sponsors and their prize offerings so drawings can be populated with rewards. | Must Have | Sponsor CRUD operations; prize inventory management |
-| US-052 | As an admin, I want to execute drawings (select winners randomly) and record results for audit purposes. | Must Have | CSPRNG selection; complete audit trail; results immutable |
-| US-053 | As an admin, I want to manage prize fulfillment workflow so winners receive their prizes. | Must Have | Status tracking: pending → shipped → delivered |
-| US-054 | As an admin, I want to view platform analytics so I can monitor business health. | Should Have | Dashboard with key metrics; export capability |
-| US-055 | As an admin, I want to suspend or ban users who violate terms of service. | Must Have | Account status management; appeal workflow |
+| ID     | User Story                                                                                                                       | Priority    | Acceptance Criteria                                               |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------------- |
+| US-050 | As an admin, I want to create and configure prize drawings (type, date, ticket cost, prizes) so users have opportunities to win. | Must Have   | Drawing creation workflow complete; validation of required fields |
+| US-051 | As an admin, I want to register sponsors and their prize offerings so drawings can be populated with rewards.                    | Must Have   | Sponsor CRUD operations; prize inventory management               |
+| US-052 | As an admin, I want to execute drawings (select winners randomly) and record results for audit purposes.                         | Must Have   | CSPRNG selection; complete audit trail; results immutable         |
+| US-053 | As an admin, I want to manage prize fulfillment workflow so winners receive their prizes.                                        | Must Have   | Status tracking: pending → shipped → delivered                    |
+| US-054 | As an admin, I want to view platform analytics so I can monitor business health.                                                 | Should Have | Dashboard with key metrics; export capability                     |
+| US-055 | As an admin, I want to suspend or ban users who violate terms of service.                                                        | Must Have   | Account status management; appeal workflow                        |
 
 ---
 
@@ -193,11 +193,11 @@ The system shall support email-based registration with email verification. Users
 
 The following states have restrictions or requirements that exclude them from MVP:
 
-| Excluded State | Reason |
-|----------------|--------|
-| New York | Registration/bonding requirements |
-| Florida | Registration requirements for certain prize values |
-| Rhode Island | Registration requirements |
+| Excluded State | Reason                                             |
+| -------------- | -------------------------------------------------- |
+| New York       | Registration/bonding requirements                  |
+| Florida        | Registration requirements for certain prize values |
+| Rhode Island   | Registration requirements                          |
 
 > **[ASSUMPTION]** Legal review will finalize the complete list of eligible states before launch.
 
@@ -205,14 +205,14 @@ The following states have restrictions or requirements that exclude them from MV
 
 Users must complete a fitness profile to be placed in competition tiers:
 
-| Field | Type | Options | Required |
-|-------|------|---------|----------|
-| Age Range | Select | 18-29, 30-39, 40-49, 50-59, 60+ | Yes |
-| Biological Sex | Select | Male, Female | Yes |
-| Fitness Level | Select | Beginner, Intermediate, Advanced | Yes |
-| Primary Goal | Multi-select | Weight Loss, Muscle Building, Endurance, General Health, Stress Relief | No |
-| Height | Number | Inches | No |
-| Weight | Number | Pounds | No |
+| Field          | Type         | Options                                                                | Required |
+| -------------- | ------------ | ---------------------------------------------------------------------- | -------- |
+| Age Range      | Select       | 18-29, 30-39, 40-49, 50-59, 60+                                        | Yes      |
+| Biological Sex | Select       | Male, Female                                                           | Yes      |
+| Fitness Level  | Select       | Beginner, Intermediate, Advanced                                       | Yes      |
+| Primary Goal   | Multi-select | Weight Loss, Muscle Building, Endurance, General Health, Stress Relief | No       |
+| Height         | Number       | Inches                                                                 | No       |
+| Weight         | Number       | Pounds                                                                 | No       |
 
 > **[ASSUMPTION]** Biological sex is used solely for creating fair competition tiers based on physiological differences in baseline fitness metrics. Users can choose any display name they prefer.
 
@@ -220,15 +220,16 @@ Users must complete a fitness profile to be placed in competition tiers:
 
 Users are placed into competition tiers based on a matrix of attributes:
 
-| Dimension | Tiers |
-|-----------|-------|
-| Age Bracket | 18-29, 30-39, 40-49, 50-59, 60+ |
-| Sex Category | Male, Female |
+| Dimension     | Tiers                            |
+| ------------- | -------------------------------- |
+| Age Bracket   | 18-29, 30-39, 40-49, 50-59, 60+  |
+| Sex Category  | Male, Female                     |
 | Fitness Level | Beginner, Intermediate, Advanced |
 
 This creates **30 possible tier combinations** (5 × 2 × 3). Users compete on leaderboards within their specific tier combination.
 
 **Tier Examples:**
+
 - `M-18-29-BEG` = Male, 18-29, Beginner
 - `F-40-49-ADV` = Female, 40-49, Advanced
 
@@ -238,11 +239,11 @@ This creates **30 possible tier combinations** (5 × 2 × 3). Users compete on l
 
 #### 4.2.1 Supported Platforms (MVP)
 
-| Platform | Integration Method | Data Available | Rate Limits |
-|----------|-------------------|----------------|-------------|
-| Apple Health | HealthKit API (requires iOS app or web workaround) | Steps, workouts, active calories, heart rate | N/A (on-device) |
-| Google Fit | REST API (OAuth 2.0) | Steps, workouts, active minutes, calories | 86,400 requests/day |
-| Fitbit | Web API (OAuth 2.0) | Steps, workouts, active minutes, sleep, heart rate | 150 requests/hour/user |
+| Platform     | Integration Method                                 | Data Available                                     | Rate Limits            |
+| ------------ | -------------------------------------------------- | -------------------------------------------------- | ---------------------- |
+| Apple Health | HealthKit API (requires iOS app or web workaround) | Steps, workouts, active calories, heart rate       | N/A (on-device)        |
+| Google Fit   | REST API (OAuth 2.0)                               | Steps, workouts, active minutes, calories          | 86,400 requests/day    |
+| Fitbit       | Web API (OAuth 2.0)                                | Steps, workouts, active minutes, sleep, heart rate | 150 requests/hour/user |
 
 > **[DECISION NEEDED]** Apple Health requires a native iOS app for direct integration. Options: (a) Build minimal iOS app for MVP, (b) Use third-party aggregator service, (c) Defer Apple Health to v1.1. Recommend option (b) with service like Terra API.
 
@@ -284,6 +285,7 @@ MVP uses batch synchronization with a **15-minute polling interval**:
 8. Updates leaderboard rankings
 
 **Duplicate Detection:** When a user has multiple trackers connected, the system uses the following priority for overlapping activities:
+
 1. User-designated primary tracker
 2. Most detailed data (more metrics available)
 3. First received
@@ -292,15 +294,15 @@ MVP uses batch synchronization with a **15-minute polling interval**:
 
 #### 4.3.1 Point Earning Rates
 
-| Activity Type | Unit | Points | Notes |
-|---------------|------|--------|-------|
-| Steps | Per 1,000 steps | 10 | Capped at 20,000 steps/day |
-| Active Minutes (Light) | Per minute | 1 | Heart rate < 50% max |
-| Active Minutes (Moderate) | Per minute | 2 | Heart rate 50-70% max |
-| Active Minutes (Vigorous) | Per minute | 3 | Heart rate > 70% max |
-| Workout Completed | Per workout (≥20 min) | 50 bonus | Max 3 workouts/day |
-| Daily Step Goal | Per achievement (10K steps) | 100 bonus | Once per day |
-| Weekly Streak | 7 consecutive active days | 250 bonus | "Active" = ≥30 active minutes |
+| Activity Type             | Unit                        | Points    | Notes                         |
+| ------------------------- | --------------------------- | --------- | ----------------------------- |
+| Steps                     | Per 1,000 steps             | 10        | Capped at 20,000 steps/day    |
+| Active Minutes (Light)    | Per minute                  | 1         | Heart rate < 50% max          |
+| Active Minutes (Moderate) | Per minute                  | 2         | Heart rate 50-70% max         |
+| Active Minutes (Vigorous) | Per minute                  | 3         | Heart rate > 70% max          |
+| Workout Completed         | Per workout (≥20 min)       | 50 bonus  | Max 3 workouts/day            |
+| Daily Step Goal           | Per achievement (10K steps) | 100 bonus | Once per day                  |
+| Weekly Streak             | 7 consecutive active days   | 250 bonus | "Active" = ≥30 active minutes |
 
 **Daily Maximum:** 1,000 points per day to prevent extreme outliers and gaming.
 
@@ -316,24 +318,24 @@ MVP uses batch synchronization with a **15-minute polling interval**:
 
 #### 4.3.3 Anti-Gaming Measures
 
-| Measure | Implementation |
-|---------|----------------|
-| Daily cap | 1,000 points maximum per day |
-| Workout cap | Maximum 3 workout bonuses per day |
-| Anomaly detection | Flag accounts with >3 standard deviations from tier average |
-| Device verification | Track device IDs; flag multiple accounts per device |
-| Manual review queue | Suspicious accounts queued for admin review before payouts |
+| Measure             | Implementation                                              |
+| ------------------- | ----------------------------------------------------------- |
+| Daily cap           | 1,000 points maximum per day                                |
+| Workout cap         | Maximum 3 workout bonuses per day                           |
+| Anomaly detection   | Flag accounts with >3 standard deviations from tier average |
+| Device verification | Track device IDs; flag multiple accounts per device         |
+| Manual review queue | Suspicious accounts queued for admin review before payouts  |
 
 ### 4.4 Sweepstakes Engine
 
 #### 4.4.1 Drawing Types
 
-| Type | Frequency | Drawing Time | Ticket Cost | Typical Prize Value |
-|------|-----------|--------------|-------------|---------------------|
-| Daily | Every day | 9:00 PM EST | 100 points | $25-$50 |
-| Weekly | Every Sunday | 9:00 PM EST | 500 points | $100-$500 |
-| Monthly | Last day of month | 9:00 PM EST | 2,000 points | $500-$2,000 |
-| Annual | December 31 | 9:00 PM EST | 10,000 points | $5,000+ |
+| Type    | Frequency         | Drawing Time | Ticket Cost   | Typical Prize Value |
+| ------- | ----------------- | ------------ | ------------- | ------------------- |
+| Daily   | Every day         | 9:00 PM EST  | 100 points    | $25-$50             |
+| Weekly  | Every Sunday      | 9:00 PM EST  | 500 points    | $100-$500           |
+| Monthly | Last day of month | 9:00 PM EST  | 2,000 points  | $500-$2,000         |
+| Annual  | December 31       | 9:00 PM EST  | 10,000 points | $5,000+             |
 
 #### 4.4.2 Drawing Configuration (Admin)
 
@@ -352,7 +354,7 @@ MVP uses batch synchronization with a **15-minute polling interval**:
       "rank": 1,
       "name": "$50 Amazon Gift Card",
       "description": "Digital gift card delivered via email",
-      "value_usd": 50.00,
+      "value_usd": 50.0,
       "quantity": 1,
       "sponsor_id": "uuid",
       "fulfillment_type": "digital|physical"
@@ -386,15 +388,16 @@ MVP uses batch synchronization with a **15-minute polling interval**:
                                 [ADDRESS_INVALID] → [ADDRESS_CONFIRMED]
 ```
 
-| Status | Trigger | Actions |
-|--------|---------|---------|
-| PENDING | Drawing completed | Create fulfillment record |
-| WINNER_NOTIFIED | Auto | Send email + in-app notification |
-| ADDRESS_CONFIRMED | User confirms/provides address | Validate address; notify admin |
-| SHIPPED | Admin enters tracking | Send tracking to user |
-| DELIVERED | Admin confirms or carrier API | Close fulfillment; update records |
+| Status            | Trigger                        | Actions                           |
+| ----------------- | ------------------------------ | --------------------------------- |
+| PENDING           | Drawing completed              | Create fulfillment record         |
+| WINNER_NOTIFIED   | Auto                           | Send email + in-app notification  |
+| ADDRESS_CONFIRMED | User confirms/provides address | Validate address; notify admin    |
+| SHIPPED           | Admin enters tracking          | Send tracking to user             |
+| DELIVERED         | Admin confirms or carrier API  | Close fulfillment; update records |
 
 **Timeouts:**
+
 - Address confirmation: 7 days (then forfeit warning)
 - Final forfeit: 14 days after drawing
 - Forfeited prizes: Re-drawn or returned to sponsor per agreement
@@ -403,12 +406,12 @@ MVP uses batch synchronization with a **15-minute polling interval**:
 
 #### 4.5.1 Leaderboard Types
 
-| Type | Reset Timing | Scope |
-|------|--------------|-------|
-| Daily | Midnight EST | Points earned today |
-| Weekly | Monday 00:00 EST | Points earned this week |
-| Monthly | 1st of month 00:00 EST | Points earned this month |
-| All-Time | Never | Cumulative points earned |
+| Type     | Reset Timing           | Scope                    |
+| -------- | ---------------------- | ------------------------ |
+| Daily    | Midnight EST           | Points earned today      |
+| Weekly   | Monday 00:00 EST       | Points earned this week  |
+| Monthly  | 1st of month 00:00 EST | Points earned this month |
+| All-Time | Never                  | Cumulative points earned |
 
 #### 4.5.2 Ranking Algorithm
 
@@ -431,33 +434,33 @@ Rankings are calculated based on **total points earned** (not current balance) w
 
 ### 5.1 Performance
 
-| Metric | Target (MVP) | Target (Scale) |
-|--------|--------------|----------------|
-| Page Load Time | < 2 seconds (p95) | < 1 second (p95) |
-| API Response Time | < 500ms (p95) | < 200ms (p95) |
-| Leaderboard Update Latency | ≤ 15 minutes | ≤ 1 minute (real-time) |
-| Activity Sync Latency | ≤ 15 minutes | ≤ 5 minutes |
-| Drawing Execution Time | < 30 seconds | < 10 seconds |
-| Concurrent Users | 5,000 | 100,000+ |
+| Metric                     | Target (MVP)      | Target (Scale)         |
+| -------------------------- | ----------------- | ---------------------- |
+| Page Load Time             | < 2 seconds (p95) | < 1 second (p95)       |
+| API Response Time          | < 500ms (p95)     | < 200ms (p95)          |
+| Leaderboard Update Latency | ≤ 15 minutes      | ≤ 1 minute (real-time) |
+| Activity Sync Latency      | ≤ 15 minutes      | ≤ 5 minutes            |
+| Drawing Execution Time     | < 30 seconds      | < 10 seconds           |
+| Concurrent Users           | 5,000             | 100,000+               |
 
 ### 5.2 Scalability
 
-| Component | MVP Architecture | Scale Architecture |
-|-----------|------------------|-------------------|
-| Web Tier | 2 OCI Compute instances + LB | OKE (Kubernetes) auto-scaling |
-| API Tier | 2 OCI Compute instances | OKE with HPA |
-| Database | Oracle Autonomous DB (2 OCPU) | Oracle Autonomous DB (auto-scaling) |
-| Cache | OCI Cache with Redis (2 nodes) | OCI Cache cluster (6+ nodes) |
-| Queue | OCI Queue (single queue) | OCI Streaming (partitioned) |
+| Component | MVP Architecture               | Scale Architecture                  |
+| --------- | ------------------------------ | ----------------------------------- |
+| Web Tier  | 2 OCI Compute instances + LB   | OKE (Kubernetes) auto-scaling       |
+| API Tier  | 2 OCI Compute instances        | OKE with HPA                        |
+| Database  | Oracle Autonomous DB (2 OCPU)  | Oracle Autonomous DB (auto-scaling) |
+| Cache     | OCI Cache with Redis (2 nodes) | OCI Cache cluster (6+ nodes)        |
+| Queue     | OCI Queue (single queue)       | OCI Streaming (partitioned)         |
 
 ### 5.3 Availability
 
-| Metric | Target |
-|--------|--------|
-| Uptime SLA | 99.9% (8.76 hours downtime/year) |
-| RTO (Recovery Time Objective) | 1 hour |
-| RPO (Recovery Point Objective) | 15 minutes |
-| Maintenance Windows | Sundays 2-4 AM EST (announced 72 hours ahead) |
+| Metric                         | Target                                        |
+| ------------------------------ | --------------------------------------------- |
+| Uptime SLA                     | 99.9% (8.76 hours downtime/year)              |
+| RTO (Recovery Time Objective)  | 1 hour                                        |
+| RPO (Recovery Point Objective) | 15 minutes                                    |
+| Maintenance Windows            | Sundays 2-4 AM EST (announced 72 hours ahead) |
 
 ### 5.4 Security
 
@@ -465,12 +468,12 @@ See [Section 10: Security Considerations](#10-security-considerations) for detai
 
 ### 5.5 Compliance
 
-| Requirement | Scope | Implementation |
-|-------------|-------|----------------|
-| CCPA | California users | Privacy controls, data export, deletion |
-| PCI-DSS | Payment processing (v1.1) | Use compliant payment processor (Stripe) |
-| Sweepstakes Laws | All operating states | Legal review; state-specific rules display |
-| Age Verification | All users | DOB collection; 18+ requirement |
+| Requirement      | Scope                     | Implementation                             |
+| ---------------- | ------------------------- | ------------------------------------------ |
+| CCPA             | California users          | Privacy controls, data export, deletion    |
+| PCI-DSS          | Payment processing (v1.1) | Use compliant payment processor (Stripe)   |
+| Sweepstakes Laws | All operating states      | Legal review; state-specific rules display |
+| Age Verification | All users                 | DOB collection; 18+ requirement            |
 
 ---
 
@@ -492,7 +495,7 @@ See [Section 10: Security Considerations](#10-security-considerations) for detai
 │         ▼                                ▼                            ▼    │
 │  ┌─────────────┐              ┌─────────────────┐            ┌───────────┐ │
 │  │  Web Tier   │              │    API Tier     │            │  Admin UI │ │
-│  │  (React)    │              │   (Node.js)     │            │  (React)  │ │
+│  │  (React)    │              │(Python/FastAPI) │            │  (React)  │ │
 │  │  2 instances│              │   2 instances   │            │ 1 instance│ │
 │  └─────────────┘              └─────────────────┘            └───────────┘ │
 │                                          │                                  │
@@ -536,26 +539,26 @@ See [Section 10: Security Considerations](#10-security-considerations) for detai
 
 ### 6.2 Component Descriptions
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Web Tier** | React 18 + Vite | Responsive SPA for end users |
-| **Admin UI** | React 18 + Vite | Administrative dashboard |
-| **API Tier** | Node.js 20 + Express | RESTful API services |
-| **Database** | Oracle Autonomous JSON Database | Primary data store with JSON Duality Views |
-| **Cache** | OCI Cache (Redis) | Session management, leaderboard caching |
-| **Queue** | OCI Queue | Asynchronous job processing |
-| **Object Storage** | OCI Object Storage | Static assets, user uploads |
-| **Vault** | OCI Vault | Secrets management, CSPRNG for drawings |
-| **WAF** | OCI WAF | DDoS protection, bot mitigation |
+| Component          | Technology                      | Purpose                                    |
+| ------------------ | ------------------------------- | ------------------------------------------ |
+| **Web Tier**       | React 18 + Vite                 | Responsive SPA for end users               |
+| **Admin UI**       | React 18 + Vite                 | Administrative dashboard                   |
+| **API Tier**       | Python 3.12 + FastAPI           | RESTful API services                       |
+| **Database**       | Oracle Autonomous JSON Database | Primary data store with JSON Duality Views |
+| **Cache**          | OCI Cache (Redis)               | Session management, leaderboard caching    |
+| **Queue**          | OCI Queue                       | Asynchronous job processing                |
+| **Object Storage** | OCI Object Storage              | Static assets, user uploads                |
+| **Vault**          | OCI Vault                       | Secrets management, CSPRNG for drawings    |
+| **WAF**            | OCI WAF                         | DDoS protection, bot mitigation            |
 
 ### 6.3 Technology Choices Rationale
 
-| Choice | Rationale |
-|--------|-----------|
-| **Oracle Autonomous JSON DB** | JSON Duality Views enable document-style development with relational integrity; auto-scaling; managed service reduces ops burden |
-| **Node.js** | High concurrency for I/O-bound workloads (API calls to fitness trackers); large ecosystem; team familiarity |
-| **React** | Component-based architecture; strong mobile-responsive capabilities; rich ecosystem |
-| **OCI-native services** | Integrated IAM, networking, monitoring; single-vendor support; cost optimization |
+| Choice                        | Rationale                                                                                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Oracle Autonomous JSON DB** | JSON Duality Views enable document-style development with relational integrity; auto-scaling; managed service reduces ops burden                        |
+| **Python + FastAPI**          | High-performance async framework; native type hints with Pydantic validation; automatic OpenAPI documentation; excellent python-oracledb driver support |
+| **React**                     | Component-based architecture; strong mobile-responsive capabilities; rich ecosystem                                                                     |
+| **OCI-native services**       | Integrated IAM, networking, monitoring; single-vendor support; cost optimization                                                                        |
 
 ---
 
@@ -608,7 +611,7 @@ CREATE TABLE users (
     password_hash       VARCHAR2(255) NOT NULL,
     email_verified      NUMBER(1) DEFAULT 0,
     email_verified_at   TIMESTAMP,
-    status              VARCHAR2(20) DEFAULT 'active' 
+    status              VARCHAR2(20) DEFAULT 'active'
                         CHECK (status IN ('pending','active','suspended','banned')),
     role                VARCHAR2(20) DEFAULT 'user'
                         CHECK (role IN ('user','premium','admin')),
@@ -617,7 +620,7 @@ CREATE TABLE users (
     created_at          TIMESTAMP DEFAULT SYSTIMESTAMP,
     updated_at          TIMESTAMP DEFAULT SYSTIMESTAMP,
     last_login_at       TIMESTAMP,
-    
+
     CONSTRAINT chk_point_balance CHECK (point_balance >= 0)
 );
 
@@ -643,7 +646,7 @@ CREATE TABLE profiles (
     goals               JSON,
     created_at          TIMESTAMP DEFAULT SYSTIMESTAMP,
     updated_at          TIMESTAMP DEFAULT SYSTIMESTAMP,
-    
+
     CONSTRAINT uk_profiles_user UNIQUE (user_id)
 );
 
@@ -656,7 +659,7 @@ CREATE INDEX idx_profiles_tier ON profiles(tier_code);
 CREATE TABLE tracker_connections (
     connection_id       RAW(16) DEFAULT SYS_GUID() PRIMARY KEY,
     user_id             RAW(16) NOT NULL REFERENCES users(user_id),
-    provider            VARCHAR2(20) NOT NULL 
+    provider            VARCHAR2(20) NOT NULL
                         CHECK (provider IN ('apple_health','google_fit','fitbit')),
     is_primary          NUMBER(1) DEFAULT 0,
     access_token        VARCHAR2(2000),  -- Encrypted
@@ -668,7 +671,7 @@ CREATE TABLE tracker_connections (
     error_message       VARCHAR2(500),
     created_at          TIMESTAMP DEFAULT SYSTIMESTAMP,
     updated_at          TIMESTAMP DEFAULT SYSTIMESTAMP,
-    
+
     CONSTRAINT uk_connection_user_provider UNIQUE (user_id, provider)
 );
 ```
@@ -691,7 +694,7 @@ CREATE TABLE activities (
     points_earned       NUMBER(5) DEFAULT 0,
     processed           NUMBER(1) DEFAULT 0,
     created_at          TIMESTAMP DEFAULT SYSTIMESTAMP,
-    
+
     CONSTRAINT uk_activity_external UNIQUE (user_id, connection_id, external_id)
 );
 
@@ -868,13 +871,13 @@ FROM users u;
 
 ### 8.1 API Overview
 
-| Aspect | Specification |
-|--------|---------------|
-| Style | REST |
-| Base URL | `https://api.fittrack.com/v1` |
-| Authentication | JWT (Bearer tokens) |
-| Content Type | `application/json` |
-| Versioning | URL path (`/v1/`) |
+| Aspect         | Specification                 |
+| -------------- | ----------------------------- |
+| Style          | REST                          |
+| Base URL       | `https://api.fittrack.com/v1` |
+| Authentication | JWT (Bearer tokens)           |
+| Content Type   | `application/json`            |
+| Versioning     | URL path (`/v1/`)             |
 
 ### 8.2 Authentication Endpoints
 
@@ -883,6 +886,7 @@ FROM users u;
 Register a new user account.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -895,6 +899,7 @@ Register a new user account.
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "userId": "550e8400-e29b-41d4-a716-446655440000",
@@ -905,6 +910,7 @@ Register a new user account.
 ```
 
 **Errors:**
+
 - `400` - Validation error (invalid email, weak password, underage, ineligible state)
 - `409` - Email already registered
 
@@ -913,6 +919,7 @@ Register a new user account.
 Authenticate and receive JWT tokens.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -921,6 +928,7 @@ Authenticate and receive JWT tokens.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIs...",
@@ -958,6 +966,7 @@ Complete password reset with token.
 Get current user's complete profile.
 
 **Response (200 OK):**
+
 ```json
 {
   "userId": "550e8400-e29b-41d4-a716-446655440000",
@@ -1009,6 +1018,7 @@ List user's connected fitness trackers.
 Start OAuth flow for connecting a tracker.
 
 **Response (200 OK):**
+
 ```json
 {
   "authorizationUrl": "https://www.fitbit.com/oauth2/authorize?client_id=...",
@@ -1035,6 +1045,7 @@ Force immediate sync (rate limited).
 Get user's activity history with pagination and filtering.
 
 **Query Parameters:**
+
 - `startDate` - ISO date
 - `endDate` - ISO date
 - `type` - `steps`, `workout`, `active_minutes`
@@ -1042,6 +1053,7 @@ Get user's activity history with pagination and filtering.
 - `limit` - Items per page (default: 20, max: 100)
 
 **Response (200 OK):**
+
 ```json
 {
   "activities": [
@@ -1074,6 +1086,7 @@ Get user's activity history with pagination and filtering.
 Get activity summary for dashboard.
 
 **Response (200 OK):**
+
 ```json
 {
   "today": {
@@ -1111,6 +1124,7 @@ Get current point balance.
 Get point transaction history.
 
 **Response (200 OK):**
+
 ```json
 {
   "transactions": [
@@ -1142,10 +1156,12 @@ Get point transaction history.
 List available and recent drawings.
 
 **Query Parameters:**
+
 - `status` - `open`, `closed`, `completed`
 - `type` - `daily`, `weekly`, `monthly`, `annual`
 
 **Response (200 OK):**
+
 ```json
 {
   "drawings": [
@@ -1163,7 +1179,7 @@ List available and recent drawings.
         {
           "rank": 1,
           "name": "$50 Amazon Gift Card",
-          "valueUsd": 50.00,
+          "valueUsd": 50.0,
           "quantity": 1,
           "sponsor": {
             "name": "Amazon",
@@ -1185,6 +1201,7 @@ Get detailed drawing information.
 Purchase tickets for a drawing.
 
 **Request:**
+
 ```json
 {
   "quantity": 5
@@ -1192,6 +1209,7 @@ Purchase tickets for a drawing.
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "ticketsPurchased": 5,
@@ -1203,6 +1221,7 @@ Purchase tickets for a drawing.
 ```
 
 **Errors:**
+
 - `400` - Insufficient points, invalid quantity
 - `403` - Drawing closed, user ineligible
 - `404` - Drawing not found
@@ -1212,6 +1231,7 @@ Purchase tickets for a drawing.
 Get drawing results (after completion).
 
 **Response (200 OK):**
+
 ```json
 {
   "drawingId": "...",
@@ -1242,14 +1262,17 @@ Get drawing results (after completion).
 Get leaderboard for a specific period.
 
 **Path Parameters:**
+
 - `period` - `daily`, `weekly`, `monthly`, `alltime`
 
 **Query Parameters:**
+
 - `tier` - Tier code (defaults to user's tier)
 - `page` - Page number
 - `limit` - Items per page (max: 100)
 
 **Response (200 OK):**
+
 ```json
 {
   "period": "weekly",
@@ -1528,15 +1551,15 @@ The dashboard is the primary landing page after login, providing at-a-glance sta
 
 ### 9.3 Design System Notes
 
-| Element | Specification |
-|---------|---------------|
-| Primary Color | `#2C5282` (Blue) |
-| Secondary Color | `#38A169` (Green - success/points) |
-| Accent Color | `#D69E2E` (Gold - prizes/wins) |
-| Error Color | `#E53E3E` (Red) |
-| Typography | Inter (headings), System UI (body) |
-| Border Radius | 8px (cards), 4px (buttons) |
-| Spacing Scale | 4px base (4, 8, 12, 16, 24, 32, 48) |
+| Element         | Specification                       |
+| --------------- | ----------------------------------- |
+| Primary Color   | `#2C5282` (Blue)                    |
+| Secondary Color | `#38A169` (Green - success/points)  |
+| Accent Color    | `#D69E2E` (Gold - prizes/wins)      |
+| Error Color     | `#E53E3E` (Red)                     |
+| Typography      | Inter (headings), System UI (body)  |
+| Border Radius   | 8px (cards), 4px (buttons)          |
+| Spacing Scale   | 4px base (4, 8, 12, 16, 24, 32, 48) |
 
 ---
 
@@ -1544,14 +1567,14 @@ The dashboard is the primary landing page after login, providing at-a-glance sta
 
 ### 10.1 Threat Model
 
-| Threat | Impact | Likelihood | Mitigation |
-|--------|--------|------------|------------|
-| Account takeover | High | Medium | MFA (v1.1), rate limiting, breach detection |
-| Point manipulation | High | Medium | Server-side validation, audit logging, anomaly detection |
-| Drawing manipulation | Critical | Low | CSPRNG, audit trail, admin 2FA |
-| Data breach | High | Low | Encryption at rest/transit, minimal PII, access controls |
-| DDoS | Medium | Medium | OCI WAF, rate limiting, auto-scaling |
-| Bot/fake accounts | Medium | High | CAPTCHA, device fingerprinting, velocity checks |
+| Threat               | Impact   | Likelihood | Mitigation                                               |
+| -------------------- | -------- | ---------- | -------------------------------------------------------- |
+| Account takeover     | High     | Medium     | MFA (v1.1), rate limiting, breach detection              |
+| Point manipulation   | High     | Medium     | Server-side validation, audit logging, anomaly detection |
+| Drawing manipulation | Critical | Low        | CSPRNG, audit trail, admin 2FA                           |
+| Data breach          | High     | Low        | Encryption at rest/transit, minimal PII, access controls |
+| DDoS                 | Medium   | Medium     | OCI WAF, rate limiting, auto-scaling                     |
+| Bot/fake accounts    | Medium   | High       | CAPTCHA, device fingerprinting, velocity checks          |
 
 ### 10.2 Authentication & Authorization
 
@@ -1566,34 +1589,34 @@ The dashboard is the primary landing page after login, providing at-a-glance sta
 
 #### 10.2.2 Authorization (RBAC)
 
-| Role | Permissions |
-|------|-------------|
-| `guest` | View public pages, register |
-| `user` | All guest + manage own account, participate in drawings, view leaderboards |
-| `premium` | All user + access premium drawings, professional services |
-| `admin` | All permissions + user management, drawing management, analytics |
+| Role      | Permissions                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| `guest`   | View public pages, register                                                |
+| `user`    | All guest + manage own account, participate in drawings, view leaderboards |
+| `premium` | All user + access premium drawings, professional services                  |
+| `admin`   | All permissions + user management, drawing management, analytics           |
 
 ### 10.3 Data Protection
 
 #### 10.3.1 Encryption
 
-| Data State | Method |
-|------------|--------|
-| In Transit | TLS 1.3 (minimum TLS 1.2) |
-| At Rest | Oracle TDE (Transparent Data Encryption) |
-| Secrets | OCI Vault with customer-managed keys |
-| OAuth Tokens | AES-256-GCM encryption before storage |
+| Data State   | Method                                   |
+| ------------ | ---------------------------------------- |
+| In Transit   | TLS 1.3 (minimum TLS 1.2)                |
+| At Rest      | Oracle TDE (Transparent Data Encryption) |
+| Secrets      | OCI Vault with customer-managed keys     |
+| OAuth Tokens | AES-256-GCM encryption before storage    |
 
 #### 10.3.2 PII Handling
 
-| Data Element | Classification | Retention | Access |
-|--------------|----------------|-----------|--------|
-| Email | PII | Account lifetime + 30 days | User, Admin |
-| Date of Birth | PII | Account lifetime | System only (age calc) |
-| Shipping Address | PII | Prize fulfillment + 90 days | User, Admin |
-| Password | Sensitive | N/A (hashed) | None |
-| Activity Data | Personal | 2 years | User, System |
-| IP Address | PII | 90 days (logs) | Admin, Security |
+| Data Element     | Classification | Retention                   | Access                 |
+| ---------------- | -------------- | --------------------------- | ---------------------- |
+| Email            | PII            | Account lifetime + 30 days  | User, Admin            |
+| Date of Birth    | PII            | Account lifetime            | System only (age calc) |
+| Shipping Address | PII            | Prize fulfillment + 90 days | User, Admin            |
+| Password         | Sensitive      | N/A (hashed)                | None                   |
+| Activity Data    | Personal       | 2 years                     | User, System           |
+| IP Address       | PII            | 90 days (logs)              | Admin, Security        |
 
 ### 10.4 API Security
 
@@ -1620,15 +1643,15 @@ The sweepstakes drawing process requires additional security measures:
 
 ### 10.6 Compliance Checklist
 
-| Requirement | Status | Notes |
-|-------------|--------|-------|
-| CCPA Privacy Policy | Required | Legal to draft |
-| Terms of Service | Required | Legal to draft |
-| Sweepstakes Rules | Required | State-specific versions needed |
-| Age Verification | Required | DOB collection + 18+ validation |
-| Data Export | Required | User can export their data |
-| Data Deletion | Required | Account deletion within 30 days |
-| Cookie Consent | Required | Banner for non-essential cookies |
+| Requirement         | Status   | Notes                            |
+| ------------------- | -------- | -------------------------------- |
+| CCPA Privacy Policy | Required | Legal to draft                   |
+| Terms of Service    | Required | Legal to draft                   |
+| Sweepstakes Rules   | Required | State-specific versions needed   |
+| Age Verification    | Required | DOB collection + 18+ validation  |
+| Data Export         | Required | User can export their data       |
+| Data Deletion       | Required | Account deletion within 30 days  |
+| Cookie Consent      | Required | Banner for non-essential cookies |
 
 ---
 
@@ -1651,36 +1674,39 @@ The sweepstakes drawing process requires additional security measures:
 
 ### 11.2 Unit Testing
 
-| Component | Framework | Coverage Target |
-|-----------|-----------|-----------------|
-| API Services | Jest | 80%+ |
-| React Components | React Testing Library | 70%+ |
-| Utility Functions | Jest | 90%+ |
-| Database Functions | Jest + Oracle Test Container | 80%+ |
+| Component            | Framework                      | Coverage Target                |
+| -------------------- | ------------------------------ | ------------------------------ |
+| API Services         | pytest                         | 80%+                           |
+| React Components     | React Testing Library          | 70%+                           |
+| Utility Functions    | pytest                         | 90%+                           |
+| Database Functions   | pytest + Oracle Test Container | 80%+                           |
+| Property-Based Tests | pytest + Hypothesis            | Points calculation, tier logic |
 
 **Focus Areas:**
+
 - Points calculation logic
 - Tier assignment logic
 - Drawing eligibility rules
-- Input validation
+- Input validation (Pydantic schemas)
 
 ### 11.3 Integration Testing
 
-| Integration | Approach |
-|-------------|----------|
-| API → Database | Test containers with Oracle XE |
-| API → Fitness APIs | Mock servers (WireMock) |
-| API → OCI Services | OCI SDK mocks + limited live tests |
-| Auth Flows | Full flow tests with test users |
+| Integration        | Approach                                          |
+| ------------------ | ------------------------------------------------- |
+| API → Database     | Test containers with Oracle XE; pytest-asyncio    |
+| API → Fitness APIs | Mock servers (respx for httpx)                    |
+| API → OCI Services | OCI SDK mocks + limited live tests                |
+| Auth Flows         | Full flow tests with test users; httpx TestClient |
 
 ### 11.4 End-to-End Testing
 
-| Tool | Purpose |
-|------|---------|
+| Tool       | Purpose                 |
+| ---------- | ----------------------- |
 | Playwright | Cross-browser E2E tests |
-| Scenarios | Critical user journeys |
+| Scenarios  | Critical user journeys  |
 
 **Critical E2E Scenarios:**
+
 1. New user registration → profile completion → tracker connection → first activity sync
 2. Point earning → ticket purchase → drawing entry → result viewing
 3. Admin drawing creation → scheduling → execution → winner notification
@@ -1688,14 +1714,15 @@ The sweepstakes drawing process requires additional security measures:
 
 ### 11.5 Performance Testing
 
-| Test Type | Tool | Targets |
-|-----------|------|---------|
-| Load Testing | k6 | 5,000 concurrent users |
-| Stress Testing | k6 | Find breaking point |
-| Soak Testing | k6 | 24-hour sustained load |
+| Test Type        | Tool       | Targets                     |
+| ---------------- | ---------- | --------------------------- |
+| Load Testing     | k6         | 5,000 concurrent users      |
+| Stress Testing   | k6         | Find breaking point         |
+| Soak Testing     | k6         | 24-hour sustained load      |
 | API Benchmarking | autocannon | Individual endpoint latency |
 
 **Key Performance Scenarios:**
+
 - Drawing close (high ticket purchase volume)
 - Leaderboard updates (bulk read operations)
 - Activity sync batch processing
@@ -1703,12 +1730,12 @@ The sweepstakes drawing process requires additional security measures:
 
 ### 11.6 Security Testing
 
-| Test Type | Frequency | Provider |
-|-----------|-----------|----------|
-| SAST | Every PR | Snyk / GitHub Advanced Security |
-| DAST | Weekly | OWASP ZAP |
-| Dependency Scanning | Daily | Snyk |
-| Penetration Testing | Pre-launch + Quarterly | Third-party firm |
+| Test Type           | Frequency              | Provider                        |
+| ------------------- | ---------------------- | ------------------------------- |
+| SAST                | Every PR               | Snyk / GitHub Advanced Security |
+| DAST                | Weekly                 | OWASP ZAP                       |
+| Dependency Scanning | Daily                  | Snyk                            |
+| Penetration Testing | Pre-launch + Quarterly | Third-party firm                |
 
 ---
 
@@ -1716,12 +1743,12 @@ The sweepstakes drawing process requires additional security measures:
 
 ### 12.1 Environments
 
-| Environment | Purpose | Infrastructure |
-|-------------|---------|----------------|
-| Development | Local development | Docker Compose |
-| CI | Automated testing | OCI DevOps runners |
-| Staging | Pre-production testing | OCI (scaled down) |
-| Production | Live system | OCI (full scale) |
+| Environment | Purpose                | Infrastructure     |
+| ----------- | ---------------------- | ------------------ |
+| Development | Local development      | Docker Compose     |
+| CI          | Automated testing      | OCI DevOps runners |
+| Staging     | Pre-production testing | OCI (scaled down)  |
+| Production  | Live system            | OCI (full scale)   |
 
 ### 12.2 CI/CD Pipeline
 
@@ -1746,16 +1773,16 @@ The sweepstakes drawing process requires additional security measures:
 
 1. **Code Push:**
    - Trigger: PR to main branch
-   - Actions: Lint, format check
+   - Actions: Lint (ruff), format check (black), type check (mypy)
 
 2. **Build:**
-   - Compile TypeScript
+   - Validate Python dependencies
    - Build React app
    - Build Docker images
    - Push to OCI Container Registry
 
 3. **Test:**
-   - Unit tests (parallel)
+   - Unit tests with pytest (parallel)
    - Integration tests
    - E2E tests (Playwright)
    - Security scans
@@ -1772,43 +1799,44 @@ The sweepstakes drawing process requires additional security measures:
 
 ### 12.3 Infrastructure as Code
 
-| Component | Tool |
-|-----------|------|
-| OCI Resources | Terraform |
-| Kubernetes Manifests | Helm charts |
-| Database Schema | Liquibase |
-| Secrets | OCI Vault + External Secrets Operator |
+| Component            | Tool                                  |
+| -------------------- | ------------------------------------- |
+| OCI Resources        | Terraform                             |
+| Kubernetes Manifests | Helm charts                           |
+| Database Schema      | Alembic (Python migrations)           |
+| Secrets              | OCI Vault + External Secrets Operator |
 
 ### 12.4 Monitoring & Observability
 
-| Aspect | Tool | Purpose |
-|--------|------|---------|
-| Metrics | OCI Monitoring + Prometheus | System and application metrics |
-| Logging | OCI Logging + Loki | Centralized log aggregation |
-| Tracing | OCI APM | Distributed request tracing |
-| Alerting | OCI Notifications + PagerDuty | Incident notification |
-| Dashboards | Grafana | Visualization |
+| Aspect     | Tool                          | Purpose                        |
+| ---------- | ----------------------------- | ------------------------------ |
+| Metrics    | OCI Monitoring + Prometheus   | System and application metrics |
+| Logging    | OCI Logging + Loki            | Centralized log aggregation    |
+| Tracing    | OCI APM                       | Distributed request tracing    |
+| Alerting   | OCI Notifications + PagerDuty | Incident notification          |
+| Dashboards | Grafana                       | Visualization                  |
 
 **Key Alerts:**
 
-| Alert | Condition | Severity |
-|-------|-----------|----------|
-| API Error Rate | > 1% errors (5xx) for 5 min | Critical |
-| API Latency | p95 > 1s for 5 min | Warning |
-| Database Connections | > 80% pool utilization | Warning |
-| Sync Failures | > 10% failure rate | Warning |
-| Drawing Failure | Any drawing execution error | Critical |
-| Disk Space | > 80% utilized | Warning |
+| Alert                | Condition                   | Severity |
+| -------------------- | --------------------------- | -------- |
+| API Error Rate       | > 1% errors (5xx) for 5 min | Critical |
+| API Latency          | p95 > 1s for 5 min          | Warning  |
+| Database Connections | > 80% pool utilization      | Warning  |
+| Sync Failures        | > 10% failure rate          | Warning  |
+| Drawing Failure      | Any drawing execution error | Critical |
+| Disk Space           | > 80% utilized              | Warning  |
 
 ### 12.5 Backup & Disaster Recovery
 
-| Component | Backup Strategy | RPO | RTO |
-|-----------|-----------------|-----|-----|
-| Database | Oracle Autonomous automatic backups | 15 min | 1 hour |
-| Object Storage | Cross-region replication | 15 min | 1 hour |
-| Configuration | Git repository | Real-time | 30 min |
+| Component      | Backup Strategy                     | RPO       | RTO    |
+| -------------- | ----------------------------------- | --------- | ------ |
+| Database       | Oracle Autonomous automatic backups | 15 min    | 1 hour |
+| Object Storage | Cross-region replication            | 15 min    | 1 hour |
+| Configuration  | Git repository                      | Real-time | 30 min |
 
 **Disaster Recovery Procedure:**
+
 1. Detect failure (automated health checks)
 2. Assess scope (single service vs. regional outage)
 3. Execute runbook (automated where possible)
@@ -1823,43 +1851,43 @@ The sweepstakes drawing process requires additional security measures:
 
 #### Business Metrics
 
-| Metric | Definition | MVP Target | Scale Target |
-|--------|------------|------------|--------------|
-| Monthly Active Users (MAU) | Users with ≥1 activity sync | 10,000 | 500,000 |
-| Daily Active Users (DAU) | Users with ≥1 session | 3,000 | 150,000 |
-| User Retention (D7) | % users active 7 days after registration | 40% | 50% |
-| User Retention (D30) | % users active 30 days after registration | 25% | 35% |
-| Premium Conversion | % free users upgrading to premium | 5% | 8% |
-| Average Revenue Per User (ARPU) | Monthly subscription revenue / MAU | $0.50 | $2.00 |
+| Metric                          | Definition                                | MVP Target | Scale Target |
+| ------------------------------- | ----------------------------------------- | ---------- | ------------ |
+| Monthly Active Users (MAU)      | Users with ≥1 activity sync               | 10,000     | 500,000      |
+| Daily Active Users (DAU)        | Users with ≥1 session                     | 3,000      | 150,000      |
+| User Retention (D7)             | % users active 7 days after registration  | 40%        | 50%          |
+| User Retention (D30)            | % users active 30 days after registration | 25%        | 35%          |
+| Premium Conversion              | % free users upgrading to premium         | 5%         | 8%           |
+| Average Revenue Per User (ARPU) | Monthly subscription revenue / MAU        | $0.50      | $2.00        |
 
 #### Engagement Metrics
 
-| Metric | Definition | MVP Target | Scale Target |
-|--------|------------|------------|--------------|
-| Activities per User (Weekly) | Avg synced activities per active user | 5 | 10 |
-| Points Earned per User (Weekly) | Avg points earned per active user | 500 | 1,000 |
-| Drawing Participation Rate | % active users entering ≥1 drawing/week | 30% | 50% |
-| Tickets per Participant | Avg tickets purchased per participating user | 3 | 5 |
+| Metric                          | Definition                                   | MVP Target | Scale Target |
+| ------------------------------- | -------------------------------------------- | ---------- | ------------ |
+| Activities per User (Weekly)    | Avg synced activities per active user        | 5          | 10           |
+| Points Earned per User (Weekly) | Avg points earned per active user            | 500        | 1,000        |
+| Drawing Participation Rate      | % active users entering ≥1 drawing/week      | 30%        | 50%          |
+| Tickets per Participant         | Avg tickets purchased per participating user | 3          | 5            |
 
 #### Technical Metrics
 
-| Metric | Definition | Target |
-|--------|------------|--------|
-| API Availability | Successful requests / total requests | 99.9% |
-| Sync Success Rate | Successful syncs / attempted syncs | 99% |
-| Drawing Execution Success | Successful drawings / scheduled drawings | 100% |
-| Page Load Time (p95) | 95th percentile load time | < 2s |
-| Error Rate | 5xx responses / total responses | < 0.1% |
+| Metric                    | Definition                               | Target |
+| ------------------------- | ---------------------------------------- | ------ |
+| API Availability          | Successful requests / total requests     | 99.9%  |
+| Sync Success Rate         | Successful syncs / attempted syncs       | 99%    |
+| Drawing Execution Success | Successful drawings / scheduled drawings | 100%   |
+| Page Load Time (p95)      | 95th percentile load time                | < 2s   |
+| Error Rate                | 5xx responses / total responses          | < 0.1% |
 
 ### 13.2 Measurement Implementation
 
-| Metric | Collection Method | Dashboard |
-|--------|-------------------|-----------|
-| MAU/DAU | Database query + analytics events | Admin Dashboard |
-| Retention | Cohort analysis (Amplitude/Mixpanel) | Analytics Platform |
-| Conversion | Funnel tracking | Analytics Platform |
-| Engagement | Application events | Admin Dashboard |
-| Technical | OCI Monitoring + APM | Grafana |
+| Metric     | Collection Method                    | Dashboard          |
+| ---------- | ------------------------------------ | ------------------ |
+| MAU/DAU    | Database query + analytics events    | Admin Dashboard    |
+| Retention  | Cohort analysis (Amplitude/Mixpanel) | Analytics Platform |
+| Conversion | Funnel tracking                      | Analytics Platform |
+| Engagement | Application events                   | Admin Dashboard    |
+| Technical  | OCI Monitoring + APM                 | Grafana            |
 
 ---
 
@@ -1867,31 +1895,31 @@ The sweepstakes drawing process requires additional security measures:
 
 ### 14.1 Technical Risks
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Fitness API rate limits exceeded | Users can't sync | Medium | Implement queuing, optimize batch sizes, cache aggressively |
-| Fitness API deprecation/changes | Integration breaks | Low | Abstract integration layer, monitor API announcements |
-| Database performance at scale | Slow leaderboards, poor UX | Medium | Proper indexing, read replicas, caching strategy |
-| Drawing system manipulation | Legal liability, trust damage | Low | CSPRNG, audit trails, third-party audits |
-| OAuth token expiration handling | Sync failures | Medium | Proactive refresh, clear user messaging |
+| Risk                             | Impact                        | Probability | Mitigation                                                  |
+| -------------------------------- | ----------------------------- | ----------- | ----------------------------------------------------------- |
+| Fitness API rate limits exceeded | Users can't sync              | Medium      | Implement queuing, optimize batch sizes, cache aggressively |
+| Fitness API deprecation/changes  | Integration breaks            | Low         | Abstract integration layer, monitor API announcements       |
+| Database performance at scale    | Slow leaderboards, poor UX    | Medium      | Proper indexing, read replicas, caching strategy            |
+| Drawing system manipulation      | Legal liability, trust damage | Low         | CSPRNG, audit trails, third-party audits                    |
+| OAuth token expiration handling  | Sync failures                 | Medium      | Proactive refresh, clear user messaging                     |
 
 ### 14.2 Business Risks
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Low user acquisition | Business failure | Medium | Marketing plan, referral program, sponsor partnerships |
-| High churn rate | Unsustainable growth | Medium | Engagement features, community building, prize value |
-| Sponsor acquisition difficulty | Limited prizes | Medium | Start with gift cards, demonstrate user engagement |
-| Legal challenges (sweepstakes) | Operational shutdown | Low | Legal review, conservative state selection, compliance monitoring |
-| Premium conversion below target | Revenue shortfall | Medium | Value proposition refinement, trial periods |
+| Risk                            | Impact               | Probability | Mitigation                                                        |
+| ------------------------------- | -------------------- | ----------- | ----------------------------------------------------------------- |
+| Low user acquisition            | Business failure     | Medium      | Marketing plan, referral program, sponsor partnerships            |
+| High churn rate                 | Unsustainable growth | Medium      | Engagement features, community building, prize value              |
+| Sponsor acquisition difficulty  | Limited prizes       | Medium      | Start with gift cards, demonstrate user engagement                |
+| Legal challenges (sweepstakes)  | Operational shutdown | Low         | Legal review, conservative state selection, compliance monitoring |
+| Premium conversion below target | Revenue shortfall    | Medium      | Value proposition refinement, trial periods                       |
 
 ### 14.3 Operational Risks
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Prize fulfillment delays | User dissatisfaction | Medium | Clear SLAs, tracking visibility, backup suppliers |
-| Customer support overload | Poor user experience | Medium | Self-service tools, FAQ, chatbot (v1.1) |
-| Admin operational errors | Drawing issues | Low | Approval workflows, audit logs, admin training |
+| Risk                      | Impact               | Probability | Mitigation                                        |
+| ------------------------- | -------------------- | ----------- | ------------------------------------------------- |
+| Prize fulfillment delays  | User dissatisfaction | Medium      | Clear SLAs, tracking visibility, backup suppliers |
+| Customer support overload | Poor user experience | Medium      | Self-service tools, FAQ, chatbot (v1.1)           |
+| Admin operational errors  | Drawing issues       | Low         | Approval workflows, audit logs, admin training    |
 
 ---
 
@@ -1912,14 +1940,15 @@ The sweepstakes drawing process requires additional security measures:
 
 **Objectives:** Infrastructure setup, core architecture, team onboarding
 
-| Week | Deliverables |
-|------|--------------|
-| 1 | OCI environment setup (Terraform), CI/CD pipeline, development environment |
-| 2 | Database schema implementation, API scaffolding, authentication system |
-| 3 | User registration flow, email verification, basic profile management |
-| 4 | Admin UI scaffolding, logging/monitoring setup |
+| Week | Deliverables                                                               |
+| ---- | -------------------------------------------------------------------------- |
+| 1    | OCI environment setup (Terraform), CI/CD pipeline, development environment |
+| 2    | Database schema implementation, API scaffolding, authentication system     |
+| 3    | User registration flow, email verification, basic profile management       |
+| 4    | Admin UI scaffolding, logging/monitoring setup                             |
 
 **Exit Criteria:**
+
 - [ ] Users can register and login
 - [ ] CI/CD deploys to staging automatically
 - [ ] Monitoring dashboards operational
@@ -1928,14 +1957,15 @@ The sweepstakes drawing process requires additional security measures:
 
 **Objectives:** Build all MVP functionality
 
-| Week | Deliverables |
-|------|--------------|
-| 5-6 | Fitness tracker OAuth flows, data sync engine |
-| 7-8 | Points system, activity logging, balance management |
-| 9-10 | Tier system, leaderboard engine, rankings |
+| Week  | Deliverables                                        |
+| ----- | --------------------------------------------------- |
+| 5-6   | Fitness tracker OAuth flows, data sync engine       |
+| 7-8   | Points system, activity logging, balance management |
+| 9-10  | Tier system, leaderboard engine, rankings           |
 | 11-12 | Drawing system, ticket purchasing, winner selection |
 
 **Exit Criteria:**
+
 - [ ] All three tracker integrations working
 - [ ] Points earned from activities correctly
 - [ ] Leaderboards displaying and updating
@@ -1945,14 +1975,15 @@ The sweepstakes drawing process requires additional security measures:
 
 **Objectives:** Quality assurance, performance optimization, security hardening
 
-| Week | Deliverables |
-|------|--------------|
-| 13 | Integration testing, bug fixes, UX refinements |
-| 14 | Performance testing, optimization, load testing |
-| 15 | Security testing, penetration testing, compliance review |
-| 16 | UAT with beta users, final bug fixes |
+| Week | Deliverables                                             |
+| ---- | -------------------------------------------------------- |
+| 13   | Integration testing, bug fixes, UX refinements           |
+| 14   | Performance testing, optimization, load testing          |
+| 15   | Security testing, penetration testing, compliance review |
+| 16   | UAT with beta users, final bug fixes                     |
 
 **Exit Criteria:**
+
 - [ ] All critical/high bugs resolved
 - [ ] Performance targets met under load
 - [ ] Security assessment passed
@@ -1962,28 +1993,29 @@ The sweepstakes drawing process requires additional security measures:
 
 **Objectives:** Production deployment, marketing launch, operational readiness
 
-| Week | Deliverables |
-|------|--------------|
-| 17 | Production deployment, final testing, soft launch (limited users) |
-| 18 | Public launch, monitoring, rapid response team |
+| Week | Deliverables                                                      |
+| ---- | ----------------------------------------------------------------- |
+| 17   | Production deployment, final testing, soft launch (limited users) |
+| 18   | Public launch, monitoring, rapid response team                    |
 
 **Exit Criteria:**
+
 - [ ] Production stable for 48 hours
 - [ ] First drawing executed successfully
 - [ ] Support processes operational
 
 ### 15.6 Post-MVP Roadmap (v1.1+)
 
-| Feature | Target Release | Priority |
-|---------|----------------|----------|
-| Native iOS/Android apps | Q3 2026 | High |
-| Premium subscription (Stripe) | Q2 2026 | High |
-| Social login (Google, Apple) | Q2 2026 | Medium |
-| Real-time leaderboards | Q3 2026 | Medium |
-| Professional services marketplace | Q4 2026 | Medium |
-| Sponsor self-service portal | Q4 2026 | Medium |
-| Team/group competitions | Q1 2027 | Low |
-| International expansion | 2027 | Low |
+| Feature                           | Target Release | Priority |
+| --------------------------------- | -------------- | -------- |
+| Native iOS/Android apps           | Q3 2026        | High     |
+| Premium subscription (Stripe)     | Q2 2026        | High     |
+| Social login (Google, Apple)      | Q2 2026        | Medium   |
+| Real-time leaderboards            | Q3 2026        | Medium   |
+| Professional services marketplace | Q4 2026        | Medium   |
+| Sponsor self-service portal       | Q4 2026        | Medium   |
+| Team/group competitions           | Q1 2027        | Low      |
+| International expansion           | 2027           | Low      |
 
 ---
 
@@ -1991,55 +2023,55 @@ The sweepstakes drawing process requires additional security measures:
 
 ### 16.1 Decisions Needed
 
-| ID | Question | Impact | Owner | Due Date |
-|----|----------|--------|-------|----------|
-| D-001 | Social login (Google, Apple) in MVP or v1.1? | Development scope | Product | Week 1 |
-| D-002 | Apple Health integration approach: native iOS app, third-party aggregator, or defer? | Architecture, timeline, cost | Engineering | Week 1 |
-| D-003 | Should users opt into "Open" tier (all demographics)? | UX design, database schema | Product | Week 2 |
-| D-004 | Point earning rate normalization across tiers? | Game balance, fairness | Product | Week 3 |
-| D-005 | Final list of eligible states for launch | Legal compliance | Legal | Week 2 |
-| D-006 | Prize value thresholds requiring tax reporting (1099) | Legal, admin workflows | Legal/Finance | Week 4 |
-| D-007 | Premium subscription price point | Revenue model | Business | Week 6 |
+| ID    | Question                                                                             | Impact                       | Owner         | Due Date |
+| ----- | ------------------------------------------------------------------------------------ | ---------------------------- | ------------- | -------- |
+| D-001 | Social login (Google, Apple) in MVP or v1.1?                                         | Development scope            | Product       | Week 1   |
+| D-002 | Apple Health integration approach: native iOS app, third-party aggregator, or defer? | Architecture, timeline, cost | Engineering   | Week 1   |
+| D-003 | Should users opt into "Open" tier (all demographics)?                                | UX design, database schema   | Product       | Week 2   |
+| D-004 | Point earning rate normalization across tiers?                                       | Game balance, fairness       | Product       | Week 3   |
+| D-005 | Final list of eligible states for launch                                             | Legal compliance             | Legal         | Week 2   |
+| D-006 | Prize value thresholds requiring tax reporting (1099)                                | Legal, admin workflows       | Legal/Finance | Week 4   |
+| D-007 | Premium subscription price point                                                     | Revenue model                | Business      | Week 6   |
 
 ### 16.2 Assumptions
 
-| ID | Assumption | Risk if Wrong | Validation Plan |
-|----|------------|---------------|-----------------|
-| A-001 | Biological sex categories (Male/Female) are sufficient for fair tiering | User complaints, legal issues | User research, legal review |
-| A-002 | 15-minute sync interval is acceptable for MVP | User dissatisfaction | Beta user feedback |
-| A-003 | Daily 1,000 point cap prevents gaming without frustrating legitimate users | Either gaming or frustrated power users | Monitor outliers, adjust |
-| A-004 | Email verification is sufficient for account security (no MFA in MVP) | Account takeovers | Security monitoring, add MFA in v1.1 |
-| A-005 | Manual prize fulfillment scales for MVP volume | Admin overload | Monitor volume, plan automation trigger |
-| A-006 | Gift cards are sufficient prizes for launch (no sponsor partnerships required) | Low user interest | User surveys, sponsor outreach in parallel |
-| A-007 | Three fitness tracker integrations cover majority of target market | Low adoption | Market research, user feedback |
+| ID    | Assumption                                                                     | Risk if Wrong                           | Validation Plan                            |
+| ----- | ------------------------------------------------------------------------------ | --------------------------------------- | ------------------------------------------ |
+| A-001 | Biological sex categories (Male/Female) are sufficient for fair tiering        | User complaints, legal issues           | User research, legal review                |
+| A-002 | 15-minute sync interval is acceptable for MVP                                  | User dissatisfaction                    | Beta user feedback                         |
+| A-003 | Daily 1,000 point cap prevents gaming without frustrating legitimate users     | Either gaming or frustrated power users | Monitor outliers, adjust                   |
+| A-004 | Email verification is sufficient for account security (no MFA in MVP)          | Account takeovers                       | Security monitoring, add MFA in v1.1       |
+| A-005 | Manual prize fulfillment scales for MVP volume                                 | Admin overload                          | Monitor volume, plan automation trigger    |
+| A-006 | Gift cards are sufficient prizes for launch (no sponsor partnerships required) | Low user interest                       | User surveys, sponsor outreach in parallel |
+| A-007 | Three fitness tracker integrations cover majority of target market             | Low adoption                            | Market research, user feedback             |
 
 ### 16.3 Dependencies
 
-| Dependency | Owner | Status | Blocker For |
-|------------|-------|--------|-------------|
-| Legal review of Terms of Service | Legal | Not Started | Launch |
-| Legal review of Sweepstakes Rules | Legal | Not Started | Drawing feature |
-| State eligibility matrix | Legal | Not Started | Registration flow |
-| Fitbit API developer account approval | Engineering | Not Started | Fitbit integration |
-| Google Fit API verification | Engineering | Not Started | Google Fit integration |
-| OCI environment provisioning | DevOps | Not Started | All development |
-| Design system and UI mockups | Design | Not Started | Frontend development |
+| Dependency                            | Owner       | Status      | Blocker For            |
+| ------------------------------------- | ----------- | ----------- | ---------------------- |
+| Legal review of Terms of Service      | Legal       | Not Started | Launch                 |
+| Legal review of Sweepstakes Rules     | Legal       | Not Started | Drawing feature        |
+| State eligibility matrix              | Legal       | Not Started | Registration flow      |
+| Fitbit API developer account approval | Engineering | Not Started | Fitbit integration     |
+| Google Fit API verification           | Engineering | Not Started | Google Fit integration |
+| OCI environment provisioning          | DevOps      | Not Started | All development        |
+| Design system and UI mockups          | Design      | Not Started | Frontend development   |
 
 ---
 
 ## Appendix A: Glossary
 
-| Term | Definition |
-|------|------------|
-| **Active Minutes** | Minutes spent in physical activity as reported by fitness tracker |
-| **CSPRNG** | Cryptographically Secure Pseudo-Random Number Generator |
-| **Drawing** | A sweepstakes event where winners are randomly selected from ticket holders |
-| **JSON Duality View** | Oracle database feature allowing document-style access to relational data |
-| **OCI** | Oracle Cloud Infrastructure |
-| **Point Balance** | User's current spendable points |
-| **Points Earned** | Total points accumulated (used for leaderboard ranking) |
-| **Tier** | Competition bracket based on user demographics and fitness level |
-| **Ticket** | Entry into a sweepstakes drawing, purchased with points |
+| Term                  | Definition                                                                  |
+| --------------------- | --------------------------------------------------------------------------- |
+| **Active Minutes**    | Minutes spent in physical activity as reported by fitness tracker           |
+| **CSPRNG**            | Cryptographically Secure Pseudo-Random Number Generator                     |
+| **Drawing**           | A sweepstakes event where winners are randomly selected from ticket holders |
+| **JSON Duality View** | Oracle database feature allowing document-style access to relational data   |
+| **OCI**               | Oracle Cloud Infrastructure                                                 |
+| **Point Balance**     | User's current spendable points                                             |
+| **Points Earned**     | Total points accumulated (used for leaderboard ranking)                     |
+| **Tier**              | Competition bracket based on user demographics and fitness level            |
+| **Ticket**            | Entry into a sweepstakes drawing, purchased with points                     |
 
 ---
 
@@ -2054,6 +2086,6 @@ The sweepstakes drawing process requires additional security measures:
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: January 2026*  
-*Next Review: Prior to Phase 2 kickoff*
+_Document Version: 1.0_
+_Last Updated: January 2026_
+_Next Review: Prior to Phase 2 kickoff_

@@ -142,3 +142,29 @@ logs/
 *.project
 .settings/
 .wallet/
+
+# Logs
+*.log 
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+apps/agentic_rag/config.yaml
+
+apps/agentic_rag/chroma_db
+apps/agentic_rag/embeddings
+apps/agentic_rag/__pycache__/
+apps/agentic_rag/.pytest_cache/
+apps/agentic_rag/.gradio/
+apps/agentic_rag/chunks.json
+apps/agentic_rag/embeddings/
+apps/agentic_rag/kubectl
+
+
+
+# avoid terraform lock files
+*.lock.hcl
+*.lock
+

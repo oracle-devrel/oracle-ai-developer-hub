@@ -7,7 +7,10 @@ from pathlib import Path
 import oracledb
 from langchain_core.documents import Document
 from langchain_oracledb import OracleVS, OracleEmbeddings
-from db_utils import load_config, get_db_connection
+try:
+    from src.db_utils import load_config, get_db_connection
+except ImportError:
+    from db_utils import load_config, get_db_connection
 
 # --- MONKEYPATCH BEGIN ---
 # Fix for AttributeError: 'str' object has no attribute 'pop'

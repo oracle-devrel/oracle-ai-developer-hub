@@ -52,9 +52,6 @@ EXPOSE 11434
 
 # Create a startup script
 RUN echo '#!/bin/bash\n\
-# Fix DNS if needed (common in Kind/Docker)\n\
-echo "nameserver 8.8.8.8" > /etc/resolv.conf\n\
-\n\
 # Start Ollama in background\n\
 ollama serve & \n\
 \n\

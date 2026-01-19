@@ -9,7 +9,10 @@ import transformers
 import uuid
 import os
 from langchain_oracledb.document_loaders.oracleai import OracleTextSplitter
-from db_utils import get_db_connection
+try:
+    from src.db_utils import get_db_connection
+except ImportError:
+    from db_utils import get_db_connection
 
 os.environ['HF_HUB_DISABLE_XET'] = '1'
 

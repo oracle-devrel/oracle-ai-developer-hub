@@ -261,17 +261,26 @@ You can deploy the application using Docker. This ensures a consistent environme
 
 1. **Build the Docker image**:
    ```bash
-   docker build -t agentic-rag .
+   docker build --network=host -t agentic-rag .
    ```
 
 2. **Run the container**:
    ```bash
+   # Recommended for Linux (bypasses Docker network/DNS issues)
    docker run -d \
+     --network=host \
      --gpus all \
-     -p 7860:7860 \
-     -p 11434:11434 \
      --name agentic-rag \
      agentic-rag
+
+   # Alternative (Port mapping)
+   # Note: May require DNS configuration if container cannot access host/internet
+   # docker run -d \
+   #   --gpus all \
+   #   -p 7860:7860 \
+   #   -p 11434:11434 \
+   #   --name agentic-rag \
+   #   agentic-rag
    ```
 
    *Note: The `--gpus all` flag requires the NVIDIA Container Toolkit. If you don't have a GPU, the application will run in CPU-only mode (slower), and you can omit this flag.*

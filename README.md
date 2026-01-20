@@ -25,11 +25,12 @@ Jupyter notebooks and interactive tutorials covering:
 - Data preparation and analysis workflows
 - Agent development and orchestration examples
 
-| Name                              | Description                                                      | Stack                                         | Link                                                                                                                                           |
-| --------------------------------- | ---------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| memory_context_engineering_agents | Build AI agents with 6 types of persistent memory.               | LangChain, Oracle AI Database, OpenAI, Tavily | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/memory_context_engineering_agents.ipynb) |
-| oracle_rag_agents_zero_to_hero    | Learn to build RAG agents from scratch using Oracle AI Database. | Oracle AI Database, OpenAI, OpenAI Agents SDK | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_agents_zero_to_hero.ipynb)    |
-| oracle_rag_with_evals             | Build RAG systems with comprehensive evaluation metrics          | Oracle AI Database, OpenAI, BEIR, Galileo     | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_with_evals.ipynb)             |
+| Name                              | Description                                                             | Stack                                         | Link                                                                                                                                                   |
+| --------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| memory_context_engineering_agents | Build AI agents with 6 types of persistent memory.                      | LangChain, Oracle AI Database, OpenAI, Tavily | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/memory_context_engineering_agents.ipynb)         |
+| oracle_rag_agents_zero_to_hero    | Learn to build RAG agents from scratch using Oracle AI Database.        | Oracle AI Database, OpenAI, OpenAI Agents SDK | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_agents_zero_to_hero.ipynb)            |
+| oracle_rag_with_evals             | Build RAG systems with comprehensive evaluation metrics                 | Oracle AI Database, OpenAI, BEIR, Galileo     | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_with_evals.ipynb)                     |
+| code_review_assistant_agentspec   | Build an AI agent specialized in code review assistance using AgentSpec | Agent Spec, Wayflow, Langgraph                | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/agentspec/code_review_assistant_agentspec.ipynb) |
 
 ### 🎓 **Workshops** (`/workshops`)
 

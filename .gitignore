@@ -169,3 +169,6 @@ apps/agentic_rag/kubectl
 *.lock
 
 CLAUDE.md
+
+# Claude-generated plan documents
+docs/plans/

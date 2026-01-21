@@ -168,3 +168,4 @@ apps/agentic_rag/kubectl
 *.lock.hcl
 *.lock
 
+CLAUDE.md

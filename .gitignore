@@ -175,4 +175,9 @@ docs/plans/
 apps/agentic_rag/.serena/
 apps/agentic_rag/.webui_secret_key
 
-apps/agentic_rag/docs/plans
+# Plan files in agentic_rag
+apps/agentic_rag/docs/plans/
+apps/agentic_rag/frontend/docs/plans/
+
+# Playwright MCP files
+.playwright-mcp/

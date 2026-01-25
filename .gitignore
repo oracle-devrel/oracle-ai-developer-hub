@@ -158,6 +158,7 @@ apps/agentic_rag/embeddings
 apps/agentic_rag/__pycache__/
 apps/agentic_rag/.pytest_cache/
 apps/agentic_rag/.gradio/
+apps/agentic_rag/openwebui_data/
 apps/agentic_rag/chunks.json
 apps/agentic_rag/embeddings/
 apps/agentic_rag/kubectl
@@ -173,3 +174,4 @@ CLAUDE.md
 # Claude-generated plan documents
 docs/plans/
 apps/agentic_rag/.serena/
+apps/agentic_rag/.webui_secret_key

@@ -70,6 +70,8 @@ from .openai_models import (
     UsageInfo,
     ErrorResponse,
     ErrorDetail,
+    ContentPart,
+    FileAttachment,
     REASONING_MODELS,
     get_model_list,
     get_model_config,
@@ -1356,6 +1358,68 @@ async def generate_non_streaming_response(
     )
 
 
+def extract_text_from_content(content: Union[str, List[ContentPart], None]) -> str:
+    """
+    Extract text content from a message that may be string or multimodal array.
+
+    OpenAI API supports content as either:
+    - A simple string
+    - An array of ContentPart objects with type "text", "image_url", etc.
+
+    Returns the concatenated text content.
+    """
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        text_parts = []
+        for part in content:
+            if isinstance(part, dict):
+                if part.get("type") == "text" and part.get("text"):
+                    text_parts.append(part["text"])
+            elif hasattr(part, "type") and part.type == "text" and part.text:
+                text_parts.append(part.text)
+        return "\n".join(text_parts)
+    return str(content)
+
+
+def extract_attachments_from_content(content: Union[str, List[ContentPart], None]) -> List[Dict[str, Any]]:
+    """
+    Extract non-text attachments (images, files, URLs) from multimodal content.
+
+    Returns list of attachment info dicts.
+    """
+    attachments = []
+    if not isinstance(content, list):
+        return attachments
+
+    for part in content:
+        part_dict = part.model_dump() if hasattr(part, "model_dump") else (part if isinstance(part, dict) else {})
+        part_type = part_dict.get("type", "")
+
+        if part_type == "image_url":
+            image_info = part_dict.get("image_url", {})
+            attachments.append({
+                "type": "image",
+                "url": image_info.get("url"),
+                "detail": image_info.get("detail", "auto")
+            })
+        elif part_type == "file":
+            attachments.append({
+                "type": "file",
+                "id": part_dict.get("id"),
+                "name": part_dict.get("name"),
+                "data": part_dict.get("data"),
+                "url": part_dict.get("url")
+            })
+        elif part_type not in ["text", ""]:
+            # Capture any other attachment types
+            attachments.append({"type": part_type, **part_dict})
+
+    return attachments
+
+
 @router.post("/chat/completions")
 async def create_chat_completion(request: ChatCompletionRequest):
     """
@@ -1376,7 +1440,60 @@ async def create_chat_completion(request: ChatCompletionRequest):
     Supports @file and @@file references in messages:
     - @filename.ext → inject file content as temporary context
     - @@filename.ext → add file to RAG storage and inject context
+
+    Also handles Open WebUI attachments:
+    - files array in request body
+    - Multimodal content arrays with images/files
     """
+    # Log parsed request for debugging attachment format
+    try:
+        # Log if there are files in the request
+        if request.files:
+            files_data = [f.model_dump() if hasattr(f, 'model_dump') else f for f in request.files]
+            print(f"📎 [Attachments] Request contains 'files' field: {json.dumps(files_data, indent=2)}", flush=True)
+
+        # Check for multimodal content in messages
+        for i, msg in enumerate(request.messages):
+            if isinstance(msg.content, list):
+                content_data = [c.model_dump() if hasattr(c, 'model_dump') else c for c in msg.content]
+                print(f"📎 [Attachments] Message {i} has multimodal content: {json.dumps(content_data, indent=2)}", flush=True)
+            if hasattr(msg, 'images') and msg.images:
+                print(f"📎 [Attachments] Message {i} has 'images' field: {msg.images}", flush=True)
+
+        # Log extra request fields
+        if request.chat_id:
+            print(f"📎 [Attachments] chat_id: {request.chat_id}", flush=True)
+        if request.session_id:
+            print(f"📎 [Attachments] session_id: {request.session_id}", flush=True)
+        if request.metadata:
+            print(f"📎 [Attachments] metadata: {json.dumps(request.metadata, indent=2)}", flush=True)
+
+        # Log full message content for first user message (truncated)
+        for msg in request.messages:
+            if msg.role.value == "user":
+                content_str = extract_text_from_content(msg.content)
+                if len(content_str) > 500:
+                    # This is likely an Open WebUI preprocessed message with embedded context
+                    print(f"📎 [OpenWebUI Context] Detected embedded context in message", flush=True)
+                    print(f"📎 [OpenWebUI Context] Full message length: {len(content_str)} chars", flush=True)
+                    print(f"📎 [OpenWebUI Context] First 500 chars: {content_str[:500]}", flush=True)
+                    # Check if it contains source tags (Open WebUI format)
+                    if "<source" in content_str:
+                        import re
+                        sources = re.findall(r'<source[^>]*id="([^"]*)"[^>]*>', content_str)
+                        print(f"📎 [OpenWebUI Context] Found {len(sources)} source references", flush=True)
+                    # Check if it contains the user's original query
+                    if "User Query:" in content_str or "user query" in content_str.lower():
+                        query_match = re.search(r'User Query[:\s]+(.+?)(?:\n|$)', content_str, re.IGNORECASE)
+                        if query_match:
+                            print(f"📎 [OpenWebUI Context] Original user query: {query_match.group(1)[:100]}", flush=True)
+                break
+
+    except Exception as e:
+        print(f"⚠️ [Attachments] Failed to log request: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+
     # Validate model
     model_config = get_model_config(request.model)
     if not model_config:
@@ -1391,14 +1508,28 @@ async def create_chat_completion(request: ChatCompletionRequest):
             }
         )
 
-    # Get user's query for processing
+    # Get user's query for processing (handles both string and multimodal content)
     user_query = ""
     user_message_idx = -1
+    message_attachments = []
+
     for idx, msg in enumerate(reversed(request.messages)):
         if msg.role.value == "user" and msg.content:
-            user_query = msg.content
+            # Extract text from potentially multimodal content
+            user_query = extract_text_from_content(msg.content)
             user_message_idx = len(request.messages) - 1 - idx
+
+            # Extract any attachments from multimodal content
+            message_attachments = extract_attachments_from_content(msg.content)
+            if message_attachments:
+                print(f"📎 [Attachments] Extracted from message content: {message_attachments}", flush=True)
             break
+
+    # Also check request-level files (Open WebUI format)
+    request_files = []
+    if request.files:
+        request_files = [f.model_dump() for f in request.files]
+        print(f"📎 [Attachments] Request-level files: {json.dumps(request_files, indent=2)}", flush=True)
 
     # Process file references (@file and @@file patterns)
     file_context = ""

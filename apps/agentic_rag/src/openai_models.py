@@ -21,13 +21,43 @@ class MessageRole(str, Enum):
     TOOL = "tool"
 
 
+class ContentPart(BaseModel):
+    """A single part of multimodal content."""
+    type: str  # "text", "image_url", "file", etc.
+    text: Optional[str] = None
+    image_url: Optional[Dict[str, Any]] = None  # {"url": "...", "detail": "..."}
+    file: Optional[Dict[str, Any]] = None  # For file attachments
+    # Additional fields that might come from Open WebUI
+    id: Optional[str] = None
+    name: Optional[str] = None
+    data: Optional[str] = None  # Base64 encoded content
+    url: Optional[str] = None  # URL for web content
+
+
+class FileAttachment(BaseModel):
+    """File attachment format used by Open WebUI."""
+    type: str = "file"  # "file", "image", "collection", etc.
+    id: Optional[str] = None
+    name: Optional[str] = None
+    filename: Optional[str] = None
+    url: Optional[str] = None
+    data: Optional[str] = None  # Base64 encoded content
+    collection_name: Optional[str] = None
+    # Additional metadata
+    size: Optional[int] = None
+    content_type: Optional[str] = None
+
+
 class ChatMessage(BaseModel):
     """A single message in a chat conversation."""
     role: MessageRole
-    content: Optional[str] = None
+    # Content can be string OR array of content parts (multimodal)
+    content: Optional[Union[str, List[ContentPart]]] = None
     name: Optional[str] = None
     function_call: Optional[Dict[str, Any]] = None
     tool_calls: Optional[List[Dict[str, Any]]] = None
+    # Additional fields for attachments/images
+    images: Optional[List[str]] = None  # Base64 or URLs
 
 
 class ChatCompletionRequest(BaseModel):
@@ -50,6 +80,13 @@ class ChatCompletionRequest(BaseModel):
     seed: Optional[int] = None
     tools: Optional[List[Dict[str, Any]]] = None
     tool_choice: Optional[Union[str, Dict[str, Any]]] = None
+
+    # Open WebUI specific fields for file/document attachments
+    files: Optional[List[FileAttachment]] = None
+    # Additional Open WebUI fields
+    chat_id: Optional[str] = None
+    session_id: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 class ChatCompletionChoice(BaseModel):

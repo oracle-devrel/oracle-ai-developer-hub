@@ -171,7 +171,8 @@ apps/agentic_rag/kubectl
 
 CLAUDE.md
 
-# Claude-generated plan documents
 docs/plans/
 apps/agentic_rag/.serena/
 apps/agentic_rag/.webui_secret_key
+
+apps/agentic_rag/docs/plans

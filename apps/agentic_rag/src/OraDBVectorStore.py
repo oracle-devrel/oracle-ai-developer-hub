@@ -166,21 +166,39 @@ class OraDBVectorStore:
         self._add_chunks_to_collection(chunks, "REPOCOLLECTION")
 
     def _query_collection(self, collection_name: str, query: str, n_results: int = 3) -> List[Dict[str, Any]]:
-        """Helper to query a collection"""
+        """Helper to query a collection with similarity scores"""
         print(f"🔍 [OracleVS] Querying {collection_name}")
         store = self.vector_stores.get(collection_name)
         if not store:
             return []
-            
-        docs = store.similarity_search(query, k=n_results)
-        
-        formatted_results = []
-        for doc in docs:
-            result = {
-                "content": doc.page_content,
-                "metadata": doc.metadata
-            }
-            formatted_results.append(result)
+
+        # Use similarity_search_with_score to get relevance scores
+        try:
+            docs_with_scores = store.similarity_search_with_score(query, k=n_results)
+            formatted_results = []
+            for doc, score in docs_with_scores:
+                # Convert distance to similarity score (lower distance = higher similarity)
+                # Euclidean distance: similarity = 1 / (1 + distance)
+                similarity = 1 / (1 + score) if score >= 0 else 0
+                result = {
+                    "content": doc.page_content,
+                    "metadata": doc.metadata,
+                    "score": similarity,
+                    "distance": score
+                }
+                formatted_results.append(result)
+        except Exception as e:
+            print(f"⚠️ [OracleVS] similarity_search_with_score failed: {e}, falling back to similarity_search")
+            docs = store.similarity_search(query, k=n_results)
+            formatted_results = []
+            for doc in docs:
+                result = {
+                    "content": doc.page_content,
+                    "metadata": doc.metadata,
+                    "score": None,
+                    "distance": None
+                }
+                formatted_results.append(result)
             
         print(f"🔍 [OracleVS] Retrieved {len(formatted_results)} chunks from {collection_name}")
         return formatted_results

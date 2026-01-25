@@ -38,10 +38,13 @@ Here you can find a result of using Chain of Thought (CoT) reasoning:
    - Pull the default model:
      ```bash
      ollama pull gemma3:270m
+     # or the 4b model
+     ollama pull gemma3:latest
      ```
 
 2. (Optional) For specialized agents, you may pull other Ollama models:
    ```bash
+   # for coding
    ollama pull qwen2.5-coder:7b
    ollama pull deepseek-r1:1.5b
    ```
@@ -61,12 +64,37 @@ Here you can find a result of using Chain of Thought (CoT) reasoning:
 3. Pull the models you want to use beforehand:
 
     ```bash
-    ollama pull gemma3:270m
+    ollama pull <model> # see ollama.com/models
     ```
 
 ## 1. Getting Started
 
-You can launch this solution in three ways:
+You can launch this solution in multiple ways:
+
+### Quick Start: Unified Launcher (Recommended)
+
+The simplest way to start the entire system is using the unified launcher:
+
+```bash
+# Start everything (FastAPI + Gradio + Open WebUI)
+python run_app.py
+
+# Start only Gradio interface
+python run_app.py --gradio
+
+# Start only Open WebUI interface
+python run_app.py --openwebui
+
+# Start API server only (for external frontends)
+python run_app.py --api-only
+```
+
+**Default Ports:**
+| Service | Port | URL |
+|---------|------|-----|
+| FastAPI Backend | 8000 | http://localhost:8000 |
+| Gradio UI | 7860 | http://localhost:7860 |
+| Open WebUI | 3000 | http://localhost:3000 |
 
 ### 1. Using the Complete REST API
 
@@ -94,7 +122,7 @@ The system provides a user-friendly web interface using Gradio, which allows you
 - Chat with your documents using either local or OpenAI models
 - Toggle Chain of Thought reasoning
 
-To launch the interface:
+To launch the Gradio interface:
 
 ```bash
 python gradio_app.py
@@ -127,7 +155,80 @@ The interface has two main tabs:
 Note: The interface will automatically detect available models based on your configuration:
 - Ollama models require Ollama to be installed and running
 
-### 3. Usage
+### 3. Using Open WebUI Interface
+
+Open WebUI provides a modern, feature-rich chat interface that connects to the same backend as Gradio. It's ideal for users who prefer a ChatGPT-like experience.
+
+#### Installation
+
+```bash
+pip install open-webui
+```
+
+#### Starting Open WebUI
+
+```bash
+# Option 1: Using the unified launcher (recommended)
+python run_app.py --openwebui
+
+# Option 2: Start Open WebUI standalone
+python openwebui_app.py
+
+# Option 3: Start both Gradio and Open WebUI
+python run_app.py
+```
+
+Open WebUI will be available at `http://localhost:3000`.
+
+#### Available Reasoning Models
+
+Open WebUI sees 18 reasoning "models" that correspond to different reasoning strategies:
+
+| Model | Description |
+|-------|-------------|
+| `standard` | Standard response without specialized reasoning |
+| `standard-rag` | Standard response with RAG context from all collections |
+| `cot` | Chain of Thought - step-by-step reasoning |
+| `cot-rag` | Chain of Thought with RAG context |
+| `tot` | Tree of Thoughts - parallel path exploration |
+| `tot-rag` | Tree of Thoughts with RAG context |
+| `react` | ReAct - reasoning and acting interleaved |
+| `react-rag` | ReAct with RAG context |
+| `self-reflection` | Self-Reflection - iterative critique and refinement |
+| `self-reflection-rag` | Self-Reflection with RAG context |
+| `consistency` | Self-Consistency - multiple samples with voting |
+| `consistency-rag` | Self-Consistency with RAG context |
+| `decomposed` | Decomposed - breaks problems into sub-problems |
+| `decomposed-rag` | Decomposed with RAG context |
+| `least-to-most` | Least-to-Most - simplest to most complex |
+| `least-to-most-rag` | Least-to-Most with RAG context |
+| `recursive` | Recursive - recursive problem decomposition |
+| `recursive-rag` | Recursive with RAG context |
+
+**Note:** Models with `-rag` suffix perform unified similarity search across **all collections** (PDF, Web, Repository) before reasoning.
+
+#### OpenAI-Compatible API
+
+The backend exposes OpenAI-compatible endpoints that Open WebUI (and other clients) can consume:
+
+```bash
+# List available models
+curl http://localhost:8000/v1/models
+
+# Chat completion (streaming)
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "cot-rag",
+    "messages": [{"role": "user", "content": "What is machine learning?"}],
+    "stream": true
+  }'
+
+# Health check
+curl http://localhost:8000/v1/health
+```
+
+### 4. Using the CLI
 
 The easiest way to use the system is through the interactive CLI:
 
@@ -158,7 +259,7 @@ python agent_cli.py
 4. **Test Oracle DB**: Verify connectivity and view table statistics.
 5. **Chat with Agent**: Interactive RAG chat using `gemma3:270m` (Ollama).
 
-### 4. Component-level Usage (Advanced)
+### 5. Component-level Usage (Advanced)
 
 If you prefer to run individual components manually:
 
@@ -254,7 +355,7 @@ To query documents using the local Ollama model, run:
 python -m src.local_rag_agent --query "Can you explain the DaGAN Approach proposed in the Depth-Aware Generative Adversarial Network for Talking Head Video Generation article?"
 ```
 
-### 4. Complete Pipeline Example
+### 6. Complete Pipeline Example
 
 First, we process a document and query it using the local model. Then, we add the document to the vector store and query from the knowledge base to get the RAG system in action.
 
@@ -506,15 +607,36 @@ Query a specific collection:
 python -m src.local_rag_agent --query "How to implement a queue?" --collection "Repository Collection"
 ```
 
-## Annex: Gradio Interface Instructions
+## Annex: User Interface Instructions
 
-### 1. Document Processing
+### Unified Launcher Options
+
+```bash
+python run_app.py              # Start all UIs (default)
+python run_app.py --gradio     # Gradio only (port 7860)
+python run_app.py --openwebui  # Open WebUI only (port 3000)
+python run_app.py --api-only   # Backend API only (port 8000)
+```
+
+### Open WebUI Features
+
+Open WebUI provides a modern chat interface with:
+- **18 Reasoning Models**: Each reasoning strategy appears as a selectable "model"
+- **RAG Integration**: Models ending in `-rag` search all collections automatically
+- **Streaming Responses**: Real-time streaming for better UX
+- **Chat History**: Built-in conversation management
+- **Export/Import**: Save and load conversations
+- **Themes**: Dark/light mode support
+
+### Gradio Interface Instructions
+
+#### 1. Document Processing
 - **Upload PDFs** using the file uploader.
 - **Process web content** by entering URLs.
 - **Process repositories** by entering paths or GitHub URLs.
 - All processed content is added to the knowledge base.
 
-### 2. Standard Chat Interface
+#### 2. Standard Chat Interface
 - Quick responses without detailed reasoning steps.
 - Select your preferred agent (Ollama gemma3 by default).
 - Select which knowledge collection to query:
@@ -523,14 +645,14 @@ python -m src.local_rag_agent --query "How to implement a queue?" --collection "
   - **Web Knowledge Base**: Always searches web content.
   - **General Knowledge**: Uses the model's built-in knowledge without searching collections.
 
-### 3. Chain of Thought Chat Interface
+#### 3. Chain of Thought Chat Interface
 - Detailed responses with step-by-step reasoning.
 - See the planning, research, reasoning, and synthesis steps.
 - Great for complex queries or when you want to understand the reasoning process.
 - May take longer but provides more detailed and thorough answers.
 - Same collection selection options as the Standard Chat Interface.
 
-### 4. A2A Chat Interface
+#### 4. A2A Chat Interface
 - Same chat experience as standard interfaces but uses A2A protocol.
 - **Granular Execution Trace**: Displays step-by-step execution including Orchestrator logic, Agent Selection, and detailed intermediate steps.
 - **Real Vector Retrieval**: Shows actual retrieved content from the knowledge base during the Research phase, not just final answers.
@@ -541,7 +663,7 @@ python -m src.local_rag_agent --query "How to implement a queue?" --collection "
 - **Status Monitoring**: Check A2A server connectivity.
 - **Same UI**: Familiar chat interface with A2A backend.
 
-### 5. A2A Protocol Testing
+#### 5. A2A Protocol Testing
 - Test the Agent2Agent (A2A) protocol functionality.
 
 - **Health Check**: Verify A2A server connectivity.
@@ -552,7 +674,7 @@ python -m src.local_rag_agent --query "How to implement a queue?" --collection "
 - **Task Dashboard**: View all tracked tasks and their statuses.
 - **Complete Test Suite**: Run all A2A tests in sequence.
 
-### 6. Performance Expectations
+#### 6. Performance Expectations
 - **Default Model**: gemma3:270m (Ollama) - Optimized for speed and quality.
 - **Other Ollama models**: Supported if installed via `ollama pull`.
 - **A2A requests**: Depends on A2A server performance and network latency.

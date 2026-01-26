@@ -77,6 +77,17 @@ from .openai_models import (
     get_model_config,
 )
 
+# Import WebProcessor for URL fetching
+try:
+    from .web_processor import WebProcessor, is_url
+except ImportError:
+    try:
+        from web_processor import WebProcessor, is_url
+    except ImportError:
+        WebProcessor = None
+        is_url = lambda x: False
+        print("⚠️ WebProcessor not available, Upload Link persistence disabled", flush=True)
+
 # Router for OpenAI-compatible endpoints
 router = APIRouter(prefix="/v1", tags=["OpenAI Compatible"])
 
@@ -88,6 +99,7 @@ _config = {}
 _interceptor = None  # ReasoningInterceptor for direct agent streaming
 _event_logger = None  # Oracle DB event logger for tracking all events
 _file_handler = None  # FileHandler for @file reference processing
+_a2a_handler = None  # A2AHandler for routing through A2A protocol
 
 
 def init_openai_compat(
@@ -96,7 +108,8 @@ def init_openai_compat(
     local_agent=None,
     config: Optional[Dict[str, Any]] = None,
     event_logger=None,
-    file_handler=None
+    file_handler=None,
+    a2a_handler=None
 ):
     """
     Initialize the OpenAI-compatible API with required dependencies.
@@ -108,14 +121,16 @@ def init_openai_compat(
         config: Configuration dict (optional)
         event_logger: OraDBEventLogger instance for database logging (optional)
         file_handler: FileHandler instance for @file processing (optional)
+        a2a_handler: A2AHandler instance for A2A protocol routing (optional)
     """
-    global _vector_store, _reasoning_ensemble, _local_agent, _config, _interceptor, _event_logger, _file_handler
+    global _vector_store, _reasoning_ensemble, _local_agent, _config, _interceptor, _event_logger, _file_handler, _a2a_handler
     _vector_store = vector_store
     _reasoning_ensemble = reasoning_ensemble
     _local_agent = local_agent
     _config = config or {}
     _event_logger = event_logger
     _file_handler = file_handler
+    _a2a_handler = a2a_handler
 
     # Initialize ReasoningInterceptor for direct agent streaming (like CLI arena mode)
     if INTERCEPTOR_AVAILABLE:
@@ -511,7 +526,8 @@ async def run_interceptor_streaming(
     thread.start()
 
     # Yield chunks as they arrive (real-time streaming)
-    max_idle_iterations = 600  # ~30 seconds max idle time (600 * 0.05s)
+    # Increased timeout for complex reasoning strategies like decomposed/least-to-most
+    max_idle_iterations = 2400  # ~120 seconds max idle time (2400 * 0.05s)
     idle_count = 0
 
     try:
@@ -704,6 +720,25 @@ async def generate_streaming_response(
             # Build model name in interceptor format: base_model+strategy
             interceptor_model = f"{base_model}+{strategy}"
 
+            # Log A2A event for reasoning request START
+            if _a2a_handler and _a2a_handler.event_logger:
+                _a2a_handler.event_logger.log_a2a_event(
+                    agent_id=f"reasoning_{strategy}_v1",
+                    agent_name=f"Reasoning Agent ({strategy})",
+                    method="reasoning.stream",
+                    user_prompt=user_query[:500],
+                    response="[streaming started]",
+                    metadata={
+                        "request_id": request_id,
+                        "model": interceptor_model,
+                        "strategy": strategy,
+                        "use_rag": bool(rag_context),
+                        "source": "openai_compat"
+                    },
+                    duration_ms=0,
+                    status="started"
+                )
+
             log_a2a_event(
                 "reasoning.dispatch",
                 "started",
@@ -806,6 +841,29 @@ async def generate_streaming_response(
                     )
                 except Exception as e:
                     print(f"[EventLogger] Error logging to Oracle DB: {e}", flush=True)
+
+            # Log A2A event for reasoning request COMPLETION
+            if _a2a_handler and _a2a_handler.event_logger:
+                try:
+                    _a2a_handler.event_logger.log_a2a_event(
+                        agent_id=f"reasoning_{strategy}_v1",
+                        agent_name=f"Reasoning Agent ({strategy})",
+                        method="reasoning.stream",
+                        user_prompt=user_query[:500],
+                        response=full_response[:2000],
+                        metadata={
+                            "request_id": request_id,
+                            "model": interceptor_model,
+                            "strategy": strategy,
+                            "use_rag": bool(rag_context),
+                            "response_length": len(full_response),
+                            "source": "openai_compat"
+                        },
+                        duration_ms=duration_ms,
+                        status="success"
+                    )
+                except Exception as e:
+                    print(f"[A2A Event] Error logging A2A event: {e}", flush=True)
 
             # Send final chunk with finish_reason
             final_chunk = ChatCompletionChunk(
@@ -1420,6 +1478,411 @@ def extract_attachments_from_content(content: Union[str, List[ContentPart], None
     return attachments
 
 
+def extract_openwebui_sources(message_content: str) -> List[Dict[str, Any]]:
+    """
+    Extract source content from Open WebUI's preprocessed message format.
+
+    Open WebUI embeds webpage content in messages using <source> tags:
+    <source id="1" title="Page Title" url="https://...">
+    ...content...
+    </source>
+
+    Returns list of source dicts with id, title, url, and content.
+    """
+    sources = []
+
+    # Pattern to match <source> tags with their attributes and content
+    # Open WebUI format: <source id="X" ...attributes...>content</source>
+    pattern = re.compile(
+        r'<source\s+([^>]*)>(.*?)</source>',
+        re.DOTALL | re.IGNORECASE
+    )
+
+    for match in pattern.finditer(message_content):
+        attrs_str = match.group(1)
+        content = match.group(2).strip()
+
+        # Parse attributes
+        id_match = re.search(r'id="([^"]*)"', attrs_str)
+        title_match = re.search(r'title="([^"]*)"', attrs_str)
+        url_match = re.search(r'url="([^"]*)"', attrs_str)
+        name_match = re.search(r'name="([^"]*)"', attrs_str)
+
+        source_info = {
+            "id": id_match.group(1) if id_match else f"source_{len(sources)}",
+            "title": title_match.group(1) if title_match else (name_match.group(1) if name_match else ""),
+            "url": url_match.group(1) if url_match else "",
+            "content": content
+        }
+
+        # Only add if there's actual content
+        if content and len(content) > 50:
+            sources.append(source_info)
+
+    return sources
+
+
+def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 100) -> List[str]:
+    """
+    Split text into overlapping chunks for vector storage.
+
+    Args:
+        text: Text to chunk
+        chunk_size: Target size of each chunk in characters
+        overlap: Number of characters to overlap between chunks
+
+    Returns:
+        List of text chunks
+    """
+    if len(text) <= chunk_size:
+        return [text]
+
+    chunks = []
+    start = 0
+
+    while start < len(text):
+        end = start + chunk_size
+
+        # Try to break at a sentence boundary
+        if end < len(text):
+            # Look for sentence-ending punctuation
+            for punct in ['. ', '.\n', '! ', '!\n', '? ', '?\n', '\n\n']:
+                break_point = text.rfind(punct, start + chunk_size // 2, end)
+                if break_point != -1:
+                    end = break_point + len(punct)
+                    break
+
+        chunk = text[start:end].strip()
+        if chunk:
+            chunks.append(chunk)
+
+        # Move start with overlap
+        start = end - overlap if end < len(text) else len(text)
+
+    return chunks
+
+
+async def execute_via_a2a(
+    query: str,
+    strategy: str,
+    use_rag: bool = False,
+    collection: str = "General",
+    request_id: str = None
+) -> Dict[str, Any]:
+    """
+    Execute a reasoning request via the A2A protocol.
+
+    This routes the request through the A2AHandler which:
+    1. Logs the request to Oracle DB event logger
+    2. Executes the reasoning strategy
+    3. Returns the response in A2A format
+
+    Args:
+        query: The user query to process
+        strategy: Reasoning strategy (cot, tot, react, etc.)
+        use_rag: Whether to use RAG context
+        collection: RAG collection to use
+        request_id: Optional request ID for tracking
+
+    Returns:
+        Dict with response and metadata
+    """
+    if not _a2a_handler:
+        log_a2a_event("a2a.execute", "warning", "A2A handler not available, falling back to direct execution")
+        return {"error": "A2A handler not available"}
+
+    try:
+        # Import A2A models
+        from .a2a_models import A2ARequest
+
+        # Create A2A request for reasoning execution
+        a2a_request = A2ARequest(
+            method="reasoning.execute",
+            params={
+                "query": query,
+                "strategy": strategy,
+                "use_rag": use_rag,
+                "collection": collection
+            },
+            id=request_id or f"openai-{uuid.uuid4().hex[:8]}"
+        )
+
+        log_a2a_event(
+            "a2a.reasoning",
+            "started",
+            f"Routing through A2A protocol",
+            strategy=strategy,
+            request_id=a2a_request.id
+        )
+
+        # Execute via A2A handler
+        response = await _a2a_handler.handle_request(a2a_request)
+
+        if response.error:
+            log_a2a_event("a2a.reasoning", "error", str(response.error))
+            return {"error": str(response.error)}
+
+        log_a2a_event(
+            "a2a.reasoning",
+            "success",
+            f"A2A response received",
+            request_id=a2a_request.id
+        )
+
+        return response.result if response.result else {}
+
+    except Exception as e:
+        log_a2a_event("a2a.reasoning", "error", f"A2A execution failed: {e}")
+        return {"error": str(e)}
+
+
+async def persist_openwebui_context_to_rag(message_content: str) -> Dict[str, Any]:
+    """
+    Extract Open WebUI embedded sources and persist them to Oracle AI Database.
+
+    This function detects when Open WebUI has preprocessed webpage content into
+    the message (with <source> tags) and stores the content in the WEBCOLLECTION
+    for future RAG retrieval.
+
+    Args:
+        message_content: The full message content from Open WebUI
+
+    Returns:
+        Dict with status, sources_found, chunks_stored, and any errors
+    """
+    result = {
+        "sources_found": 0,
+        "chunks_stored": 0,
+        "sources": [],
+        "errors": []
+    }
+
+    if not _vector_store:
+        result["errors"].append("Vector store not initialized")
+        return result
+
+    # Check if this looks like Open WebUI preprocessed content
+    if "<source" not in message_content:
+        return result
+
+    # Extract sources from the message
+    sources = extract_openwebui_sources(message_content)
+    result["sources_found"] = len(sources)
+
+    if not sources:
+        return result
+
+    log_a2a_event(
+        "openwebui.context",
+        "detected",
+        f"Found {len(sources)} embedded sources",
+        sources=len(sources)
+    )
+
+    for source in sources:
+        try:
+            source_url = source.get("url", "")
+            source_title = source.get("title", "Unknown")
+            source_id = source.get("id", "")
+            content = source.get("content", "")
+
+            # Generate a unique ID for deduplication
+            import hashlib
+            content_hash = hashlib.md5(content[:1000].encode()).hexdigest()[:8]
+            unique_source_id = f"openwebui_{source_id}_{content_hash}"
+
+            # Chunk the content
+            text_chunks = chunk_text(content, chunk_size=800, overlap=100)
+
+            # Prepare chunks for storage
+            chunks = []
+            for i, chunk_text_item in enumerate(text_chunks):
+                chunks.append({
+                    "text": chunk_text_item,
+                    "metadata": {
+                        "source": source_url or f"openwebui_source_{source_id}",
+                        "title": source_title,
+                        "chunk_id": i,
+                        "total_chunks": len(text_chunks),
+                        "source_type": "openwebui_attachment",
+                        "ingestion_time": datetime.now().isoformat()
+                    }
+                })
+
+            # Persist to Oracle AI Database
+            if chunks:
+                _vector_store.add_web_chunks(chunks, unique_source_id)
+
+                log_a2a_event(
+                    "openwebui.persist",
+                    "success",
+                    f"Stored source: {source_title[:50]}",
+                    chunks=len(chunks),
+                    url=source_url[:60] if source_url else "N/A"
+                )
+
+                result["chunks_stored"] += len(chunks)
+                result["sources"].append({
+                    "id": source_id,
+                    "title": source_title,
+                    "url": source_url,
+                    "chunks": len(chunks)
+                })
+
+                # Log to Oracle DB event logger
+                if _event_logger:
+                    try:
+                        _event_logger.log_document_event(
+                            document_type="openwebui_webpage",
+                            document_id=unique_source_id,
+                            source=source_url or f"openwebui_source_{source_id}",
+                            chunks_processed=len(chunks),
+                            status="success"
+                        )
+                    except Exception as e:
+                        print(f"[EventLogger] Error logging ingest event: {e}", flush=True)
+
+        except Exception as e:
+            error_msg = f"Failed to persist source {source.get('id', 'unknown')}: {str(e)}"
+            result["errors"].append(error_msg)
+            log_a2a_event("openwebui.persist", "error", error_msg)
+
+    return result
+
+
+async def process_openwebui_url_uploads(request_files: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Process URL uploads from Open WebUI's "Upload Link" functionality.
+
+    When a user uses "Upload Link" in Open WebUI, the URL is passed in the
+    request.files array. This function:
+    1. Detects URL files in the request
+    2. Fetches and processes the URL content using WebProcessor
+    3. Persists chunks to WEBCOLLECTION with openwebui_url source
+    4. Logs the event to Oracle Autonomous
+
+    Args:
+        request_files: List of file attachments from request.files
+
+    Returns:
+        Dict with stats: {"urls_processed": int, "chunks_stored": int, "errors": []}
+    """
+    result = {
+        "urls_processed": 0,
+        "chunks_stored": 0,
+        "errors": [],
+        "sources": []
+    }
+
+    if not request_files:
+        return result
+
+    if not _vector_store:
+        result["errors"].append("Vector store not initialized")
+        return result
+
+    if not WebProcessor:
+        result["errors"].append("WebProcessor not available")
+        return result
+
+    processor = WebProcessor(chunk_size=800)
+
+    for file_info in request_files:
+        try:
+            # Check if this is a URL upload
+            file_url = file_info.get("url")
+            file_type = file_info.get("type", "")
+            file_name = file_info.get("name") or file_info.get("filename", "")
+
+            # Skip non-URL files
+            if not file_url:
+                continue
+
+            # Validate it's actually a URL
+            if not is_url(file_url):
+                log_a2a_event(
+                    "openwebui.url_upload",
+                    "skipped",
+                    f"Not a valid URL: {file_url}"
+                )
+                continue
+
+            log_a2a_event(
+                "openwebui.url_upload",
+                "processing",
+                f"Fetching URL: {file_url}",
+                source="Upload Link"
+            )
+
+            # Fetch and process the URL
+            try:
+                chunks = processor.process_url(file_url)
+            except Exception as fetch_error:
+                error_msg = f"Failed to fetch URL {file_url}: {str(fetch_error)}"
+                result["errors"].append(error_msg)
+                log_a2a_event("openwebui.url_upload", "error", error_msg)
+                continue
+
+            if not chunks:
+                log_a2a_event(
+                    "openwebui.url_upload",
+                    "warning",
+                    f"No content extracted from {file_url}"
+                )
+                continue
+
+            # Add openwebui_url source marker to metadata
+            for chunk in chunks:
+                chunk["metadata"]["source_type"] = "openwebui_url"
+                chunk["metadata"]["upload_method"] = "Upload Link"
+                chunk["metadata"]["original_filename"] = file_name
+
+            # Generate unique source ID
+            source_id = f"openwebui_url_{uuid.uuid4().hex[:8]}"
+
+            # Persist to WEBCOLLECTION
+            _vector_store.add_web_chunks(chunks, source_id)
+
+            result["urls_processed"] += 1
+            result["chunks_stored"] += len(chunks)
+
+            # Extract title from first chunk metadata
+            title = chunks[0]["metadata"].get("title", file_url) if chunks else file_url
+            result["sources"].append({
+                "url": file_url,
+                "title": title,
+                "chunks": len(chunks)
+            })
+
+            log_a2a_event(
+                "openwebui.url_upload",
+                "success",
+                f"Stored {len(chunks)} chunks from {file_url}",
+                collection="WEBCOLLECTION",
+                source_id=source_id
+            )
+
+            # Log to Oracle event logger
+            if _event_logger:
+                try:
+                    _event_logger.log_document_event(
+                        document_type="openwebui_url",
+                        document_id=source_id,
+                        source=file_url,
+                        chunks_processed=len(chunks),
+                        status="success"
+                    )
+                except Exception as e:
+                    print(f"[EventLogger] Error logging URL upload event: {e}", flush=True)
+
+        except Exception as e:
+            error_msg = f"Error processing URL upload: {str(e)}"
+            result["errors"].append(error_msg)
+            log_a2a_event("openwebui.url_upload", "error", error_msg)
+
+    return result
+
+
 @router.post("/chat/completions")
 async def create_chat_completion(request: ChatCompletionRequest):
     """
@@ -1444,6 +1907,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
     Also handles Open WebUI attachments:
     - files array in request body
     - Multimodal content arrays with images/files
+    - Upload Link URLs (automatically persisted to WEBCOLLECTION)
     """
     # Log parsed request for debugging attachment format
     try:
@@ -1469,6 +1933,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
             print(f"📎 [Attachments] metadata: {json.dumps(request.metadata, indent=2)}", flush=True)
 
         # Log full message content for first user message (truncated)
+        openwebui_persist_result = None
         for msg in request.messages:
             if msg.role.value == "user":
                 content_str = extract_text_from_content(msg.content)
@@ -1476,12 +1941,17 @@ async def create_chat_completion(request: ChatCompletionRequest):
                     # This is likely an Open WebUI preprocessed message with embedded context
                     print(f"📎 [OpenWebUI Context] Detected embedded context in message", flush=True)
                     print(f"📎 [OpenWebUI Context] Full message length: {len(content_str)} chars", flush=True)
-                    print(f"📎 [OpenWebUI Context] First 500 chars: {content_str[:500]}", flush=True)
                     # Check if it contains source tags (Open WebUI format)
                     if "<source" in content_str:
-                        import re
                         sources = re.findall(r'<source[^>]*id="([^"]*)"[^>]*>', content_str)
                         print(f"📎 [OpenWebUI Context] Found {len(sources)} source references", flush=True)
+                        # Persist embedded sources to Oracle AI Database for RAG
+                        try:
+                            openwebui_persist_result = await persist_openwebui_context_to_rag(content_str)
+                            if openwebui_persist_result["chunks_stored"] > 0:
+                                print(f"📎 [OpenWebUI Context] ✅ Persisted {openwebui_persist_result['chunks_stored']} chunks to Oracle AI Database", flush=True)
+                        except Exception as e:
+                            print(f"📎 [OpenWebUI Context] ⚠️ Failed to persist sources: {e}", flush=True)
                     # Check if it contains the user's original query
                     if "User Query:" in content_str or "user query" in content_str.lower():
                         query_match = re.search(r'User Query[:\s]+(.+?)(?:\n|$)', content_str, re.IGNORECASE)
@@ -1530,6 +2000,20 @@ async def create_chat_completion(request: ChatCompletionRequest):
     if request.files:
         request_files = [f.model_dump() for f in request.files]
         print(f"📎 [Attachments] Request-level files: {json.dumps(request_files, indent=2)}", flush=True)
+
+        # Process URL uploads from "Upload Link" functionality
+        # This persists URL content to WEBCOLLECTION for RAG
+        try:
+            url_upload_result = await process_openwebui_url_uploads(request_files)
+            if url_upload_result["urls_processed"] > 0:
+                print(f"🔗 [Upload Link] ✅ Processed {url_upload_result['urls_processed']} URLs, stored {url_upload_result['chunks_stored']} chunks to WEBCOLLECTION", flush=True)
+                for source in url_upload_result.get("sources", []):
+                    print(f"   └─ {source['title'][:50]}... ({source['chunks']} chunks)", flush=True)
+            if url_upload_result["errors"]:
+                for error in url_upload_result["errors"]:
+                    print(f"🔗 [Upload Link] ⚠️ {error}", flush=True)
+        except Exception as e:
+            print(f"🔗 [Upload Link] ⚠️ Failed to process URL uploads: {e}", flush=True)
 
     # Process file references (@file and @@file patterns)
     file_context = ""

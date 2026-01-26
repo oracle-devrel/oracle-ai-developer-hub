@@ -151,7 +151,8 @@ init_openai_compat(
     local_agent=rag_agent,
     config={},
     event_logger=event_logger if EVENT_LOGGING_ENABLED else None,
-    file_handler=file_handler
+    file_handler=file_handler,
+    a2a_handler=a2a_handler
 )
 print("OpenAI-compatible API initialized successfully.")
 
@@ -200,7 +201,8 @@ def on_model_change(new_model_name: str):
         local_agent=rag_agent,
         config={"model_name": new_model_name},
         event_logger=event_logger if EVENT_LOGGING_ENABLED else None,
-        file_handler=file_handler
+        file_handler=file_handler,
+        a2a_handler=a2a_handler
     )
     print(f"✅ OpenAI-compatible API updated")
 
@@ -466,6 +468,173 @@ async def get_event_count(event_type: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Open WebUI Embedding Sync Endpoints
+class EmbeddingSyncRequest(BaseModel):
+    """Request body for syncing embeddings from Open WebUI to Oracle AI Database."""
+    collection_name: str
+    documents: List[dict]  # List of {text: str, metadata: dict}
+    source: str = "openwebui"
+
+
+class EmbeddingSyncResponse(BaseModel):
+    """Response for embedding sync operation."""
+    status: str
+    collection: str
+    documents_synced: int
+    message: str
+
+
+@app.post("/sync/embeddings", response_model=EmbeddingSyncResponse)
+async def sync_openwebui_embeddings(request: EmbeddingSyncRequest):
+    """
+    Sync embeddings from Open WebUI to Oracle AI Database.
+
+    This endpoint allows Open WebUI or custom pipelines to send document
+    embeddings to be stored in Oracle AI Database for unified RAG access.
+
+    Expected document format:
+    {
+        "text": "document content",
+        "metadata": {
+            "source": "filename or url",
+            "title": "optional title",
+            ...
+        }
+    }
+    """
+    start_time = time.time()
+
+    try:
+        if not vector_store:
+            raise HTTPException(status_code=503, detail="Vector store not initialized")
+
+        # Prepare chunks for Oracle DB
+        chunks = []
+        for doc in request.documents:
+            text = doc.get("text", "")
+            metadata = doc.get("metadata", {})
+
+            # Add source tracking
+            metadata["synced_from"] = request.source
+            metadata["original_collection"] = request.collection_name
+            metadata["sync_timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+            if text:
+                chunks.append({
+                    "text": text,
+                    "metadata": metadata
+                })
+
+        if not chunks:
+            return EmbeddingSyncResponse(
+                status="warning",
+                collection=request.collection_name,
+                documents_synced=0,
+                message="No valid documents to sync"
+            )
+
+        # Determine target collection based on source type
+        collection_target = "GENERALCOLLECTION"  # Default
+        if "pdf" in request.collection_name.lower() or "file" in request.collection_name.lower():
+            collection_target = "PDFCOLLECTION"
+        elif "web" in request.collection_name.lower() or "url" in request.collection_name.lower():
+            collection_target = "WEBCOLLECTION"
+
+        # Sync to Oracle AI Database
+        source_id = f"openwebui_{request.collection_name}"
+        vector_store._add_chunks_to_collection(chunks, collection_target)
+
+        processing_time = (time.time() - start_time) * 1000
+
+        # Log the sync event
+        if EVENT_LOGGING_ENABLED:
+            event_logger.log_ingest_event(
+                document_type="openwebui_sync",
+                source_path=request.collection_name,
+                total_chunks=len(chunks),
+                successful_chunks=len(chunks),
+                failed_chunks=0,
+                collection_used=collection_target,
+                metadata={
+                    "source": request.source,
+                    "original_collection": request.collection_name
+                }
+            )
+            event_logger.log_api_event(
+                endpoint="/sync/embeddings",
+                method="POST",
+                request_data={
+                    "collection": request.collection_name,
+                    "document_count": len(request.documents),
+                    "source": request.source
+                },
+                response_data={
+                    "synced": len(chunks),
+                    "target_collection": collection_target
+                },
+                status_code=200,
+                duration_ms=processing_time
+            )
+
+        print(f"✅ [Sync] Synced {len(chunks)} documents from Open WebUI collection '{request.collection_name}' to Oracle AI Database ({collection_target})", flush=True)
+
+        return EmbeddingSyncResponse(
+            status="success",
+            collection=collection_target,
+            documents_synced=len(chunks),
+            message=f"Successfully synced {len(chunks)} documents to {collection_target}"
+        )
+
+    except Exception as e:
+        processing_time = (time.time() - start_time) * 1000
+
+        if EVENT_LOGGING_ENABLED:
+            event_logger.log_api_event(
+                endpoint="/sync/embeddings",
+                method="POST",
+                request_data={
+                    "collection": request.collection_name,
+                    "source": request.source
+                },
+                response_data={"error": str(e)},
+                status_code=500,
+                duration_ms=processing_time
+            )
+
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/sync/status")
+async def get_sync_status():
+    """Get the current sync status and statistics."""
+    if not vector_store:
+        raise HTTPException(status_code=503, detail="Vector store not initialized")
+
+    try:
+        # Get collection counts
+        collections = {}
+        for name in ["PDFCOLLECTION", "WEBCOLLECTION", "GENERALCOLLECTION", "REPOCOLLECTION"]:
+            store = vector_store.vector_stores.get(name)
+            if store:
+                try:
+                    # Try to get count (this is Oracle-specific)
+                    collections[name] = {"status": "available"}
+                except:
+                    collections[name] = {"status": "unknown"}
+            else:
+                collections[name] = {"status": "not_initialized"}
+
+        return {
+            "status": "ok",
+            "vector_store": "Oracle AI Database",
+            "collections": collections,
+            "sync_endpoint": "/sync/embeddings"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn

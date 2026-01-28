@@ -1,6 +1,6 @@
 # Oracle SelectAI Colab Notebooks
 
-This directory contains Google Colab notebooks for demonstrating Oracle Database 23ai features, specifically focusing on SelectAI capabilities.
+This directory contains Google Colab notebooks for demonstrating Oracle Database 26ai features, specifically focusing on SelectAI capabilities.
 
 ## Available Notebooks
 

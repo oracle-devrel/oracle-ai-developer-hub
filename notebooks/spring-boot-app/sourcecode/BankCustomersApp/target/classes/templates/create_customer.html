@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Bank Customers Spring Boot with Oracle Autonomous AI Database</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+	integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+	crossorigin="anonymous">
+<style> 
+.bg-dark 
+{
+    background-color: #302D29 !important;
+}
+.table-dark {
+    color: #fff;
+    background-color: #161513 !important;
+}
+</style>
+</head>
+<body>
+<nav class="navbar navbar-expand-md bg-dark navbar-dark">
+  <!-- Brand -->
+  <a class="navbar-brand" href="#">Spring Boot - How to guide</a>
+
+  <!-- Toggler/collapsibe Button -->
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <!-- Navbar links -->
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" th:href="@{/customers}">Bank Customers</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+<br>
+<br>
+	<div class = "container">
+		<div class = "row">
+			<div class ="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+				<h1 class = "text-center"> Create New Customer </h1>
+				<div class = "card-body">
+					<form th:action="@{/customers}" th:object = "${customer}" method="POST">
+						<div class ="form-group">
+							<label> Customer Name </label>
+							<input
+							type = "text"
+							name = "customerName"
+							th:field = "*{customerName}"
+							class = "form-control"
+							placeholder="Enter Customer Name" 
+							/>
+						</div>
+
+						<div class ="form-group">
+							<label> Gender </label>
+							<input
+							type = "text"
+							name = "gender"
+							th:field = "*{gender}"
+							class = "form-control"
+							placeholder="Enter Customer Email" 
+							/>
+						</div>
+
+						<div class ="form-group">
+							<label> Marital Status </label>
+							<input
+							type = "text"
+							name = "maritalStatus"
+							th:field = "*{maritalStatus}"
+							class = "form-control"
+							placeholder="Enter Customer Email" 
+							/>
+						</div>
+
+						<div class ="form-group">
+							<label> Street Address </label>
+							<input
+							type = "text"
+							name = "streetAddress"
+							th:field = "*{streetAddress}"
+							class = "form-control"
+							placeholder="Enter Customer Email" 
+							/>
+						</div>
+						
+						<div class ="form-group">
+							<label> Phone </label>
+							<input
+							type = "text"
+							name = "phoneNumber"
+							th:field = "*{phoneNumber}"
+							class = "form-control"
+							placeholder="Enter Phone Number" 
+							/>
+						</div>
+						
+						<div class ="form-group">
+							<label> Customer Email </label>
+							<input
+							type = "text"
+							name = "email"
+							th:field = "*{email}"
+							class = "form-control"
+							placeholder="Enter Customer Email" 
+							/>
+						</div>
+
+						<div class ="form-group">
+							<label> Gender </label>
+							<input
+							type = "text"
+							name = "city"
+							th:field = "*{city}"
+							class = "form-control"
+							placeholder="Enter Customer Email" 
+							/>
+						</div>
+
+						<div class ="form-group">
+							<label> Gender </label>
+							<input
+							type = "text"
+							name = "state"
+							th:field = "*{state}"
+							class = "form-control"
+							placeholder="Enter Customer Email" 
+							/>
+						</div>
+						
+						<div class = "box-footer">
+							<button type="submit" class = "btn btn-primary">
+								Submit
+							</button>
+						</div>
+					</form>
+				
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

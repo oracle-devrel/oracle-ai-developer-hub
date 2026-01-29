@@ -1,4 +1,4 @@
-# Building a RAG Application with using AI Agent Development Kit and Google Colab Notebook
+# Building a RAG Application with AI Agent Development Kit and Google Colab Notebook
 
 ## Introduction
 

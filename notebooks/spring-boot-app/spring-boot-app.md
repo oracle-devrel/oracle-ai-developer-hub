@@ -484,4 +484,7 @@ and provides the actual implementation of the business logic
 * [Download Source code](https://github.com/madhusudhanrao-ppm/dbdevrel/tree/main/source-codes)
 * [Direct ORM deployment link](https://cloud.oracle.com/resourcemanager/stacks/create?zipUrl=https://objectstorage.us-phoenix-1.oraclecloud.com/p/jtfUsV33KtLR937hWybAgrq8qtuQQuAaIw1K_VBThhlUF6Z1HYF0Ai50sQlp06bQ/n/oradbclouducm/b/medical_transcripts/o/Terraform/oracle-lakehouse-devedition-stack.zip)
  
- 
+## Author 
+
+Madhusudhan Rao, Principal Product Manager, Oracle Database
+Dec 2025

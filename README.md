@@ -12,6 +12,7 @@ Applications and reference implementations demonstrating how to build AI-powered
 
 | Name                     | Description                                                                                                                      | Link                                                                                                           |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| FitTracker               | Gamified fitness platform built with Oracle 26ai JSON Duality Views (FastAPI + Redis), created live during a webinar.            | [![View App](https://img.shields.io/badge/View%20App-blue?style=flat-square)](./apps/FitTracker)               |
 | oci-generative-ai-jet-ui | Full-stack AI application with Oracle JET UI, OCI Generative AI integration, Kubernetes deployment, and Terraform infrastructure | [![View App](https://img.shields.io/badge/View%20App-blue?style=flat-square)](./apps/oci-generative-ai-jet-ui) |
 
 ### 📓 **Notebooks** (`/notebooks`)
@@ -26,7 +27,9 @@ Jupyter notebooks and interactive tutorials covering:
 
 | Name                              | Description                                                      | Stack                                         | Link                                                                                                                                           |
 | --------------------------------- | ---------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| fs_vs_dbs                         | Compare filesystem vs database agent memory architectures.       | LangChain, Oracle AI Database, OpenAI         | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/fs_vs_dbs.ipynb)                         |
 | memory_context_engineering_agents | Build AI agents with 6 types of persistent memory.               | LangChain, Oracle AI Database, OpenAI, Tavily | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/memory_context_engineering_agents.ipynb) |
+| oracle_langchain_example          | Build a simple RAG app using Oracle 26ai and LangChain.          | LangChain, Oracle AI Database, Hugging Face   | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_langchain_example.ipynb)          |
 | oracle_rag_agents_zero_to_hero    | Learn to build RAG agents from scratch using Oracle AI Database. | Oracle AI Database, OpenAI, OpenAI Agents SDK | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_agents_zero_to_hero.ipynb)    |
 | oracle_rag_with_evals             | Build RAG systems with comprehensive evaluation metrics          | Oracle AI Database, OpenAI, BEIR, Galileo     | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_with_evals.ipynb)             |
 

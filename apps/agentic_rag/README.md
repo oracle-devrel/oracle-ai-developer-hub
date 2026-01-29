@@ -10,7 +10,7 @@ The system has the following features:
 
 - Intelligent query routing
 - PDF processing using Docling for accurate text extraction and chunking
-- Persistent vector storage with Oracle AI Database 26ai (PDF and Websites)
+- Persistent vector storage with Oracle AI Database (PDF and Websites)
 - Smart context retrieval and response generation
 - FastAPI-based REST API for document upload and querying
 - Support for local, agentic workflows using `gemma3:270m` via Ollama
@@ -549,7 +549,7 @@ The system consists of several key components:
 1. **PDF Processor**: we use `docling` to extract and chunk text from PDF documents
 2. **Web Processor**: we use `trafilatura` to extract and chunk text from websites
 3. **GitHub Repository Processor**: we use `gitingest` to extract and chunk text from repositories
-4. **Vector Store**: Manages document embeddings and similarity search using `Oracle AI Database 26ai` (default) or `ChromaDB` (fallback)
+4. **Vector Store**: Manages document embeddings and similarity search using `Oracle AI Database` (default) or `ChromaDB` (fallback)
 5. **RAG Agent**: Makes intelligent decisions about query routing and response generation
    - Uses `gemma3:270m` via Ollama as the default local model
 6. **FastAPI Server**: Provides REST API endpoints for document upload and querying

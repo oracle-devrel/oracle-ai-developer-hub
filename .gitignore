@@ -172,6 +172,9 @@ apps/agentic_rag/kubectl
 CLAUDE.md
 
 docs/plans/
+task_plan.md
+findings.md
+progress.md
 apps/agentic_rag/.serena/
 apps/agentic_rag/.webui_secret_key
 

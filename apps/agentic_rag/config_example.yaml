@@ -18,7 +18,14 @@ AGENT_ENDPOINTS:
   synthesizer_url: http://localhost:8000
 
 # Model configuration for specialized agents (via Ollama API) (only necessary if not using the GUI)
-SPECIALIZED_AGENT_MODEL: gemma3:270m  # Options: qwq, deepseek-r1, llama3.3, phi4, gemma3:latest (2B param version), etc.
+SPECIALIZED_AGENT_MODEL: gemma3:latest  # Options: qwq, deepseek-r1, llama3.3, phi4, gemma3:latest (2B param version), etc.
 
 # Response generation configuration
 MAX_RESPONSE_LENGTH: 2048  # Maximum number of tokens to generate in responses (default: 2048, can be increased for longer responses like 4096, 8192)
+
+# Open WebUI Configuration
+# Open WebUI provides an alternative chat interface using OpenAI-compatible API
+OPENWEBUI:
+  PORT: 3000              # Port for Open WebUI (default: 3000)
+  DEFAULT_MODEL: cot-rag  # Default reasoning model for Open WebUI
+  DATA_DIR: ./openwebui_data  # Directory for Open WebUI data storage

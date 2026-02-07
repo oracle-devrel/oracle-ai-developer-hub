@@ -1,0 +1,39 @@
+# Title shown in Application Information tab.
+title: Oracle AI Database 26ai - Developer Edition
+# Sub Title shown in Application Information tab.
+description:  Oracle AI Database 26ai - Developer Edition
+stackDescription: "Deploy Oracle AI Database 26ai - Lakehouse Developer Edition"
+schemaVersion: 1.1.0
+version: "20251104"
+locale: "en"
+  
+logoUrl: "https://cloudmarketplace.oracle.com/marketplace/content?contentId=80556488"
+
+outputGroups:
+  - title: Oracle AI Database 26ai - Lakehouse Developer Edition 
+
+variableGroups:
+  - title: Tenancy Configuration
+    visible: false
+    variables: 
+    - tenancy_ocid
+    - region
+
+  - title: Main Configuration - Required
+    visible: true
+    variables:    
+    - compute_count
+    - compute_model
+    - data_storage_size_in_gb
+    - db_name
+    - display_name
+    - db_version
+    - db_workload 
+    - admin_password
+    - is_dedicated
+    - is_dev_tier
+    - is_mtls_connection_required
+    - is_preview_version_with_service_terms_accepted
+    - license_model
+    - autonomous_maintenance_schedule_type
+   

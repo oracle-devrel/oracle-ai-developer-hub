@@ -140,13 +140,39 @@ class OraDBEventLogger:
             metadata CLOB
         )
         """
-        
+
+        # Reasoning Events Table - tracks reasoning ensemble executions
+        sql_reasoning_events = """
+        CREATE TABLE IF NOT EXISTS REASONING_EVENTS (
+            event_id VARCHAR2(100) PRIMARY KEY,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            query_text CLOB,
+            strategies_requested CLOB,
+            strategies_completed CLOB,
+            winner_strategy VARCHAR2(50),
+            winner_response CLOB,
+            vote_count NUMBER,
+            total_strategies NUMBER,
+            similarity_threshold NUMBER,
+            all_responses CLOB,
+            rag_enabled NUMBER(1),
+            collection_used VARCHAR2(200),
+            chunks_retrieved NUMBER,
+            total_duration_ms NUMBER,
+            parallel_execution NUMBER(1),
+            config_json CLOB,
+            status VARCHAR2(50),
+            error_message CLOB
+        )
+        """
+
         try:
             self.cursor.execute(sql_a2a_events)
             self.cursor.execute(sql_api_events)
             self.cursor.execute(sql_model_events)
             self.cursor.execute(sql_doc_events)
             self.cursor.execute(sql_query_events)
+            self.cursor.execute(sql_reasoning_events)
             self.connection.commit()
             print("[EventLogger] Event logging tables created/verified successfully")
         except Exception as e:
@@ -366,7 +392,66 @@ class OraDBEventLogger:
         except Exception as e:
             print(f"[EventLogger] Error logging query event: {str(e)}")
             return event_id
-    
+
+    def log_reasoning_event(
+        self,
+        query_text: str,
+        strategies_requested: List[str],
+        winner_strategy: str,
+        winner_response: str,
+        vote_count: int,
+        all_responses: List[Dict[str, Any]],
+        rag_enabled: bool = False,
+        collection_used: Optional[str] = None,
+        chunks_retrieved: int = 0,
+        total_duration_ms: Optional[float] = None,
+        config: Optional[Dict[str, Any]] = None,
+        status: str = "success",
+        error_message: Optional[str] = None
+    ) -> str:
+        """Log a reasoning ensemble execution event"""
+        event_id = f"reasoning_{uuid.uuid4().hex}"
+
+        try:
+            strategies_json = json.dumps(strategies_requested)
+            all_responses_json = json.dumps(all_responses)
+            config_json = json.dumps(config) if config else None
+
+            sql = """
+            INSERT INTO REASONING_EVENTS
+            (event_id, query_text, strategies_requested, winner_strategy, winner_response,
+             vote_count, total_strategies, all_responses, rag_enabled, collection_used,
+             chunks_retrieved, total_duration_ms, parallel_execution, config_json, status, error_message)
+            VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15, :16)
+            """
+
+            self.cursor.execute(sql, (
+                event_id,
+                query_text,
+                strategies_json,
+                winner_strategy,
+                winner_response,
+                vote_count,
+                len(strategies_requested),
+                all_responses_json,
+                1 if rag_enabled else 0,
+                collection_used,
+                chunks_retrieved,
+                total_duration_ms,
+                1,  # parallel_execution always true for ensemble
+                config_json,
+                status,
+                error_message
+            ))
+            self.connection.commit()
+
+            print(f"[EventLogger] Reasoning event logged: {event_id} - {winner_strategy}")
+            return event_id
+
+        except Exception as e:
+            print(f"[EventLogger] Error logging reasoning event: {str(e)}")
+            return event_id
+
     def get_events(
         self,
         event_type: str = "all",
@@ -375,15 +460,16 @@ class OraDBEventLogger:
         end_time: Optional[datetime] = None
     ) -> List[Dict[str, Any]]:
         """Get events from the database"""
-        
+
         table_map = {
             "a2a": "A2A_EVENTS",
             "api": "API_EVENTS",
             "model": "MODEL_EVENTS",
             "document": "DOCUMENT_EVENTS",
-            "query": "QUERY_EVENTS"
+            "query": "QUERY_EVENTS",
+            "reasoning": "REASONING_EVENTS"
         }
-        
+
         if event_type == "all":
             # Union all tables
             events = []
@@ -421,15 +507,16 @@ class OraDBEventLogger:
     
     def get_event_count(self, event_type: str = "all") -> int:
         """Get count of events"""
-        
+
         table_map = {
             "a2a": "A2A_EVENTS",
             "api": "API_EVENTS",
             "model": "MODEL_EVENTS",
             "document": "DOCUMENT_EVENTS",
-            "query": "QUERY_EVENTS"
+            "query": "QUERY_EVENTS",
+            "reasoning": "REASONING_EVENTS"
         }
-        
+
         if event_type == "all":
             total = 0
             for table_name in table_map.values():
@@ -455,7 +542,8 @@ class OraDBEventLogger:
             "api_events": self.get_event_count("api"),
             "model_events": self.get_event_count("model"),
             "document_events": self.get_event_count("document"),
-            "query_events": self.get_event_count("query")
+            "query_events": self.get_event_count("query"),
+            "reasoning_events": self.get_event_count("reasoning")
         }
         
         # Get average response times for A2A events

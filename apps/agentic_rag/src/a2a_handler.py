@@ -18,6 +18,8 @@ from .a2a_models import (
 from .task_manager import TaskManager
 from .agent_registry import AgentRegistry
 from .specialized_agent_cards import get_all_specialized_agent_cards, get_agent_card_by_id
+from .reasoning.rag_ensemble import RAGReasoningEnsemble
+from .reasoning_agent_cards import get_all_reasoning_agent_cards, get_reasoning_agent_card_by_id
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,10 @@ class A2AHandler:
         
         # Initialize specialized agents (lazy loading)
         self._specialized_agents = {}
-        
+
+        # Initialize reasoning ensemble (lazy loading)
+        self._reasoning_ensemble = None
+
         # Register available methods
         self.methods = {
             "document.query": self.handle_document_query,
@@ -51,6 +56,10 @@ class A2AHandler:
             "task.status": self.handle_task_status,
             "task.cancel": self.handle_task_cancel,
             "health.check": self.handle_health_check,
+            # Reasoning methods
+            "reasoning.execute": self.handle_reasoning_execute,
+            "reasoning.strategy": self.handle_reasoning_strategy,
+            "reasoning.list": self.handle_reasoning_list,
         }
         
         # Initialize registration flag
@@ -86,7 +95,18 @@ class A2AHandler:
         except Exception as e:
             logger.warning(f"Could not load model from config: {str(e)}")
             return "deepseek-r1"  # Default model
-    
+
+    def _get_reasoning_ensemble(self) -> RAGReasoningEnsemble:
+        """Lazy initialize reasoning ensemble."""
+        if self._reasoning_ensemble is None:
+            model = self._load_specialized_agent_model()
+            self._reasoning_ensemble = RAGReasoningEnsemble(
+                model_name=model,
+                vector_store=self.vector_store,
+                event_logger=self.event_logger
+            )
+        return self._reasoning_ensemble
+
     def _register_self(self):
         """Register this agent in the agent registry"""
         try:
@@ -193,10 +213,53 @@ class A2AHandler:
                         
                 except Exception as e:
                     logger.error(f"Error registering specialized agent {agent_id}: {str(e)}")
-            
+
+            # Register reasoning agents
+            logger.info("Registering reasoning agents...")
+            reasoning_cards = get_all_reasoning_agent_cards(
+                self.agent_endpoints.get('planner_url', 'http://localhost:8000')
+            )
+
+            for agent_id, card_data in reasoning_cards.items():
+                try:
+                    capabilities = []
+                    for cap_data in card_data.get("capabilities", []):
+                        capability = AgentCapability(
+                            name=cap_data["name"],
+                            description=cap_data["description"],
+                            input_schema=cap_data.get("input_schema", {}),
+                            output_schema=cap_data.get("output_schema", {})
+                        )
+                        capabilities.append(capability)
+
+                    endpoints_data = card_data.get("endpoints", {})
+                    endpoints = AgentEndpoint(
+                        base_url=endpoints_data.get("base_url", "http://localhost:8000"),
+                        authentication=endpoints_data.get("authentication", {})
+                    )
+
+                    agent_card = AgentCard(
+                        agent_id=card_data["agent_id"],
+                        name=card_data["name"],
+                        version=card_data["version"],
+                        description=card_data["description"],
+                        capabilities=capabilities,
+                        endpoints=endpoints,
+                        metadata=card_data.get("metadata", {})
+                    )
+
+                    success = self.agent_registry.register_agent(agent_card)
+                    if success:
+                        logger.info(f"Registered reasoning agent: {agent_id}")
+
+                except Exception as e:
+                    logger.error(f"Error registering reasoning agent {agent_id}: {str(e)}")
+
+            logger.info("Reasoning agent registration complete")
+
             logger.info(f"Specialized agent registration complete. Registry has {len(self.agent_registry.registered_agents)} total agents")
             logger.info(f"Available capabilities: {list(self.agent_registry.capability_index.keys())}")
-            
+
         except Exception as e:
             logger.error(f"Failed to register specialized agents: {str(e)}")
             import traceback
@@ -887,7 +950,100 @@ Final Answer:"""
         # Return the agent card for this agent
         from agent_card import get_agent_card
         return get_agent_card()
-    
+
+    async def handle_reasoning_execute(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle reasoning.execute requests - run ensemble with voting."""
+        import time
+        start_time = time.time()
+
+        query = params.get("query", "")
+        strategies = params.get("strategies", ["cot"])
+        use_rag = params.get("use_rag", True)
+        collection = params.get("collection", "PDF")
+        config = params.get("config", {})
+
+        if not query:
+            return {"error": "Query is required"}
+
+        ensemble = self._get_reasoning_ensemble()
+        result = await ensemble.run(
+            query=query,
+            strategies=strategies,
+            use_rag=use_rag,
+            collection=collection,
+            config=config
+        )
+
+        # Log A2A event
+        if self.event_logger:
+            duration_ms = (time.time() - start_time) * 1000
+            self.event_logger.log_a2a_event(
+                agent_id="reasoning_ensemble_v1",
+                agent_name="Reasoning Ensemble",
+                method="reasoning.execute",
+                user_prompt=query,
+                response=result.winner["response"],
+                metadata={
+                    "strategies": strategies,
+                    "winner": result.winner["strategy"],
+                    "use_rag": use_rag
+                },
+                duration_ms=duration_ms,
+                status="success"
+            )
+
+        return {
+            "winner": result.winner,
+            "all_responses": result.all_responses,
+            "execution_trace": [
+                {"timestamp": e.timestamp, "type": e.event_type, "message": e.message}
+                for e in result.execution_trace
+            ],
+            "rag_context": result.rag_context,
+            "total_duration_ms": result.total_duration_ms,
+            "voting_details": result.voting_details
+        }
+
+    async def handle_reasoning_strategy(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle reasoning.strategy requests - run single strategy."""
+        query = params.get("query", "")
+        strategy = params.get("strategy", "cot")
+        config = params.get("config", {})
+
+        if not query:
+            return {"error": "Query is required"}
+
+        ensemble = self._get_reasoning_ensemble()
+        result = await ensemble.run(
+            query=query,
+            strategies=[strategy],
+            use_rag=False,  # Single strategy typically without RAG
+            config={strategy: config} if config else None
+        )
+
+        return {
+            "strategy": strategy,
+            "response": result.winner["response"],
+            "duration_ms": result.total_duration_ms
+        }
+
+    async def handle_reasoning_list(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle reasoning.list requests - list available strategies."""
+        ensemble = self._get_reasoning_ensemble()
+        strategies = ensemble.available_strategies
+
+        return {
+            "strategies": strategies,
+            "count": len(strategies),
+            "details": {
+                s: {
+                    "name": ensemble.get_strategy_display_name(s),
+                    "icon": ensemble.get_strategy_icon(s)
+                }
+                for s in strategies
+            }
+        }
+
     async def handle_task_create(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle task creation requests"""
         task_params = TaskCreateParams(**params)

@@ -32,6 +32,7 @@ except ImportError:
     ORACLE_DB_AVAILABLE = False
 
 from src.local_rag_agent import LocalRAGAgent
+from src.reasoning.rag_ensemble import RAGReasoningEnsemble
 
 # Load environment variables and config
 load_dotenv()
@@ -79,7 +80,19 @@ except Exception as e:
     print(f"Could not initialize Ollama gemma3:270m: {str(e)}")
     local_agent = None
     print("No local model available")
-    
+
+# Initialize reasoning ensemble
+reasoning_ensemble = None
+try:
+    reasoning_ensemble = RAGReasoningEnsemble(
+        model_name="gemma3:270m",
+        vector_store=vector_store,
+        event_logger=None
+    )
+    print("Reasoning ensemble initialized")
+except Exception as e:
+    print(f"Could not initialize reasoning ensemble: {str(e)}")
+
 openai_agent = None
 
 # A2A Client for testing
@@ -935,6 +948,132 @@ def a2a_chat(message: str, history, agent_type: str, use_cot: bool, collection: 
              
         yield sanitize_history(current_history)
 
+
+# Unified Reasoning Chat Function
+def unified_reasoning_chat(
+    message: str,
+    history,
+    model: str,
+    use_rag: bool,
+    collection: str,
+    strategies: list,
+    tot_depth: int,
+    consistency_samples: int,
+    reflection_turns: int
+):
+    """
+    Unified chat function that handles reasoning ensemble.
+    Returns: (history, execution_trace, strategy_responses, final_answer)
+    """
+    if not message or not message.strip():
+        return history or [], "", "", ""
+
+    if not strategies:
+        strategies = ["cot"]  # Default to CoT
+
+    # Build config from advanced settings
+    config = {}
+    if "tot" in strategies:
+        config["tot"] = {"depth": tot_depth}
+    if "consistency" in strategies:
+        config["consistency"] = {"samples": consistency_samples}
+    if "self_reflection" in strategies:
+        config["self_reflection"] = {"max_turns": reflection_turns}
+
+    # Map collection names
+    collection_mapping = {
+        "PDF Collection": "PDF",
+        "Repository Collection": "Repository",
+        "Web Knowledge Base": "Web",
+        "General Knowledge": "General"
+    }
+    mapped_collection = collection_mapping.get(collection, "PDF")
+
+    # Run ensemble
+    if reasoning_ensemble:
+        try:
+            # Run async function synchronously
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            result = loop.run_until_complete(reasoning_ensemble.run(
+                query=message,
+                strategies=strategies,
+                use_rag=use_rag,
+                collection=mapped_collection,
+                config=config if config else None
+            ))
+            loop.close()
+
+            # Format execution trace
+            trace_lines = []
+            for event in result.execution_trace:
+                trace_lines.append(f"{event.timestamp} │ {event.message}")
+            execution_trace = "\n".join(trace_lines)
+
+            # Format strategy responses
+            response_blocks = []
+            for resp in result.all_responses:
+                is_winner = resp["strategy"] == result.winner["strategy"]
+                icon = reasoning_ensemble.get_strategy_icon(resp["strategy"])
+                name = reasoning_ensemble.get_strategy_display_name(resp["strategy"])
+                duration = resp["duration_ms"] / 1000
+
+                winner_badge = "🏆 " if is_winner else ""
+                vote_info = f" ({result.winner['vote_count']} votes)" if is_winner and result.voting_details else ""
+
+                # Truncate long responses
+                resp_text = resp["response"]
+                if len(resp_text) > 500:
+                    resp_text = resp_text[:500] + "..."
+
+                block = f"""### {winner_badge}{icon} {name}{vote_info} ⏱️ {duration:.1f}s
+
+{resp_text}
+"""
+                response_blocks.append(block)
+
+            strategy_responses = "\n---\n".join(response_blocks)
+
+            # Format final answer
+            sources_text = ""
+            if result.rag_context and result.rag_context.get("sources"):
+                sources_text = "\n\n📚 **Sources:** " + ", ".join(result.rag_context["sources"])
+
+            final_answer = result.winner["response"] + sources_text
+
+            # Update history
+            history = history or []
+            history.append({"role": "user", "content": message})
+            history.append({"role": "assistant", "content": final_answer})
+
+            return history, execution_trace, strategy_responses, final_answer
+
+        except Exception as e:
+            error_msg = f"Error running reasoning ensemble: {str(e)}"
+            print(error_msg)
+            history = history or []
+            history.append({"role": "user", "content": message})
+            history.append({"role": "assistant", "content": f"⚠️ {error_msg}"})
+            return history, f"Error: {str(e)}", "", error_msg
+    else:
+        # Fallback to simple response
+        history = history or []
+        history.append({"role": "user", "content": message})
+        history.append({"role": "assistant", "content": "Reasoning ensemble not initialized. Please check the configuration."})
+        return history, "Reasoning ensemble not available", "", "Reasoning ensemble not initialized"
+
+
+# Custom CSS for A2A Trace (module level for Gradio 6.0 compatibility)
+CUSTOM_CSS = """
+#a2a_trace_log .message-wrap .message {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+#a2a_trace_log .message-wrap {
+    max-width: 100% !important;
+}
+"""
+
 def create_interface():
     """Create Gradio interface"""
     # Workaround for Gradio schema parsing bug with additionalProperties
@@ -1048,19 +1187,8 @@ def create_interface():
                             gr.Markdown("#### Synthesizer B (Concise)")
                             gr.JSON(value=all_cards.get("synthesizer_agent_v2", {}))
     
-    # Custom CSS for A2A Trace
-    custom_css = """
-    #a2a_trace_log .message-wrap .message {
-        max-width: 100% !important;
-        width: 100% !important;
-    }
-    #a2a_trace_log .message-wrap {
-        max-width: 100% !important;
-    }
-    """
-    
     try:
-        with gr.Blocks(title="Agentic RAG System", theme=gr.themes.Soft(), css=custom_css) as interface:
+        with gr.Blocks(title="Agentic RAG System") as interface:
             gr.Markdown("""
             # 🤖 Agentic RAG System
             
@@ -1217,6 +1345,196 @@ def create_interface():
                     > - All communication goes through the A2A protocol for agent-to-agent interaction
                     """)
             
+                # Unified Reasoning Chat Tab
+                with gr.Tab("Reasoning Chat"):
+                    gr.Markdown("""
+                    # 🧠 Unified Reasoning Chat
+                    
+                    Chat with advanced reasoning strategies. Select one or multiple strategies to run in parallel 
+                    with ensemble voting. Enable RAG to ground responses in your documents.
+                    """)
+                    
+                    # Settings bar
+                    with gr.Row():
+                        with gr.Column(scale=1):
+                            reasoning_model_dropdown = gr.Dropdown(
+                                choices=model_choices,
+                                value=default_model if default_model in model_choices else model_choices[0] if model_choices else None,
+                                label="Model",
+                                info="Select the LLM model for reasoning"
+                            )
+                        with gr.Column(scale=1):
+                            reasoning_rag_toggle = gr.Checkbox(
+                                value=True,
+                                label="RAG Enabled",
+                                info="Retrieve context from documents before reasoning"
+                            )
+                        with gr.Column(scale=1):
+                            reasoning_collection_dropdown = gr.Dropdown(
+                                choices=collection_choices,
+                                value=collection_choices[0],
+                                label="Collection",
+                                info="Knowledge base to query for context"
+                            )
+                    
+                    # Strategy selector
+                    gr.Markdown("### Reasoning Strategies")
+                    all_strategy_values = ["cot", "tot", "react", "self_reflection", "consistency", "decomposed", "least_to_most", "recursive", "standard"]
+                    with gr.Row():
+                        reasoning_strategies = gr.CheckboxGroup(
+                            choices=[
+                                ("🔗 Chain-of-Thought", "cot"),
+                                ("🌳 Tree of Thoughts", "tot"),
+                                ("🛠️ ReAct", "react"),
+                                ("🪞 Self-Reflection", "self_reflection"),
+                                ("🔄 Self-Consistency", "consistency"),
+                                ("🧩 Decomposed", "decomposed"),
+                                ("📈 Least-to-Most", "least_to_most"),
+                                ("🔁 Recursive", "recursive"),
+                                ("📝 Standard", "standard")
+                            ],
+                            value=["cot"],
+                            label="Select strategies (multiple = ensemble voting)",
+                            info="Select one for direct response, or multiple for parallel execution with majority voting"
+                        )
+                    with gr.Row():
+                        toggle_all_strategies_btn = gr.Button("Toggle All Strategies", variant="secondary", size="sm")
+                    
+                    # Advanced settings (collapsible)
+                    with gr.Accordion("⚙️ Advanced Settings", open=False):
+                        with gr.Row():
+                            reasoning_tot_depth = gr.Slider(
+                                minimum=1, maximum=5, value=3, step=1,
+                                label="ToT Depth",
+                                info="Number of levels in Tree of Thoughts exploration"
+                            )
+                            reasoning_consistency_samples = gr.Slider(
+                                minimum=1, maximum=7, value=3, step=1,
+                                label="Consistency Samples",
+                                info="Number of samples for Self-Consistency voting"
+                            )
+                            reasoning_reflection_turns = gr.Slider(
+                                minimum=1, maximum=5, value=3, step=1,
+                                label="Reflection Turns",
+                                info="Max iterations for Self-Reflection refinement"
+                            )
+                    
+                    # Strategy responses (expanded by default)
+                    with gr.Accordion("📊 Strategy Responses", open=True):
+                        reasoning_strategy_responses = gr.Textbox(
+                            lines=10,
+                            label="",
+                            placeholder="Strategy responses will appear here after running the ensemble...",
+                            interactive=False
+                        )
+
+                    # Execution trace (collapsible)
+                    with gr.Accordion("🔄 Execution Trace", open=False):
+                        reasoning_execution_trace = gr.Textbox(
+                            lines=8,
+                            label="",
+                            placeholder="Execution trace will appear here...",
+                            interactive=False
+                        )
+
+                    # Final answer display
+                    gr.Markdown("### 💬 Final Answer")
+                    reasoning_final_answer = gr.Textbox(
+                        lines=6,
+                        label="",
+                        placeholder="Ask a question to see the reasoning result...",
+                        interactive=False
+                    )
+                    
+                    # Input area
+                    with gr.Row():
+                        reasoning_msg = gr.Textbox(
+                            label="Your Question",
+                            placeholder="Type your question here...",
+                            scale=6
+                        )
+                        reasoning_send = gr.Button("Send", variant="primary", scale=1)
+                        reasoning_clear = gr.Button("Clear", variant="secondary", scale=1)
+                    
+                    # Event handlers for Unified Reasoning Chat
+                    def clear_reasoning_chat():
+                        return "", "", ""
+
+                    def toggle_all_strategies(current_strategies):
+                        """Toggle between all strategies selected and none selected."""
+                        if len(current_strategies) == len(all_strategy_values):
+                            return []
+                        return all_strategy_values
+
+                    def reasoning_chat_wrapper(message, model, use_rag, collection, strategies, tot_depth, consistency_samples, reflection_turns):
+                        """Wrapper that calls unified_reasoning_chat without history."""
+                        _, execution_trace, strategy_responses, final_answer = unified_reasoning_chat(
+                            message, [], model, use_rag, collection, strategies, tot_depth, consistency_samples, reflection_turns
+                        )
+                        return execution_trace, strategy_responses, final_answer
+
+                    toggle_all_strategies_btn.click(
+                        toggle_all_strategies,
+                        inputs=[reasoning_strategies],
+                        outputs=[reasoning_strategies]
+                    )
+
+                    reasoning_send.click(
+                        reasoning_chat_wrapper,
+                        inputs=[
+                            reasoning_msg,
+                            reasoning_model_dropdown,
+                            reasoning_rag_toggle,
+                            reasoning_collection_dropdown,
+                            reasoning_strategies,
+                            reasoning_tot_depth,
+                            reasoning_consistency_samples,
+                            reasoning_reflection_turns
+                        ],
+                        outputs=[
+                            reasoning_execution_trace,
+                            reasoning_strategy_responses,
+                            reasoning_final_answer
+                        ],
+                        api_name=False
+                    ).then(
+                        lambda: "",
+                        outputs=reasoning_msg
+                    )
+
+                    reasoning_msg.submit(
+                        reasoning_chat_wrapper,
+                        inputs=[
+                            reasoning_msg,
+                            reasoning_model_dropdown,
+                            reasoning_rag_toggle,
+                            reasoning_collection_dropdown,
+                            reasoning_strategies,
+                            reasoning_tot_depth,
+                            reasoning_consistency_samples,
+                            reasoning_reflection_turns
+                        ],
+                        outputs=[
+                            reasoning_execution_trace,
+                            reasoning_strategy_responses,
+                            reasoning_final_answer
+                        ],
+                        api_name=False
+                    ).then(
+                        lambda: "",
+                        outputs=reasoning_msg
+                    )
+                    
+                    reasoning_clear.click(
+                        clear_reasoning_chat,
+                        outputs=[
+                            reasoning_execution_trace,
+                            reasoning_strategy_responses,
+                            reasoning_final_answer
+                        ],
+                        api_name=False
+                    )
+
                 # A2A Testing Tab
                 with gr.Tab("A2A Protocol Testing"):
                     gr.Markdown("""
@@ -1758,7 +2076,9 @@ def main():
         server_name="0.0.0.0",
         server_port=7860,
         share=True,
-        inbrowser=True
+        inbrowser=True,
+        css=CUSTOM_CSS,
+        theme=gr.themes.Soft()
     )
 
 def download_model(model_type: str) -> str:

@@ -21,5 +21,4 @@ oracledb
 sentence-transformers
 pytest
 pytest-asyncio
-# Local install of agent-reasoning (replace with PyPI version when published)
--e /home/ubuntu/git/agent-reasoning
+agent-reasoning

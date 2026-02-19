@@ -184,3 +184,7 @@ apps/agentic_rag/frontend/docs/plans/
 
 # Playwright MCP files
 .playwright-mcp/
+notebooks/episodic/conversations/fsagent_session_0010.md
+notebooks/episodic/tool_outputs/fsagent_session_0010/20260211_221258_arxiv_search_candidates.json
+notebooks/episodic/tool_outputs/fsagent_session_0010/20260211_230704_arxiv_search_candidates.json
+notebooks/config.yaml

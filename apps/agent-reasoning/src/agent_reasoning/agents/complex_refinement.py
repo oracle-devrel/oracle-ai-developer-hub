@@ -54,7 +54,7 @@ Instructions:
 Format your response EXACTLY as:
 SCORE: [number between 0.0 and 1.0]
 FEEDBACK: [specific technical corrections needed, or "Technically accurate" if score >= 0.9]""",
-        refiner_prompt_template="""You are a technical editor. Fix the technical accuracy issues in the following article.
+        refiner_prompt_template="""You are a technical editor. The article below needs technical accuracy fixes. Rewrite it with ALL corrections applied. Output ONLY the corrected article text, nothing else.
 
 Original Topic: {query}
 
@@ -64,9 +64,8 @@ Current Article:
 Technical Accuracy Feedback:
 {feedback}
 
-Instructions: Rewrite the article fixing ALL technical inaccuracies mentioned. Keep the same structure and style, only fix the technical errors.
-
-Corrected Article:"""
+Rewrite the complete article below, fixing all technical inaccuracies. Do not ask for input or add commentary — output the corrected article directly:
+"""
     ),
     PipelineStage(
         name="Structure & Clarity",
@@ -88,7 +87,7 @@ Instructions:
 Format your response EXACTLY as:
 SCORE: [number between 0.0 and 1.0]
 FEEDBACK: [specific structural improvements needed, or "Well structured" if score >= 0.9]""",
-        refiner_prompt_template="""You are a structural editor. Improve the structure and clarity of the following article.
+        refiner_prompt_template="""You are a structural editor. The article below needs structure and clarity improvements. Rewrite it with ALL structural fixes applied. Output ONLY the improved article text, nothing else.
 
 Original Topic: {query}
 
@@ -98,9 +97,8 @@ Current Article:
 Structure & Clarity Feedback:
 {feedback}
 
-Instructions: Reorganize and rewrite the article to address ALL structural issues mentioned. Improve flow, transitions, and logical ordering. Keep the technical content accurate.
-
-Restructured Article:"""
+Rewrite the complete article below, fixing all structural issues. Do not ask for input or add commentary — output the restructured article directly:
+"""
     ),
     PipelineStage(
         name="Technical Depth",
@@ -122,7 +120,7 @@ Instructions:
 Format your response EXACTLY as:
 SCORE: [number between 0.0 and 1.0]
 FEEDBACK: [specific technical details to add, or "Sufficiently detailed" if score >= 0.9]""",
-        refiner_prompt_template="""You are a technical writer. Enhance the technical depth of the following article.
+        refiner_prompt_template="""You are a technical writer. The article below needs more technical depth. Rewrite it with ALL requested details added. Output ONLY the enhanced article text, nothing else.
 
 Original Topic: {query}
 
@@ -132,9 +130,8 @@ Current Article:
 Technical Depth Feedback:
 {feedback}
 
-Instructions: Expand the article to add ALL the technical details mentioned in the feedback. Add formulas, algorithms, or specific details where needed. Maintain accuracy and structure.
-
-Enhanced Article:"""
+Rewrite the complete article below, adding all requested technical details. Do not ask for input or add commentary — output the enhanced article directly:
+"""
     ),
     PipelineStage(
         name="Examples & Analogies",
@@ -156,7 +153,7 @@ Instructions:
 Format your response EXACTLY as:
 SCORE: [number between 0.0 and 1.0]
 FEEDBACK: [specific examples/analogies to add, or "Well illustrated" if score >= 0.9]""",
-        refiner_prompt_template="""You are a technical communicator. Add examples and analogies to the following article.
+        refiner_prompt_template="""You are a technical communicator. The article below needs more examples and analogies. Rewrite it with ALL requested illustrations added. Output ONLY the improved article text, nothing else.
 
 Original Topic: {query}
 
@@ -166,9 +163,8 @@ Current Article:
 Examples & Analogies Feedback:
 {feedback}
 
-Instructions: Add concrete examples and helpful analogies as specified in the feedback. Make abstract concepts more tangible. Maintain technical accuracy and structure.
-
-Illustrated Article:"""
+Rewrite the complete article below, adding all requested examples and analogies. Do not ask for input or add commentary — output the illustrated article directly:
+"""
     ),
     PipelineStage(
         name="Professional Polish",
@@ -190,7 +186,7 @@ Instructions:
 Format your response EXACTLY as:
 SCORE: [number between 0.0 and 1.0]
 FEEDBACK: [specific polish improvements needed, or "Publication ready" if score >= 0.9]""",
-        refiner_prompt_template="""You are a professional editor. Polish the following article for publication.
+        refiner_prompt_template="""You are a professional editor. The article below needs final polish for publication. Rewrite it with ALL polish improvements applied. Output ONLY the polished article text, nothing else.
 
 Original Topic: {query}
 
@@ -200,9 +196,8 @@ Current Article:
 Polish Feedback:
 {feedback}
 
-Instructions: Apply final polish to address ALL issues mentioned. Improve word choice, eliminate redundancy, and ensure professional tone. This is the final pass.
-
-Polished Article:"""
+Rewrite the complete article below, applying all polish improvements. Do not ask for input or add commentary — output the polished article directly:
+"""
     ),
 ]
 
@@ -355,7 +350,18 @@ Provide a comprehensive answer suitable for a technical blog:"""
                     yield StreamEvent(event_type="text", data=chunk)
                 yield StreamEvent(event_type="text", data="\n")
 
-                current_draft = new_draft
+                # Guard: if the model produced a placeholder instead of actual content,
+                # keep the previous draft (common with smaller models)
+                new_draft_lower = new_draft.strip().lower()
+                if (len(new_draft.strip()) < len(current_draft.strip()) * 0.3
+                        or "paste" in new_draft_lower[:100]
+                        or "provide the" in new_draft_lower[:100]
+                        or "i'm ready" in new_draft_lower[:100]):
+                    yield StreamEvent(event_type="text", data=colored(
+                        "\n[GUARD] Refiner output appears to be a placeholder. Keeping previous draft.\n", "yellow"
+                    ))
+                else:
+                    current_draft = new_draft
 
             if not stage_complete:
                 yield StreamEvent(event_type="text", data=colored(

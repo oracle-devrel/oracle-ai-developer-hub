@@ -109,7 +109,10 @@ type Model struct {
 	quitting      bool
 
 	// Streaming control
-	streamCancel context.CancelFunc
+	streamCancel   context.CancelFunc
+	streamRespChan <-chan client.GenerateResponse
+	streamErrChan  <-chan error
+	streamStart    time.Time
 
 	// Keys
 	keys KeyMap
@@ -167,49 +170,46 @@ func (m *Model) loadModels() tea.Cmd {
 	}
 }
 
-// startStream starts a streaming query to a single agent
+// startStream initiates a streaming query and returns the first chunk.
+// On subsequent calls (empty query), it reads the next chunk from stored channels.
 func (m *Model) startStream(agentID, query string) tea.Cmd {
-	return func() tea.Msg {
+	// If query is non-empty, start a new request and store the channels
+	if query != "" {
 		ctx, cancel := context.WithCancel(context.Background())
 		m.streamCancel = cancel
+		m.streamStart = time.Now()
 
 		modelWithStrategy := fmt.Sprintf("%s+%s", m.currentModel, agentID)
-		startTime := time.Now()
+		m.streamRespChan, m.streamErrChan = m.serverClient.Generate(ctx, modelWithStrategy, query)
+	}
 
-		respChan, errChan := m.serverClient.Generate(ctx, modelWithStrategy, query)
+	// Capture channel refs for the closure
+	respChan := m.streamRespChan
+	errChan := m.streamErrChan
+	startTime := m.streamStart
 
-		// Process chunks until done
+	return func() tea.Msg {
+		if respChan == nil {
+			return streamDoneMsg{agentID: agentID, duration: 0}
+		}
 		for {
 			select {
 			case resp, ok := <-respChan:
 				if !ok {
-					duration := time.Since(startTime).Seconds()
-					return streamDoneMsg{agentID: agentID, duration: duration}
+					return streamDoneMsg{agentID: agentID, duration: time.Since(startTime).Seconds()}
 				}
 				if resp.Response != "" {
-					// Return chunk immediately - we'll continue in next Update
 					return streamChunkMsg{agentID: agentID, content: resp.Response}
 				}
 				if resp.Done {
-					duration := time.Since(startTime).Seconds()
-					return streamDoneMsg{agentID: agentID, duration: duration}
+					return streamDoneMsg{agentID: agentID, duration: time.Since(startTime).Seconds()}
 				}
 			case err := <-errChan:
 				if err != nil {
 					return streamErrorMsg{agentID: agentID, err: err}
 				}
-			case <-ctx.Done():
-				return streamDoneMsg{agentID: agentID, duration: time.Since(startTime).Seconds()}
 			}
 		}
-	}
-}
-
-// continueStream continues receiving stream chunks
-func (m *Model) continueStream(agentID string) tea.Cmd {
-	return func() tea.Msg {
-		// This is a placeholder - actual streaming is handled via callbacks
-		return nil
 	}
 }
 
@@ -405,7 +405,7 @@ func (m *Model) handleInputKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.chat.StartStreaming()
 		m.input.Reset()
 
-		return m, m.runStream(m.currentAgent, query)
+		return m, m.startStream(m.currentAgent, query)
 
 	default:
 		// Pass to input component
@@ -485,78 +485,6 @@ func (m *Model) updateSizes() {
 	m.modelSelector.SetSize(50, 20)
 }
 
-// runStream runs a streaming query
-func (m *Model) runStream(agentID, query string) tea.Cmd {
-	return func() tea.Msg {
-		ctx, cancel := context.WithCancel(context.Background())
-		m.streamCancel = cancel
-
-		modelWithStrategy := fmt.Sprintf("%s+%s", m.currentModel, agentID)
-		startTime := time.Now()
-
-		respChan, errChan := m.serverClient.Generate(ctx, modelWithStrategy, query)
-
-		for {
-			select {
-			case resp, ok := <-respChan:
-				if !ok {
-					duration := time.Since(startTime).Seconds()
-					return streamDoneMsg{agentID: agentID, duration: duration}
-				}
-				if resp.Done {
-					duration := time.Since(startTime).Seconds()
-					return streamDoneMsg{agentID: agentID, duration: duration}
-				}
-				// For streaming we need to return chunks incrementally
-				// This is tricky with bubbletea - we'll accumulate and return done
-			case err := <-errChan:
-				if err != nil {
-					return streamErrorMsg{agentID: agentID, err: err}
-				}
-			case <-ctx.Done():
-				return streamDoneMsg{agentID: agentID, duration: time.Since(startTime).Seconds()}
-			}
-		}
-	}
-}
-
-// streamToChat handles real-time streaming to chat
-func (m *Model) streamToChat(agentID, query string) tea.Cmd {
-	return func() tea.Msg {
-		ctx, cancel := context.WithCancel(context.Background())
-		m.streamCancel = cancel
-
-		modelWithStrategy := fmt.Sprintf("%s+%s", m.currentModel, agentID)
-		startTime := time.Now()
-
-		respChan, errChan := m.serverClient.Generate(ctx, modelWithStrategy, query)
-
-		var fullContent strings.Builder
-
-		for {
-			select {
-			case resp, ok := <-respChan:
-				if !ok {
-					duration := time.Since(startTime).Seconds()
-					return streamDoneMsg{agentID: agentID, duration: duration}
-				}
-				if resp.Response != "" {
-					fullContent.WriteString(resp.Response)
-				}
-				if resp.Done {
-					duration := time.Since(startTime).Seconds()
-					return streamDoneMsg{agentID: agentID, duration: duration}
-				}
-			case err := <-errChan:
-				if err != nil {
-					return streamErrorMsg{agentID: agentID, err: err}
-				}
-			case <-ctx.Done():
-				return streamDoneMsg{agentID: agentID, duration: time.Since(startTime).Seconds()}
-			}
-		}
-	}
-}
 
 // startArenaRun starts all agents in arena mode
 func (m *Model) startArenaRun(query string) tea.Cmd {

@@ -1,8 +1,9 @@
 # Agent Reasoning: The Thinking Layer
 
-![License](https://img.shields.io/badge/license-MIT-green)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![PyPI](https://img.shields.io/pypi/v/agent-reasoning)
+[![PyPI](https://img.shields.io/pypi/v/agent-reasoning)](https://pypi.org/project/agent-reasoning/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/agent-reasoning)](https://pypi.org/project/agent-reasoning/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 ![Ollama](https://img.shields.io/badge/backend-Ollama-black)
 ![Reasoning](https://img.shields.io/badge/reasoning-CoT%20|%20ToT%20|%20ReAct%20|%20Refinement-purple)
 ![Status](https://img.shields.io/badge/status-experimental-orange)

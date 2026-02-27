@@ -41,12 +41,12 @@ type Logger struct {
 }
 
 type LogEntry struct {
-	Level     string         `json:"level"`
-	Timestamp string         `json:"timestamp"`
-	Component string         `json:"component,omitempty"`
-	Message   string         `json:"message"`
-	Fields    map[string]any `json:"fields,omitempty"`
-	Caller    string         `json:"caller,omitempty"`
+	Level     string                 `json:"level"`
+	Timestamp string                 `json:"timestamp"`
+	Component string                 `json:"component,omitempty"`
+	Message   string                 `json:"message"`
+	Fields    map[string]interface{} `json:"fields,omitempty"`
+	Caller    string                 `json:"caller,omitempty"`
 }
 
 func init() {
@@ -71,7 +71,7 @@ func EnableFileLogging(filePath string) error {
 	mu.Lock()
 	defer mu.Unlock()
 
-	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %w", err)
 	}
@@ -96,7 +96,7 @@ func DisableFileLogging() {
 	}
 }
 
-func logMessage(level LogLevel, component string, message string, fields map[string]any) {
+func logMessage(level LogLevel, component string, message string, fields map[string]interface{}) {
 	if level < currentLevel {
 		return
 	}
@@ -119,15 +119,13 @@ func logMessage(level LogLevel, component string, message string, fields map[str
 	if logger.file != nil {
 		jsonData, err := json.Marshal(entry)
 		if err == nil {
-			logger.file.Write(append(jsonData, '\n'))
+			logger.file.WriteString(string(jsonData) + "\n")
 		}
 	}
 
 	var fieldStr string
 	if len(fields) > 0 {
 		fieldStr = " " + formatFields(fields)
-	} else {
-		fieldStr = ""
 	}
 
 	logLine := fmt.Sprintf("[%s] [%s]%s %s%s",
@@ -152,8 +150,8 @@ func formatComponent(component string) string {
 	return fmt.Sprintf(" %s:", component)
 }
 
-func formatFields(fields map[string]any) string {
-	parts := make([]string, 0, len(fields))
+func formatFields(fields map[string]interface{}) string {
+	var parts []string
 	for k, v := range fields {
 		parts = append(parts, fmt.Sprintf("%s=%v", k, v))
 	}
@@ -168,11 +166,11 @@ func DebugC(component string, message string) {
 	logMessage(DEBUG, component, message, nil)
 }
 
-func DebugF(message string, fields map[string]any) {
+func DebugF(message string, fields map[string]interface{}) {
 	logMessage(DEBUG, "", message, fields)
 }
 
-func DebugCF(component string, message string, fields map[string]any) {
+func DebugCF(component string, message string, fields map[string]interface{}) {
 	logMessage(DEBUG, component, message, fields)
 }
 
@@ -184,11 +182,11 @@ func InfoC(component string, message string) {
 	logMessage(INFO, component, message, nil)
 }
 
-func InfoF(message string, fields map[string]any) {
+func InfoF(message string, fields map[string]interface{}) {
 	logMessage(INFO, "", message, fields)
 }
 
-func InfoCF(component string, message string, fields map[string]any) {
+func InfoCF(component string, message string, fields map[string]interface{}) {
 	logMessage(INFO, component, message, fields)
 }
 
@@ -200,11 +198,11 @@ func WarnC(component string, message string) {
 	logMessage(WARN, component, message, nil)
 }
 
-func WarnF(message string, fields map[string]any) {
+func WarnF(message string, fields map[string]interface{}) {
 	logMessage(WARN, "", message, fields)
 }
 
-func WarnCF(component string, message string, fields map[string]any) {
+func WarnCF(component string, message string, fields map[string]interface{}) {
 	logMessage(WARN, component, message, fields)
 }
 
@@ -216,11 +214,11 @@ func ErrorC(component string, message string) {
 	logMessage(ERROR, component, message, nil)
 }
 
-func ErrorF(message string, fields map[string]any) {
+func ErrorF(message string, fields map[string]interface{}) {
 	logMessage(ERROR, "", message, fields)
 }
 
-func ErrorCF(component string, message string, fields map[string]any) {
+func ErrorCF(component string, message string, fields map[string]interface{}) {
 	logMessage(ERROR, component, message, fields)
 }
 
@@ -232,10 +230,10 @@ func FatalC(component string, message string) {
 	logMessage(FATAL, component, message, nil)
 }
 
-func FatalF(message string, fields map[string]any) {
+func FatalF(message string, fields map[string]interface{}) {
 	logMessage(FATAL, "", message, fields)
 }
 
-func FatalCF(component string, message string, fields map[string]any) {
+func FatalCF(component string, message string, fields map[string]interface{}) {
 	logMessage(FATAL, component, message, fields)
 }

@@ -9,15 +9,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/jasperan/picooraclaw/pkg/logger"
 )
 
-var (
-	namePattern        = regexp.MustCompile(`^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$`)
-	reFrontmatter      = regexp.MustCompile(`(?s)^---(?:\r\n|\n|\r)(.*?)(?:\r\n|\n|\r)---`)
-	reStripFrontmatter = regexp.MustCompile(`(?s)^---(?:\r\n|\n|\r)(.*?)(?:\r\n|\n|\r)---(?:\r\n|\n|\r)*`)
-)
+var namePattern = regexp.MustCompile(`^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$`)
 
 const (
 	MaxNameLength        = 64
@@ -59,72 +53,134 @@ func (info SkillInfo) validate() error {
 
 type SkillsLoader struct {
 	workspace       string
-	workspaceSkills string // workspace skills (project-level)
-	globalSkills    string // global skills (~/.picooraclaw/skills)
-	builtinSkills   string // builtin skills
+	workspaceSkills string // workspace skills (项目级别)
+	globalSkills    string // 全局 skills (~/.picoclaw/skills)
+	builtinSkills   string // 内置 skills
 }
 
 func NewSkillsLoader(workspace string, globalSkills string, builtinSkills string) *SkillsLoader {
 	return &SkillsLoader{
 		workspace:       workspace,
 		workspaceSkills: filepath.Join(workspace, "skills"),
-		globalSkills:    globalSkills, // ~/.picooraclaw/skills
+		globalSkills:    globalSkills, // ~/.picoclaw/skills
 		builtinSkills:   builtinSkills,
 	}
 }
 
 func (sl *SkillsLoader) ListSkills() []SkillInfo {
 	skills := make([]SkillInfo, 0)
-	seen := make(map[string]bool)
 
-	addSkills := func(dir, source string) {
-		if dir == "" {
-			return
-		}
-		dirs, err := os.ReadDir(dir)
-		if err != nil {
-			return
-		}
-		for _, d := range dirs {
-			if !d.IsDir() {
-				continue
+	if sl.workspaceSkills != "" {
+		if dirs, err := os.ReadDir(sl.workspaceSkills); err == nil {
+			for _, dir := range dirs {
+				if dir.IsDir() {
+					skillFile := filepath.Join(sl.workspaceSkills, dir.Name(), "SKILL.md")
+					if _, err := os.Stat(skillFile); err == nil {
+						info := SkillInfo{
+							Name:   dir.Name(),
+							Path:   skillFile,
+							Source: "workspace",
+						}
+						metadata := sl.getSkillMetadata(skillFile)
+						if metadata != nil {
+							info.Description = metadata.Description
+							info.Name = metadata.Name
+						}
+						if err := info.validate(); err != nil {
+							slog.Warn("invalid skill from workspace", "name", info.Name, "error", err)
+							continue
+						}
+						skills = append(skills, info)
+					}
+				}
 			}
-			skillFile := filepath.Join(dir, d.Name(), "SKILL.md")
-			if _, err := os.Stat(skillFile); err != nil {
-				continue
-			}
-			info := SkillInfo{
-				Name:   d.Name(),
-				Path:   skillFile,
-				Source: source,
-			}
-			metadata := sl.getSkillMetadata(skillFile)
-			if metadata != nil {
-				info.Description = metadata.Description
-				info.Name = metadata.Name
-			}
-			if err := info.validate(); err != nil {
-				slog.Warn("invalid skill from "+source, "name", info.Name, "error", err)
-				continue
-			}
-			if seen[info.Name] {
-				continue
-			}
-			seen[info.Name] = true
-			skills = append(skills, info)
 		}
 	}
 
-	// Priority: workspace > global > builtin
-	addSkills(sl.workspaceSkills, "workspace")
-	addSkills(sl.globalSkills, "global")
-	addSkills(sl.builtinSkills, "builtin")
+	// 全局 skills (~/.picoclaw/skills) - 被 workspace skills 覆盖
+	if sl.globalSkills != "" {
+		if dirs, err := os.ReadDir(sl.globalSkills); err == nil {
+			for _, dir := range dirs {
+				if dir.IsDir() {
+					skillFile := filepath.Join(sl.globalSkills, dir.Name(), "SKILL.md")
+					if _, err := os.Stat(skillFile); err == nil {
+						// 检查是否已被 workspace skills 覆盖
+						exists := false
+						for _, s := range skills {
+							if s.Name == dir.Name() && s.Source == "workspace" {
+								exists = true
+								break
+							}
+						}
+						if exists {
+							continue
+						}
+
+						info := SkillInfo{
+							Name:   dir.Name(),
+							Path:   skillFile,
+							Source: "global",
+						}
+						metadata := sl.getSkillMetadata(skillFile)
+						if metadata != nil {
+							info.Description = metadata.Description
+							info.Name = metadata.Name
+						}
+						if err := info.validate(); err != nil {
+							slog.Warn("invalid skill from global", "name", info.Name, "error", err)
+							continue
+						}
+						skills = append(skills, info)
+					}
+				}
+			}
+		}
+	}
+
+	if sl.builtinSkills != "" {
+		if dirs, err := os.ReadDir(sl.builtinSkills); err == nil {
+			for _, dir := range dirs {
+				if dir.IsDir() {
+					skillFile := filepath.Join(sl.builtinSkills, dir.Name(), "SKILL.md")
+					if _, err := os.Stat(skillFile); err == nil {
+						// 检查是否已被 workspace 或 global skills 覆盖
+						exists := false
+						for _, s := range skills {
+							if s.Name == dir.Name() && (s.Source == "workspace" || s.Source == "global") {
+								exists = true
+								break
+							}
+						}
+						if exists {
+							continue
+						}
+
+						info := SkillInfo{
+							Name:   dir.Name(),
+							Path:   skillFile,
+							Source: "builtin",
+						}
+						metadata := sl.getSkillMetadata(skillFile)
+						if metadata != nil {
+							info.Description = metadata.Description
+							info.Name = metadata.Name
+						}
+						if err := info.validate(); err != nil {
+							slog.Warn("invalid skill from builtin", "name", info.Name, "error", err)
+							continue
+						}
+						skills = append(skills, info)
+					}
+				}
+			}
+		}
+	}
 
 	return skills
 }
 
 func (sl *SkillsLoader) LoadSkill(name string) (string, bool) {
-	// 1. load from workspace skills first (project-level)
+	// 1. 优先从 workspace skills 加载（项目级别）
 	if sl.workspaceSkills != "" {
 		skillFile := filepath.Join(sl.workspaceSkills, name, "SKILL.md")
 		if content, err := os.ReadFile(skillFile); err == nil {
@@ -132,7 +188,7 @@ func (sl *SkillsLoader) LoadSkill(name string) (string, bool) {
 		}
 	}
 
-	// 2. then load from global skills (~/.picooraclaw/skills)
+	// 2. 其次从全局 skills 加载 (~/.picoclaw/skills)
 	if sl.globalSkills != "" {
 		skillFile := filepath.Join(sl.globalSkills, name, "SKILL.md")
 		if content, err := os.ReadFile(skillFile); err == nil {
@@ -140,7 +196,7 @@ func (sl *SkillsLoader) LoadSkill(name string) (string, bool) {
 		}
 	}
 
-	// 3. finally load from builtin skills
+	// 3. 最后从内置 skills 加载
 	if sl.builtinSkills != "" {
 		skillFile := filepath.Join(sl.builtinSkills, name, "SKILL.md")
 		if content, err := os.ReadFile(skillFile); err == nil {
@@ -195,11 +251,6 @@ func (sl *SkillsLoader) BuildSkillsSummary() string {
 func (sl *SkillsLoader) getSkillMetadata(skillPath string) *SkillMetadata {
 	content, err := os.ReadFile(skillPath)
 	if err != nil {
-		logger.WarnCF("skills", "Failed to read skill metadata",
-			map[string]any{
-				"skill_path": skillPath,
-				"error":      err.Error(),
-			})
 		return nil
 	}
 
@@ -232,15 +283,10 @@ func (sl *SkillsLoader) getSkillMetadata(skillPath string) *SkillMetadata {
 
 // parseSimpleYAML parses simple key: value YAML format
 // Example: name: github\n description: "..."
-// Normalizes line endings to handle \n (Unix), \r\n (Windows), and \r (classic Mac)
 func (sl *SkillsLoader) parseSimpleYAML(content string) map[string]string {
 	result := make(map[string]string)
 
-	// Normalize line endings: convert \r\n and \r to \n
-	normalized := strings.ReplaceAll(content, "\r\n", "\n")
-	normalized = strings.ReplaceAll(normalized, "\r", "\n")
-
-	for _, line := range strings.Split(normalized, "\n") {
+	for _, line := range strings.Split(content, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
@@ -260,8 +306,10 @@ func (sl *SkillsLoader) parseSimpleYAML(content string) map[string]string {
 }
 
 func (sl *SkillsLoader) extractFrontmatter(content string) string {
-	// Support \n (Unix), \r\n (Windows), and \r (classic Mac) line endings for frontmatter blocks
-	match := reFrontmatter.FindStringSubmatch(content)
+	// (?s) enables DOTALL mode so . matches newlines
+	// Match first ---, capture everything until next --- on its own line
+	re := regexp.MustCompile(`(?s)^---\n(.*)\n---`)
+	match := re.FindStringSubmatch(content)
 	if len(match) > 1 {
 		return match[1]
 	}
@@ -269,7 +317,8 @@ func (sl *SkillsLoader) extractFrontmatter(content string) string {
 }
 
 func (sl *SkillsLoader) stripFrontmatter(content string) string {
-	return reStripFrontmatter.ReplaceAllString(content, "")
+	re := regexp.MustCompile(`^---\n.*?\n---\n`)
+	return re.ReplaceAllString(content, "")
 }
 
 func escapeXML(s string) string {

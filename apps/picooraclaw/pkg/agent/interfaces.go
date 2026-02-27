@@ -33,13 +33,6 @@ type StateManagerInterface interface {
 	GetLastChatID() string
 }
 
-// PromptStoreInterface defines the contract for prompt storage backends.
-type PromptStoreInterface interface {
-	LoadPrompt(name string) (string, error)
-	SavePrompt(name, content string) error
-	LoadBootstrapFiles() map[string]string
-}
-
 // OracleMemoryStore is an extended interface for Oracle-backed memory with vector search.
 type OracleMemoryStore interface {
 	MemoryStoreInterface

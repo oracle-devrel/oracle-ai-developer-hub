@@ -24,37 +24,37 @@ func (t *I2CTool) Description() string {
 	return "Interact with I2C bus devices for reading sensors and controlling peripherals. Actions: detect (list buses), scan (find devices on a bus), read (read bytes from device), write (send bytes to device). Linux only."
 }
 
-func (t *I2CTool) Parameters() map[string]any {
-	return map[string]any{
+func (t *I2CTool) Parameters() map[string]interface{} {
+	return map[string]interface{}{
 		"type": "object",
-		"properties": map[string]any{
-			"action": map[string]any{
+		"properties": map[string]interface{}{
+			"action": map[string]interface{}{
 				"type":        "string",
 				"enum":        []string{"detect", "scan", "read", "write"},
 				"description": "Action to perform: detect (list available I2C buses), scan (find devices on a bus), read (read bytes from a device), write (send bytes to a device)",
 			},
-			"bus": map[string]any{
+			"bus": map[string]interface{}{
 				"type":        "string",
 				"description": "I2C bus number (e.g. \"1\" for /dev/i2c-1). Required for scan/read/write.",
 			},
-			"address": map[string]any{
+			"address": map[string]interface{}{
 				"type":        "integer",
 				"description": "7-bit I2C device address (0x03-0x77). Required for read/write.",
 			},
-			"register": map[string]any{
+			"register": map[string]interface{}{
 				"type":        "integer",
 				"description": "Register address to read from or write to. If set, sends register byte before read/write.",
 			},
-			"data": map[string]any{
+			"data": map[string]interface{}{
 				"type":        "array",
-				"items":       map[string]any{"type": "integer"},
+				"items":       map[string]interface{}{"type": "integer"},
 				"description": "Bytes to write (0-255 each). Required for write action.",
 			},
-			"length": map[string]any{
+			"length": map[string]interface{}{
 				"type":        "integer",
 				"description": "Number of bytes to read (1-256). Default: 1. Used with read action.",
 			},
-			"confirm": map[string]any{
+			"confirm": map[string]interface{}{
 				"type":        "boolean",
 				"description": "Must be true for write operations. Safety guard to prevent accidental writes.",
 			},
@@ -63,7 +63,7 @@ func (t *I2CTool) Parameters() map[string]any {
 	}
 }
 
-func (t *I2CTool) Execute(ctx context.Context, args map[string]any) *ToolResult {
+func (t *I2CTool) Execute(ctx context.Context, args map[string]interface{}) *ToolResult {
 	if runtime.GOOS != "linux" {
 		return ErrorResult("I2C is only supported on Linux. This tool requires /dev/i2c-* device files.")
 	}
@@ -95,9 +95,7 @@ func (t *I2CTool) detect() *ToolResult {
 	}
 
 	if len(matches) == 0 {
-		return SilentResult(
-			"No I2C buses found. You may need to:\n1. Load the i2c-dev module: modprobe i2c-dev\n2. Check that I2C is enabled in device tree\n3. Configure pinmux for your board (see hardware skill)",
-		)
+		return SilentResult("No I2C buses found. You may need to:\n1. Load the i2c-dev module: modprobe i2c-dev\n2. Check that I2C is enabled in device tree\n3. Configure pinmux for your board (see hardware skill)")
 	}
 
 	type busInfo struct {
@@ -117,20 +115,14 @@ func (t *I2CTool) detect() *ToolResult {
 	return SilentResult(fmt.Sprintf("Found %d I2C bus(es):\n%s", len(buses), string(result)))
 }
 
-// Helper functions for I2C operations (used by platform-specific implementations)
-
 // isValidBusID checks that a bus identifier is a simple number (prevents path injection)
-//
-//nolint:unused // Used by i2c_linux.go
 func isValidBusID(id string) bool {
 	matched, _ := regexp.MatchString(`^\d+$`, id)
 	return matched
 }
 
 // parseI2CAddress extracts and validates an I2C address from args
-//
-//nolint:unused // Used by i2c_linux.go
-func parseI2CAddress(args map[string]any) (int, *ToolResult) {
+func parseI2CAddress(args map[string]interface{}) (int, *ToolResult) {
 	addrFloat, ok := args["address"].(float64)
 	if !ok {
 		return 0, ErrorResult("address is required (e.g. 0x38 for AHT20)")
@@ -143,9 +135,7 @@ func parseI2CAddress(args map[string]any) (int, *ToolResult) {
 }
 
 // parseI2CBus extracts and validates an I2C bus from args
-//
-//nolint:unused // Used by i2c_linux.go
-func parseI2CBus(args map[string]any) (string, *ToolResult) {
+func parseI2CBus(args map[string]interface{}) (string, *ToolResult) {
 	bus, ok := args["bus"].(string)
 	if !ok || bus == "" {
 		return "", ErrorResult("bus is required (e.g. \"1\" for /dev/i2c-1)")

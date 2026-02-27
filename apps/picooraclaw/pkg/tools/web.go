@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -17,63 +16,12 @@ const (
 	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 )
 
-// Pre-compiled regexes for HTML text extraction
-var (
-	reScript     = regexp.MustCompile(`<script[\s\S]*?</script>`)
-	reStyle      = regexp.MustCompile(`<style[\s\S]*?</style>`)
-	reTags       = regexp.MustCompile(`<[^>]+>`)
-	reWhitespace = regexp.MustCompile(`[^\S\n]+`)
-	reBlankLines = regexp.MustCompile(`\n{3,}`)
-
-	// DuckDuckGo result extraction
-	reDDGLink    = regexp.MustCompile(`<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)</a>`)
-	reDDGSnippet = regexp.MustCompile(`<a class="result__snippet[^"]*".*?>([\s\S]*?)</a>`)
-)
-
-// createHTTPClient creates an HTTP client with optional proxy support
-func createHTTPClient(proxyURL string, timeout time.Duration) (*http.Client, error) {
-	client := &http.Client{
-		Timeout: timeout,
-		Transport: &http.Transport{
-			MaxIdleConns:        10,
-			IdleConnTimeout:     30 * time.Second,
-			DisableCompression:  false,
-			TLSHandshakeTimeout: 15 * time.Second,
-		},
-	}
-
-	if proxyURL != "" {
-		proxy, err := url.Parse(proxyURL)
-		if err != nil {
-			return nil, fmt.Errorf("invalid proxy URL: %w", err)
-		}
-		scheme := strings.ToLower(proxy.Scheme)
-		switch scheme {
-		case "http", "https", "socks5", "socks5h":
-		default:
-			return nil, fmt.Errorf(
-				"unsupported proxy scheme %q (supported: http, https, socks5, socks5h)",
-				proxy.Scheme,
-			)
-		}
-		if proxy.Host == "" {
-			return nil, fmt.Errorf("invalid proxy URL: missing host")
-		}
-		client.Transport.(*http.Transport).Proxy = http.ProxyURL(proxy)
-	} else {
-		client.Transport.(*http.Transport).Proxy = http.ProxyFromEnvironment
-	}
-
-	return client, nil
-}
-
 type SearchProvider interface {
 	Search(ctx context.Context, query string, count int) (string, error)
 }
 
 type BraveSearchProvider struct {
 	apiKey string
-	proxy  string
 }
 
 func (p *BraveSearchProvider) Search(ctx context.Context, query string, count int) (string, error) {
@@ -88,10 +36,7 @@ func (p *BraveSearchProvider) Search(ctx context.Context, query string, count in
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Subscription-Token", p.apiKey)
 
-	client, err := createHTTPClient(p.proxy, 10*time.Second)
-	if err != nil {
-		return "", fmt.Errorf("failed to create HTTP client: %w", err)
-	}
+	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("request failed: %w", err)
@@ -139,95 +84,7 @@ func (p *BraveSearchProvider) Search(ctx context.Context, query string, count in
 	return strings.Join(lines, "\n"), nil
 }
 
-type TavilySearchProvider struct {
-	apiKey  string
-	baseURL string
-	proxy   string
-}
-
-func (p *TavilySearchProvider) Search(ctx context.Context, query string, count int) (string, error) {
-	searchURL := p.baseURL
-	if searchURL == "" {
-		searchURL = "https://api.tavily.com/search"
-	}
-
-	payload := map[string]any{
-		"api_key":             p.apiKey,
-		"query":               query,
-		"search_depth":        "advanced",
-		"include_answer":      false,
-		"include_images":      false,
-		"include_raw_content": false,
-		"max_results":         count,
-	}
-
-	bodyBytes, err := json.Marshal(payload)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal payload: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "POST", searchURL, bytes.NewBuffer(bodyBytes))
-	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", userAgent)
-
-	client, err := createHTTPClient(p.proxy, 10*time.Second)
-	if err != nil {
-		return "", fmt.Errorf("failed to create HTTP client: %w", err)
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("tavily api error (status %d): %s", resp.StatusCode, string(body))
-	}
-
-	var searchResp struct {
-		Results []struct {
-			Title   string `json:"title"`
-			URL     string `json:"url"`
-			Content string `json:"content"`
-		} `json:"results"`
-	}
-
-	if err := json.Unmarshal(body, &searchResp); err != nil {
-		return "", fmt.Errorf("failed to parse response: %w", err)
-	}
-
-	results := searchResp.Results
-	if len(results) == 0 {
-		return fmt.Sprintf("No results for: %s", query), nil
-	}
-
-	var lines []string
-	lines = append(lines, fmt.Sprintf("Results for: %s (via Tavily)", query))
-	for i, item := range results {
-		if i >= count {
-			break
-		}
-		lines = append(lines, fmt.Sprintf("%d. %s\n   %s", i+1, item.Title, item.URL))
-		if item.Content != "" {
-			lines = append(lines, fmt.Sprintf("   %s", item.Content))
-		}
-	}
-
-	return strings.Join(lines, "\n"), nil
-}
-
-type DuckDuckGoSearchProvider struct {
-	proxy string
-}
+type DuckDuckGoSearchProvider struct{}
 
 func (p *DuckDuckGoSearchProvider) Search(ctx context.Context, query string, count int) (string, error) {
 	searchURL := fmt.Sprintf("https://html.duckduckgo.com/html/?q=%s", url.QueryEscape(query))
@@ -239,10 +96,7 @@ func (p *DuckDuckGoSearchProvider) Search(ctx context.Context, query string, cou
 
 	req.Header.Set("User-Agent", userAgent)
 
-	client, err := createHTTPClient(p.proxy, 10*time.Second)
-	if err != nil {
-		return "", fmt.Errorf("failed to create HTTP client: %w", err)
-	}
+	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("request failed: %w", err)
@@ -264,7 +118,8 @@ func (p *DuckDuckGoSearchProvider) extractResults(html string, count int, query 
 	// Try finding the result links directly first, as they are the most critical
 	// Pattern: <a class="result__a" href="...">Title</a>
 	// The previous regex was a bit strict. Let's make it more flexible for attributes order/content
-	matches := reDDGLink.FindAllStringSubmatch(html, count+5)
+	reLink := regexp.MustCompile(`<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)</a>`)
+	matches := reLink.FindAllStringSubmatch(html, count+5)
 
 	if len(matches) == 0 {
 		return fmt.Sprintf("No results found or extraction failed. Query: %s", query), nil
@@ -281,7 +136,8 @@ func (p *DuckDuckGoSearchProvider) extractResults(html string, count int, query 
 
 	// A better regex approach: iterate through text and find matches in order
 	// But for now, let's grab all snippets too
-	snippetMatches := reDDGSnippet.FindAllStringSubmatch(html, count+5)
+	reSnippet := regexp.MustCompile(`<a class="result__snippet[^"]*".*?>([\s\S]*?)</a>`)
+	snippetMatches := reSnippet.FindAllStringSubmatch(html, count+5)
 
 	maxItems := min(len(matches), count)
 
@@ -316,28 +172,22 @@ func (p *DuckDuckGoSearchProvider) extractResults(html string, count int, query 
 }
 
 func stripTags(content string) string {
-	return reTags.ReplaceAllString(content, "")
+	re := regexp.MustCompile(`<[^>]+>`)
+	return re.ReplaceAllString(content, "")
 }
 
 type PerplexitySearchProvider struct {
 	apiKey string
-	proxy  string
 }
 
 func (p *PerplexitySearchProvider) Search(ctx context.Context, query string, count int) (string, error) {
 	searchURL := "https://api.perplexity.ai/chat/completions"
 
-	payload := map[string]any{
+	payload := map[string]interface{}{
 		"model": "sonar",
 		"messages": []map[string]string{
-			{
-				"role":    "system",
-				"content": "You are a search assistant. Provide concise search results with titles, URLs, and brief descriptions in the following format:\n1. Title\n   URL\n   Description\n\nDo not add extra commentary.",
-			},
-			{
-				"role":    "user",
-				"content": fmt.Sprintf("Search for: %s. Provide up to %d relevant results.", query, count),
-			},
+			{"role": "system", "content": "You are a search assistant. Provide concise search results with titles, URLs, and brief descriptions in the following format:\n1. Title\n   URL\n   Description\n\nDo not add extra commentary."},
+			{"role": "user", "content": fmt.Sprintf("Search for: %s. Provide up to %d relevant results.", query, count)},
 		},
 		"max_tokens": 1000,
 	}
@@ -356,10 +206,7 @@ func (p *PerplexitySearchProvider) Search(ctx context.Context, query string, cou
 	req.Header.Set("Authorization", "Bearer "+p.apiKey)
 	req.Header.Set("User-Agent", userAgent)
 
-	client, err := createHTTPClient(p.proxy, 30*time.Second)
-	if err != nil {
-		return "", fmt.Errorf("failed to create HTTP client: %w", err)
-	}
+	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("request failed: %w", err)
@@ -403,44 +250,30 @@ type WebSearchToolOptions struct {
 	BraveAPIKey          string
 	BraveMaxResults      int
 	BraveEnabled         bool
-	TavilyAPIKey         string
-	TavilyBaseURL        string
-	TavilyMaxResults     int
-	TavilyEnabled        bool
 	DuckDuckGoMaxResults int
 	DuckDuckGoEnabled    bool
 	PerplexityAPIKey     string
 	PerplexityMaxResults int
 	PerplexityEnabled    bool
-	Proxy                string
 }
 
 func NewWebSearchTool(opts WebSearchToolOptions) *WebSearchTool {
 	var provider SearchProvider
 	maxResults := 5
 
-	// Priority: Perplexity > Brave > Tavily > DuckDuckGo
+	// Priority: Perplexity > Brave > DuckDuckGo
 	if opts.PerplexityEnabled && opts.PerplexityAPIKey != "" {
-		provider = &PerplexitySearchProvider{apiKey: opts.PerplexityAPIKey, proxy: opts.Proxy}
+		provider = &PerplexitySearchProvider{apiKey: opts.PerplexityAPIKey}
 		if opts.PerplexityMaxResults > 0 {
 			maxResults = opts.PerplexityMaxResults
 		}
 	} else if opts.BraveEnabled && opts.BraveAPIKey != "" {
-		provider = &BraveSearchProvider{apiKey: opts.BraveAPIKey, proxy: opts.Proxy}
+		provider = &BraveSearchProvider{apiKey: opts.BraveAPIKey}
 		if opts.BraveMaxResults > 0 {
 			maxResults = opts.BraveMaxResults
 		}
-	} else if opts.TavilyEnabled && opts.TavilyAPIKey != "" {
-		provider = &TavilySearchProvider{
-			apiKey:  opts.TavilyAPIKey,
-			baseURL: opts.TavilyBaseURL,
-			proxy:   opts.Proxy,
-		}
-		if opts.TavilyMaxResults > 0 {
-			maxResults = opts.TavilyMaxResults
-		}
 	} else if opts.DuckDuckGoEnabled {
-		provider = &DuckDuckGoSearchProvider{proxy: opts.Proxy}
+		provider = &DuckDuckGoSearchProvider{}
 		if opts.DuckDuckGoMaxResults > 0 {
 			maxResults = opts.DuckDuckGoMaxResults
 		}
@@ -462,15 +295,15 @@ func (t *WebSearchTool) Description() string {
 	return "Search the web for current information. Returns titles, URLs, and snippets from search results."
 }
 
-func (t *WebSearchTool) Parameters() map[string]any {
-	return map[string]any{
+func (t *WebSearchTool) Parameters() map[string]interface{} {
+	return map[string]interface{}{
 		"type": "object",
-		"properties": map[string]any{
-			"query": map[string]any{
+		"properties": map[string]interface{}{
+			"query": map[string]interface{}{
 				"type":        "string",
 				"description": "Search query",
 			},
-			"count": map[string]any{
+			"count": map[string]interface{}{
 				"type":        "integer",
 				"description": "Number of results (1-10)",
 				"minimum":     1.0,
@@ -481,7 +314,7 @@ func (t *WebSearchTool) Parameters() map[string]any {
 	}
 }
 
-func (t *WebSearchTool) Execute(ctx context.Context, args map[string]any) *ToolResult {
+func (t *WebSearchTool) Execute(ctx context.Context, args map[string]interface{}) *ToolResult {
 	query, ok := args["query"].(string)
 	if !ok {
 		return ErrorResult("query is required")
@@ -507,7 +340,6 @@ func (t *WebSearchTool) Execute(ctx context.Context, args map[string]any) *ToolR
 
 type WebFetchTool struct {
 	maxChars int
-	proxy    string
 }
 
 func NewWebFetchTool(maxChars int) *WebFetchTool {
@@ -519,16 +351,6 @@ func NewWebFetchTool(maxChars int) *WebFetchTool {
 	}
 }
 
-func NewWebFetchToolWithProxy(maxChars int, proxy string) *WebFetchTool {
-	if maxChars <= 0 {
-		maxChars = 50000
-	}
-	return &WebFetchTool{
-		maxChars: maxChars,
-		proxy:    proxy,
-	}
-}
-
 func (t *WebFetchTool) Name() string {
 	return "web_fetch"
 }
@@ -537,15 +359,15 @@ func (t *WebFetchTool) Description() string {
 	return "Fetch a URL and extract readable content (HTML to text). Use this to get weather info, news, articles, or any web content."
 }
 
-func (t *WebFetchTool) Parameters() map[string]any {
-	return map[string]any{
+func (t *WebFetchTool) Parameters() map[string]interface{} {
+	return map[string]interface{}{
 		"type": "object",
-		"properties": map[string]any{
-			"url": map[string]any{
+		"properties": map[string]interface{}{
+			"url": map[string]interface{}{
 				"type":        "string",
 				"description": "URL to fetch",
 			},
-			"maxChars": map[string]any{
+			"maxChars": map[string]interface{}{
 				"type":        "integer",
 				"description": "Maximum characters to extract",
 				"minimum":     100.0,
@@ -555,7 +377,7 @@ func (t *WebFetchTool) Parameters() map[string]any {
 	}
 }
 
-func (t *WebFetchTool) Execute(ctx context.Context, args map[string]any) *ToolResult {
+func (t *WebFetchTool) Execute(ctx context.Context, args map[string]interface{}) *ToolResult {
 	urlStr, ok := args["url"].(string)
 	if !ok {
 		return ErrorResult("url is required")
@@ -588,17 +410,20 @@ func (t *WebFetchTool) Execute(ctx context.Context, args map[string]any) *ToolRe
 
 	req.Header.Set("User-Agent", userAgent)
 
-	client, err := createHTTPClient(t.proxy, 60*time.Second)
-	if err != nil {
-		return ErrorResult(fmt.Sprintf("failed to create HTTP client: %v", err))
-	}
-
-	// Configure redirect handling
-	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		if len(via) >= 5 {
-			return fmt.Errorf("stopped after 5 redirects")
-		}
-		return nil
+	client := &http.Client{
+		Timeout: 60 * time.Second,
+		Transport: &http.Transport{
+			MaxIdleConns:        10,
+			IdleConnTimeout:     30 * time.Second,
+			DisableCompression:  false,
+			TLSHandshakeTimeout: 15 * time.Second,
+		},
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if len(via) >= 5 {
+				return fmt.Errorf("stopped after 5 redirects")
+			}
+			return nil
+		},
 	}
 
 	resp, err := client.Do(req)
@@ -617,7 +442,7 @@ func (t *WebFetchTool) Execute(ctx context.Context, args map[string]any) *ToolRe
 	var text, extractor string
 
 	if strings.Contains(contentType, "application/json") {
-		var jsonData any
+		var jsonData interface{}
 		if err := json.Unmarshal(body, &jsonData); err == nil {
 			formatted, _ := json.MarshalIndent(jsonData, "", "  ")
 			text = string(formatted)
@@ -640,7 +465,7 @@ func (t *WebFetchTool) Execute(ctx context.Context, args map[string]any) *ToolRe
 		text = text[:maxChars]
 	}
 
-	result := map[string]any{
+	result := map[string]interface{}{
 		"url":       urlStr,
 		"status":    resp.StatusCode,
 		"extractor": extractor,
@@ -652,26 +477,23 @@ func (t *WebFetchTool) Execute(ctx context.Context, args map[string]any) *ToolRe
 	resultJSON, _ := json.MarshalIndent(result, "", "  ")
 
 	return &ToolResult{
-		ForLLM: fmt.Sprintf(
-			"Fetched %d bytes from %s (extractor: %s, truncated: %v)",
-			len(text),
-			urlStr,
-			extractor,
-			truncated,
-		),
+		ForLLM:  fmt.Sprintf("Fetched %d bytes from %s (extractor: %s, truncated: %v)", len(text), urlStr, extractor, truncated),
 		ForUser: string(resultJSON),
 	}
 }
 
 func (t *WebFetchTool) extractText(htmlContent string) string {
-	result := reScript.ReplaceAllLiteralString(htmlContent, "")
-	result = reStyle.ReplaceAllLiteralString(result, "")
-	result = reTags.ReplaceAllLiteralString(result, "")
+	re := regexp.MustCompile(`<script[\s\S]*?</script>`)
+	result := re.ReplaceAllLiteralString(htmlContent, "")
+	re = regexp.MustCompile(`<style[\s\S]*?</style>`)
+	result = re.ReplaceAllLiteralString(result, "")
+	re = regexp.MustCompile(`<[^>]+>`)
+	result = re.ReplaceAllLiteralString(result, "")
 
 	result = strings.TrimSpace(result)
 
-	result = reWhitespace.ReplaceAllString(result, " ")
-	result = reBlankLines.ReplaceAllString(result, "\n\n")
+	re = regexp.MustCompile(`\s+`)
+	result = re.ReplaceAllLiteralString(result, " ")
 
 	lines := strings.Split(result, "\n")
 	var cleanLines []string

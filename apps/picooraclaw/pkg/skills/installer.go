@@ -8,10 +8,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
-
-	"github.com/jasperan/picooraclaw/pkg/fileutil"
-	"github.com/jasperan/picooraclaw/pkg/utils"
 )
 
 type SkillInstaller struct {
@@ -24,6 +22,12 @@ type AvailableSkill struct {
 	Description string   `json:"description"`
 	Author      string   `json:"author"`
 	Tags        []string `json:"tags"`
+}
+
+type BuiltinSkill struct {
+	Name    string `json:"name"`
+	Path    string `json:"path"`
+	Enabled bool   `json:"enabled"`
 }
 
 func NewSkillInstaller(workspace string) *SkillInstaller {
@@ -39,7 +43,16 @@ func (si *SkillInstaller) InstallFromGitHub(ctx context.Context, repo string) er
 		return fmt.Errorf("skill '%s' already exists", filepath.Base(repo))
 	}
 
-	url := fmt.Sprintf("https://raw.githubusercontent.com/%s/main/SKILL.md", repo)
+	// repo can be "owner/repo" or "owner/repo/subdir".
+	// For "owner/repo/subdir", the raw URL path is owner/repo @ main /subdir/SKILL.md.
+	// For "owner/repo", the raw URL path is owner/repo @ main /SKILL.md.
+	var url string
+	parts := strings.SplitN(repo, "/", 3)
+	if len(parts) == 3 {
+		url = fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/main/%s/SKILL.md", parts[0], parts[1], parts[2])
+	} else {
+		url = fmt.Sprintf("https://raw.githubusercontent.com/%s/main/SKILL.md", repo)
+	}
 
 	client := &http.Client{Timeout: 15 * time.Second}
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -47,7 +60,7 @@ func (si *SkillInstaller) InstallFromGitHub(ctx context.Context, repo string) er
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	resp, err := utils.DoRequestWithRetry(client, req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to fetch skill: %w", err)
 	}
@@ -62,14 +75,12 @@ func (si *SkillInstaller) InstallFromGitHub(ctx context.Context, repo string) er
 		return fmt.Errorf("failed to read response: %w", err)
 	}
 
-	if err := os.MkdirAll(skillDir, 0o755); err != nil {
+	if err := os.MkdirAll(skillDir, 0755); err != nil {
 		return fmt.Errorf("failed to create skill directory: %w", err)
 	}
 
 	skillPath := filepath.Join(skillDir, "SKILL.md")
-
-	// Use unified atomic write utility with explicit sync for flash storage reliability.
-	if err := fileutil.WriteFileAtomic(skillPath, body, 0o600); err != nil {
+	if err := os.WriteFile(skillPath, body, 0644); err != nil {
 		return fmt.Errorf("failed to write skill file: %w", err)
 	}
 
@@ -99,7 +110,7 @@ func (si *SkillInstaller) ListAvailableSkills(ctx context.Context) ([]AvailableS
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	resp, err := utils.DoRequestWithRetry(client, req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch skills list: %w", err)
 	}
@@ -120,4 +131,50 @@ func (si *SkillInstaller) ListAvailableSkills(ctx context.Context) ([]AvailableS
 	}
 
 	return skills, nil
+}
+
+func (si *SkillInstaller) ListBuiltinSkills() []BuiltinSkill {
+	builtinSkillsDir := filepath.Join(filepath.Dir(si.workspace), "picoclaw", "skills")
+
+	entries, err := os.ReadDir(builtinSkillsDir)
+	if err != nil {
+		return nil
+	}
+
+	var skills []BuiltinSkill
+	for _, entry := range entries {
+		if entry.IsDir() {
+			_ = entry
+			skillName := entry.Name()
+			skillFile := filepath.Join(builtinSkillsDir, skillName, "SKILL.md")
+
+			data, err := os.ReadFile(skillFile)
+			description := ""
+			if err == nil {
+				content := string(data)
+				if idx := strings.Index(content, "\n"); idx > 0 {
+					firstLine := content[:idx]
+					if strings.Contains(firstLine, "description:") {
+						descLine := strings.Index(content[idx:], "\n")
+						if descLine > 0 {
+							description = strings.TrimSpace(content[idx+descLine : idx+descLine])
+						}
+					}
+				}
+			}
+
+			// skill := BuiltinSkill{
+			// 	Name:    skillName,
+			// 	Path:    description,
+			// 	Enabled: true,
+			// }
+
+			status := "✓"
+			fmt.Printf("  %s  %s\n", status, entry.Name())
+			if description != "" {
+				fmt.Printf("    %s\n", description)
+			}
+		}
+	}
+	return skills
 }

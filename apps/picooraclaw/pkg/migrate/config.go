@@ -12,17 +12,12 @@ import (
 )
 
 var supportedProviders = map[string]bool{
-	"anthropic":      true,
-	"openai":         true,
-	"openrouter":     true,
-	"groq":           true,
-	"zhipu":          true,
-	"vllm":           true,
-	"gemini":         true,
-	"qwen":           true,
-	"deepseek":       true,
-	"github_copilot": true,
-	"mistral":        true,
+	"anthropic":  true,
+	"openai":     true,
+	"openrouter": true,
+	"groq":       true,
+	"vllm":       true,
+	"gemini":     true,
 }
 
 var supportedChannels = map[string]bool{
@@ -48,42 +43,39 @@ func findOpenClawConfig(openclawHome string) (string, error) {
 	return "", fmt.Errorf("no config file found in %s (tried openclaw.json, config.json)", openclawHome)
 }
 
-func LoadOpenClawConfig(configPath string) (map[string]any, error) {
+func LoadOpenClawConfig(configPath string) (map[string]interface{}, error) {
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("reading OpenClaw config: %w", err)
 	}
 
-	var raw map[string]any
+	var raw map[string]interface{}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return nil, fmt.Errorf("parsing OpenClaw config: %w", err)
 	}
 
 	converted := convertKeysToSnake(raw)
-	result, ok := converted.(map[string]any)
+	result, ok := converted.(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("unexpected config format")
 	}
 	return result, nil
 }
 
-func ConvertConfig(data map[string]any) (*config.Config, []string, error) {
+func ConvertConfig(data map[string]interface{}) (*config.Config, []string, error) {
 	cfg := config.DefaultConfig()
 	var warnings []string
 
 	if agents, ok := getMap(data, "agents"); ok {
 		if defaults, ok := getMap(agents, "defaults"); ok {
-			// Prefer model_name, fallback to model for backward compatibility
-			if v, ok := getString(defaults, "model_name"); ok {
-				cfg.Agents.Defaults.ModelName = v
-			} else if v, ok := getString(defaults, "model"); ok {
+			if v, ok := getString(defaults, "model"); ok {
 				cfg.Agents.Defaults.Model = v
 			}
 			if v, ok := getFloat(defaults, "max_tokens"); ok {
 				cfg.Agents.Defaults.MaxTokens = int(v)
 			}
 			if v, ok := getFloat(defaults, "temperature"); ok {
-				cfg.Agents.Defaults.Temperature = &v
+				cfg.Agents.Defaults.Temperature = v
 			}
 			if v, ok := getFloat(defaults, "max_tool_iterations"); ok {
 				cfg.Agents.Defaults.MaxToolIterations = int(v)
@@ -96,7 +88,7 @@ func ConvertConfig(data map[string]any) (*config.Config, []string, error) {
 
 	if providers, ok := getMap(data, "providers"); ok {
 		for name, val := range providers {
-			pMap, ok := val.(map[string]any)
+			pMap, ok := val.(map[string]interface{})
 			if !ok {
 				continue
 			}
@@ -105,7 +97,7 @@ func ConvertConfig(data map[string]any) (*config.Config, []string, error) {
 
 			if !supportedProviders[name] {
 				if apiKey != "" || apiBase != "" {
-					warnings = append(warnings, fmt.Sprintf("Provider '%s' not supported in PicoOraClaw, skipping", name))
+					warnings = append(warnings, fmt.Sprintf("Provider '%s' not supported in PicoClaw, skipping", name))
 				}
 				continue
 			}
@@ -115,16 +107,11 @@ func ConvertConfig(data map[string]any) (*config.Config, []string, error) {
 			case "anthropic":
 				cfg.Providers.Anthropic = pc
 			case "openai":
-				cfg.Providers.OpenAI = config.OpenAIProviderConfig{
-					ProviderConfig: pc,
-					WebSearch:      getBoolOrDefault(pMap, "web_search", true),
-				}
+				cfg.Providers.OpenAI = pc
 			case "openrouter":
 				cfg.Providers.OpenRouter = pc
 			case "groq":
 				cfg.Providers.Groq = pc
-			case "zhipu":
-				cfg.Providers.Zhipu = pc
 			case "vllm":
 				cfg.Providers.VLLM = pc
 			case "gemini":
@@ -135,12 +122,12 @@ func ConvertConfig(data map[string]any) (*config.Config, []string, error) {
 
 	if channels, ok := getMap(data, "channels"); ok {
 		for name, val := range channels {
-			cMap, ok := val.(map[string]any)
+			cMap, ok := val.(map[string]interface{})
 			if !ok {
 				continue
 			}
 			if !supportedChannels[name] {
-				warnings = append(warnings, fmt.Sprintf("Channel '%s' not supported in PicoOraClaw, skipping", name))
+				warnings = append(warnings, fmt.Sprintf("Channel '%s' not supported in PicoClaw, skipping", name))
 				continue
 			}
 			enabled, _ := getBool(cMap, "enabled")
@@ -254,23 +241,11 @@ func MergeConfig(existing, incoming *config.Config) *config.Config {
 	if existing.Providers.Groq.APIKey == "" {
 		existing.Providers.Groq = incoming.Providers.Groq
 	}
-	if existing.Providers.Zhipu.APIKey == "" {
-		existing.Providers.Zhipu = incoming.Providers.Zhipu
-	}
 	if existing.Providers.VLLM.APIKey == "" && existing.Providers.VLLM.APIBase == "" {
 		existing.Providers.VLLM = incoming.Providers.VLLM
 	}
 	if existing.Providers.Gemini.APIKey == "" {
 		existing.Providers.Gemini = incoming.Providers.Gemini
-	}
-	if existing.Providers.DeepSeek.APIKey == "" {
-		existing.Providers.DeepSeek = incoming.Providers.DeepSeek
-	}
-	if existing.Providers.GitHubCopilot.APIBase == "" {
-		existing.Providers.GitHubCopilot = incoming.Providers.GitHubCopilot
-	}
-	if existing.Providers.Qwen.APIKey == "" {
-		existing.Providers.Qwen = incoming.Providers.Qwen
 	}
 
 	if !existing.Channels.Telegram.Enabled && incoming.Channels.Telegram.Enabled {
@@ -322,16 +297,16 @@ func camelToSnake(s string) string {
 	return result.String()
 }
 
-func convertKeysToSnake(data any) any {
+func convertKeysToSnake(data interface{}) interface{} {
 	switch v := data.(type) {
-	case map[string]any:
-		result := make(map[string]any, len(v))
+	case map[string]interface{}:
+		result := make(map[string]interface{}, len(v))
 		for key, val := range v {
 			result[camelToSnake(key)] = convertKeysToSnake(val)
 		}
 		return result
-	case []any:
-		result := make([]any, len(v))
+	case []interface{}:
+		result := make([]interface{}, len(v))
 		for i, val := range v {
 			result[i] = convertKeysToSnake(val)
 		}
@@ -346,16 +321,16 @@ func rewriteWorkspacePath(path string) string {
 	return path
 }
 
-func getMap(data map[string]any, key string) (map[string]any, bool) {
+func getMap(data map[string]interface{}, key string) (map[string]interface{}, bool) {
 	v, ok := data[key]
 	if !ok {
 		return nil, false
 	}
-	m, ok := v.(map[string]any)
+	m, ok := v.(map[string]interface{})
 	return m, ok
 }
 
-func getString(data map[string]any, key string) (string, bool) {
+func getString(data map[string]interface{}, key string) (string, bool) {
 	v, ok := data[key]
 	if !ok {
 		return "", false
@@ -364,7 +339,7 @@ func getString(data map[string]any, key string) (string, bool) {
 	return s, ok
 }
 
-func getFloat(data map[string]any, key string) (float64, bool) {
+func getFloat(data map[string]interface{}, key string) (float64, bool) {
 	v, ok := data[key]
 	if !ok {
 		return 0, false
@@ -373,7 +348,7 @@ func getFloat(data map[string]any, key string) (float64, bool) {
 	return f, ok
 }
 
-func getBool(data map[string]any, key string) (bool, bool) {
+func getBool(data map[string]interface{}, key string) (bool, bool) {
 	v, ok := data[key]
 	if !ok {
 		return false, false
@@ -382,19 +357,12 @@ func getBool(data map[string]any, key string) (bool, bool) {
 	return b, ok
 }
 
-func getBoolOrDefault(data map[string]any, key string, defaultVal bool) bool {
-	if v, ok := getBool(data, key); ok {
-		return v
-	}
-	return defaultVal
-}
-
-func getStringSlice(data map[string]any, key string) []string {
+func getStringSlice(data map[string]interface{}, key string) []string {
 	v, ok := data[key]
 	if !ok {
 		return []string{}
 	}
-	arr, ok := v.([]any)
+	arr, ok := v.([]interface{})
 	if !ok {
 		return []string{}
 	}

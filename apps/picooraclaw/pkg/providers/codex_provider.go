@@ -7,24 +7,20 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jasperan/picooraclaw/pkg/auth"
+	"github.com/jasperan/picooraclaw/pkg/logger"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 	"github.com/openai/openai-go/v3/responses"
-
-	"github.com/jasperan/picooraclaw/pkg/auth"
-	"github.com/jasperan/picooraclaw/pkg/logger"
 )
 
-const (
-	codexDefaultModel        = "gpt-5.2"
-	codexDefaultInstructions = "You are Codex, a coding assistant."
-)
+const codexDefaultModel = "gpt-5.2"
+const codexDefaultInstructions = "You are Codex, a coding assistant."
 
 type CodexProvider struct {
-	client          *openai.Client
-	accountID       string
-	tokenSource     func() (string, string, error)
-	enableWebSearch bool
+	client      *openai.Client
+	accountID   string
+	tokenSource func() (string, string, error)
 }
 
 const defaultCodexInstructions = "You are Codex, a coding assistant."
@@ -41,36 +37,27 @@ func NewCodexProvider(token, accountID string) *CodexProvider {
 	}
 	client := openai.NewClient(opts...)
 	return &CodexProvider{
-		client:          &client,
-		accountID:       accountID,
-		enableWebSearch: true,
+		client:    &client,
+		accountID: accountID,
 	}
 }
 
-func NewCodexProviderWithTokenSource(
-	token, accountID string, tokenSource func() (string, string, error),
-) *CodexProvider {
+func NewCodexProviderWithTokenSource(token, accountID string, tokenSource func() (string, string, error)) *CodexProvider {
 	p := NewCodexProvider(token, accountID)
 	p.tokenSource = tokenSource
 	return p
 }
 
-func (p *CodexProvider) Chat(
-	ctx context.Context, messages []Message, tools []ToolDefinition, model string, options map[string]any,
-) (*LLMResponse, error) {
+func (p *CodexProvider) Chat(ctx context.Context, messages []Message, tools []ToolDefinition, model string, options map[string]interface{}) (*LLMResponse, error) {
 	var opts []option.RequestOption
 	accountID := p.accountID
 	resolvedModel, fallbackReason := resolveCodexModel(model)
 	if fallbackReason != "" {
-		logger.WarnCF(
-			"provider.codex",
-			"Requested model is not compatible with Codex backend, using fallback",
-			map[string]any{
-				"requested_model": model,
-				"resolved_model":  resolvedModel,
-				"reason":          fallbackReason,
-			},
-		)
+		logger.WarnCF("provider.codex", "Requested model is not compatible with Codex backend, using fallback", map[string]interface{}{
+			"requested_model": model,
+			"resolved_model":  resolvedModel,
+			"reason":          fallbackReason,
+		})
 	}
 	if p.tokenSource != nil {
 		tok, accID, err := p.tokenSource()
@@ -85,17 +72,13 @@ func (p *CodexProvider) Chat(
 	if accountID != "" {
 		opts = append(opts, option.WithHeader("Chatgpt-Account-Id", accountID))
 	} else {
-		logger.WarnCF(
-			"provider.codex",
-			"No account id found for Codex request; backend may reject with 400",
-			map[string]any{
-				"requested_model": model,
-				"resolved_model":  resolvedModel,
-			},
-		)
+		logger.WarnCF("provider.codex", "No account id found for Codex request; backend may reject with 400", map[string]interface{}{
+			"requested_model": model,
+			"resolved_model":  resolvedModel,
+		})
 	}
 
-	params := buildCodexParams(messages, tools, resolvedModel, options, p.enableWebSearch)
+	params := buildCodexParams(messages, tools, resolvedModel, options)
 
 	stream := p.client.Responses.NewStreaming(ctx, params, opts...)
 	defer stream.Close()
@@ -106,14 +89,14 @@ func (p *CodexProvider) Chat(
 		if evt.Type == "response.completed" || evt.Type == "response.failed" || evt.Type == "response.incomplete" {
 			evtResp := evt.Response
 			if evtResp.ID != "" {
-				evtRespCopy := evtResp
-				resp = &evtRespCopy
+				copy := evtResp
+				resp = &copy
 			}
 		}
 	}
 	err := stream.Err()
 	if err != nil {
-		fields := map[string]any{
+		fields := map[string]interface{}{
 			"requested_model":    model,
 			"resolved_model":     resolvedModel,
 			"messages_count":     len(messages),
@@ -139,7 +122,7 @@ func (p *CodexProvider) Chat(
 		return nil, fmt.Errorf("codex API call: %w", err)
 	}
 	if resp == nil {
-		fields := map[string]any{
+		fields := map[string]interface{}{
 			"requested_model":    model,
 			"resolved_model":     resolvedModel,
 			"messages_count":     len(messages),
@@ -170,7 +153,6 @@ func resolveCodexModel(model string) (string, string) {
 	}
 
 	unsupportedPrefixes := []string{
-		"glm",
 		"claude",
 		"anthropic",
 		"gemini",
@@ -184,7 +166,6 @@ func resolveCodexModel(model string) (string, string) {
 		"mistral",
 		"grok",
 		"xai",
-		"zhipu",
 	}
 	for _, prefix := range unsupportedPrefixes {
 		if strings.HasPrefix(m, prefix) {
@@ -199,29 +180,20 @@ func resolveCodexModel(model string) (string, string) {
 	return codexDefaultModel, "unsupported model family"
 }
 
-func buildCodexParams(
-	messages []Message, tools []ToolDefinition, model string, options map[string]any, enableWebSearch bool,
-) responses.ResponseNewParams {
+func buildCodexParams(messages []Message, tools []ToolDefinition, model string, options map[string]interface{}) responses.ResponseNewParams {
 	var inputItems responses.ResponseInputParam
 	var instructions string
 
 	for _, msg := range messages {
 		switch msg.Role {
 		case "system":
-			// Use the full concatenated system prompt (static + dynamic + summary)
-			// as instructions. This keeps behavior consistent with Anthropic and
-			// OpenAI-compat adapters where the complete system context lives in
-			// one place. Prefix caching is handled by prompt_cache_key below,
-			// not by splitting content across instructions vs input messages.
 			instructions = msg.Content
 		case "user":
 			if msg.ToolCallID != "" {
 				inputItems = append(inputItems, responses.ResponseInputItemUnionParam{
 					OfFunctionCallOutput: &responses.ResponseInputItemFunctionCallOutputParam{
 						CallID: msg.ToolCallID,
-						Output: responses.ResponseInputItemFunctionCallOutputOutputUnionParam{
-							OfString: openai.Opt(msg.Content),
-						},
+						Output: responses.ResponseInputItemFunctionCallOutputOutputUnionParam{OfString: openai.Opt(msg.Content)},
 					},
 				})
 			} else {
@@ -245,9 +217,6 @@ func buildCodexParams(
 				for _, tc := range msg.ToolCalls {
 					name, args, ok := resolveCodexToolCall(tc)
 					if !ok {
-						logger.WarnCF("provider.codex", "Skipping invalid tool call in history", map[string]any{
-							"call_id": tc.ID,
-						})
 						continue
 					}
 					inputItems = append(inputItems, responses.ResponseInputItemUnionParam{
@@ -270,9 +239,7 @@ func buildCodexParams(
 			inputItems = append(inputItems, responses.ResponseInputItemUnionParam{
 				OfFunctionCallOutput: &responses.ResponseInputItemFunctionCallOutputParam{
 					CallID: msg.ToolCallID,
-					Output: responses.ResponseInputItemFunctionCallOutputOutputUnionParam{
-						OfString: openai.Opt(msg.Content),
-					},
+					Output: responses.ResponseInputItemFunctionCallOutputOutputUnionParam{OfString: openai.Opt(msg.Content)},
 				},
 			})
 		}
@@ -294,15 +261,8 @@ func buildCodexParams(
 		params.Instructions = openai.Opt(defaultCodexInstructions)
 	}
 
-	// Prompt caching: pass a stable cache key so OpenAI can bucket requests
-	// and reuse prefix KV cache across calls with the same key.
-	// See: https://platform.openai.com/docs/guides/prompt-caching
-	if cacheKey, ok := options["prompt_cache_key"].(string); ok && cacheKey != "" {
-		params.PromptCacheKey = openai.Opt(cacheKey)
-	}
-
-	if len(tools) > 0 || enableWebSearch {
-		params.Tools = translateToolsForCodex(tools, enableWebSearch)
+	if len(tools) > 0 {
+		params.Tools = translateToolsForCodex(tools)
 	}
 
 	return params
@@ -332,19 +292,9 @@ func resolveCodexToolCall(tc ToolCall) (name string, arguments string, ok bool) 
 	return name, "{}", true
 }
 
-func translateToolsForCodex(tools []ToolDefinition, enableWebSearch bool) []responses.ToolUnionParam {
-	capHint := len(tools)
-	if enableWebSearch {
-		capHint++
-	}
-	result := make([]responses.ToolUnionParam, 0, capHint)
+func translateToolsForCodex(tools []ToolDefinition) []responses.ToolUnionParam {
+	result := make([]responses.ToolUnionParam, 0, len(tools))
 	for _, t := range tools {
-		if t.Type != "function" {
-			continue
-		}
-		if enableWebSearch && strings.EqualFold(t.Function.Name, "web_search") {
-			continue
-		}
 		ft := responses.FunctionToolParam{
 			Name:       t.Function.Name,
 			Parameters: t.Function.Parameters,
@@ -354,9 +304,6 @@ func translateToolsForCodex(tools []ToolDefinition, enableWebSearch bool) []resp
 			ft.Description = openai.Opt(t.Function.Description)
 		}
 		result = append(result, responses.ToolUnionParam{OfFunction: &ft})
-	}
-	if enableWebSearch {
-		result = append(result, responses.ToolParamOfWebSearch(responses.WebSearchToolTypeWebSearch))
 	}
 	return result
 }
@@ -374,9 +321,9 @@ func parseCodexResponse(resp *responses.Response) *LLMResponse {
 				}
 			}
 		case "function_call":
-			var args map[string]any
+			var args map[string]interface{}
 			if err := json.Unmarshal([]byte(item.Arguments), &args); err != nil {
-				args = map[string]any{"raw": item.Arguments}
+				args = map[string]interface{}{"raw": item.Arguments}
 			}
 			toolCalls = append(toolCalls, ToolCall{
 				ID:        item.CallID,

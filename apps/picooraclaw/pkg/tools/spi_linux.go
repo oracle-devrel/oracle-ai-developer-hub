@@ -66,12 +66,10 @@ func configureSPI(devPath string, mode uint8, bits uint8, speed uint32) (int, *T
 }
 
 // transfer performs a full-duplex SPI transfer
-func (t *SPITool) transfer(args map[string]any) *ToolResult {
+func (t *SPITool) transfer(args map[string]interface{}) *ToolResult {
 	confirm, _ := args["confirm"].(bool)
 	if !confirm {
-		return ErrorResult(
-			"transfer operations require confirm: true. Please confirm with the user before sending data to SPI devices.",
-		)
+		return ErrorResult("transfer operations require confirm: true. Please confirm with the user before sending data to SPI devices.")
 	}
 
 	dev, speed, mode, bits, errMsg := parseSPIArgs(args)
@@ -79,7 +77,7 @@ func (t *SPITool) transfer(args map[string]any) *ToolResult {
 		return ErrorResult(errMsg)
 	}
 
-	dataRaw, ok := args["data"].([]any)
+	dataRaw, ok := args["data"].([]interface{})
 	if !ok || len(dataRaw) == 0 {
 		return ErrorResult("data is required for transfer (array of byte values 0-255)")
 	}
@@ -132,7 +130,7 @@ func (t *SPITool) transfer(args map[string]any) *ToolResult {
 		intBytes[i] = int(b)
 	}
 
-	result, _ := json.MarshalIndent(map[string]any{
+	result, _ := json.MarshalIndent(map[string]interface{}{
 		"device":   devPath,
 		"sent":     len(txBuf),
 		"received": intBytes,
@@ -142,7 +140,7 @@ func (t *SPITool) transfer(args map[string]any) *ToolResult {
 }
 
 // readDevice reads bytes from SPI by sending zeros (read-only, no confirm needed)
-func (t *SPITool) readDevice(args map[string]any) *ToolResult {
+func (t *SPITool) readDevice(args map[string]interface{}) *ToolResult {
 	dev, speed, mode, bits, errMsg := parseSPIArgs(args)
 	if errMsg != "" {
 		return ErrorResult(errMsg)
@@ -188,7 +186,7 @@ func (t *SPITool) readDevice(args map[string]any) *ToolResult {
 		intBytes[i] = int(b)
 	}
 
-	result, _ := json.MarshalIndent(map[string]any{
+	result, _ := json.MarshalIndent(map[string]interface{}{
 		"device": devPath,
 		"bytes":  intBytes,
 		"hex":    hexBytes,

@@ -12,8 +12,6 @@ import (
 	"time"
 
 	"github.com/mymmrac/telego"
-	"github.com/mymmrac/telego/telegohandler"
-	th "github.com/mymmrac/telego/telegohandler"
 	tu "github.com/mymmrac/telego/telegoutil"
 
 	"github.com/jasperan/picooraclaw/pkg/bus"
@@ -23,24 +21,10 @@ import (
 	"github.com/jasperan/picooraclaw/pkg/voice"
 )
 
-var (
-	reHeading    = regexp.MustCompile(`^#{1,6}\s+(.+)$`)
-	reBlockquote = regexp.MustCompile(`^>\s*(.*)$`)
-	reLink       = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
-	reBoldStar   = regexp.MustCompile(`\*\*(.+?)\*\*`)
-	reBoldUnder  = regexp.MustCompile(`__(.+?)__`)
-	reItalic     = regexp.MustCompile(`_([^_]+)_`)
-	reStrike     = regexp.MustCompile(`~~(.+?)~~`)
-	reListItem   = regexp.MustCompile(`^[-*]\s+`)
-	reCodeBlock  = regexp.MustCompile("```[\\w]*\\n?([\\s\\S]*?)```")
-	reInlineCode = regexp.MustCompile("`([^`]+)`")
-)
-
 type TelegramChannel struct {
 	*BaseChannel
 	bot          *telego.Bot
-	commands     TelegramCommander
-	config       *config.Config
+	config       config.TelegramConfig
 	chatIDs      map[string]int64
 	transcriber  *voice.GroqTranscriber
 	placeholders sync.Map // chatID -> messageID
@@ -57,39 +41,30 @@ func (c *thinkingCancel) Cancel() {
 	}
 }
 
-func NewTelegramChannel(cfg *config.Config, bus *bus.MessageBus) (*TelegramChannel, error) {
+func NewTelegramChannel(cfg config.TelegramConfig, bus *bus.MessageBus) (*TelegramChannel, error) {
 	var opts []telego.BotOption
-	telegramCfg := cfg.Channels.Telegram
 
-	if telegramCfg.Proxy != "" {
-		proxyURL, parseErr := url.Parse(telegramCfg.Proxy)
+	if cfg.Proxy != "" {
+		proxyURL, parseErr := url.Parse(cfg.Proxy)
 		if parseErr != nil {
-			return nil, fmt.Errorf("invalid proxy URL %q: %w", telegramCfg.Proxy, parseErr)
+			return nil, fmt.Errorf("invalid proxy URL %q: %w", cfg.Proxy, parseErr)
 		}
 		opts = append(opts, telego.WithHTTPClient(&http.Client{
 			Transport: &http.Transport{
 				Proxy: http.ProxyURL(proxyURL),
 			},
 		}))
-	} else if os.Getenv("HTTP_PROXY") != "" || os.Getenv("HTTPS_PROXY") != "" {
-		// Use environment proxy if configured
-		opts = append(opts, telego.WithHTTPClient(&http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyFromEnvironment,
-			},
-		}))
 	}
 
-	bot, err := telego.NewBot(telegramCfg.Token, opts...)
+	bot, err := telego.NewBot(cfg.Token, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create telegram bot: %w", err)
 	}
 
-	base := NewBaseChannel("telegram", telegramCfg, bus, telegramCfg.AllowFrom)
+	base := NewBaseChannel("telegram", cfg, bus, cfg.AllowFrom)
 
 	return &TelegramChannel{
 		BaseChannel:  base,
-		commands:     NewTelegramCommands(bot, cfg),
 		bot:          bot,
 		config:       cfg,
 		chatIDs:      make(map[string]int64),
@@ -113,41 +88,26 @@ func (c *TelegramChannel) Start(ctx context.Context) error {
 		return fmt.Errorf("failed to start long polling: %w", err)
 	}
 
-	bh, err := telegohandler.NewBotHandler(c.bot, updates)
-	if err != nil {
-		return fmt.Errorf("failed to create bot handler: %w", err)
-	}
-
-	bh.HandleMessage(func(ctx *th.Context, message telego.Message) error {
-		c.commands.Help(ctx, message)
-		return nil
-	}, th.CommandEqual("help"))
-	bh.HandleMessage(func(ctx *th.Context, message telego.Message) error {
-		return c.commands.Start(ctx, message)
-	}, th.CommandEqual("start"))
-
-	bh.HandleMessage(func(ctx *th.Context, message telego.Message) error {
-		return c.commands.Show(ctx, message)
-	}, th.CommandEqual("show"))
-
-	bh.HandleMessage(func(ctx *th.Context, message telego.Message) error {
-		return c.commands.List(ctx, message)
-	}, th.CommandEqual("list"))
-
-	bh.HandleMessage(func(ctx *th.Context, message telego.Message) error {
-		return c.handleMessage(ctx, &message)
-	}, th.AnyMessage())
-
 	c.setRunning(true)
-	logger.InfoCF("telegram", "Telegram bot connected", map[string]any{
+	logger.InfoCF("telegram", "Telegram bot connected", map[string]interface{}{
 		"username": c.bot.Username(),
 	})
 
-	go bh.Start()
-
 	go func() {
-		<-ctx.Done()
-		bh.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case update, ok := <-updates:
+				if !ok {
+					logger.InfoC("telegram", "Updates channel closed, reconnecting...")
+					return
+				}
+				if update.Message != nil {
+					c.handleMessage(ctx, update)
+				}
+			}
+		}
 	}()
 
 	return nil
@@ -195,7 +155,7 @@ func (c *TelegramChannel) Send(ctx context.Context, msg bus.OutboundMessage) err
 	tgMsg.ParseMode = telego.ModeHTML
 
 	if _, err = c.bot.SendMessage(ctx, tgMsg); err != nil {
-		logger.ErrorCF("telegram", "HTML parse failed, falling back to plain text", map[string]any{
+		logger.ErrorCF("telegram", "HTML parse failed, falling back to plain text", map[string]interface{}{
 			"error": err.Error(),
 		})
 		tgMsg.ParseMode = ""
@@ -206,27 +166,30 @@ func (c *TelegramChannel) Send(ctx context.Context, msg bus.OutboundMessage) err
 	return nil
 }
 
-func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Message) error {
+func (c *TelegramChannel) handleMessage(ctx context.Context, update telego.Update) {
+	message := update.Message
 	if message == nil {
-		return fmt.Errorf("message is nil")
+		return
 	}
 
 	user := message.From
 	if user == nil {
-		return fmt.Errorf("message sender (user) is nil")
+		return
 	}
 
-	senderID := fmt.Sprintf("%d", user.ID)
+	userID := fmt.Sprintf("%d", user.ID)
+	senderID := userID
 	if user.Username != "" {
-		senderID = fmt.Sprintf("%d|%s", user.ID, user.Username)
+		senderID = fmt.Sprintf("%s|%s", userID, user.Username)
 	}
 
-	// check allowlist to avoid downloading attachments for rejected users
-	if !c.IsAllowed(senderID) {
-		logger.DebugCF("telegram", "Message rejected by allowlist", map[string]any{
-			"user_id": senderID,
+	// 检查白名单，避免为被拒绝的用户下载附件
+	if !c.IsAllowed(userID) && !c.IsAllowed(senderID) {
+		logger.DebugCF("telegram", "Message rejected by allowlist", map[string]interface{}{
+			"user_id":  userID,
+			"username": user.Username,
 		})
-		return nil
+		return
 	}
 
 	chatID := message.Chat.ID
@@ -234,13 +197,13 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 
 	content := ""
 	mediaPaths := []string{}
-	localFiles := []string{} // track local files that need cleanup
+	localFiles := []string{} // 跟踪需要清理的本地文件
 
-	// ensure temp files are cleaned up when function returns
+	// 确保临时文件在函数返回时被清理
 	defer func() {
 		for _, file := range localFiles {
 			if err := os.Remove(file); err != nil {
-				logger.DebugCF("telegram", "Failed to cleanup temp file", map[string]any{
+				logger.DebugCF("telegram", "Failed to cleanup temp file", map[string]interface{}{
 					"file":  file,
 					"error": err.Error(),
 				})
@@ -259,7 +222,7 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 		content += message.Caption
 	}
 
-	if len(message.Photo) > 0 {
+	if message.Photo != nil && len(message.Photo) > 0 {
 		photo := message.Photo[len(message.Photo)-1]
 		photoPath := c.downloadPhoto(ctx, photo.FileID)
 		if photoPath != "" {
@@ -268,7 +231,7 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 			if content != "" {
 				content += "\n"
 			}
-			content += "[image: photo]"
+			content += fmt.Sprintf("[image: photo]")
 		}
 	}
 
@@ -278,26 +241,26 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 			localFiles = append(localFiles, voicePath)
 			mediaPaths = append(mediaPaths, voicePath)
 
-			var transcribedText string
+			transcribedText := ""
 			if c.transcriber != nil && c.transcriber.IsAvailable() {
-				transcriberCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+				ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 				defer cancel()
 
-				result, err := c.transcriber.Transcribe(transcriberCtx, voicePath)
+				result, err := c.transcriber.Transcribe(ctx, voicePath)
 				if err != nil {
-					logger.ErrorCF("telegram", "Voice transcription failed", map[string]any{
+					logger.ErrorCF("telegram", "Voice transcription failed", map[string]interface{}{
 						"error": err.Error(),
 						"path":  voicePath,
 					})
-					transcribedText = "[voice (transcription failed)]"
+					transcribedText = fmt.Sprintf("[voice (transcription failed)]")
 				} else {
 					transcribedText = fmt.Sprintf("[voice transcription: %s]", result.Text)
-					logger.InfoCF("telegram", "Voice transcribed successfully", map[string]any{
+					logger.InfoCF("telegram", "Voice transcribed successfully", map[string]interface{}{
 						"text": result.Text,
 					})
 				}
 			} else {
-				transcribedText = "[voice]"
+				transcribedText = fmt.Sprintf("[voice]")
 			}
 
 			if content != "" {
@@ -315,7 +278,7 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 			if content != "" {
 				content += "\n"
 			}
-			content += "[audio]"
+			content += fmt.Sprintf("[audio]")
 		}
 	}
 
@@ -327,7 +290,7 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 			if content != "" {
 				content += "\n"
 			}
-			content += "[file]"
+			content += fmt.Sprintf("[file]")
 		}
 	}
 
@@ -335,7 +298,7 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 		content = "[empty message]"
 	}
 
-	logger.DebugCF("telegram", "Received message", map[string]any{
+	logger.DebugCF("telegram", "Received message", map[string]interface{}{
 		"sender_id": senderID,
 		"chat_id":   fmt.Sprintf("%d", chatID),
 		"preview":   utils.Truncate(content, 50),
@@ -344,7 +307,7 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 	// Thinking indicator
 	err := c.bot.SendChatAction(ctx, tu.ChatAction(tu.ID(chatID), telego.ChatActionTyping))
 	if err != nil {
-		logger.ErrorCF("telegram", "Failed to send chat action", map[string]any{
+		logger.ErrorCF("telegram", "Failed to send chat action", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -367,31 +330,21 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 		c.placeholders.Store(chatIDStr, pID)
 	}
 
-	peerKind := "direct"
-	peerID := fmt.Sprintf("%d", user.ID)
-	if message.Chat.Type != "private" {
-		peerKind = "group"
-		peerID = fmt.Sprintf("%d", chatID)
-	}
-
 	metadata := map[string]string{
 		"message_id": fmt.Sprintf("%d", message.MessageID),
 		"user_id":    fmt.Sprintf("%d", user.ID),
 		"username":   user.Username,
 		"first_name": user.FirstName,
 		"is_group":   fmt.Sprintf("%t", message.Chat.Type != "private"),
-		"peer_kind":  peerKind,
-		"peer_id":    peerID,
 	}
 
-	c.HandleMessage(fmt.Sprintf("%d", user.ID), fmt.Sprintf("%d", chatID), content, mediaPaths, metadata)
-	return nil
+	c.HandleMessage(senderID, fmt.Sprintf("%d", chatID), content, mediaPaths, metadata)
 }
 
 func (c *TelegramChannel) downloadPhoto(ctx context.Context, fileID string) string {
 	file, err := c.bot.GetFile(ctx, &telego.GetFileParams{FileID: fileID})
 	if err != nil {
-		logger.ErrorCF("telegram", "Failed to get photo file", map[string]any{
+		logger.ErrorCF("telegram", "Failed to get photo file", map[string]interface{}{
 			"error": err.Error(),
 		})
 		return ""
@@ -406,7 +359,7 @@ func (c *TelegramChannel) downloadFileWithInfo(file *telego.File, ext string) st
 	}
 
 	url := c.bot.FileDownloadURL(file.FilePath)
-	logger.DebugCF("telegram", "File URL", map[string]any{"url": url})
+	logger.DebugCF("telegram", "File URL", map[string]interface{}{"url": url})
 
 	// Use FilePath as filename for better identification
 	filename := file.FilePath + ext
@@ -418,7 +371,7 @@ func (c *TelegramChannel) downloadFileWithInfo(file *telego.File, ext string) st
 func (c *TelegramChannel) downloadFile(ctx context.Context, fileID, ext string) string {
 	file, err := c.bot.GetFile(ctx, &telego.GetFileParams{FileID: fileID})
 	if err != nil {
-		logger.ErrorCF("telegram", "Failed to get file", map[string]any{
+		logger.ErrorCF("telegram", "Failed to get file", map[string]interface{}{
 			"error": err.Error(),
 		})
 		return ""
@@ -444,18 +397,19 @@ func markdownToTelegramHTML(text string) string {
 	inlineCodes := extractInlineCodes(text)
 	text = inlineCodes.text
 
-	text = reHeading.ReplaceAllString(text, "$1")
+	text = regexp.MustCompile(`^#{1,6}\s+(.+)$`).ReplaceAllString(text, "$1")
 
-	text = reBlockquote.ReplaceAllString(text, "$1")
+	text = regexp.MustCompile(`^>\s*(.*)$`).ReplaceAllString(text, "$1")
 
 	text = escapeHTML(text)
 
-	text = reLink.ReplaceAllString(text, `<a href="$2">$1</a>`)
+	text = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`).ReplaceAllString(text, `<a href="$2">$1</a>`)
 
-	text = reBoldStar.ReplaceAllString(text, "<b>$1</b>")
+	text = regexp.MustCompile(`\*\*(.+?)\*\*`).ReplaceAllString(text, "<b>$1</b>")
 
-	text = reBoldUnder.ReplaceAllString(text, "<b>$1</b>")
+	text = regexp.MustCompile(`__(.+?)__`).ReplaceAllString(text, "<b>$1</b>")
 
+	reItalic := regexp.MustCompile(`_([^_]+)_`)
 	text = reItalic.ReplaceAllStringFunc(text, func(s string) string {
 		match := reItalic.FindStringSubmatch(s)
 		if len(match) < 2 {
@@ -464,9 +418,9 @@ func markdownToTelegramHTML(text string) string {
 		return "<i>" + match[1] + "</i>"
 	})
 
-	text = reStrike.ReplaceAllString(text, "<s>$1</s>")
+	text = regexp.MustCompile(`~~(.+?)~~`).ReplaceAllString(text, "<s>$1</s>")
 
-	text = reListItem.ReplaceAllString(text, "• ")
+	text = regexp.MustCompile(`^[-*]\s+`).ReplaceAllString(text, "• ")
 
 	for i, code := range inlineCodes.codes {
 		escaped := escapeHTML(code)
@@ -475,11 +429,7 @@ func markdownToTelegramHTML(text string) string {
 
 	for i, code := range codeBlocks.codes {
 		escaped := escapeHTML(code)
-		text = strings.ReplaceAll(
-			text,
-			fmt.Sprintf("\x00CB%d\x00", i),
-			fmt.Sprintf("<pre><code>%s</code></pre>", escaped),
-		)
+		text = strings.ReplaceAll(text, fmt.Sprintf("\x00CB%d\x00", i), fmt.Sprintf("<pre><code>%s</code></pre>", escaped))
 	}
 
 	return text
@@ -491,7 +441,8 @@ type codeBlockMatch struct {
 }
 
 func extractCodeBlocks(text string) codeBlockMatch {
-	matches := reCodeBlock.FindAllStringSubmatch(text, -1)
+	re := regexp.MustCompile("```[\\w]*\\n?([\\s\\S]*?)```")
+	matches := re.FindAllStringSubmatch(text, -1)
 
 	codes := make([]string, 0, len(matches))
 	for _, match := range matches {
@@ -499,7 +450,7 @@ func extractCodeBlocks(text string) codeBlockMatch {
 	}
 
 	i := 0
-	text = reCodeBlock.ReplaceAllStringFunc(text, func(m string) string {
+	text = re.ReplaceAllStringFunc(text, func(m string) string {
 		placeholder := fmt.Sprintf("\x00CB%d\x00", i)
 		i++
 		return placeholder
@@ -514,7 +465,8 @@ type inlineCodeMatch struct {
 }
 
 func extractInlineCodes(text string) inlineCodeMatch {
-	matches := reInlineCode.FindAllStringSubmatch(text, -1)
+	re := regexp.MustCompile("`([^`]+)`")
+	matches := re.FindAllStringSubmatch(text, -1)
 
 	codes := make([]string, 0, len(matches))
 	for _, match := range matches {
@@ -522,7 +474,7 @@ func extractInlineCodes(text string) inlineCodeMatch {
 	}
 
 	i := 0
-	text = reInlineCode.ReplaceAllStringFunc(text, func(m string) string {
+	text = re.ReplaceAllStringFunc(text, func(m string) string {
 		placeholder := fmt.Sprintf("\x00IC%d\x00", i)
 		i++
 		return placeholder

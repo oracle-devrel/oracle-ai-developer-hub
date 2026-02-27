@@ -6,19 +6,17 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 // TestEditTool_EditFile_Success verifies successful file editing
 func TestEditTool_EditFile_Success(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.txt")
-	os.WriteFile(testFile, []byte("Hello World\nThis is a test"), 0o644)
+	os.WriteFile(testFile, []byte("Hello World\nThis is a test"), 0644)
 
 	tool := NewEditFileTool(tmpDir, true)
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"path":     testFile,
 		"old_text": "World",
 		"new_text": "Universe",
@@ -62,7 +60,7 @@ func TestEditTool_EditFile_NotFound(t *testing.T) {
 
 	tool := NewEditFileTool(tmpDir, true)
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"path":     testFile,
 		"old_text": "old",
 		"new_text": "new",
@@ -85,11 +83,11 @@ func TestEditTool_EditFile_NotFound(t *testing.T) {
 func TestEditTool_EditFile_OldTextNotFound(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.txt")
-	os.WriteFile(testFile, []byte("Hello World"), 0o644)
+	os.WriteFile(testFile, []byte("Hello World"), 0644)
 
 	tool := NewEditFileTool(tmpDir, true)
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"path":     testFile,
 		"old_text": "Goodbye",
 		"new_text": "Hello",
@@ -112,11 +110,11 @@ func TestEditTool_EditFile_OldTextNotFound(t *testing.T) {
 func TestEditTool_EditFile_MultipleMatches(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.txt")
-	os.WriteFile(testFile, []byte("test test test"), 0o644)
+	os.WriteFile(testFile, []byte("test test test"), 0644)
 
 	tool := NewEditFileTool(tmpDir, true)
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"path":     testFile,
 		"old_text": "test",
 		"new_text": "done",
@@ -140,11 +138,11 @@ func TestEditTool_EditFile_OutsideAllowedDir(t *testing.T) {
 	tmpDir := t.TempDir()
 	otherDir := t.TempDir()
 	testFile := filepath.Join(otherDir, "test.txt")
-	os.WriteFile(testFile, []byte("content"), 0o644)
+	os.WriteFile(testFile, []byte("content"), 0644)
 
 	tool := NewEditFileTool(tmpDir, true) // Restrict to tmpDir
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"path":     testFile,
 		"old_text": "content",
 		"new_text": "new",
@@ -153,25 +151,21 @@ func TestEditTool_EditFile_OutsideAllowedDir(t *testing.T) {
 	result := tool.Execute(ctx, args)
 
 	// Should return error result
-	assert.True(t, result.IsError, "Expected error when path is outside allowed directory")
+	if !result.IsError {
+		t.Errorf("Expected error when path is outside allowed directory")
+	}
 
 	// Should mention outside allowed directory
-	// Note: ErrorResult only sets ForLLM by default, so ForUser might be empty.
-	// We check ForLLM as it's the primary error channel.
-	assert.True(
-		t,
-		strings.Contains(result.ForLLM, "outside") || strings.Contains(result.ForLLM, "access denied") ||
-			strings.Contains(result.ForLLM, "escapes"),
-		"Expected 'outside allowed' or 'access denied' message, got ForLLM: %s",
-		result.ForLLM,
-	)
+	if !strings.Contains(result.ForLLM, "outside") && !strings.Contains(result.ForUser, "outside") {
+		t.Errorf("Expected 'outside allowed' message, got ForLLM: %s", result.ForLLM)
+	}
 }
 
 // TestEditTool_EditFile_MissingPath verifies error handling for missing path
 func TestEditTool_EditFile_MissingPath(t *testing.T) {
 	tool := NewEditFileTool("", false)
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"old_text": "old",
 		"new_text": "new",
 	}
@@ -188,7 +182,7 @@ func TestEditTool_EditFile_MissingPath(t *testing.T) {
 func TestEditTool_EditFile_MissingOldText(t *testing.T) {
 	tool := NewEditFileTool("", false)
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"path":     "/tmp/test.txt",
 		"new_text": "new",
 	}
@@ -205,7 +199,7 @@ func TestEditTool_EditFile_MissingOldText(t *testing.T) {
 func TestEditTool_EditFile_MissingNewText(t *testing.T) {
 	tool := NewEditFileTool("", false)
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"path":     "/tmp/test.txt",
 		"old_text": "old",
 	}
@@ -222,11 +216,11 @@ func TestEditTool_EditFile_MissingNewText(t *testing.T) {
 func TestEditTool_AppendFile_Success(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.txt")
-	os.WriteFile(testFile, []byte("Initial content"), 0o644)
+	os.WriteFile(testFile, []byte("Initial content"), 0644)
 
 	tool := NewAppendFileTool("", false)
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"path":    testFile,
 		"content": "\nAppended content",
 	}
@@ -266,7 +260,7 @@ func TestEditTool_AppendFile_Success(t *testing.T) {
 func TestEditTool_AppendFile_MissingPath(t *testing.T) {
 	tool := NewAppendFileTool("", false)
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"content": "test",
 	}
 
@@ -282,7 +276,7 @@ func TestEditTool_AppendFile_MissingPath(t *testing.T) {
 func TestEditTool_AppendFile_MissingContent(t *testing.T) {
 	tool := NewAppendFileTool("", false)
 	ctx := context.Background()
-	args := map[string]any{
+	args := map[string]interface{}{
 		"path": "/tmp/test.txt",
 	}
 
@@ -292,146 +286,4 @@ func TestEditTool_AppendFile_MissingContent(t *testing.T) {
 	if !result.IsError {
 		t.Errorf("Expected error when content is missing")
 	}
-}
-
-// TestReplaceEditContent verifies the helper function replaceEditContent
-func TestReplaceEditContent(t *testing.T) {
-	tests := []struct {
-		name        string
-		content     []byte
-		oldText     string
-		newText     string
-		expected    []byte
-		expectError bool
-	}{
-		{
-			name:        "successful replacement",
-			content:     []byte("hello world"),
-			oldText:     "world",
-			newText:     "universe",
-			expected:    []byte("hello universe"),
-			expectError: false,
-		},
-		{
-			name:        "old text not found",
-			content:     []byte("hello world"),
-			oldText:     "golang",
-			newText:     "rust",
-			expected:    nil,
-			expectError: true,
-		},
-		{
-			name:        "multiple matches found",
-			content:     []byte("test text test"),
-			oldText:     "test",
-			newText:     "done",
-			expected:    nil,
-			expectError: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result, err := replaceEditContent(tt.content, tt.oldText, tt.newText)
-			if tt.expectError {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expected, result)
-			}
-		})
-	}
-}
-
-// TestAppendFileTool_AppendToNonExistent_Restricted verifies that AppendFileTool in restricted mode
-// can append to a file that does not yet exist — it should silently create the file.
-// This exercises the errors.Is(err, fs.ErrNotExist) path in appendFileWithRW + rootRW.
-func TestAppendFileTool_AppendToNonExistent_Restricted(t *testing.T) {
-	workspace := t.TempDir()
-	tool := NewAppendFileTool(workspace, true)
-	ctx := context.Background()
-
-	args := map[string]any{
-		"path":    "brand_new_file.txt",
-		"content": "first content",
-	}
-
-	result := tool.Execute(ctx, args)
-	assert.False(
-		t,
-		result.IsError,
-		"Expected success when appending to non-existent file in restricted mode, got: %s",
-		result.ForLLM,
-	)
-
-	// Verify the file was created with correct content
-	data, err := os.ReadFile(filepath.Join(workspace, "brand_new_file.txt"))
-	assert.NoError(t, err)
-	assert.Equal(t, "first content", string(data))
-}
-
-// TestAppendFileTool_Restricted_Success verifies that AppendFileTool in restricted mode
-// correctly appends to an existing file within the sandbox.
-func TestAppendFileTool_Restricted_Success(t *testing.T) {
-	workspace := t.TempDir()
-	testFile := "existing.txt"
-	err := os.WriteFile(filepath.Join(workspace, testFile), []byte("initial"), 0o644)
-	assert.NoError(t, err)
-
-	tool := NewAppendFileTool(workspace, true)
-	ctx := context.Background()
-	args := map[string]any{
-		"path":    testFile,
-		"content": " appended",
-	}
-
-	result := tool.Execute(ctx, args)
-	assert.False(t, result.IsError, "Expected success, got: %s", result.ForLLM)
-	assert.True(t, result.Silent)
-
-	data, err := os.ReadFile(filepath.Join(workspace, testFile))
-	assert.NoError(t, err)
-	assert.Equal(t, "initial appended", string(data))
-}
-
-// TestEditFileTool_Restricted_InPlaceEdit verifies that EditFileTool in restricted mode
-// correctly edits a file using the single-open editFileInRoot path.
-func TestEditFileTool_Restricted_InPlaceEdit(t *testing.T) {
-	workspace := t.TempDir()
-	testFile := "edit_target.txt"
-	err := os.WriteFile(filepath.Join(workspace, testFile), []byte("Hello World"), 0o644)
-	assert.NoError(t, err)
-
-	tool := NewEditFileTool(workspace, true)
-	ctx := context.Background()
-	args := map[string]any{
-		"path":     testFile,
-		"old_text": "World",
-		"new_text": "Go",
-	}
-
-	result := tool.Execute(ctx, args)
-	assert.False(t, result.IsError, "Expected success, got: %s", result.ForLLM)
-	assert.True(t, result.Silent)
-
-	data, err := os.ReadFile(filepath.Join(workspace, testFile))
-	assert.NoError(t, err)
-	assert.Equal(t, "Hello Go", string(data))
-}
-
-// TestEditFileTool_Restricted_FileNotFound verifies that editFileInRoot returns a proper
-// error message when the target file does not exist.
-func TestEditFileTool_Restricted_FileNotFound(t *testing.T) {
-	workspace := t.TempDir()
-	tool := NewEditFileTool(workspace, true)
-	ctx := context.Background()
-	args := map[string]any{
-		"path":     "no_such_file.txt",
-		"old_text": "old",
-		"new_text": "new",
-	}
-
-	result := tool.Execute(ctx, args)
-	assert.True(t, result.IsError)
-	assert.Contains(t, result.ForLLM, "not found")
 }

@@ -1,46 +1,59 @@
-# Binaries
-# Go build artifacts
+# Build artifacts
 bin/
 build/
+dist/
 *.exe
 *.dll
 *.so
 *.dylib
 *.test
 *.out
+
+# Project binaries
+/picooraclaw
+/picooraclaw-*
 /picoclaw
 /picoclaw-test
-cmd/**/workspace
 
-# Picoclaw specific
+# Generated workspace (produced by `make generate`, embedded into binary)
+cmd/picooraclaw/workspace/
 
-# PicoClaw
+# Runtime / user data directories
+.picooraclaw/
 .picoclaw/
-config.json
 sessions/
-build/
+ralph/
+.ralph/
+tasks/
 
-# Coverage
-
-# Secrets & Config (keep templates, ignore actual secrets)
+# Secrets & actual config (keep example templates, ignore real values)
 .env
 config/config.json
 
-# Test
+# Personal workspace memory (prevent committing user-specific runtime data)
+workspace/memory/*.md
+!workspace/memory/.gitkeep
+
+# Test coverage
 coverage.txt
 coverage.html
 
 # OS
 .DS_Store
-
-# Ralph workspace
-ralph/
-.ralph/
-tasks/
+Thumbs.db
 
 # Editors
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# Added by goreleaser init:
-dist/
+# Design docs (local only)
+docs/plans/
+
+# Claude Code project instructions (local only)
+CLAUDE.md
+
+# goreleaser
+.env.example
+.serena/project.yml

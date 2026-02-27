@@ -1,8 +1,8 @@
-// PicoOraClaw - Ultra-lightweight personal AI agent
+// PicoClaw - Ultra-lightweight personal AI agent
 // Inspired by and based on nanobot: https://github.com/HKUDS/nanobot
 // License: MIT
 //
-// Copyright (c) 2026 PicoOraClaw contributors
+// Copyright (c) 2026 PicoClaw contributors
 
 package tools
 
@@ -33,12 +33,7 @@ type ToolLoopResult struct {
 
 // RunToolLoop executes the LLM + tool call iteration loop.
 // This is the core agent logic that can be reused by both main agent and subagents.
-func RunToolLoop(
-	ctx context.Context,
-	config ToolLoopConfig,
-	messages []providers.Message,
-	channel, chatID string,
-) (*ToolLoopResult, error) {
+func RunToolLoop(ctx context.Context, config ToolLoopConfig, messages []providers.Message, channel, chatID string) (*ToolLoopResult, error) {
 	iteration := 0
 	var finalContent string
 
@@ -60,8 +55,12 @@ func RunToolLoop(
 		// 2. Set default LLM options
 		llmOpts := config.LLMOptions
 		if llmOpts == nil {
-			llmOpts = map[string]any{}
+			llmOpts = map[string]any{
+				"max_tokens":  4096,
+				"temperature": 0.7,
+			}
 		}
+
 		// 3. Call LLM
 		response, err := config.Provider.Chat(ctx, messages, providerToolDefs, config.Model, llmOpts)
 		if err != nil {
@@ -84,20 +83,15 @@ func RunToolLoop(
 			break
 		}
 
-		normalizedToolCalls := make([]providers.ToolCall, 0, len(response.ToolCalls))
-		for _, tc := range response.ToolCalls {
-			normalizedToolCalls = append(normalizedToolCalls, providers.NormalizeToolCall(tc))
-		}
-
 		// 5. Log tool calls
-		toolNames := make([]string, 0, len(normalizedToolCalls))
-		for _, tc := range normalizedToolCalls {
+		toolNames := make([]string, 0, len(response.ToolCalls))
+		for _, tc := range response.ToolCalls {
 			toolNames = append(toolNames, tc.Name)
 		}
 		logger.InfoCF("toolloop", "LLM requested tool calls",
 			map[string]any{
 				"tools":     toolNames,
-				"count":     len(normalizedToolCalls),
+				"count":     len(response.ToolCalls),
 				"iteration": iteration,
 			})
 
@@ -106,13 +100,11 @@ func RunToolLoop(
 			Role:    "assistant",
 			Content: response.Content,
 		}
-		for _, tc := range normalizedToolCalls {
+		for _, tc := range response.ToolCalls {
 			argumentsJSON, _ := json.Marshal(tc.Arguments)
 			assistantMsg.ToolCalls = append(assistantMsg.ToolCalls, providers.ToolCall{
-				ID:        tc.ID,
-				Type:      "function",
-				Name:      tc.Name,
-				Arguments: tc.Arguments,
+				ID:   tc.ID,
+				Type: "function",
 				Function: &providers.FunctionCall{
 					Name:      tc.Name,
 					Arguments: string(argumentsJSON),
@@ -122,7 +114,7 @@ func RunToolLoop(
 		messages = append(messages, assistantMsg)
 
 		// 7. Execute tool calls
-		for _, tc := range normalizedToolCalls {
+		for _, tc := range response.ToolCalls {
 			argsJSON, _ := json.Marshal(tc.Arguments)
 			argsPreview := utils.Truncate(string(argsJSON), 200)
 			logger.InfoCF("toolloop", fmt.Sprintf("Tool call: %s(%s)", tc.Name, argsPreview),

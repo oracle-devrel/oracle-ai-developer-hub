@@ -3,7 +3,6 @@ package tools
 import (
 	"context"
 	"fmt"
-	"sort"
 	"sync"
 	"time"
 
@@ -35,22 +34,16 @@ func (r *ToolRegistry) Get(name string) (Tool, bool) {
 	return tool, ok
 }
 
-func (r *ToolRegistry) Execute(ctx context.Context, name string, args map[string]any) *ToolResult {
+func (r *ToolRegistry) Execute(ctx context.Context, name string, args map[string]interface{}) *ToolResult {
 	return r.ExecuteWithContext(ctx, name, args, "", "", nil)
 }
 
 // ExecuteWithContext executes a tool with channel/chatID context and optional async callback.
 // If the tool implements AsyncTool and a non-nil callback is provided,
 // the callback will be set on the tool before execution.
-func (r *ToolRegistry) ExecuteWithContext(
-	ctx context.Context,
-	name string,
-	args map[string]any,
-	channel, chatID string,
-	asyncCallback AsyncCallback,
-) *ToolResult {
+func (r *ToolRegistry) ExecuteWithContext(ctx context.Context, name string, args map[string]interface{}, channel, chatID string, asyncCallback AsyncCallback) *ToolResult {
 	logger.InfoCF("tool", "Tool execution started",
-		map[string]any{
+		map[string]interface{}{
 			"tool": name,
 			"args": args,
 		})
@@ -58,7 +51,7 @@ func (r *ToolRegistry) ExecuteWithContext(
 	tool, ok := r.Get(name)
 	if !ok {
 		logger.ErrorCF("tool", "Tool not found",
-			map[string]any{
+			map[string]interface{}{
 				"tool": name,
 			})
 		return ErrorResult(fmt.Sprintf("tool %q not found", name)).WithError(fmt.Errorf("tool not found"))
@@ -73,7 +66,7 @@ func (r *ToolRegistry) ExecuteWithContext(
 	if asyncTool, ok := tool.(AsyncTool); ok && asyncCallback != nil {
 		asyncTool.SetCallback(asyncCallback)
 		logger.DebugCF("tool", "Async callback injected",
-			map[string]any{
+			map[string]interface{}{
 				"tool": name,
 			})
 	}
@@ -85,20 +78,20 @@ func (r *ToolRegistry) ExecuteWithContext(
 	// Log based on result type
 	if result.IsError {
 		logger.ErrorCF("tool", "Tool execution failed",
-			map[string]any{
+			map[string]interface{}{
 				"tool":     name,
 				"duration": duration.Milliseconds(),
 				"error":    result.ForLLM,
 			})
 	} else if result.Async {
 		logger.InfoCF("tool", "Tool started (async)",
-			map[string]any{
+			map[string]interface{}{
 				"tool":     name,
 				"duration": duration.Milliseconds(),
 			})
 	} else {
 		logger.InfoCF("tool", "Tool execution completed",
-			map[string]any{
+			map[string]interface{}{
 				"tool":          name,
 				"duration_ms":   duration.Milliseconds(),
 				"result_length": len(result.ForLLM),
@@ -108,27 +101,13 @@ func (r *ToolRegistry) ExecuteWithContext(
 	return result
 }
 
-// sortedToolNames returns tool names in sorted order for deterministic iteration.
-// This is critical for KV cache stability: non-deterministic map iteration would
-// produce different system prompts and tool definitions on each call, invalidating
-// the LLM's prefix cache even when no tools have changed.
-func (r *ToolRegistry) sortedToolNames() []string {
-	names := make([]string, 0, len(r.tools))
-	for name := range r.tools {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	return names
-}
-
-func (r *ToolRegistry) GetDefinitions() []map[string]any {
+func (r *ToolRegistry) GetDefinitions() []map[string]interface{} {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	sorted := r.sortedToolNames()
-	definitions := make([]map[string]any, 0, len(sorted))
-	for _, name := range sorted {
-		definitions = append(definitions, ToolToSchema(r.tools[name]))
+	definitions := make([]map[string]interface{}, 0, len(r.tools))
+	for _, tool := range r.tools {
+		definitions = append(definitions, ToolToSchema(tool))
 	}
 	return definitions
 }
@@ -139,21 +118,19 @@ func (r *ToolRegistry) ToProviderDefs() []providers.ToolDefinition {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	sorted := r.sortedToolNames()
-	definitions := make([]providers.ToolDefinition, 0, len(sorted))
-	for _, name := range sorted {
-		tool := r.tools[name]
+	definitions := make([]providers.ToolDefinition, 0, len(r.tools))
+	for _, tool := range r.tools {
 		schema := ToolToSchema(tool)
 
 		// Safely extract nested values with type checks
-		fn, ok := schema["function"].(map[string]any)
+		fn, ok := schema["function"].(map[string]interface{})
 		if !ok {
 			continue
 		}
 
 		name, _ := fn["name"].(string)
 		desc, _ := fn["description"].(string)
-		params, _ := fn["parameters"].(map[string]any)
+		params, _ := fn["parameters"].(map[string]interface{})
 
 		definitions = append(definitions, providers.ToolDefinition{
 			Type: "function",
@@ -172,7 +149,11 @@ func (r *ToolRegistry) List() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	return r.sortedToolNames()
+	names := make([]string, 0, len(r.tools))
+	for name := range r.tools {
+		names = append(names, name)
+	}
+	return names
 }
 
 // Count returns the number of registered tools.
@@ -188,10 +169,8 @@ func (r *ToolRegistry) GetSummaries() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	sorted := r.sortedToolNames()
-	summaries := make([]string, 0, len(sorted))
-	for _, name := range sorted {
-		tool := r.tools[name]
+	summaries := make([]string, 0, len(r.tools))
+	for _, tool := range r.tools {
 		summaries = append(summaries, fmt.Sprintf("- `%s` - %s", tool.Name(), tool.Description()))
 	}
 	return summaries

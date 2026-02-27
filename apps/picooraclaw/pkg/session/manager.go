@@ -32,7 +32,7 @@ func NewSessionManager(storage string) *SessionManager {
 	}
 
 	if storage != "" {
-		os.MkdirAll(storage, 0o755)
+		os.MkdirAll(storage, 0755)
 		sm.loadSessions()
 	}
 
@@ -214,7 +214,7 @@ func (sm *SessionManager) Save(key string) error {
 		_ = tmpFile.Close()
 		return err
 	}
-	if err := tmpFile.Chmod(0o644); err != nil {
+	if err := tmpFile.Chmod(0644); err != nil {
 		_ = tmpFile.Close()
 		return err
 	}
@@ -265,18 +265,15 @@ func (sm *SessionManager) loadSessions() error {
 	return nil
 }
 
-// SetHistory updates the messages of a session.
+// SetHistory replaces the message history of a session.
 func (sm *SessionManager) SetHistory(key string, history []providers.Message) {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
 	session, ok := sm.sessions[key]
 	if ok {
-		// Create a deep copy to strictly isolate internal state
-		// from the caller's slice.
 		msgs := make([]providers.Message, len(history))
 		copy(msgs, history)
 		session.Messages = msgs
-		session.Updated = time.Now()
 	}
 }

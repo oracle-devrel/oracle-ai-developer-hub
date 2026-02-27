@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
-
-	"github.com/jasperan/picooraclaw/pkg/fileutil"
 )
 
 // State represents the persistent state for a workspace.
@@ -40,7 +38,7 @@ func NewManager(workspace string) *Manager {
 	oldStateFile := filepath.Join(workspace, "state.json")
 
 	// Create state directory if it doesn't exist
-	os.MkdirAll(stateDir, 0o755)
+	os.MkdirAll(stateDir, 0755)
 
 	sm := &Manager{
 		workspace: workspace,
@@ -126,20 +124,33 @@ func (sm *Manager) GetTimestamp() time.Time {
 // saveAtomic performs an atomic save using temp file + rename.
 // This ensures that the state file is never corrupted:
 // 1. Write to a temp file
-// 2. Sync to disk (critical for SD cards/flash storage)
-// 3. Rename temp file to target (atomic on POSIX systems)
-// 4. If rename fails, cleanup the temp file
+// 2. Rename temp file to target (atomic on POSIX systems)
+// 3. If rename fails, cleanup the temp file
 //
 // Must be called with the lock held.
 func (sm *Manager) saveAtomic() error {
-	// Use unified atomic write utility with explicit sync for flash storage reliability.
-	// Using 0o600 (owner read/write only) for secure default permissions.
+	// Create temp file in the same directory as the target
+	tempFile := sm.stateFile + ".tmp"
+
+	// Marshal state to JSON
 	data, err := json.MarshalIndent(sm.state, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal state: %w", err)
 	}
 
-	return fileutil.WriteFileAtomic(sm.stateFile, data, 0o600)
+	// Write to temp file
+	if err := os.WriteFile(tempFile, data, 0644); err != nil {
+		return fmt.Errorf("failed to write temp file: %w", err)
+	}
+
+	// Atomic rename from temp to target
+	if err := os.Rename(tempFile, sm.stateFile); err != nil {
+		// Cleanup temp file if rename fails
+		os.Remove(tempFile)
+		return fmt.Errorf("failed to rename temp file: %w", err)
+	}
+
+	return nil
 }
 
 // load loads the state from disk.

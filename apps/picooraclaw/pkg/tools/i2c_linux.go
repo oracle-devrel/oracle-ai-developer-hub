@@ -74,7 +74,7 @@ func smbusProbe(fd int, addr int, hasQuick bool) bool {
 // scan probes valid 7-bit addresses on a bus for connected devices.
 // Uses the same hybrid probe strategy as i2cdetect's MODE_AUTO:
 // SMBus Quick Write for most addresses, SMBus Read Byte for EEPROM ranges.
-func (t *I2CTool) scan(args map[string]any) *ToolResult {
+func (t *I2CTool) scan(args map[string]interface{}) *ToolResult {
 	bus, errResult := parseI2CBus(args)
 	if errResult != nil {
 		return errResult
@@ -99,9 +99,7 @@ func (t *I2CTool) scan(args map[string]any) *ToolResult {
 	hasReadByte := funcs&i2cFuncSmbusReadByte != 0
 
 	if !hasQuick && !hasReadByte {
-		return ErrorResult(
-			fmt.Sprintf("I2C adapter %s supports neither SMBus Quick nor Read Byte — cannot probe safely", devPath),
-		)
+		return ErrorResult(fmt.Sprintf("I2C adapter %s supports neither SMBus Quick nor Read Byte — cannot probe safely", devPath))
 	}
 
 	type deviceEntry struct {
@@ -135,7 +133,7 @@ func (t *I2CTool) scan(args map[string]any) *ToolResult {
 		return SilentResult(fmt.Sprintf("No devices found on %s. Check wiring and pull-up resistors.", devPath))
 	}
 
-	result, _ := json.MarshalIndent(map[string]any{
+	result, _ := json.MarshalIndent(map[string]interface{}{
 		"bus":     devPath,
 		"devices": found,
 		"count":   len(found),
@@ -144,7 +142,7 @@ func (t *I2CTool) scan(args map[string]any) *ToolResult {
 }
 
 // readDevice reads bytes from an I2C device, optionally at a specific register
-func (t *I2CTool) readDevice(args map[string]any) *ToolResult {
+func (t *I2CTool) readDevice(args map[string]interface{}) *ToolResult {
 	bus, errResult := parseI2CBus(args)
 	if errResult != nil {
 		return errResult
@@ -182,7 +180,7 @@ func (t *I2CTool) readDevice(args map[string]any) *ToolResult {
 		if reg < 0 || reg > 255 {
 			return ErrorResult("register must be between 0x00 and 0xFF")
 		}
-		_, err = syscall.Write(fd, []byte{byte(reg)})
+		_, err := syscall.Write(fd, []byte{byte(reg)})
 		if err != nil {
 			return ErrorResult(fmt.Sprintf("failed to write register 0x%02x: %v", reg, err))
 		}
@@ -203,7 +201,7 @@ func (t *I2CTool) readDevice(args map[string]any) *ToolResult {
 		intBytes[i] = int(buf[i])
 	}
 
-	result, _ := json.MarshalIndent(map[string]any{
+	result, _ := json.MarshalIndent(map[string]interface{}{
 		"bus":     devPath,
 		"address": fmt.Sprintf("0x%02x", addr),
 		"bytes":   intBytes,
@@ -214,12 +212,10 @@ func (t *I2CTool) readDevice(args map[string]any) *ToolResult {
 }
 
 // writeDevice writes bytes to an I2C device, optionally at a specific register
-func (t *I2CTool) writeDevice(args map[string]any) *ToolResult {
+func (t *I2CTool) writeDevice(args map[string]interface{}) *ToolResult {
 	confirm, _ := args["confirm"].(bool)
 	if !confirm {
-		return ErrorResult(
-			"write operations require confirm: true. Please confirm with the user before writing to I2C devices, as incorrect writes can misconfigure hardware.",
-		)
+		return ErrorResult("write operations require confirm: true. Please confirm with the user before writing to I2C devices, as incorrect writes can misconfigure hardware.")
 	}
 
 	bus, errResult := parseI2CBus(args)
@@ -232,7 +228,7 @@ func (t *I2CTool) writeDevice(args map[string]any) *ToolResult {
 		return errResult
 	}
 
-	dataRaw, ok := args["data"].([]any)
+	dataRaw, ok := args["data"].([]interface{})
 	if !ok || len(dataRaw) == 0 {
 		return ErrorResult("data is required for write (array of byte values 0-255)")
 	}

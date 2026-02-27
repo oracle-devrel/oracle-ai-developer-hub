@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-
 	"github.com/jasperan/picooraclaw/pkg/logger"
 )
 
@@ -66,8 +65,8 @@ func DownloadFile(url, filename string, opts DownloadOptions) string {
 	}
 
 	mediaDir := filepath.Join(os.TempDir(), "picoclaw_media")
-	if err := os.MkdirAll(mediaDir, 0o700); err != nil {
-		logger.ErrorCF(opts.LoggerPrefix, "Failed to create media directory", map[string]any{
+	if err := os.MkdirAll(mediaDir, 0700); err != nil {
+		logger.ErrorCF(opts.LoggerPrefix, "Failed to create media directory", map[string]interface{}{
 			"error": err.Error(),
 		})
 		return ""
@@ -80,7 +79,7 @@ func DownloadFile(url, filename string, opts DownloadOptions) string {
 	// Create HTTP request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		logger.ErrorCF(opts.LoggerPrefix, "Failed to create download request", map[string]any{
+		logger.ErrorCF(opts.LoggerPrefix, "Failed to create download request", map[string]interface{}{
 			"error": err.Error(),
 		})
 		return ""
@@ -94,7 +93,7 @@ func DownloadFile(url, filename string, opts DownloadOptions) string {
 	client := &http.Client{Timeout: opts.Timeout}
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.ErrorCF(opts.LoggerPrefix, "Failed to download file", map[string]any{
+		logger.ErrorCF(opts.LoggerPrefix, "Failed to download file", map[string]interface{}{
 			"error": err.Error(),
 			"url":   url,
 		})
@@ -103,7 +102,7 @@ func DownloadFile(url, filename string, opts DownloadOptions) string {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		logger.ErrorCF(opts.LoggerPrefix, "File download returned non-200 status", map[string]any{
+		logger.ErrorCF(opts.LoggerPrefix, "File download returned non-200 status", map[string]interface{}{
 			"status": resp.StatusCode,
 			"url":    url,
 		})
@@ -112,7 +111,7 @@ func DownloadFile(url, filename string, opts DownloadOptions) string {
 
 	out, err := os.Create(localPath)
 	if err != nil {
-		logger.ErrorCF(opts.LoggerPrefix, "Failed to create local file", map[string]any{
+		logger.ErrorCF(opts.LoggerPrefix, "Failed to create local file", map[string]interface{}{
 			"error": err.Error(),
 		})
 		return ""
@@ -122,13 +121,13 @@ func DownloadFile(url, filename string, opts DownloadOptions) string {
 	if _, err := io.Copy(out, resp.Body); err != nil {
 		out.Close()
 		os.Remove(localPath)
-		logger.ErrorCF(opts.LoggerPrefix, "Failed to write file", map[string]any{
+		logger.ErrorCF(opts.LoggerPrefix, "Failed to write file", map[string]interface{}{
 			"error": err.Error(),
 		})
 		return ""
 	}
 
-	logger.DebugCF(opts.LoggerPrefix, "File downloaded successfully", map[string]any{
+	logger.DebugCF(opts.LoggerPrefix, "File downloaded successfully", map[string]interface{}{
 		"path": localPath,
 	})
 

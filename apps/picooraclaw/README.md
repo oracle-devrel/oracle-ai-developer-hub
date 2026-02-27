@@ -9,9 +9,8 @@
     <img src="https://img.shields.io/badge/Go-1.24+-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go">
     <img src="https://img.shields.io/badge/Arch-x86__64%2C%20ARM64%2C%20RISC--V-blue?style=for-the-badge" alt="Hardware">
     <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
-    <br>
-    <a href="https://picoclaw.io"><img src="https://img.shields.io/badge/Website-picoclaw.io-blue?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Website"></a>
-    <a href="https://x.com/SipeedIO"><img src="https://img.shields.io/badge/X_(Twitter)-SipeedIO-black?style=for-the-badge&logo=x&logoColor=white" alt="Twitter"></a>
+    <img src="https://img.shields.io/badge/backend-Ollama-black?style=for-the-badge" alt="Ollama">
+    <a href="https://www.oracle.com/database/free/"><img src="https://img.shields.io/badge/Oracle_Database-Free-F80000?style=for-the-badge&logo=oracle&logoColor=white" alt="Oracle Database"></a>
   </p>
 
   <p>

@@ -2,19 +2,19 @@ spring:
   main:
     banner-mode: "off"
   profiles:
-    active: default
+    active: ${SPRING_PROFILES_ACTIVE:default}
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
-    url: jdbc:oracle:thin:@DB_SERVICE_high?TNS_ADMIN=/PATH/TO/WALLET
-    username: ADMIN
-    password: "PASSWORD"
+    url: ${DB_URL:jdbc:oracle:thin:@//localhost:1521/freepdb1}
+    username: ${DB_USERNAME:spring_ai_user}
+    password: ${DB_PASSWORD:change_me}
     type: oracle.ucp.jdbc.PoolDataSource
     oracleucp:
-      sql-for-validate-connection: SELECT * FROM dual
-      connection-pool-name: connectionPoolName1
-      initial-pool-size: 5
-      min-pool-size: 5
-      max-pool-size: 10
+      sql-for-validate-connection: ${DB_VALIDATE_SQL:SELECT * FROM dual}
+      connection-pool-name: ${DB_POOL_NAME:connectionPoolName1}
+      initial-pool-size: ${DB_POOL_INITIAL_SIZE:5}
+      min-pool-size: ${DB_POOL_MIN_SIZE:5}
+      max-pool-size: ${DB_POOL_MAX_SIZE:10}
   jpa:
     hibernate:
       use-new-id-generator-mappings: false
@@ -26,19 +26,31 @@ spring:
       file-size-threshold: 2MB
 oracle:
   jdbc:
-    fanEnabled: true
+    fanEnabled: ${ORACLE_JDBC_FAN_ENABLED:true}
 
 genai:
-  region: "US_CHICAGO_1"
+  region: ${OCI_GENAI_REGION:US_CHICAGO_1}
   config:
-    location: "~/.oci/config"
-    profile: "DEFAULT"
-  compartment_id: "COMPARTMENT_ID"
-  chat_model_id: "ocid1.generativeaimodel.AAAAAAAAAAAAA"
-  summarization_model_id: "ocid1.generativeaimodel.AAAAAAAAAAAAA"
-  embed_model_id: "cohere.embed-english-v3.0"
+    location: ${OCI_CONFIG_PATH:/Users/wojtekpluta/.oci/config}
+    profile: ${OCI_CONFIG_PROFILE:DEFAULT}
+  compartment_id: ${OCI_COMPARTMENT_ID:COMPARTMENT_ID}
+  chat_model_id: ${OCI_CHAT_MODEL_ID:ocid1.generativeaimodel.AAAAAAAAAAAAA}
+  summarization_model_id: ${OCI_SUMMARY_MODEL_ID:ocid1.generativeaimodel.AAAAAAAAAAAAA}
+  embed_model_id: ${OCI_EMBED_MODEL_ID:cohere.embed-english-v3.0}
+
+memory:
+  context:
+    tokenBudgetTokens: ${MEMORY_CONTEXT_TOKEN_BUDGET_TOKENS:80000}
+    tokenBudgetPercent: ${MEMORY_CONTEXT_TOKEN_BUDGET_PERCENT:0.75}
+  messages:
+    maxCount: ${MEMORY_MESSAGES_MAX_COUNT:20}
+  kv:
+    allowlist: ${MEMORY_KV_ALLOWLIST:userPrefs,persona,constraints,workflow.step,workflow.status,workflow.plan,workflow.lastInput,workflow.lastError}
+    touchOnRead: ${MEMORY_KV_TOUCH_ON_READ:false}
+    touchExtensionSeconds: ${MEMORY_KV_TOUCH_EXTENSION_SECONDS:600}
+
 storage:
-  path: "/PATH/FOR/UPLOAD/FILES"
+  path: ${STORAGE_PATH:/tmp/uploads}
 logging:
   level:
     com.oracle.bmc.generativeai.model.ModelCapability: ERROR

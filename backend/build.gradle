@@ -8,9 +8,9 @@ group = 'dev.victormartin.oci.genai.backend'
 version = '0.0.7'
 
 java {
-	sourceCompatibility = '17'
+	sourceCompatibility = '21'
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 

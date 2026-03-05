@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -152,6 +153,7 @@ public class RagService {
      */
     private List<KbChunk> topK(String tenantId, List<Float> qEmbed, List<String> docIds, List<String> tags, int k, String question) {
         List<KbChunk> out = new ArrayList<>();
+        String tagsRegex = buildTagsRegex(tags);
 
         String sql =
                 "SELECT c.id AS chunk_id, c.doc_id, d.title, d.uri, c.text, c.source_meta, c.chunk_ix, c.tenant_id " +
@@ -196,6 +198,9 @@ public class RagService {
                     }
                     sqlVec.append(") ");
                 }
+                if (tagsRegex != null) {
+                    sqlVec.append("AND REGEXP_LIKE(LOWER(d.tags_json), ?, 'i') ");
+                }
                 // Optional: add tags filter via JSON_EXISTS(d.tags_json, '$[*]?(@ like_regex "...")')
                 sqlVec.append("ORDER BY dist ASC FETCH FIRST ? ROWS ONLY");
 
@@ -207,6 +212,9 @@ public class RagService {
                         for (String id : docIds) {
                             ps.setString(idx++, id);
                         }
+                    }
+                    if (tagsRegex != null) {
+                        ps.setString(idx++, tagsRegex);
                     }
                     ps.setInt(idx++, k);
 
@@ -271,6 +279,9 @@ public class RagService {
                         }
                         sqlLike.append(") ");
                     }
+                    if (tagsRegex != null) {
+                        sqlLike.append("AND REGEXP_LIKE(LOWER(d.tags_json), ?, 'i') ");
+                    }
                     sqlLike.append("AND REGEXP_LIKE(c.text, ?, 'i') ");
                     sqlLike.append("FETCH FIRST ? ROWS ONLY");
 
@@ -281,6 +292,9 @@ public class RagService {
                             for (String id : docIds) {
                                 ps.setString(idx++, id);
                             }
+                        }
+                        if (tagsRegex != null) {
+                            ps.setString(idx++, tagsRegex);
                         }
                         ps.setString(idx++, regex.toString());
                         ps.setInt(idx++, k);
@@ -317,6 +331,9 @@ public class RagService {
                         }
                         sqlAny.append(") ");
                     }
+                    if (tagsRegex != null) {
+                        sqlAny.append("AND REGEXP_LIKE(LOWER(d.tags_json), ?, 'i') ");
+                    }
                     sqlAny.append("ORDER BY c.id DESC FETCH FIRST ? ROWS ONLY");
 
                     try (PreparedStatement ps = conn.prepareStatement(sqlAny.toString())) {
@@ -326,6 +343,9 @@ public class RagService {
                             for (String id : docIds) {
                                 ps.setString(idx++, id);
                             }
+                        }
+                        if (tagsRegex != null) {
+                            ps.setString(idx++, tagsRegex);
                         }
                         ps.setInt(idx++, k);
 
@@ -360,6 +380,27 @@ public class RagService {
             log.warn("DB connection failed during retrieval: {}", outer.getMessage());
         }
         return out;
+    }
+
+    private String buildTagsRegex(List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return null;
+        }
+        List<String> safeTags = tags.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .map(String::toLowerCase)
+                .map(this::escapeRegex)
+                .collect(Collectors.toList());
+        if (safeTags.isEmpty()) {
+            return null;
+        }
+        return "(" + String.join("|", safeTags) + ")";
+    }
+
+    private String escapeRegex(String input) {
+        return input.replaceAll("([\\\\.\[\]{}()*+?^$|])", "\\\\$1");
     }
 
     private String assemblePrompt(String question, List<KbChunk> snippets) {

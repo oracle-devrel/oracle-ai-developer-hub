@@ -92,6 +92,7 @@ flowchart LR
 - Troubleshooting: [TROUBLESHOOTING.md](guides/TROUBLESHOOTING.md)
 - FAQ: [FAQ.md](guides/FAQ.md)
 - Local development: [LOCAL.md](guides/LOCAL.md)
+- AI Agent Memory Architecture: [AGENT_MEMORY_SPRING_AI_ORACLE_AI_DATABASE.md](guides/AGENT_MEMORY_SPRING_AI_ORACLE_AI_DATABASE.md)
 - Security: [SECURITY.md](guides/SECURITY.md)
 - Contributing: [CONTRIBUTING.md](guides/CONTRIBUTING.md)
 - Changes: [CHANGES.md](guides/CHANGES.md)

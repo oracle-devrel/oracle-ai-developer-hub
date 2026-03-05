@@ -29,19 +29,19 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Check Java 17+
+# Check Java 21+
 check_java() {
     echo -e "${YELLOW}☕ Checking Java runtime...${NC}"
     if ! command_exists java; then
-        echo -e "${RED}❌ Java (JDK) 17+ is required but not found. Install from https://adoptium.net/ or brew install openjdk@17.${NC}"
+        echo -e "${RED}❌ Java (JDK) 21+ is required but not found. Install from https://adoptium.net/ or brew install --cask temurin@21.${NC}"
         exit 1
     fi
     JAVA_VERSION_RAW=$(java -version 2>&1 | awk -F\" '/version/ {print $2}')
     JAVA_MAJOR=${JAVA_VERSION_RAW%%.*}
-    if [[ "$JAVA_MAJOR" =~ ^[0-9]+$ ]] && [ "$JAVA_MAJOR" -ge 17 ]; then
+    if [[ "$JAVA_MAJOR" =~ ^[0-9]+$ ]] && [ "$JAVA_MAJOR" -ge 21 ]; then
         echo -e "${GREEN}✅ Java $JAVA_VERSION_RAW detected${NC}"
     else
-        echo -e "${RED}❌ Java 17+ is required. Current: $JAVA_VERSION_RAW${NC}"
+        echo -e "${RED}❌ Java 21+ is required. Current: $JAVA_VERSION_RAW${NC}"
         exit 1
     fi
 }

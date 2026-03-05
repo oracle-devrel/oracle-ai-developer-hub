@@ -2,6 +2,8 @@
 
 This document describes how this project implements production‑grade agent memory on Oracle AI Database. It focuses on conversation history, key‑value (KV) memory for agent state, and optional summaries/telemetry – the data the agent uses to recall context across turns. The Retrieval‑Augmented Generation (RAG) Knowledge Base (documents, chunks, embeddings) is covered separately in RAG.md.
 
+For a comprehensive architectural overview of AI agent memory using Spring AI and Oracle AI Database, see [AGENT_MEMORY_SPRING_AI_ORACLE_AI_DATABASE.md](AGENT_MEMORY_SPRING_AI_ORACLE_AI_DATABASE.md).
+
 This guide covers:
 - Schema design for agent memory (conversations, messages, memory_kv, optional memory_long and interactions)
 - Copy/paste‑ready DDL and indexes optimized for common memory patterns
@@ -469,3 +471,4 @@ This schema and the associated patterns enable reliable, observable, and scalabl
 ## Q&A
 Q: How do I add a new table? A: Create a new Liquibase changeset in backend/src/main/resources/db/migration/Vn__new_table.sql, using additive DDL and rollback statements.
 Q: What if VECTOR type is not supported? A: Use fallback types; see RAG.md for embedding alternatives.
+Q: For advanced agent memory patterns with Spring AI, where should I look? A: Refer to [AGENT_MEMORY_SPRING_AI_ORACLE_AI_DATABASE.md](AGENT_MEMORY_SPRING_AI_ORACLE_AI_DATABASE.md) for detailed architecture and code examples.

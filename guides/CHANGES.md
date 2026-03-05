@@ -3,6 +3,42 @@
 ## How to Use This Changelog
 This changelog documents changes in reverse chronological order, building on previous versions. Each entry includes sections like Added, Changed, Fixed for modularity. Use it to track evolution and learn from updates. Cross-reference with README.md for overview and SERVICES_GUIDE.md for backend details.
 
+## [2026-03-05]
+### Added
+- Guides: New comprehensive guide `AGENT_MEMORY_SPRING_AI_ORACLE_AI_DATABASE.md` covering AI agent memory architecture with Spring AI, OCI GenAI, and Oracle AI Database (migrated/expanded from specFile.md).
+- DevRel: Platform-optimized articles in `devrel-writes/oci-genai-jet-ui/`:
+  - Medium: Thought leadership on cognitive architecture and enterprise impact.
+  - dev.to: Technical deep dive with code snippets and best practices.
+  - DataCamp: Hands-on tutorial with step-by-step implementation exercises.
+- Cross-references: Updated README.md and DATABASE.md with links to new guide.
+
+### Changed
+- Branding: Enforced "Oracle AI Database" throughout new content; corrected legacy "23ai" references.
+- Backend memory architecture alignment:
+  - Added `ProceduralMemoryService` to persist workflow state in `memory_kv` using `workflow.*` keys.
+  - Updated `/api/genai/rag` flow to persist episodic user/assistant turns and refresh rolling summary after response.
+  - Added tag-aware filtering in `RagService` retrieval SQL paths (`VECTOR`, regex fallback, recency fallback).
+  - Hardened backend `application.yaml` with environment-driven datasource/OCI/memory settings.
+- Java baseline upgrade for backend runtime/build:
+  - Updated backend toolchain/source compatibility from Java 17 to Java 21 in `backend/build.gradle`.
+  - Updated Gradle toolchain guidance in `backend/gradle.properties` to Java 21.
+  - Updated local guides/scripts references to Java 21 (`guides/LOCAL.md`, `guides/FAQ.md`, `guides/TROUBLESHOOTING.md`, `local/serverStart.sh`, `local/localStart.sh`).
+- Setup docs resilience improvements:
+  - Updated `guides/K8S.md` and `guides/LOCAL.md` to avoid requiring `nvm` explicitly.
+  - Environment setup now validates `node -v`/`npm -v` with Node.js 18+ requirement and uses `npm ci`.
+  - Added Podman-specific OCIR pull-secret remediation in `guides/K8S.md` for `ImagePullBackOff` / `Unauthorized` scenarios.
+
+### Fixed
+- RAG interactions now contribute to durable episodic memory instead of being transient-only responses.
+- Retrieval now honors request `tags` filters across all retrieval fallbacks.
+
+### Build
+- Backend tests could not be executed in this environment due to local JDK/Gradle incompatibility (`Unsupported class file major version 69` with Gradle semantic analysis under Java 25 only runtime present). Code-level test additions were made but runtime verification is pending Java 17/21 toolchain availability.
+- Java 21 verification run was not executed in this pass by request (no local JDK installation). Local machine currently exposes Java 25 only.
+
+### Documentation
+- All new content includes secure placeholders (no real secrets), Mermaid diagrams, and repo links.
+
 ## [2025-11-04]
 ### Added
 - UI: Added a visible Close button to the Settings drawer on mobile, allowing users to return to the main page.

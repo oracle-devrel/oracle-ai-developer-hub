@@ -73,7 +73,7 @@ This guide covers common issues across the backend (Spring Boot), frontend (Orac
 
 ### Backend not starting
 - Symptom: Gradle/Spring errors on bootRun.
-- Steps: 1) ./gradlew clean build. 2) Review logs for Liquibase/datasource. 3) Align with build.gradle (Spring Boot 3.2.x/Java 17).
+- Steps: 1) ./gradlew clean build. 2) Review logs for Liquibase/datasource. 3) Align with build.gradle (Spring Boot 3.2.x/Java 21).
 
 ### UI cannot connect to backend
 - Symptom: CORS/network errors in console.

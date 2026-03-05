@@ -50,9 +50,12 @@ Helpful docs:
 ```bash
 git clone https://github.com/oracle-devrel/oci-generative-ai-jet-ui.git
 cd oci-generative-ai-jet-ui
-nvm install 18 && nvm use 18
-cd scripts && npm install && cd ..
+node -v   # ensure Node.js 18+
+npm -v
+cd scripts && npm ci && cd ..
 ```
+
+If Node.js is missing or older than 18, install Node.js 18+ using either nvm or Homebrew, then rerun the commands above.
 
 ### Generate environment and tfvars
 
@@ -172,6 +175,35 @@ curl -X POST http://localhost:8080/api/genai/rag \
 - Ingress provisioning delay → LoadBalancer IP may take several minutes; re-check `kubectl get svc`.
 - Database objects missing → confirm Liquibase ran; see logs and `DATABASE.md` (delimiter notes, schemas).
 - More scenarios: `TROUBLESHOOTING.md`.
+
+### ImagePullBackOff with OCIR (`Unauthorized`) when using Podman
+
+If pod events show `invalid username/password ... Unauthorized` while pulling from OCIR, recreate `ocir-secret` from Podman auth:
+
+```bash
+# 1) Login to OCIR with OCI auth token
+podman login ord.ocir.io -u 'axywji1aljc2/<oci_username>'
+
+# For federated users, username is often:
+# axywji1aljc2/oracleidentitycloudservice/<email>
+
+# 2) Recreate pull secret from Podman auth.json
+kubectl delete secret ocir-secret -n backend --ignore-not-found
+kubectl create secret generic ocir-secret \
+  --from-file=.dockerconfigjson=/Users/wojtekpluta/.config/containers/auth.json \
+  --type=kubernetes.io/dockerconfigjson \
+  -n backend
+
+# 3) Restart workloads so image pulls retry immediately
+kubectl rollout restart deploy/backend deploy/app -n backend
+kubectl get pods -n backend -w
+```
+
+Quick verification:
+
+```bash
+kubectl describe pod -n backend $(kubectl get pod -n backend -l app=backend -o jsonpath='{.items[0].metadata.name}') | sed -n '/Events/,$p'
+```
 
 ## Cleanup
 

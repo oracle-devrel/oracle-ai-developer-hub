@@ -8,7 +8,7 @@
 # - Optionally start the frontend
 # - Robust health checks and clean shutdown
 #
-# Requirements: macOS, bash, Docker, Java 17+, Node 18+
+# Requirements: macOS, bash, Docker, Java 21+, Node 18+
 
 set -euo pipefail
 
@@ -69,16 +69,16 @@ ensure_ports_free() {
 check_java() {
   echo -e "${YELLOW}☕ Checking Java runtime...${NC}"
   if ! command_exists java; then
-    echo -e "${RED}❌ Java (JDK) 17+ required. Install from https://adoptium.net/ or brew install openjdk@17${NC}"
+    echo -e "${RED}❌ Java (JDK) 21+ required. Install from https://adoptium.net/ or brew install --cask temurin@21${NC}"
     exit 1
   fi
   local ver_raw
   ver_raw=$(java -version 2>&1 | awk -F\" '/version/ {print $2}')
   local major="${ver_raw%%.*}"
-  if [[ "$major" =~ ^[0-9]+$ ]] && [ "$major" -ge 17 ]; then
+  if [[ "$major" =~ ^[0-9]+$ ]] && [ "$major" -ge 21 ]; then
     echo -e "${GREEN}✅ Java $ver_raw detected${NC}"
   else
-    echo -e "${RED}❌ Java 17+ required. Current: $ver_raw${NC}"
+    echo -e "${RED}❌ Java 21+ required. Current: $ver_raw${NC}"
     exit 1
   fi
 }

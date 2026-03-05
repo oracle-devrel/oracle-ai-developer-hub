@@ -55,7 +55,7 @@ A: Possible causes: empty KB or tenant mismatch. Step 1: Validate with /api/kb/d
 ## Build and Development
 
 Q: How do I build the app?  
-A: For backend: `./gradlew clean build` (aligns with Spring Boot 3.2.x/Java 17 in build.gradle). For frontend: `npm ci && npm run build` (Oracle JET 19.x in package.json). See LOCAL.md for running, CHANGES.md for recent build fixes.
+A: For backend: `./gradlew clean build` (aligns with Spring Boot 3.2.x/Java 21 in build.gradle). For frontend: `npm ci && npm run build` (Oracle JET 19.x in package.json). See LOCAL.md for running, CHANGES.md for recent build fixes.
 
 Q: How do I contribute?  
 A: Follow CONTRIBUTING.md guidelines. Step 1: Fork and branch. Step 2: Make changes. Step 3: PR with description. Add to CHANGES.md.

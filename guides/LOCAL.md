@@ -1,10 +1,10 @@
 # Run Local
 
-This guide provides step-by-step instructions to run the app locally using the Java/Spring backend and Oracle JET frontend. It builds on README.md for overview and aligns with build.gradle (Spring Boot 3.2.x/Java 17) and package.json (Oracle JET 19.x). For deployment, see K8S.md next.
+This guide provides step-by-step instructions to run the app locally using the Java/Spring backend and Oracle JET frontend. It builds on README.md for overview and aligns with build.gradle (Spring Boot 3.2.x/Java 21) and package.json (Oracle JET 19.x). For deployment, see K8S.md next.
 
 ## Prerequisites
 
-- JDK 17+ (for backend)
+- JDK 21+ (for backend)
 - Node.js 18+ (for frontend and scripts)
 - OCI credentials configured locally (~/.oci/config) with access to Generative AI
 - Oracle ADB Wallet unzipped to an absolute path (contains sqlnet.ora, tnsnames.ora, etc.)
@@ -15,9 +15,12 @@ This guide provides step-by-step instructions to run the app locally using the J
    ```bash
    git clone https://github.com/oracle-devrel/oci-generative-ai-jet-ui.git
    cd oci-generative-ai-jet-ui
-   nvm install 18 && nvm use 18
+   node -v   # ensure Node.js 18+
+   npm -v
    cd scripts && npm ci && cd ..
    ```
+
+   If Node.js is missing or older than 18, install Node.js 18+ using nvm or Homebrew, then rerun the commands.
 
 2. Configure backend (DB and OCI) in backend/src/main/resources/application.yaml:
    ```yaml
@@ -46,7 +49,7 @@ This guide provides step-by-step instructions to run the app locally using the J
 3. Build and run backend:
    ```bash
    cd backend
-   ./gradlew clean build  # Aligns with Spring Boot 3.2.x/Java 17 in build.gradle
+   ./gradlew clean build  # Aligns with Spring Boot 3.2.x/Java 21 in build.gradle
    ./gradlew bootRun
    # Backend runs on http://localhost:8080
    ```

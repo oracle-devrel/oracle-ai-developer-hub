@@ -30,19 +30,21 @@ import (
 )
 
 type AgentLoop struct {
-	bus            *bus.MessageBus
-	provider       providers.LLMProvider
-	workspace      string
-	model          string
-	contextWindow  int // Maximum context window size in tokens
-	maxIterations  int
-	sessions       SessionManagerInterface
-	state          StateManagerInterface
-	contextBuilder *ContextBuilder
-	tools          *tools.ToolRegistry
-	running        atomic.Bool
-	summarizing    sync.Map // Tracks which sessions are currently being summarized
-	channelManager channelManagerInterface
+	bus                       *bus.MessageBus
+	provider                  providers.LLMProvider
+	workspace                 string
+	model                     string
+	contextWindow             int // Maximum context window size in tokens
+	maxIterations             int
+	summarizeMessageThreshold int // Trigger summarization after this many messages
+	summarizeTokenPercent     int // Trigger summarization when history exceeds this % of context window
+	sessions                  SessionManagerInterface
+	state                     StateManagerInterface
+	contextBuilder            *ContextBuilder
+	tools                     *tools.ToolRegistry
+	running                   atomic.Bool
+	summarizing               sync.Map // Tracks which sessions are currently being summarized
+	channelManager            channelManagerInterface
 }
 
 // channelManagerInterface allows the agent loop to query enabled channels.
@@ -147,19 +149,7 @@ func NewAgentLoop(cfg *config.Config, msgBus *bus.MessageBus, provider providers
 	// Register write_daily_note with the file-based memory store
 	toolsRegistry.Register(tools.NewWriteDailyNoteTool(contextBuilder.GetMemoryStore()))
 
-	return &AgentLoop{
-		bus:            msgBus,
-		provider:       provider,
-		workspace:      workspace,
-		model:          cfg.Agents.Defaults.Model,
-		contextWindow:  cfg.Agents.Defaults.MaxTokens,
-		maxIterations:  cfg.Agents.Defaults.MaxToolIterations,
-		sessions:       sessionsManager,
-		state:          stateManager,
-		contextBuilder: contextBuilder,
-		tools:          toolsRegistry,
-		summarizing:    sync.Map{},
-	}
+	return newAgentLoop(cfg, msgBus, provider, sessionsManager, stateManager, contextBuilder, toolsRegistry)
 }
 
 // NewAgentLoopWithStores creates an AgentLoop with custom storage backends.
@@ -190,18 +180,34 @@ func NewAgentLoopWithStores(cfg *config.Config, msgBus *bus.MessageBus, provider
 		contextBuilder.SetMemoryStore(memoryStore)
 	}
 
+	return newAgentLoop(cfg, msgBus, provider, sessions, stateStore, contextBuilder, toolsRegistry)
+}
+
+// newAgentLoop creates the AgentLoop with configurable summarization thresholds.
+func newAgentLoop(cfg *config.Config, msgBus *bus.MessageBus, provider providers.LLMProvider, sessions SessionManagerInterface, stateStore StateManagerInterface, contextBuilder *ContextBuilder, toolsRegistry *tools.ToolRegistry) *AgentLoop {
+	summarizeMessageThreshold := cfg.Agents.Defaults.SummarizeMessageThreshold
+	if summarizeMessageThreshold == 0 {
+		summarizeMessageThreshold = 20
+	}
+	summarizeTokenPercent := cfg.Agents.Defaults.SummarizeTokenPercent
+	if summarizeTokenPercent == 0 {
+		summarizeTokenPercent = 75
+	}
+
 	return &AgentLoop{
-		bus:            msgBus,
-		provider:       provider,
-		workspace:      workspace,
-		model:          cfg.Agents.Defaults.Model,
-		contextWindow:  cfg.Agents.Defaults.MaxTokens,
-		maxIterations:  cfg.Agents.Defaults.MaxToolIterations,
-		sessions:       sessions,
-		state:          stateStore,
-		contextBuilder: contextBuilder,
-		tools:          toolsRegistry,
-		summarizing:    sync.Map{},
+		bus:                       msgBus,
+		provider:                  provider,
+		workspace:                 cfg.WorkspacePath(),
+		model:                     cfg.Agents.Defaults.Model,
+		contextWindow:             cfg.Agents.Defaults.MaxTokens,
+		maxIterations:             cfg.Agents.Defaults.MaxToolIterations,
+		summarizeMessageThreshold: summarizeMessageThreshold,
+		summarizeTokenPercent:     summarizeTokenPercent,
+		sessions:                  sessions,
+		state:                     stateStore,
+		contextBuilder:            contextBuilder,
+		tools:                     toolsRegistry,
+		summarizing:               sync.Map{},
 	}
 }
 
@@ -626,6 +632,10 @@ func (al *AgentLoop) runLLMIteration(ctx context.Context, messages []providers.M
 		// Check if no tool calls - we're done
 		if len(response.ToolCalls) == 0 {
 			finalContent = response.Content
+			// Fallback to reasoning content if main content is empty (#992)
+			if finalContent == "" && response.ReasoningContent != "" {
+				finalContent = response.ReasoningContent
+			}
 			logger.InfoCF("agent", "LLM response without tool calls (direct answer)",
 				map[string]interface{}{
 					"iteration":     iteration,
@@ -667,73 +677,119 @@ func (al *AgentLoop) runLLMIteration(ctx context.Context, messages []providers.M
 		// Save assistant message with tool calls to session
 		al.sessions.AddFullMessage(opts.SessionKey, assistantMsg)
 
-		// Execute tool calls with loop detection
-		for _, tc := range response.ToolCalls {
-			// Log tool call with arguments preview
-			argsJSON, _ := json.Marshal(tc.Arguments)
-			argsPreview := utils.Truncate(string(argsJSON), 200)
-			logger.InfoCF("agent", fmt.Sprintf("Tool call: %s(%s)", tc.Name, argsPreview),
-				map[string]interface{}{
-					"tool":      tc.Name,
-					"iteration": iteration,
-				})
+		// Execute tool calls in parallel (#1070)
+		type indexedToolResult struct {
+			result *tools.ToolResult
+			tc     providers.ToolCall
+			loopHit bool   // true if this call was a loop detection hit
+			loopMsg string // warning message for loop detection
+		}
 
-			// Check for repeated identical tool calls (loop detection)
+		toolResults := make([]indexedToolResult, len(response.ToolCalls))
+		var wg sync.WaitGroup
+
+		for i, tc := range response.ToolCalls {
+			toolResults[i].tc = tc
+
+			// Check for repeated identical tool calls (loop detection) - must be serial
+			argsJSON, _ := json.Marshal(tc.Arguments)
 			key := toolCallKey{Name: tc.Name, Args: string(argsJSON)}
 			recentToolCalls[key]++
 			if recentToolCalls[key] > 2 {
+				toolResults[i].loopHit = true
+				toolResults[i].loopMsg = fmt.Sprintf("Warning: tool '%s' with these arguments was already called %d times. Try a different approach.", tc.Name, recentToolCalls[key]-1)
+				continue
+			}
+
+			wg.Add(1)
+			go func(idx int, tc providers.ToolCall) {
+				defer wg.Done()
+
+				argsJSON, _ := json.Marshal(tc.Arguments)
+				argsPreview := utils.Truncate(string(argsJSON), 200)
+				logger.InfoCF("agent", fmt.Sprintf("Tool call: %s(%s)", tc.Name, argsPreview),
+					map[string]interface{}{
+						"tool":      tc.Name,
+						"iteration": iteration,
+					})
+
+				// Create async callback for tools that implement AsyncExecutor.
+				// Sends ForUser content directly to user and publishes ForLLM as inbound.
+				asyncCallback := func(_ context.Context, result *tools.ToolResult) {
+					if !result.Silent && result.ForUser != "" {
+						al.bus.PublishOutbound(bus.OutboundMessage{
+							Channel: opts.Channel,
+							ChatID:  opts.ChatID,
+							Content: result.ForUser,
+						})
+					}
+
+					content := result.ForLLM
+					if content == "" && result.Err != nil {
+						content = result.Err.Error()
+					}
+					if content == "" {
+						return
+					}
+
+					logger.InfoCF("agent", "Async tool completed, publishing result",
+						map[string]interface{}{
+							"tool":        tc.Name,
+							"content_len": len(content),
+							"channel":     opts.Channel,
+						})
+
+					al.bus.PublishInbound(bus.InboundMessage{
+						Channel:  "system",
+						SenderID: fmt.Sprintf("async:%s", tc.Name),
+						ChatID:   fmt.Sprintf("%s:%s", opts.Channel, opts.ChatID),
+						Content:  content,
+					})
+				}
+
+				toolResult := al.tools.ExecuteWithContext(ctx, tc.Name, tc.Arguments, opts.Channel, opts.ChatID, asyncCallback)
+				toolResults[idx].result = toolResult
+			}(i, tc)
+		}
+		wg.Wait()
+
+		// Process results in original order (send to user, save to session)
+		for _, r := range toolResults {
+			if r.loopHit {
 				toolResultMsg := providers.Message{
 					Role:       "tool",
-					Content:    fmt.Sprintf("Warning: tool '%s' with these arguments was already called %d times. Try a different approach.", tc.Name, recentToolCalls[key]-1),
-					ToolCallID: tc.ID,
+					Content:    r.loopMsg,
+					ToolCallID: r.tc.ID,
 				}
 				messages = append(messages, toolResultMsg)
 				al.sessions.AddFullMessage(opts.SessionKey, toolResultMsg)
 				continue
 			}
 
-			// Create async callback for tools that implement AsyncTool
-			// NOTE: Following openclaw's design, async tools do NOT send results directly to users.
-			// Instead, they notify the agent via PublishInbound, and the agent decides
-			// whether to forward the result to the user (in processSystemMessage).
-			asyncCallback := func(callbackCtx context.Context, result *tools.ToolResult) {
-				// Log the async completion but don't send directly to user
-				// The agent will handle user notification via processSystemMessage
-				if !result.Silent && result.ForUser != "" {
-					logger.InfoCF("agent", "Async tool completed, agent will handle notification",
-						map[string]interface{}{
-							"tool":        tc.Name,
-							"content_len": len(result.ForUser),
-						})
-				}
-			}
-
-			toolResult := al.tools.ExecuteWithContext(ctx, tc.Name, tc.Arguments, opts.Channel, opts.ChatID, asyncCallback)
-
 			// Send ForUser content to user immediately if not Silent
-			if !toolResult.Silent && toolResult.ForUser != "" && opts.SendResponse {
+			if !r.result.Silent && r.result.ForUser != "" && opts.SendResponse {
 				al.bus.PublishOutbound(bus.OutboundMessage{
 					Channel: opts.Channel,
 					ChatID:  opts.ChatID,
-					Content: toolResult.ForUser,
+					Content: r.result.ForUser,
 				})
 				logger.DebugCF("agent", "Sent tool result to user",
 					map[string]interface{}{
-						"tool":        tc.Name,
-						"content_len": len(toolResult.ForUser),
+						"tool":        r.tc.Name,
+						"content_len": len(r.result.ForUser),
 					})
 			}
 
 			// Determine content for LLM based on tool result
-			contentForLLM := toolResult.ForLLM
-			if contentForLLM == "" && toolResult.Err != nil {
-				contentForLLM = toolResult.Err.Error()
+			contentForLLM := r.result.ForLLM
+			if contentForLLM == "" && r.result.Err != nil {
+				contentForLLM = r.result.Err.Error()
 			}
 
 			toolResultMsg := providers.Message{
 				Role:       "tool",
 				Content:    contentForLLM,
-				ToolCallID: tc.ID,
+				ToolCallID: r.tc.ID,
 			}
 			messages = append(messages, toolResultMsg)
 
@@ -750,9 +806,9 @@ func (al *AgentLoop) runLLMIteration(ctx context.Context, messages []providers.M
 func (al *AgentLoop) maybeSummarize(sessionKey string) {
 	newHistory := al.sessions.GetHistory(sessionKey)
 	tokenEstimate := al.estimateTokens(newHistory)
-	threshold := al.contextWindow * 75 / 100
+	threshold := al.contextWindow * al.summarizeTokenPercent / 100
 
-	if len(newHistory) > 20 || tokenEstimate > threshold {
+	if len(newHistory) > al.summarizeMessageThreshold || tokenEstimate > threshold {
 		if _, loading := al.summarizing.LoadOrStore(sessionKey, true); !loading {
 			go func() {
 				defer al.summarizing.Delete(sessionKey)

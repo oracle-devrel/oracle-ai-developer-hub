@@ -17,8 +17,8 @@ def _make_judge_response(pro_score=7, con_score=5, winner="PRO"):
 
 def _make_agent(rounds=2):
     """Create a DebateAgent with mocked internals."""
-    with patch("src.agents.debate.BaseAgent.__init__", return_value=None):
-        from src.agents.debate import DebateAgent
+    with patch("agent_reasoning.agents.debate.BaseAgent.__init__", return_value=None):
+        from agent_reasoning.agents.debate import DebateAgent
 
         agent = DebateAgent.__new__(DebateAgent)
         agent.name = "DebateAgent"

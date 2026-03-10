@@ -8,8 +8,8 @@ import pytest
 
 def _make_agent(max_simulations=3, exploration_constant=1.414, max_children=2):
     """Create an MCTSAgent with mocked internals."""
-    with patch("src.agents.mcts.BaseAgent.__init__", return_value=None):
-        from src.agents.mcts import MCTSAgent
+    with patch("agent_reasoning.agents.mcts.BaseAgent.__init__", return_value=None):
+        from agent_reasoning.agents.mcts import MCTSAgent
 
         agent = MCTSAgent.__new__(MCTSAgent)
         agent.name = "MCTSAgent"
@@ -55,7 +55,7 @@ def test_mcts_run_returns_string():
 
 def test_mcts_backpropagation():
     """Backpropagation should update visits and wins from leaf to root."""
-    from src.visualization.models import MCTSNode
+    from agent_reasoning.visualization.models import MCTSNode
 
     agent = _make_agent()
 
@@ -81,7 +81,7 @@ def test_mcts_backpropagation():
 
 def test_mcts_selection_picks_unexplored():
     """Selection should prefer nodes that can still be expanded."""
-    from src.visualization.models import MCTSNode
+    from agent_reasoning.visualization.models import MCTSNode
 
     agent = _make_agent(max_children=2)
 
@@ -100,7 +100,7 @@ def test_mcts_selection_picks_unexplored():
 
 def test_mcts_selection_uses_ucb1():
     """Selection should use UCB1 to pick among fully-expanded children."""
-    from src.visualization.models import MCTSNode
+    from agent_reasoning.visualization.models import MCTSNode
 
     agent = _make_agent(max_children=2)
 
@@ -122,7 +122,7 @@ def test_mcts_selection_uses_ucb1():
 
 def test_mcts_best_path():
     """Best path should follow highest win-rate children from root."""
-    from src.visualization.models import MCTSNode
+    from agent_reasoning.visualization.models import MCTSNode
 
     agent = _make_agent()
 

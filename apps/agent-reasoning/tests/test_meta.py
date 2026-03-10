@@ -2,8 +2,8 @@ from unittest.mock import MagicMock, patch
 
 
 def test_meta_classifies_and_routes():
-    with patch("src.agents.meta.BaseAgent.__init__", return_value=None):
-        from src.agents.meta import MetaReasoningAgent
+    with patch("agent_reasoning.agents.meta.BaseAgent.__init__", return_value=None):
+        from agent_reasoning.agents.meta import MetaReasoningAgent
 
         agent = MetaReasoningAgent.__new__(MetaReasoningAgent)
         agent.name = "MetaReasoningAgent"
@@ -20,7 +20,7 @@ def test_meta_classifies_and_routes():
 
 
 def test_meta_routing_table_completeness():
-    from src.agents.meta import MetaReasoningAgent
+    from agent_reasoning.agents.meta import MetaReasoningAgent
 
     assert "math" in MetaReasoningAgent.ROUTING_TABLE
     assert "creative" in MetaReasoningAgent.ROUTING_TABLE
@@ -29,8 +29,8 @@ def test_meta_routing_table_completeness():
 
 
 def test_meta_unknown_category_defaults_to_general():
-    with patch("src.agents.meta.BaseAgent.__init__", return_value=None):
-        from src.agents.meta import MetaReasoningAgent
+    with patch("agent_reasoning.agents.meta.BaseAgent.__init__", return_value=None):
+        from agent_reasoning.agents.meta import MetaReasoningAgent
 
         agent = MetaReasoningAgent.__new__(MetaReasoningAgent)
         agent.name = "MetaReasoningAgent"
@@ -42,8 +42,8 @@ def test_meta_unknown_category_defaults_to_general():
 
 
 def test_meta_emits_classification_event():
-    with patch("src.agents.meta.BaseAgent.__init__", return_value=None):
-        from src.agents.meta import MetaReasoningAgent
+    with patch("agent_reasoning.agents.meta.BaseAgent.__init__", return_value=None):
+        from agent_reasoning.agents.meta import MetaReasoningAgent
 
         agent = MetaReasoningAgent.__new__(MetaReasoningAgent)
         agent.name = "MetaReasoningAgent"

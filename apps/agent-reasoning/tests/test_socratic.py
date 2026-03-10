@@ -7,8 +7,8 @@ import pytest
 
 def _make_agent(max_questions=3):
     """Create a SocraticAgent with mocked internals."""
-    with patch("src.agents.socratic.BaseAgent.__init__", return_value=None):
-        from src.agents.socratic import SocraticAgent
+    with patch("agent_reasoning.agents.socratic.BaseAgent.__init__", return_value=None):
+        from agent_reasoning.agents.socratic import SocraticAgent
 
         agent = SocraticAgent.__new__(SocraticAgent)
         agent.name = "SocraticAgent"

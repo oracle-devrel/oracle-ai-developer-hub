@@ -7,8 +7,8 @@ import pytest
 
 def _make_agent(num_analogies=2):
     """Create an AnalogicalAgent with mocked internals."""
-    with patch("src.agents.analogical.BaseAgent.__init__", return_value=None):
-        from src.agents.analogical import AnalogicalAgent
+    with patch("agent_reasoning.agents.analogical.BaseAgent.__init__", return_value=None):
+        from agent_reasoning.agents.analogical import AnalogicalAgent
 
         agent = AnalogicalAgent.__new__(AnalogicalAgent)
         agent.name = "AnalogicalAgent"

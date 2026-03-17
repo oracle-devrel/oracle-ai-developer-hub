@@ -1,0 +1,6 @@
+This is a small test document for ragcli.
+It contains some text to verify the upload and chunking process.
+RAG is abbreviation of Retrieval-Augmented Generation.
+Google Style is what we want for the frontend.
+Oracle 26ai is the database used.
+Ollama is our LLM provider.

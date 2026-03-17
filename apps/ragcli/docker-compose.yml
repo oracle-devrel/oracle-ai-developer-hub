@@ -1,0 +1,96 @@
+services:
+  # ragcli FastAPI Backend
+  ragcli-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ragcli-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD}
+    volumes:
+      - ./config.yaml:/app/config.yaml
+      - ./logs:/app/logs
+      - ragcli-data:/app/data
+    command: python -m ragcli.api.server
+    networks:
+      - ragcli-network
+    depends_on:
+      ollama:
+        condition: service_started
+      oracle-free:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+
+  # Oracle Database 26ai Free
+  oracle-free:
+    image: container-registry.oracle.com/database/free:latest-lite
+    container_name: oracle-free
+    ports:
+      - "1522:1521"
+    environment:
+      - ORACLE_PWD=${ORACLE_PASSWORD:-Welcome12345*}
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    networks:
+      - ragcli-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s ADMIN/$${ORACLE_PWD}@localhost:1521/FREEPDB1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  # Ollama LLM Server
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - ragcli-network
+    restart: unless-stopped
+    # For GPU support, uncomment the following:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  ragcli-data:
+    driver: local
+  oracle-data:
+    driver: local
+  anythingllm-storage:
+    driver: local
+  anythingllm-env:
+    driver: local
+  ollama-data:
+    driver: local
+
+
+networks:
+  ragcli-network:
+    driver: bridge
+
+# Usage:
+# 1. Create .env file with ORACLE_PASSWORD=your_password
+# 2. Update config.yaml with Oracle DSN and credentials
+# 3. Run: docker-compose up -d
+# 4. Pull models: docker exec ollama ollama pull nomic-embed-text
+# 5. Access AnythingLLM: http://localhost:3001
+# 6. Access API docs: http://localhost:8000/docs

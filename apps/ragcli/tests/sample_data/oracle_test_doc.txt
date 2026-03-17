@@ -1,0 +1,12 @@
+Oracle AI Vector Search provides a comprehensive set of capabilities for managing and querying vector data within the Oracle Database.
+It integrates seamlessly with existing database workflows, allowing for efficient storage, indexing, and retrieval of high-dimensional vectors.
+By leveraging the power of SQL and PL/SQL, users can perform complex similarity searches and combine vector operations with traditional relational queries.
+
+One of the key features is the ability to generate embeddings directly within the database using loaded ONNX models or by calling out to external services like OCI GenAI or Hugging Face.
+This eliminates the need to move data out of the database for vectorization, enhancing security and performance.
+Furthermore, Oracle AI Vector Search supports various index types, such as HNSW and IVF, to optimize search performance based on the specific requirements of the dataset and query patterns.
+
+In addition to vector operations, the platform offers tools for document processing, including chunking and summarization.
+The chunking capabilities allow large documents to be split into manageable pieces, which can then be embedded and stored.
+Summarization features enable users to generate concise summaries of text data, facilitating quick insights and understanding.
+Overall, Oracle AI Vector Search empowers developers to build advanced AI-driven applications with ease and scalability.

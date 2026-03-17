@@ -1,0 +1,35 @@
+# Core Dependencies (latest versions)
+typer
+click
+rich
+questionary
+oracledb
+pyyaml
+aiohttp
+requests
+plotly
+matplotlib
+langchain-community
+langchain-oracledb
+tiktoken
+umap-learn
+scikit-learn
+psutil
+pypdf2
+pdfplumber
+watchdog
+
+# FastAPI and API server
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+
+# Development and Testing (optional)
+# pytest
+# black
+# isort
+
+# For packaging
+setuptools
+wheel

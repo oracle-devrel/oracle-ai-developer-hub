@@ -8,7 +8,7 @@
 ![Reasoning](https://img.shields.io/badge/reasoning-16%20strategies%20|%20CoT%20|%20ToT%20|%20ReAct%20|%20MCTS%20|%20Debate%20|%20Socratic%20|%20Meta-purple?style=for-the-badge)
 ![Status](https://img.shields.io/badge/status-experimental-orange?style=for-the-badge)
 
-![](https://raw.githubusercontent.com/jasperan/agent-reasoning/main/gif/arena_mode.gif)
+![Agent Reasoning TUI Splash](assets/tui-splash.png)
 
 ## Installation
 

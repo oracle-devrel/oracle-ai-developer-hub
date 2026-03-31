@@ -80,8 +80,8 @@ PicoOraClaw is a fork of [PicoClaw](https://github.com/jasperan/picooraclaw) tha
 >
 > Or install manually:
 > ```bash
-> git clone https://github.com/jasperan/picooraclaw.git
-> cd picooraclaw
+> git clone https://github.com/oracle-devrel/oracle-ai-developer-hub.git
+> cd oracle-ai-developer-hub/apps/picooraclaw
 > # See below for setup instructions
 > ```
 > </details>

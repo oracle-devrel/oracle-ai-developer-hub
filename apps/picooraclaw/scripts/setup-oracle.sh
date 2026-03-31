@@ -11,7 +11,7 @@ set -euo pipefail
 
 ORACLE_PWD="${1:-PicoOraclaw123}"
 CONTAINER_NAME="oracle-free"
-ORACLE_IMAGE="container-registry.oracle.com/database/free:latest"
+ORACLE_IMAGE="gvenzl/oracle-free:latest"
 PICO_BIN="./build/picooraclaw-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
 CONFIG_FILE="$HOME/.picooraclaw/config.json"
 
@@ -29,7 +29,7 @@ command -v docker >/dev/null 2>&1 || fail "docker not found. Install Docker firs
 ok "Prerequisites met"
 
 # ── step 1: start Oracle container ───────────────────────────────────────────
-section "Step 1/4: Oracle AI Database container"
+section "Step 1/6: Oracle AI Database container"
 if docker ps --format '{{.Names}}' | grep -qx "$CONTAINER_NAME"; then
     ok "Container '$CONTAINER_NAME' already running — skipping"
 elif docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER_NAME"; then
@@ -40,7 +40,9 @@ else
     info "Pulling and starting Oracle AI Database (first run takes ~2 min)..."
     docker run -d --name "$CONTAINER_NAME" \
         -p 1521:1521 \
-        -e ORACLE_PWD="$ORACLE_PWD" \
+        -e ORACLE_PASSWORD="$ORACLE_PWD" \
+        -e APP_USER=picooraclaw \
+        -e APP_USER_PASSWORD="$ORACLE_PWD" \
         -e ORACLE_CHARACTERSET=AL32UTF8 \
         -v oracle-data:/opt/oracle/oradata \
         "$ORACLE_IMAGE"
@@ -50,7 +52,7 @@ fi
 info "Waiting for database to be ready..."
 TIMEOUT=180
 ELAPSED=0
-while ! docker logs "$CONTAINER_NAME" 2>&1 | grep -q "DATABASE IS READY"; do
+while ! docker logs "$CONTAINER_NAME" 2>&1 | grep -q "DATABASE IS READY TO USE"; do
     sleep 5
     ELAPSED=$((ELAPSED + 5))
     printf "\r  Waiting... %ds" "$ELAPSED"
@@ -59,8 +61,8 @@ done
 echo
 ok "Oracle AI Database is ready"
 
-# ── step 2: create database user ─────────────────────────────────────────────
-section "Step 2/4: Database user"
+# ── step 2: create database user (fallback for pre-existing containers) ──────
+section "Step 2/6: Database user"
 info "Creating user 'picooraclaw' in FREEPDB1..."
 docker exec "$CONTAINER_NAME" sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL 2>&1 | grep -v "^$" | sed 's/^/  /' || true
 WHENEVER SQLERROR CONTINUE
@@ -73,7 +75,7 @@ SQL
 ok "User ready (already existed = fine)"
 
 # ── step 3: patch config ──────────────────────────────────────────────────────
-section "Step 3/4: Config"
+section "Step 3/6: Config"
 info "Patching $CONFIG_FILE with Oracle settings..."
 python3 - "$CONFIG_FILE" "$ORACLE_PWD" <<'PYEOF'
 import json, sys
@@ -97,8 +99,42 @@ print("  patched successfully")
 PYEOF
 ok "Config updated"
 
-# ── step 4: initialize schema + ONNX model ───────────────────────────────────
-section "Step 4/4: Schema + ONNX model"
+# ── step 4: grant mining model privilege ──────────────────────────────────────
+section "Step 4/6: Mining model privilege"
+info "Granting CREATE MINING MODEL to picooraclaw..."
+docker exec "$CONTAINER_NAME" sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL 2>&1 | grep -v "^$" | sed 's/^/  /' || true
+WHENEVER SQLERROR CONTINUE
+GRANT CREATE MINING MODEL TO picooraclaw;
+EXIT;
+SQL
+ok "Privilege granted"
+
+# ── step 5: download and stage ONNX embedding model ──────────────────────────
+section "Step 5/6: ONNX embedding model"
+info "Downloading Oracle's augmented all-MiniLM-L12-v2 model..."
+ONNX_WORK="/tmp/onnx_model"
+mkdir -p "$ONNX_WORK"
+curl -fsSL "https://adwc4pm.objectstorage.us-ashburn-1.oci.customer-oci.com/p/VBRD9P8ZFWkKvnfhrWxkpPe8K03-JIoM5h_8EJyJcpE80c108fuUjg7R5L5O7mMZ/n/adwc4pm/b/OML-Resources/o/all_MiniLM_L12_v2_augmented.zip" \
+  -o "$ONNX_WORK/model.zip"
+cd "$ONNX_WORK" && unzip -o model.zip && cd -
+ONNX_FILE=$(find "$ONNX_WORK" -name "*.onnx" -type f | head -1)
+if [ -n "$ONNX_FILE" ]; then
+  docker exec "$CONTAINER_NAME" mkdir -p /opt/oracle/oradata/models
+  docker cp "$ONNX_FILE" "$CONTAINER_NAME":/opt/oracle/oradata/models/all_MiniLM_L12_v2.onnx
+  docker exec "$CONTAINER_NAME" chown oracle /opt/oracle/oradata/models/all_MiniLM_L12_v2.onnx
+  docker exec "$CONTAINER_NAME" sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL
+CREATE OR REPLACE DIRECTORY PICO_ONNX_DIR AS '/opt/oracle/oradata/models';
+GRANT READ ON DIRECTORY PICO_ONNX_DIR TO picooraclaw;
+EXIT;
+SQL
+  ok "ONNX model staged in database"
+else
+  info "WARNING: No .onnx file found in download"
+fi
+rm -rf "$ONNX_WORK"
+
+# ── step 6: initialize schema + load ONNX model ──────────────────────────────
+section "Step 6/6: Schema + ONNX model"
 info "Running picooraclaw setup-oracle..."
 "$PICO_BIN" setup-oracle
 

@@ -19,8 +19,8 @@ from rich.table import Table
 
 # Import Interceptor and Map
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from src.interceptor import AGENT_MAP, ReasoningInterceptor
-from src.visualization import get_visualizer
+from agent_reasoning.interceptor import AGENT_MAP, ReasoningInterceptor
+from agent_reasoning.visualization import get_visualizer
 
 console = Console()
 client = ReasoningInterceptor()
@@ -423,7 +423,7 @@ def run_refinement_demo(interactive=False):
     console.print("Generator → Critic (score 0.0-1.0) → Refiner → Loop until threshold met\n")
 
     # Import the agent directly for custom configuration
-    from src.agents.refinement_loop import RefinementLoopAgent
+    from agent_reasoning.agents.refinement_loop import RefinementLoopAgent
 
     if interactive:
         # Ask user for query
@@ -546,7 +546,7 @@ def run_complex_refinement_demo():
     console.print("  5. [cyan]Professional Polish[/cyan] - Final editing pass\n")
 
     # Import the agent directly for custom configuration
-    from src.agents.complex_refinement import ComplexRefinementLoopAgent
+    from agent_reasoning.agents.complex_refinement import ComplexRefinementLoopAgent
 
     # Use default demo query
     query = (

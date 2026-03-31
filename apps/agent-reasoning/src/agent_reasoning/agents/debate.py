@@ -7,8 +7,8 @@ from agent_reasoning.visualization.models import DebateRound, StreamEvent
 
 
 class DebateAgent(BaseAgent):
-    def __init__(self, model="gemma3:270m", rounds=3):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", rounds=3, **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "DebateAgent"
         self.color = "red"
         self.rounds = rounds

@@ -23,8 +23,8 @@ class MetaReasoningAgent(BaseAgent):
         "general": "cot",
     }
 
-    def __init__(self, model="gemma3:270m"):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "MetaReasoningAgent"
         self.color = "white"
 

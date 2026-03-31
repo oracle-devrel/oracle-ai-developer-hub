@@ -7,8 +7,8 @@ from agent_reasoning.visualization.models import SocraticExchange, StreamEvent
 class SocraticAgent(BaseAgent):
     """Socratic method: progressive questioning to narrow solution space."""
 
-    def __init__(self, model="gemma3:270m", max_questions=5):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", max_questions=5, **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "SocraticAgent"
         self.color = "cyan"
         self.max_questions = max_questions

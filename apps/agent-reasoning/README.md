@@ -5,10 +5,31 @@
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue?style=for-the-badge)](https://www.python.org/)
 ![Ollama](https://img.shields.io/badge/backend-Ollama-black?style=for-the-badge)
-![Reasoning](https://img.shields.io/badge/reasoning-CoT%20|%20ToT%20|%20ReAct%20|%20Reflection%20|%20RLM%20|%20Consistency%20|%20Decomposed%20|%20LtM%20|%20Refinement-purple?style=for-the-badge)
+![Reasoning](https://img.shields.io/badge/reasoning-16%20strategies%20|%20CoT%20|%20ToT%20|%20ReAct%20|%20MCTS%20|%20Debate%20|%20Socratic%20|%20Meta-purple?style=for-the-badge)
 ![Status](https://img.shields.io/badge/status-experimental-orange?style=for-the-badge)
 
-![](https://raw.githubusercontent.com/jasperan/agent-reasoning/main/gif/arena_mode.gif)
+![Agent Reasoning TUI Splash](assets/tui-splash.png)
+
+<div align="center">
+
+**[View Interactive Presentation](docs/slides/presentation.html)** | Animated overview of the project
+
+</div>
+
+<table>
+<tr>
+<td><img src="docs/slides/slide-01.png" alt="Title" width="400"/></td>
+<td><img src="docs/slides/slide-02.png" alt="Overview" width="400"/></td>
+</tr>
+<tr>
+<td><img src="docs/slides/slide-03.png" alt="Architecture" width="400"/></td>
+<td><img src="docs/slides/slide-04.png" alt="Features" width="400"/></td>
+</tr>
+<tr>
+<td><img src="docs/slides/slide-05.png" alt="Tech Stack" width="400"/></td>
+<td><img src="docs/slides/slide-06.png" alt="Getting Started" width="400"/></td>
+</tr>
+</table>
 
 ## Installation
 
@@ -103,7 +124,7 @@ uv add --dev <package>
 **Prerequisite**: [Ollama](https://ollama.com/) must be running locally, or you can connect to a remote Ollama instance.
 ```bash
 ollama pull gemma3:270m    # Tiny model for quick testing
-ollama pull gemma3:latest  # Full model for quality results
+ollama pull qwen3.5:9b    # Recommended model for quality results
 ```
 
 ### Configuring Remote Ollama Endpoint
@@ -237,7 +258,8 @@ python agent_cli.py --agents         # Show strategy guide
 - **Benchmark Charts**: Auto-generate PNG visualizations of benchmark results
 
 ### 2. Terminal UI (TUI)
-A Go-based terminal interface with split-panel layout and arena grid view.
+
+A Go-based terminal interface built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Lipgloss](https://github.com/charmbracelet/lipgloss). 7 views, 10 structured visualizers, ~9,800 lines of Go.
 
 ```bash
 # Build and run
@@ -246,21 +268,115 @@ go build -o agent-tui .
 ./agent-tui
 ```
 
-The TUI automatically starts the reasoning server on launch.
+The TUI automatically starts the reasoning server on launch. Requires Go 1.18+.
 
-**Features:**
-- Split layout: agent sidebar + chat panel
-- Arena mode: 3x3 grid showing all agents running in parallel
-- Real-time streaming with cancellation support
+#### Chat View
 
-**Keybindings:**
-| Key | Action |
-|-----|--------|
-| `↑/↓` or `j/k` | Navigate sidebar |
-| `Tab` | Switch focus (sidebar ↔ input) |
-| `Enter` | Select agent / submit query |
-| `Esc` | Cancel streaming / exit arena |
-| `q` | Quit |
+The default view. Split-pane layout with a 16-agent sidebar, chat panel with live streaming, and a metrics bar showing TTFT, tokens/sec, and token count in real-time.
+
+![Chat View](assets/tui-chat.svg)
+
+Press `v` to toggle **structured visualization mode**. Instead of raw text, you see the agent's reasoning process rendered live: tree diagrams for ToT, swimlanes for ReAct, vote tallies for Consistency, score gauges for Refinement, and more.
+
+Press `p` to open the **hyperparameter tuner**. Adjust ToT width/depth, Consistency samples, Refinement score thresholds, and other agent parameters before running a query.
+
+Press `?` to invoke the **strategy advisor**. The MetaReasoningAgent analyzes your query and recommends the best strategy.
+
+#### Arena Mode
+
+All 16 agents race simultaneously on the same query. 4x4 grid with live streaming per cell. A leaderboard bar updates as agents finish.
+
+![Arena Mode](assets/tui-arena.svg)
+
+After all agents finish, press `Enter` for a summary table ranked by completion time, tokens, and TPS. Press `s` to save the full arena report.
+
+#### Head-to-Head Duel
+
+Pick any two agents, same query, side-by-side streaming. Live metrics comparison at the bottom. Press `j` after both finish to invoke an LLM judge that scores both responses.
+
+![Duel Mode](assets/tui-duel.svg)
+
+#### Step-Through Debugger
+
+Pause an agent between LLM calls. Inspect intermediate state (tree nodes, scores, prompts, raw responses). Step forward one call at a time or let it run to completion.
+
+![Debugger](assets/tui-debugger.svg)
+
+#### Benchmark Dashboard
+
+4-tab native dashboard reading existing JSON benchmark files:
+- **Reasoning**: strategy x task heatmap
+- **Accuracy**: bar charts by dataset (GSM8K, MMLU, ARC, HellaSwag)
+- **Speed**: TPS bars and latency columns per model
+- **Compare**: OCI vs Ollama side-by-side with color-coded winners
+
+#### Session Browser
+
+Browse, search, and re-run past conversations. Filter by type (chat/arena/duel), strategy, or free text. Export to markdown. Every interaction auto-saves to `data/sessions/`.
+
+#### Agent Guide
+
+Reference cards for all 16 agents: how it works, best for, parameters, trade-offs, and research reference. Press `Enter` on any card to jump straight into a chat with that agent.
+
+#### TUI Configuration
+
+Optional YAML config at `~/.config/agent-reasoning/config.yaml`:
+
+```yaml
+server:
+  port: 8080
+  auto_start: true
+ollama:
+  url: http://localhost:11434
+defaults:
+  model: qwen3.5:9b
+  visualization: true    # structured viz on by default
+ui:
+  sidebar_width: 22
+  metrics_bar: true
+sessions:
+  auto_save: true
+  directory: data/sessions
+```
+
+If the file doesn't exist, sane defaults are used. The file is never auto-created.
+
+#### TUI Keybindings
+
+| Key | Context | Action |
+|-----|---------|--------|
+| `j/k` or `↑/↓` | Sidebar, lists | Navigate |
+| `Tab` | Any view | Switch focus (sidebar / input) |
+| `Enter` | Sidebar | Select agent or action |
+| `Enter` | Input | Submit query |
+| `Esc` | Streaming | Cancel current stream |
+| `Esc` | Any view | Return to chat |
+| `v` | Chat | Toggle structured visualization |
+| `p` | Chat | Open hyperparameter tuner |
+| `?` | Chat (with text) | Strategy advisor |
+| `D` | Chat | Debug last query |
+| `S` | Any view | Jump to sessions |
+| `1-4` | Benchmarks | Switch tab |
+| `h/l` | Benchmarks | Navigate tabs |
+| `n` | Debugger | Step forward |
+| `c` | Debugger | Continue (run to end) |
+| `b` | Debugger | Step backward (replay) |
+| `i` | Debugger | Toggle inspector mode |
+| `j` | Duel (finished) | Invoke LLM judge |
+| `s` | Arena (finished) | Save report |
+| `q` or `Ctrl+C` | Not streaming | Quit |
+
+#### TUI Views Summary
+
+| View | Access | Description |
+|------|--------|-------------|
+| Chat | Default | Single-agent conversation with structured visualization |
+| Arena | Sidebar: "Arena Mode" | 16 agents racing on same query, live 4x4 grid |
+| Duel | Sidebar: "Head-to-Head" | Two agents side-by-side with LLM judge |
+| Debugger | Sidebar: "Debugger" or `D` | Step-through reasoning with state inspection |
+| Benchmarks | Sidebar: "Benchmarks" | 4-tab dashboard with terminal charts |
+| Sessions | Sidebar: "Sessions" | Browse, search, re-run, export past chats |
+| Agent Guide | Sidebar: "Agent Guide" | Reference cards for all 16 strategies |
 
 ### 3. Python API (For Developers)
 Use the `ReasoningInterceptor` as a drop-in replacement for your LLM client.
@@ -351,6 +467,11 @@ curl http://localhost:8080/api/tags
 | **Recursive (RLM)** | Uses Python REPL to recursively process prompt variables. | Long-context processing | [Author et al. (2025)](https://arxiv.org/abs/2512.24601) |
 | **Refinement Loop** | Generator → Critic (0.0-1.0 score) → Refiner iterative loop. | Technical Writing, Quality Content | Inspired by [Madaan et al. (2023)](https://arxiv.org/abs/2303.17651) |
 | **Complex Refinement** | 5-stage pipeline: Accuracy → Clarity → Depth → Examples → Polish. | Long-form Articles, Documentation | Multi-stage refinement architecture |
+| **Adversarial Debate** | Pro/con debate rounds with judge evaluation. | Controversial Topics, Analysis | [Irving et al. (2018)](https://arxiv.org/abs/1805.00899) |
+| **MCTS** | Monte Carlo Tree Search with UCB1 selection. | Complex Strategy, Planning | [Browne et al. (2012)](https://doi.org/10.1109/TCIAIG.2012.2186810) |
+| **Analogical** | Solve by finding and applying structural analogies. | Novel Problems, Cross-domain | [Gentner (1983)](https://doi.org/10.1111/j.1551-6708.1983.tb00497.x) |
+| **Socratic** | Progressive questioning to deepen understanding. | Deep Understanding, Philosophy | [Paul & Elder (2007)](https://www.criticalthinking.org/) |
+| **Meta-Reasoning** | Auto-classifies query and routes to optimal strategy. | Any Query Type (auto-selection) | Novel |
 
 ---
 
@@ -365,25 +486,29 @@ Evaluate reasoning strategies against standard NLP datasets to measure accuracy 
 | **ARC-Challenge** | Science Reasoning | 25 | Multiple choice (A-D) | Clark et al. (2018) |
 | **HellaSwag** | Commonsense | 20 | Multiple choice (A-D) | Zellers et al. (2019) |
 
-### Results: `gemma3:latest` (4.3B Q4_K_M)
+### Results: `qwen3.5:9b` (9.7B Q4_K_M)
 
-Full eval across all 11 strategies (1,155 evaluations):
+Full eval across 13 strategies (4,200 evaluations, March 2026):
 
-| Strategy | GSM8K | MMLU | ARC-C | HellaSwag | **Avg** |
-|----------|-------|------|-------|-----------|---------|
-| **Standard** (baseline) | 66.7% | 90.0% | 92.0% | 90.0% | **84.7%** |
-| **Chain of Thought** | 73.3% | 96.7% | 88.0% | 90.0% | **87.0%** |
-| **Tree of Thoughts** | 76.7% | 63.3% | 76.0% | 90.0% | **76.5%** |
-| **ReAct** | 63.3% | 86.7% | 96.0% | 90.0% | **84.0%** |
-| **Self-Reflection** | 66.7% | 90.0% | 88.0% | 90.0% | **83.7%** |
-| **Self-Consistency** | 76.7% | 96.7% | 92.0% | — | **66.3%** |
-| **Decomposed** | 10.0% | 60.0% | 84.0% | — | **38.5%** |
+| Strategy | GSM8K | MMLU | ARC-C | **Avg** |
+|----------|-------|------|-------|---------|
+| **Chain of Thought** | 94.0% | 82.0% | 90.0% | **88.7%** |
+| **Recursive** | 96.0% | 78.0% | 88.0% | **87.3%** |
+| **Self-Consistency** | 92.0% | 80.0% | 88.0% | **86.7%** |
+| **Tree of Thoughts** | 96.0% | 74.0% | 90.0% | **86.7%** |
+| **Standard** (baseline) | 96.0% | 66.0% | 82.0% | **81.3%** |
+| **Self-Reflection** | 96.0% | 60.0% | 86.0% | **80.7%** |
+| **Refinement Loop** | 94.0% | 60.0% | 80.0% | **78.0%** |
+| **Socratic** | 74.0% | 76.0% | 84.0% | **78.0%** |
+| **Debate** | 60.0% | 72.0% | 86.0% | **72.7%** |
+| **Decomposed** | 88.0% | 54.0% | 60.0% | **67.3%** |
+| **ReAct** | 84.0% | 46.0% | 70.0% | **66.7%** |
 
 **Key findings:**
-- **CoT** achieves the highest average accuracy (87.0%), outperforming Standard on GSM8K (+6.6%) and MMLU (+6.7%)
-- **Self-Consistency** ties CoT on MMLU (96.7%) and GSM8K (76.7%) through majority voting
-- **ToT** excels on GSM8K math (76.7%, +10% over Standard) through branch exploration
-- **ReAct** achieves the highest ARC-Challenge score (96.0%) via tool-augmented reasoning
+- **CoT** achieves the highest average accuracy (88.7%), outperforming Standard on MMLU (+16%) and ARC-C (+8%)
+- **Recursive** and **ToT** cluster close behind at 86.7-87.3%
+- **Self-Consistency** matches ToT at 86.7% through majority voting reliability
+- **Standard** generation scores 96.0% on GSM8K but drops on MMLU (66.0%), showing reasoning strategies help most on knowledge tasks
 
 ### Accuracy Heatmap
 
@@ -411,7 +536,7 @@ Charts are auto-generated after each run to `benchmarks/charts/`.
 ```python
 from src.benchmarks.accuracy import AccuracyBenchmarkRunner, DATASET_REGISTRY
 
-runner = AccuracyBenchmarkRunner(model="gemma3:latest")
+runner = AccuracyBenchmarkRunner(model="qwen3.5:9b")
 
 # Run all datasets with specific strategies
 for result in runner.run_all_datasets(
@@ -541,7 +666,7 @@ Observation: [1] Sundar Pichai - Wikipedia: ... He is the chief executive office
 
 ## 📊 Appendix C: Benchmark Charts
 
-Benchmark charts are auto-generated after every benchmark run. Below are sample outputs using `gemma3:latest`.
+Benchmark charts are auto-generated after every benchmark run. Below are sample outputs using `qwen3.5:9b`.
 
 ### Response Latency by Strategy
 

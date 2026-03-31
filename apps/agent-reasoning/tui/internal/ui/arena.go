@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -29,6 +30,7 @@ type ArenaCell struct {
 
 // Arena represents the arena grid view
 type Arena struct {
+	mu         sync.Mutex
 	cells      []*ArenaCell
 	query      string
 	width      int
@@ -63,12 +65,16 @@ func NewArena() *Arena {
 
 // SetSize updates the arena dimensions
 func (a *Arena) SetSize(width, height int) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	a.width = width
 	a.height = height
 }
 
 // Start begins the arena run with a query
 func (a *Arena) Start(query string) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	a.query = query
 	a.active = true
 	a.completed = 0
@@ -84,21 +90,27 @@ func (a *Arena) Start(query string) {
 
 // Stop ends the arena mode
 func (a *Arena) Stop() {
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	a.active = false
 }
 
 // IsActive returns whether arena mode is active
 func (a *Arena) IsActive() bool {
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	return a.active
 }
 
 // GetCells returns all cells
 func (a *Arena) GetCells() []*ArenaCell {
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	return a.cells
 }
 
-// GetCell returns a cell by agent ID
-func (a *Arena) GetCell(agentID string) *ArenaCell {
+// getCell returns a cell by agent ID (caller must hold a.mu).
+func (a *Arena) getCell(agentID string) *ArenaCell {
 	for _, cell := range a.cells {
 		if cell.AgentID == agentID {
 			return cell
@@ -107,9 +119,18 @@ func (a *Arena) GetCell(agentID string) *ArenaCell {
 	return nil
 }
 
+// GetCell returns a cell by agent ID
+func (a *Arena) GetCell(agentID string) *ArenaCell {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.getCell(agentID)
+}
+
 // SetCellStatus updates a cell's status
 func (a *Arena) SetCellStatus(agentID string, status ArenaStatus) {
-	if cell := a.GetCell(agentID); cell != nil {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if cell := a.getCell(agentID); cell != nil {
 		cell.Status = status
 		if status == ArenaDone || status == ArenaError {
 			a.completed++
@@ -119,28 +140,36 @@ func (a *Arena) SetCellStatus(agentID string, status ArenaStatus) {
 
 // SetCellContent updates a cell's content
 func (a *Arena) SetCellContent(agentID, content string) {
-	if cell := a.GetCell(agentID); cell != nil {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if cell := a.getCell(agentID); cell != nil {
 		cell.Content = content
 	}
 }
 
 // AppendCellContent appends to a cell's content
 func (a *Arena) AppendCellContent(agentID, content string) {
-	if cell := a.GetCell(agentID); cell != nil {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if cell := a.getCell(agentID); cell != nil {
 		cell.Content += content
 	}
 }
 
 // SetCellDuration sets the duration for a cell
 func (a *Arena) SetCellDuration(agentID string, duration float64) {
-	if cell := a.GetCell(agentID); cell != nil {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if cell := a.getCell(agentID); cell != nil {
 		cell.Duration = duration
 	}
 }
 
 // SetCellError sets an error for a cell
 func (a *Arena) SetCellError(agentID, err string) {
-	if cell := a.GetCell(agentID); cell != nil {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if cell := a.getCell(agentID); cell != nil {
 		cell.Error = err
 		cell.Status = ArenaError
 	}
@@ -148,16 +177,23 @@ func (a *Arena) SetCellError(agentID, err string) {
 
 // IsComplete returns whether all agents have finished
 func (a *Arena) IsComplete() bool {
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	return a.completed >= len(a.cells)
 }
 
 // Query returns the current query
 func (a *Arena) Query() string {
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	return a.query
 }
 
 // View renders the arena grid
 func (a *Arena) View() string {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	if !a.active {
 		return ""
 	}
@@ -253,6 +289,9 @@ func (a *Arena) renderCell(cell *ArenaCell, width, height int) string {
 
 // RenderSummary renders a summary table after arena completion
 func (a *Arena) RenderSummary() string {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	var b strings.Builder
 
 	b.WriteString(ArenaHeaderStyle.Render("Arena Results Summary"))

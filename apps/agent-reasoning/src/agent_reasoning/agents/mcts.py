@@ -8,8 +8,8 @@ from agent_reasoning.visualization.models import MCTSNode, StreamEvent
 
 
 class MCTSAgent(BaseAgent):
-    def __init__(self, model="gemma3:270m"):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "MCTSAgent"
         self.color = "blue"
         self.max_simulations = 20

@@ -1,10 +1,12 @@
-from agent_reasoning.agents.base import BaseAgent
-from agent_reasoning.visualization.models import ReflectionIteration, StreamEvent
 from termcolor import colored
 
+from agent_reasoning.agents.base import BaseAgent
+from agent_reasoning.visualization.models import ReflectionIteration, StreamEvent
+
+
 class SelfReflectionAgent(BaseAgent):
-    def __init__(self, model="gemma3:270m"):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "SelfReflectionAgent"
         self.color = "green"
 
@@ -52,7 +54,9 @@ class SelfReflectionAgent(BaseAgent):
 
         # 2. Reflection Loop
         for turn in range(max_turns):
-            yield StreamEvent(event_type="text", data=f"\n[Reflection Turn {turn+1}/{max_turns}]\n")
+            yield StreamEvent(
+                event_type="text", data=f"\n[Reflection Turn {turn + 1}/{max_turns}]\n"
+            )
 
             # Create new iteration for turns > 0
             if turn > 0:

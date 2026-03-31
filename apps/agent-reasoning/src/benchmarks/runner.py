@@ -7,14 +7,12 @@ Supports:
 - Comparative analysis and reports
 """
 
-import time
 import json
-import os
+import time
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Optional, Callable, Generator
 from enum import Enum
-
+from typing import Callable, Dict, Generator, List, Optional
 
 # OCI A10 GPU pricing (VM.GPU.A10.1 shape)
 # Price per hour in USD - used to calculate cost for local Ollama inference
@@ -32,6 +30,7 @@ class BenchmarkType(Enum):
 @dataclass
 class BenchmarkTask:
     """A single benchmark task."""
+
     id: str
     name: str
     category: str
@@ -43,6 +42,7 @@ class BenchmarkTask:
 @dataclass
 class BenchmarkResult:
     """Result of a single benchmark run."""
+
     task_id: str
     task_name: str
     strategy: str
@@ -60,6 +60,7 @@ class BenchmarkResult:
 @dataclass
 class InferenceResult:
     """Result of an inference benchmark run."""
+
     source: str  # "ollama" or "oci"
     model: str
     prompt: str
@@ -76,6 +77,7 @@ class InferenceResult:
 @dataclass
 class ComparisonResult:
     """Result of OCI vs Ollama comparison."""
+
     prompt: str
     ollama_latency_ms: float
     ollama_ttft_ms: float
@@ -89,6 +91,7 @@ class ComparisonResult:
 @dataclass
 class BenchmarkReport:
     """Complete benchmark report."""
+
     benchmark_type: str
     model: str
     timestamp: str
@@ -104,30 +107,32 @@ class BenchmarkReport:
         """Generate markdown report."""
         lines = [
             f"# Benchmark Report: {self.benchmark_type}",
-            f"",
+            "",
             f"**Model:** {self.model}",
             f"**Timestamp:** {self.timestamp}",
             f"**Total Tasks:** {self.total_tasks}",
             f"**Successful:** {self.successful_tasks}",
             f"**Failed:** {self.failed_tasks}",
-            f"",
-            f"## Performance Metrics",
-            f"",
-            f"| Metric | Value |",
-            f"|--------|-------|",
+            "",
+            "## Performance Metrics",
+            "",
+            "| Metric | Value |",
+            "|--------|-------|",
             f"| Avg Latency | {self.avg_latency_ms:.2f} ms |",
             f"| Avg TTFT | {self.avg_ttft_ms:.2f} ms |",
             f"| Avg TPS | {self.avg_tps:.2f} |",
-            f"",
-            f"## Results by Task",
-            f"",
-            f"| Task | Strategy | Latency (ms) | TTFT (ms) | TPS | Status |",
-            f"|------|----------|--------------|-----------|-----|--------|",
+            "",
+            "## Results by Task",
+            "",
+            "| Task | Strategy | Latency (ms) | TTFT (ms) | TPS | Status |",
+            "|------|----------|--------------|-----------|-----|--------|",
         ]
 
         for r in self.results:
             status = "✓" if r.success else "✗"
-            lines.append(f"| {r.task_name[:30]} | {r.strategy} | {r.total_ms:.0f} | {r.ttft_ms:.0f} | {r.tps:.1f} | {status} |")
+            lines.append(
+                f"| {r.task_name[:30]} | {r.strategy} | {r.total_ms:.0f} | {r.ttft_ms:.0f} | {r.tps:.1f} | {status} |"
+            )
 
         return "\n".join(lines)
 
@@ -140,7 +145,7 @@ AGENT_BENCHMARK_TASKS = [
         category="Philosophy",
         query="What is the meaning of life? Answer with a mix of biological and philosophical perspectives.",
         recommended_strategy="consistency",
-        description="Tests diverse reasoning with self-consistency voting"
+        description="Tests diverse reasoning with self-consistency voting",
     ),
     BenchmarkTask(
         id="logic_riddle",
@@ -148,7 +153,7 @@ AGENT_BENCHMARK_TASKS = [
         category="Logic",
         query="I have a 3-gallon jug and a 5-gallon jug. How can I measure exactly 4 gallons of water?",
         recommended_strategy="tot",
-        description="Tests tree-of-thought exploration for puzzle solving"
+        description="Tests tree-of-thought exploration for puzzle solving",
     ),
     BenchmarkTask(
         id="planning",
@@ -156,7 +161,7 @@ AGENT_BENCHMARK_TASKS = [
         category="Planning",
         query="Plan a detailed 3-day itinerary for Tokyo for a history buff who loves samurais and tea.",
         recommended_strategy="decomposed",
-        description="Tests problem decomposition for complex planning"
+        description="Tests problem decomposition for complex planning",
     ),
     BenchmarkTask(
         id="physics",
@@ -164,7 +169,7 @@ AGENT_BENCHMARK_TASKS = [
         category="Physics",
         query="A train travels at 0.6c for 5 years (train time). How much time has passed on Earth? Explain the steps.",
         recommended_strategy="least_to_most",
-        description="Tests incremental solving for multi-step problems"
+        description="Tests incremental solving for multi-step problems",
     ),
     BenchmarkTask(
         id="tool_use",
@@ -172,7 +177,7 @@ AGENT_BENCHMARK_TASKS = [
         category="Tools",
         query="Who is the current CEO of Google? Calculate the square root of 144.",
         recommended_strategy="react",
-        description="Tests ReAct pattern for tool-based reasoning"
+        description="Tests ReAct pattern for tool-based reasoning",
     ),
     BenchmarkTask(
         id="code_gen",
@@ -180,7 +185,7 @@ AGENT_BENCHMARK_TASKS = [
         category="Coding",
         query="Write a Python function that implements binary search on a sorted list. Include docstring and type hints.",
         recommended_strategy="reflection",
-        description="Tests self-reflection for code quality"
+        description="Tests self-reflection for code quality",
     ),
     BenchmarkTask(
         id="technical_writing",
@@ -188,7 +193,7 @@ AGENT_BENCHMARK_TASKS = [
         category="Writing",
         query="Explain how neural networks learn using backpropagation, gradient descent, and loss functions.",
         recommended_strategy="refinement",
-        description="Tests iterative refinement for technical content"
+        description="Tests iterative refinement for technical content",
     ),
     BenchmarkTask(
         id="math_proof",
@@ -196,7 +201,7 @@ AGENT_BENCHMARK_TASKS = [
         category="Math",
         query="Prove that the square root of 2 is irrational.",
         recommended_strategy="cot",
-        description="Tests chain-of-thought for logical proofs"
+        description="Tests chain-of-thought for logical proofs",
     ),
 ]
 
@@ -242,7 +247,7 @@ class BenchmarkRunner:
         Yields:
             BenchmarkResult for each completed task
         """
-        from src.interceptor import AGENT_MAP
+        from agent_reasoning.interceptor import AGENT_MAP
 
         if tasks is None:
             tasks = AGENT_BENCHMARK_TASKS
@@ -259,7 +264,7 @@ class BenchmarkRunner:
                         strategy=strategy,
                         model=self.model,
                         success=False,
-                        error=f"Unknown strategy: {strategy}"
+                        error=f"Unknown strategy: {strategy}",
                     )
                     continue
 
@@ -276,13 +281,10 @@ class BenchmarkRunner:
                 yield result
 
     def _run_single_agent_task(
-        self,
-        task: BenchmarkTask,
-        strategy: str,
-        on_chunk: Optional[Callable[[str], None]] = None
+        self, task: BenchmarkTask, strategy: str, on_chunk: Optional[Callable[[str], None]] = None
     ) -> BenchmarkResult:
         """Run a single agent task and measure performance."""
-        from src.interceptor import AGENT_MAP
+        from agent_reasoning.interceptor import AGENT_MAP
 
         agent_class = AGENT_MAP[strategy]
         agent = agent_class(model=self.model)
@@ -319,7 +321,7 @@ class BenchmarkRunner:
                 ttft_ms=round(ttft, 2),
                 total_ms=round(total_ms, 2),
                 token_count=token_count,
-                tps=round(tps, 2)
+                tps=round(tps, 2),
             )
 
         except Exception as e:
@@ -329,7 +331,7 @@ class BenchmarkRunner:
                 strategy=strategy,
                 model=self.model,
                 success=False,
-                error=str(e)
+                error=str(e),
             )
 
     def run_inference_benchmark(
@@ -365,11 +367,7 @@ class BenchmarkRunner:
                 if on_progress:
                     on_progress(current, total, prompt[:50])
 
-                payload = {
-                    "model": self.model,
-                    "prompt": prompt,
-                    "stream": True
-                }
+                payload = {"model": self.model, "prompt": prompt, "stream": True}
 
                 start_time = time.time()
                 first_token_time = None
@@ -381,7 +379,7 @@ class BenchmarkRunner:
                         r.raise_for_status()
                         for line in r.iter_lines():
                             if line:
-                                data = json.loads(line.decode('utf-8'))
+                                data = json.loads(line.decode("utf-8"))
                                 if first_token_time is None:
                                     first_token_time = time.time()
 
@@ -404,7 +402,7 @@ class BenchmarkRunner:
                         "token_count": token_count,
                         "tps": round(tps, 2),
                         "success": True,
-                        "error": None
+                        "error": None,
                     }
 
                 except Exception as e:
@@ -413,7 +411,7 @@ class BenchmarkRunner:
                         "prompt": prompt[:50],
                         "iteration": i + 1,
                         "success": False,
-                        "error": str(e)
+                        "error": str(e),
                     }
 
     def generate_report(self, benchmark_type: str = "agent_reasoning") -> BenchmarkReport:
@@ -435,7 +433,7 @@ class BenchmarkRunner:
             avg_latency_ms=round(avg_latency, 2),
             avg_ttft_ms=round(avg_ttft, 2),
             avg_tps=round(avg_tps, 2),
-            results=self.results
+            results=self.results,
         )
 
     def save_report(self, filepath: str, format: str = "markdown") -> None:
@@ -495,6 +493,7 @@ class BenchmarkRunner:
         if not dry_run:
             try:
                 import oci as oci_sdk
+
                 oci = oci_sdk
             except ImportError:
                 pass
@@ -540,7 +539,7 @@ class BenchmarkRunner:
                         prompt=prompt[:50],
                         iteration=i + 1,
                         success=False,
-                        error="OCI SDK not installed. Run 'pip install oci'."
+                        error="OCI SDK not installed. Run 'pip install oci'.",
                     )
                     continue
 
@@ -554,8 +553,7 @@ class BenchmarkRunner:
                         try:
                             identity_client = oci.identity.IdentityClient(config)
                             compartments = identity_client.list_compartments(
-                                config.get("tenancy"),
-                                compartment_id_in_subtree=True
+                                config.get("tenancy"), compartment_id_in_subtree=True
                             )
                             for c in compartments.data:
                                 if c.name == "oci_generative_ai" and c.lifecycle_state == "ACTIVE":
@@ -565,7 +563,9 @@ class BenchmarkRunner:
                             pass
 
                     if not effective_compartment_id:
-                        effective_compartment_id = config.get("compartment_id") or config.get("tenancy")
+                        effective_compartment_id = config.get("compartment_id") or config.get(
+                            "tenancy"
+                        )
 
                     if not effective_compartment_id:
                         yield InferenceResult(
@@ -574,7 +574,7 @@ class BenchmarkRunner:
                             prompt=prompt[:50],
                             iteration=i + 1,
                             success=False,
-                            error="Compartment ID not found in config or parameter"
+                            error="Compartment ID not found in config or parameter",
                         )
                         continue
 
@@ -582,7 +582,7 @@ class BenchmarkRunner:
                         config=config,
                         service_endpoint=endpoint,
                         retry_strategy=oci.retry.NoneRetryStrategy(),
-                        timeout=(10, 240)
+                        timeout=(10, 240),
                     )
 
                     # Use GenericChatRequest with STREAMING enabled
@@ -594,13 +594,15 @@ class BenchmarkRunner:
                         chat_request=oci.generative_ai_inference.models.GenericChatRequest(
                             messages=[
                                 oci.generative_ai_inference.models.UserMessage(
-                                    content=[oci.generative_ai_inference.models.TextContent(text=prompt)]
+                                    content=[
+                                        oci.generative_ai_inference.models.TextContent(text=prompt)
+                                    ]
                                 )
                             ],
                             max_tokens=200,
                             temperature=0.75,
                             is_stream=True,  # Enable streaming for accurate TTFT
-                        )
+                        ),
                     )
 
                     start_time = time.time()
@@ -657,7 +659,7 @@ class BenchmarkRunner:
                         prompt=prompt[:50],
                         iteration=i + 1,
                         success=False,
-                        error=str(e)[:200]
+                        error=str(e)[:200],
                     )
 
     def run_comparison_benchmark(
@@ -692,9 +694,10 @@ class BenchmarkRunner:
         Yields:
             Dict with comparison data for each prompt
         """
-        import requests
         import queue
         import threading
+
+        import requests
 
         if prompts is None:
             prompts = INFERENCE_BENCHMARK_PROMPTS
@@ -713,11 +716,7 @@ class BenchmarkRunner:
 
             for prompt in prompts:
                 for i in range(iterations):
-                    payload = {
-                        "model": model_name,
-                        "prompt": prompt,
-                        "stream": True
-                    }
+                    payload = {"model": model_name, "prompt": prompt, "stream": True}
 
                     start_time = time.time()
                     first_token_time = None
@@ -729,7 +728,7 @@ class BenchmarkRunner:
                             r.raise_for_status()
                             for line in r.iter_lines():
                                 if line:
-                                    data = json.loads(line.decode('utf-8'))
+                                    data = json.loads(line.decode("utf-8"))
                                     if first_token_time is None:
                                         first_token_time = time.time()
 
@@ -768,7 +767,7 @@ class BenchmarkRunner:
                             prompt=prompt[:50],
                             iteration=i + 1,
                             success=False,
-                            error=str(e)
+                            error=str(e),
                         )
                         result_queue.put({"type": "ollama", "model": model_name, "result": result})
 
@@ -850,7 +849,7 @@ class BenchmarkRunner:
                         "latency": sum(r.latency_ms for r in runs) / len(runs),
                         "ttft": sum(r.ttft_ms for r in runs) / len(runs),
                         "tps": sum(r.tps for r in runs) / len(runs),
-                        "source": "ollama"
+                        "source": "ollama",
                     }
 
             oci_runs = [r for r in all_results["oci"] if r.prompt == prompt_key and r.success]
@@ -860,7 +859,7 @@ class BenchmarkRunner:
                     "ttft": sum(r.ttft_ms for r in oci_runs) / len(oci_runs),
                     "tps": sum(r.tps for r in oci_runs) / len(oci_runs),
                     "cost": sum(r.cost_estimate for r in oci_runs) / len(oci_runs),
-                    "source": "oci"
+                    "source": "oci",
                 }
 
             if len(model_stats) >= 2:
@@ -889,4 +888,9 @@ class BenchmarkRunner:
                         on_comparison(comparison)
 
                     # Include all model stats in the yield
-                    yield {"type": "comparison", "result": comparison, "all_models": model_stats, "winner": winner}
+                    yield {
+                        "type": "comparison",
+                        "result": comparison,
+                        "all_models": model_stats,
+                        "winner": winner,
+                    }

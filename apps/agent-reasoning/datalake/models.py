@@ -11,8 +11,6 @@ use the connected user's default schema.
 """
 
 import uuid
-from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import (
     Boolean,
@@ -31,6 +29,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship
 
 class Base(DeclarativeBase):
     """Declarative base for all datalake models."""
+
     pass
 
 
@@ -92,15 +91,11 @@ class ReasoningSession(Base):
             "strategy": self.strategy,
             "model": self.model,
             "created_at": self.created_at.isoformat() if self.created_at else None,
-            "completed_at": (
-                self.completed_at.isoformat() if self.completed_at else None
-            ),
+            "completed_at": (self.completed_at.isoformat() if self.completed_at else None),
             "final_answer": self.final_answer,
             "status": self.status,
             "total_tokens": self.total_tokens,
-            "metadata": (
-                json.loads(self.session_metadata) if self.session_metadata else None
-            ),
+            "metadata": (json.loads(self.session_metadata) if self.session_metadata else None),
             "event_count": len(self.events) if self.events else 0,
         }
 
@@ -221,7 +216,5 @@ class ReasoningComparison(Base):
             "name": self.name,
             "query": self.query,
             "created_at": self.created_at.isoformat() if self.created_at else None,
-            "session_ids": (
-                json.loads(self.session_ids) if self.session_ids else []
-            ),
+            "session_ids": (json.loads(self.session_ids) if self.session_ids else []),
         }

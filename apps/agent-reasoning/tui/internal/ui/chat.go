@@ -48,8 +48,16 @@ func NewChat() *Chat {
 func (c *Chat) SetSize(width, height int) {
 	c.width = width
 	c.height = height
-	c.viewport.Width = width - 4  // Account for padding
-	c.viewport.Height = height - 4 // Account for title and padding
+	vpWidth := width - 4   // Account for padding
+	vpHeight := height - 4 // Account for title and padding
+	if vpWidth < 1 {
+		vpWidth = 1
+	}
+	if vpHeight < 1 {
+		vpHeight = 1
+	}
+	c.viewport.Width = vpWidth
+	c.viewport.Height = vpHeight
 	c.updateContent()
 }
 
@@ -122,6 +130,12 @@ func (c *Chat) IsStreaming() bool {
 
 // updateContent updates the viewport content
 func (c *Chat) updateContent() {
+	// Show caduceus splash when chat is empty
+	if len(c.messages) == 0 && !c.isStreaming {
+		c.viewport.SetContent(RenderSplash(c.viewport.Width, c.viewport.Height))
+		return
+	}
+
 	var b strings.Builder
 
 	for _, msg := range c.messages {
@@ -160,7 +174,11 @@ func (c *Chat) Update(msg tea.Msg) (*Chat, tea.Cmd) {
 // View renders the chat panel
 func (c *Chat) View() string {
 	title := ChatTitleStyle.Render(fmt.Sprintf("[%s] %s", c.agentID, c.agentName))
-	separator := lipgloss.NewStyle().Foreground(ColorMuted).Render(strings.Repeat("─", c.width-4))
+	sepWidth := c.width - 4
+	if sepWidth < 0 {
+		sepWidth = 0
+	}
+	separator := lipgloss.NewStyle().Foreground(ColorMuted).Render(strings.Repeat("─", sepWidth))
 
 	content := lipgloss.JoinVertical(lipgloss.Left,
 		title,

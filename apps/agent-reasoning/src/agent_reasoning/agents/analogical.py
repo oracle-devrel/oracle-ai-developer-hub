@@ -7,8 +7,8 @@ from agent_reasoning.visualization.models import AnalogyMapping, StreamEvent
 class AnalogicalAgent(BaseAgent):
     """Analogical reasoning: solve problems by structural analogy."""
 
-    def __init__(self, model="gemma3:270m", num_analogies=3):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", num_analogies=3, **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "AnalogicalAgent"
         self.color = "yellow"
         self.num_analogies = num_analogies

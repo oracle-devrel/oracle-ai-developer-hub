@@ -1,9 +1,9 @@
 from agent_reasoning.agents.base import BaseAgent
-from termcolor import colored
+
 
 class LeastToMostAgent(BaseAgent):
-    def __init__(self, model="gemma3:270m"):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "LeastToMostAgent"
         self.color = "cyan"
 
@@ -29,18 +29,18 @@ class LeastToMostAgent(BaseAgent):
         yield "\n"
 
         # 2. Sequential Solving
-        sub_questions = [line.strip() for line in plan_text.split('\n') if line.strip()]
+        sub_questions = [line.strip() for line in plan_text.split("\n") if line.strip()]
         history = ""
 
         for q in sub_questions:
             yield f"\n**Addressing:** `{q}`\n"
             prompt = f"Q: {q}\nAnswer this specific question based on prior context if applicable.\nContext:\n{history}"
-            
-            yield f"Answer: "
+
+            yield "Answer: "
             answer = ""
             for chunk in self.client.generate(prompt):
-                 yield chunk
-                 answer += chunk
+                yield chunk
+                answer += chunk
             yield "\n"
-            
+
             history += f"Q: {q}\nA: {answer}\n"

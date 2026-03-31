@@ -1,11 +1,14 @@
 import re
-from agent_reasoning.agents.base import BaseAgent
-from agent_reasoning.visualization.models import ChainStep, StreamEvent
+
 from termcolor import colored
 
+from agent_reasoning.agents.base import BaseAgent
+from agent_reasoning.visualization.models import ChainStep, StreamEvent
+
+
 class CoTAgent(BaseAgent):
-    def __init__(self, model="gemma3:270m"):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "CoTAgent"
         self.color = "blue"
 
@@ -14,8 +17,8 @@ class CoTAgent(BaseAgent):
         print(colored("Reasoning: ", self.color), end="", flush=True)
         full_response = ""
         for chunk in self.stream(query):
-             print(colored(chunk, self.color), end="", flush=True)
-             full_response += chunk
+            print(colored(chunk, self.color), end="", flush=True)
+            full_response += chunk
         print()
         return full_response
 
@@ -30,7 +33,13 @@ class CoTAgent(BaseAgent):
         yield StreamEvent(event_type="query", data=query)
 
         # Injecting CoT instruction
-        prompt = f"Question: {query}\n\nInstruction: Think step-by-step to answer the question. Break down the reasoning process clearly. Number each step (Step 1, Step 2, etc.). Provide a detailed final answer."
+        prompt = (
+            f"Question: {query}\n\n"
+            "Instruction: Think step-by-step to answer the question. "
+            "Break down the reasoning process clearly. "
+            "Number each step (Step 1, Step 2, etc.). "
+            "Provide a detailed final answer."
+        )
 
         full_response = ""
         current_step = ChainStep(step=1, content="")

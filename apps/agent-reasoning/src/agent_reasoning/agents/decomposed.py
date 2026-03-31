@@ -1,10 +1,10 @@
 from agent_reasoning.agents.base import BaseAgent
-from agent_reasoning.visualization.models import SubTask, StreamEvent, TaskStatus
-from termcolor import colored
+from agent_reasoning.visualization.models import StreamEvent, SubTask, TaskStatus
+
 
 class DecomposedAgent(BaseAgent):
-    def __init__(self, model="gemma3:270m"):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "DecomposedAgent"
         self.color = "red"
 
@@ -58,7 +58,7 @@ class DecomposedAgent(BaseAgent):
         yield StreamEvent(event_type="text", data="\n")
 
         # Parse sub-tasks
-        lines = sub_tasks_text.split('\n')
+        lines = sub_tasks_text.split("\n")
         tasks = []
         task_id = 0
         for line in lines:

@@ -210,3 +210,28 @@ class StreamEvent:
         str,
     ]
     is_update: bool = False  # True if updating existing item
+
+    def to_dict(self):
+        """Serialize for NDJSON streaming."""
+        data = self.data
+        if hasattr(data, "__dict__") and not isinstance(data, Enum):
+            data = {}
+            for k, v in self.data.__dict__.items():
+                if isinstance(v, Enum):
+                    data[k] = v.value
+                elif isinstance(v, list):
+                    data[k] = [
+                        item.__dict__
+                        if (hasattr(item, "__dict__") and not isinstance(item, Enum))
+                        else (item.value if isinstance(item, Enum) else item)
+                        for item in v
+                    ]
+                elif hasattr(v, "__dict__"):
+                    data[k] = v.__dict__
+                else:
+                    data[k] = v
+        return {
+            "event_type": self.event_type,
+            "data": data,
+            "is_update": self.is_update,
+        }

@@ -57,19 +57,22 @@ services:
   # ─────────────────────────────────────────────
   oracle-db:
     # Oracle AI Database 26ai Free — the default storage backend
-    image: container-registry.oracle.com/database/free:latest
+    # gvenzl/oracle-free requires no registry auth (unlike container-registry.oracle.com)
+    image: gvenzl/oracle-free:latest
     container_name: picooraclaw-oracle
     profiles:
       - oracle
     environment:
-      - ORACLE_PWD=${PICO_ORACLE_PASSWORD:-OraclePass123}
+      - ORACLE_PASSWORD=${PICO_ORACLE_PASSWORD:-OraclePass123}
+      - APP_USER=picooraclaw
+      - APP_USER_PASSWORD=${PICO_ORACLE_PASSWORD:-OraclePass123}
       - ORACLE_CHARACTERSET=AL32UTF8
     ports:
       - "1521:1521"
     volumes:
       - oracle-data:/opt/oracle/oradata
     healthcheck:
-      test: ["CMD-SHELL", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s system/$${ORACLE_PWD}@localhost:1521/FREEPDB1"]
+      test: ["CMD-SHELL", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s system/$${ORACLE_PASSWORD}@localhost:1521/FREEPDB1"]
       interval: 30s
       timeout: 10s
       retries: 10

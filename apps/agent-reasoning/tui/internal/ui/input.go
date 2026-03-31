@@ -64,6 +64,11 @@ func (i *Input) Reset() {
 	i.textInput.Reset()
 }
 
+// SetPlaceholder updates the placeholder text.
+func (i *Input) SetPlaceholder(text string) {
+	i.textInput.Placeholder = text
+}
+
 // Update handles input updates
 func (i *Input) Update(msg tea.Msg) (*Input, tea.Cmd) {
 	var cmd tea.Cmd

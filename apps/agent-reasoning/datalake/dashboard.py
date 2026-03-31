@@ -20,7 +20,6 @@ Usage (mounted):
 """
 
 import json
-import os
 from pathlib import Path
 from typing import Optional
 
@@ -33,6 +32,7 @@ from datalake.store import ReasoningStore
 
 # Template directory
 TEMPLATE_DIR = Path(__file__).parent / "templates"
+
 
 # Jinja2 filters
 def _json_pretty(value):
@@ -65,16 +65,16 @@ def _format_duration(ms):
 
 # Event type colors for the timeline
 EVENT_COLORS = {
-    "node": "#3b82f6",         # blue
-    "task": "#8b5cf6",         # violet
-    "sample": "#06b6d4",       # cyan
-    "iteration": "#f59e0b",    # amber
-    "refinement": "#10b981",   # emerald
-    "pipeline": "#ec4899",     # pink
-    "react_step": "#ef4444",   # red
-    "chain_step": "#6366f1",   # indigo
-    "text": "#94a3b8",         # slate
-    "final": "#22c55e",        # green
+    "node": "#3b82f6",  # blue
+    "task": "#8b5cf6",  # violet
+    "sample": "#06b6d4",  # cyan
+    "iteration": "#f59e0b",  # amber
+    "refinement": "#10b981",  # emerald
+    "pipeline": "#ec4899",  # pink
+    "react_step": "#ef4444",  # red
+    "chain_step": "#6366f1",  # indigo
+    "text": "#94a3b8",  # slate
+    "final": "#22c55e",  # green
 }
 
 

@@ -75,19 +75,22 @@ echo "--- Setting up Oracle Database (mode: $ORACLE_MODE) ---"
 
 if [ "$ORACLE_MODE" = "freepdb" ]; then
   # Pull and start Oracle AI Database 26ai Free container (default backend)
-  docker pull container-registry.oracle.com/database/free:latest
+  # gvenzl/oracle-free requires no registry auth (unlike container-registry.oracle.com)
+  docker pull gvenzl/oracle-free:latest
   docker run -d --name oracle-free \
     -p 1521:1521 \
-    -e ORACLE_PWD="$ORACLE_PWD" \
+    -e ORACLE_PASSWORD="$ORACLE_PWD" \
+    -e APP_USER=picooraclaw \
+    -e APP_USER_PASSWORD="$ORACLE_PWD" \
     -e ORACLE_CHARACTERSET=AL32UTF8 \
     -v oracle-data:/opt/oracle/oradata \
     --restart unless-stopped \
-    container-registry.oracle.com/database/free:latest
+    gvenzl/oracle-free:latest
 
   echo "Waiting for Oracle DB to be ready..."
   TIMEOUT=300
   ELAPSED=0
-  while ! docker logs oracle-free 2>&1 | grep -q "DATABASE IS READY"; do
+  while ! docker logs oracle-free 2>&1 | grep -q "DATABASE IS READY TO USE"; do
     sleep 10
     ELAPSED=$((ELAPSED + 10))
     echo "  Waiting... ${ELAPSED}s"
@@ -99,15 +102,35 @@ if [ "$ORACLE_MODE" = "freepdb" ]; then
   done
   echo "Oracle DB is ready"
 
-  # Create picooraclaw user
+  # Grant mining model privilege (user auto-created by gvenzl APP_USER)
   docker exec oracle-free sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL || true
 WHENEVER SQLERROR CONTINUE
-CREATE USER picooraclaw IDENTIFIED BY "${ORACLE_PWD}"
-  DEFAULT TABLESPACE users QUOTA UNLIMITED ON users;
-GRANT CONNECT, RESOURCE, DB_DEVELOPER_ROLE TO picooraclaw;
 GRANT CREATE MINING MODEL TO picooraclaw;
 EXIT;
 SQL
+
+  # Download and stage ONNX embedding model for VECTOR_EMBEDDING()
+  echo "Downloading ONNX embedding model..."
+  ONNX_WORK="/tmp/onnx_model"
+  mkdir -p "$ONNX_WORK"
+  curl -fsSL "https://adwc4pm.objectstorage.us-ashburn-1.oci.customer-oci.com/p/VBRD9P8ZFWkKvnfhrWxkpPe8K03-JIoM5h_8EJyJcpE80c108fuUjg7R5L5O7mMZ/n/adwc4pm/b/OML-Resources/o/all_MiniLM_L12_v2_augmented.zip" \
+    -o "$ONNX_WORK/model.zip"
+  cd "$ONNX_WORK" && unzip -o model.zip && cd -
+  ONNX_FILE=$(find "$ONNX_WORK" -name "*.onnx" -type f | head -1)
+  if [ -n "$ONNX_FILE" ]; then
+    docker exec oracle-free mkdir -p /opt/oracle/oradata/models
+    docker cp "$ONNX_FILE" oracle-free:/opt/oracle/oradata/models/all_MiniLM_L12_v2.onnx
+    docker exec oracle-free chown oracle /opt/oracle/oradata/models/all_MiniLM_L12_v2.onnx
+    docker exec oracle-free sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL
+CREATE OR REPLACE DIRECTORY PICO_ONNX_DIR AS '/opt/oracle/oradata/models';
+GRANT READ ON DIRECTORY PICO_ONNX_DIR TO picooraclaw;
+EXIT;
+SQL
+    echo "ONNX model staged in database"
+  else
+    echo "WARNING: No .onnx file found in download — embedding will use fallback"
+  fi
+  rm -rf "$ONNX_WORK"
 
   # Patch config for freepdb mode
   python3 - "$CONFIG_FILE" "$ORACLE_PWD" <<'PYEOF'
@@ -140,6 +163,29 @@ elif [ "$ORACLE_MODE" = "adb" ]; then
     chown -R opc:opc "$WALLET_DIR"
   fi
 
+  # Create picooraclaw user in ADB (connect as ADMIN first)
+  echo "Creating picooraclaw user in Autonomous Database..."
+  pip3 install oracledb 2>/dev/null || pip3 install --break-system-packages oracledb 2>/dev/null || true
+  python3 - "$ORACLE_PWD" "$ADB_DSN" "${WALLET_DIR:-}" <<'PYEOF_USER'
+import oracledb, sys
+pwd, dsn, wallet = sys.argv[1], sys.argv[2], sys.argv[3]
+kwargs = {"user": "ADMIN", "password": pwd, "dsn": dsn}
+if wallet:
+    kwargs.update(config_dir=wallet, wallet_location=wallet, wallet_password=pwd)
+conn = oracledb.connect(**kwargs)
+cur = conn.cursor()
+try:
+    cur.execute(f'CREATE USER picooraclaw IDENTIFIED BY "{pwd}" QUOTA UNLIMITED ON DATA')
+    print("User picooraclaw created")
+except oracledb.DatabaseError as e:
+    if "ORA-01920" not in str(e): raise
+    print("User picooraclaw already exists")
+cur.execute("GRANT CONNECT, RESOURCE, DB_DEVELOPER_ROLE TO picooraclaw")
+cur.execute("GRANT CREATE MINING MODEL TO picooraclaw")
+conn.commit()
+conn.close()
+PYEOF_USER
+
   python3 - "$CONFIG_FILE" "$ORACLE_PWD" "$ADB_DSN" "${WALLET_DIR:-}" <<'PYEOF'
 import json, sys
 path, pwd, dsn = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -171,6 +217,7 @@ cat > /etc/systemd/system/picooraclaw-gateway.service <<'UNIT'
 [Unit]
 Description=PicoOraClaw Gateway
 After=network-online.target docker.service ollama.service
+Requires=docker.service
 Wants=network-online.target
 
 [Service]

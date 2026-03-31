@@ -12,6 +12,7 @@ dist/
 # Project binaries
 /picooraclaw
 /picooraclaw-*
+!/picooraclaw-presentation.html
 /picoclaw
 /picoclaw-test
 

@@ -1,14 +1,17 @@
 import re
-from agent_reasoning.agents.base import BaseAgent
-from agent_reasoning.visualization.models import ReActStep, StreamEvent, TaskStatus
+
 from termcolor import colored
 
+from agent_reasoning.agents.base import BaseAgent
+from agent_reasoning.visualization.models import ReActStep, StreamEvent, TaskStatus
+
+
 class ReActAgent(BaseAgent):
-    def __init__(self, model="gemma3:270m"):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "ReActAgent"
         self.color = "magenta"
-    
+
     def perform_tool_call(self, tool_name, tool_input):
         if tool_name == "calculate":
             try:
@@ -20,28 +23,33 @@ class ReActAgent(BaseAgent):
         elif tool_name == "web_search":
             # Real Web Scraping (DuckDuckGo HTML)
             try:
-                import requests
                 import re
-                
+
+                import requests
+
                 headers = {
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                    "User-Agent": (
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/91.0.4472.124 Safari/537.36"
+                    )
                 }
                 url = "https://html.duckduckgo.com/html/"
                 data = {"q": tool_input}
-                
+
                 resp = requests.post(url, data=data, headers=headers, timeout=10)
                 html = resp.text
-                
+
                 snippets = re.findall(r'class="result__snippet"[^>]*>(.*?)</a>', html)
                 titles = re.findall(r'class="result__a"[^>]*>(.*?)</a>', html)
-                
+
                 if snippets:
                     res_str = ""
                     for i in range(min(2, len(snippets))):
                         title = titles[i] if i < len(titles) else "Result"
-                        clean_snip = re.sub(r'<[^>]+>', '', snippets[i])
-                        clean_title = re.sub(r'<[^>]+>', '', title)
-                        res_str += f"[{i+1}] {clean_title}: {clean_snip}\n"
+                        clean_snip = re.sub(r"<[^>]+>", "", snippets[i])
+                        clean_title = re.sub(r"<[^>]+>", "", title)
+                        res_str += f"[{i + 1}] {clean_title}: {clean_snip}\n"
                     return res_str.strip()
                 return "No results found via Web Search."
             except Exception as e:
@@ -53,32 +61,33 @@ class ReActAgent(BaseAgent):
                 "python": "Python 1.0 was released in 1994.",
                 "python version": "Python 1.0 was released in 1994.",
                 "2026": "The year 2026 is in the future.",
-                "france": "France is a country in Europe. Population ~67 million."
+                "france": "France is a country in Europe. Population ~67 million.",
             }
-            
+
             try:
                 import requests
+
                 url = "https://en.wikipedia.org/w/api.php"
                 params = {
                     "action": "query",
                     "list": "search",
                     "srsearch": tool_input,
-                    "format": "json"
+                    "format": "json",
                 }
                 resp = requests.get(url, params=params, timeout=5)
                 data = resp.json()
                 if "query" in data and "search" in data["query"] and data["query"]["search"]:
                     top = data["query"]["search"][0]
                     return f"Title: {top['title']}\nSnippet: {top['snippet']}"
-            except:
+            except Exception:
                 pass
-            
+
             # Detailed Fallback Check
             key = tool_input.lower()
             for k, v in fallback_db.items():
                 if k in key or key in k:
                     return f"Fallback Search: {v}"
-            
+
             return "No results found."
 
         else:
@@ -109,7 +118,8 @@ class ReActAgent(BaseAgent):
         """Structured event streaming for visualization."""
         system_prompt = """You are a Reasoning and Acting agent.
 Tools:
-- web_search[query]: SEARCH THE WEB. Use this for ANY question about current events, people, companies, or news. (e.g. web_search[CEO of Google])
+- web_search[query]: SEARCH THE WEB. Use for ANY question about
+  current events, people, companies, or news. (e.g. web_search[CEO of Google])
 - calculate[expression]: Use for math. (e.g. calculate[3+3])
 - search[query]: Use ONLY for definitions.
 
@@ -130,9 +140,13 @@ Instructions:
         max_steps = 5
 
         for i in range(max_steps):
+            if not self._check_budget():
+                yield StreamEvent(event_type="text", data=f"\n{self._budget_exceeded_msg}\n")
+                break
+
             step = ReActStep(step=i + 1, status=TaskStatus.RUNNING)
             yield StreamEvent(event_type="react_step", data=step)
-            yield StreamEvent(event_type="text", data=f"\n--- Step {i+1} ---\nAgent: ")
+            yield StreamEvent(event_type="text", data=f"\n--- Step {i + 1} ---\nAgent: ")
 
             # Stop generation at Observation: to prevent hallucinating tools output
             response_chunk = ""
@@ -158,8 +172,10 @@ Instructions:
                 # Update messages only up to the action
                 action_full_str = match.group(0)
                 idx = response_chunk.find(action_full_str)
-                valid_part = response_chunk[:idx + len(action_full_str)]
-                messages = messages[:-len(response_chunk)] + valid_part if response_chunk else messages
+                valid_part = response_chunk[: idx + len(action_full_str)]
+                messages = (
+                    messages[: -len(response_chunk)] + valid_part if response_chunk else messages
+                )
 
                 yield StreamEvent(event_type="text", data=f"\nRunning {tool_name}...")
                 observation = self.perform_tool_call(tool_name, tool_input)
@@ -179,7 +195,9 @@ Instructions:
                 yield StreamEvent(event_type="react_step", data=step, is_update=True)
 
                 # Extract final answer
-                final_match = re.search(r"Final Answer:\s*(.*)", response_chunk, re.IGNORECASE | re.DOTALL)
+                final_match = re.search(
+                    r"Final Answer:\s*(.*)", response_chunk, re.IGNORECASE | re.DOTALL
+                )
                 final_answer = final_match.group(1).strip() if final_match else response_chunk
                 yield StreamEvent(event_type="final", data=final_answer)
                 return

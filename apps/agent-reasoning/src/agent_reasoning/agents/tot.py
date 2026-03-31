@@ -1,11 +1,14 @@
-from agent_reasoning.agents.base import BaseAgent
-from agent_reasoning.visualization.models import TreeNode, StreamEvent
-from termcolor import colored
 import re
 
+from termcolor import colored
+
+from agent_reasoning.agents.base import BaseAgent
+from agent_reasoning.visualization.models import StreamEvent, TreeNode
+
+
 class ToTAgent(BaseAgent):
-    def __init__(self, model="gemma3:270m"):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "ToTAgent"
         self.color = "magenta"
         self.width = 2
@@ -36,20 +39,37 @@ class ToTAgent(BaseAgent):
     def stream_structured(self, query):
         """Structured event streaming for visualization."""
         yield StreamEvent(event_type="query", data=query)
-        yield StreamEvent(event_type="text", data=f"Thinking via Tree of Thoughts (Depth={self.depth}, Width={self.width})...\n")
+        yield StreamEvent(
+            event_type="text",
+            data=f"Thinking via Tree of Thoughts (Depth={self.depth}, Width={self.width})...\n",
+        )
 
         current_thoughts = [("", None)]  # (thought_path, parent_id)
         node_counter = 0
         all_nodes = {}
 
         for step in range(self.depth):
-            yield StreamEvent(event_type="text", data=f"\n[Step {step + 1}/{self.depth} - Exploring branches]\n")
+            if not self._check_budget():
+                yield StreamEvent(event_type="text", data=f"\n{self._budget_exceeded_msg}\n")
+                break
+
+            yield StreamEvent(
+                event_type="text", data=f"\n[Step {step + 1}/{self.depth} - Exploring branches]\n"
+            )
 
             candidates = []
 
             # 1. Generate Candidates
             for thought_path, parent_id in current_thoughts:
-                prompt = f"Problem: {query}\nCurrent reasoning path:\n{thought_path}\n\nProvide {self.width} distinct possible next steps or continuations to solve this problem. Label them Option 1, Option 2, etc."
+                if not self._check_budget():
+                    yield StreamEvent(event_type="text", data=f"\n{self._budget_exceeded_msg}\n")
+                    break
+
+                prompt = (
+                    f"Problem: {query}\nCurrent reasoning path:\n{thought_path}\n\n"
+                    f"Provide {self.width} distinct possible next steps or continuations "
+                    "to solve this problem. Label them Option 1, Option 2, etc."
+                )
 
                 response = ""
                 for chunk in self.client.generate(prompt, stream=False):
@@ -58,18 +78,28 @@ class ToTAgent(BaseAgent):
                 options = [opt for opt in response.split("Option ") if opt.strip()]
                 if not options:
                     options = [response]
-                options = options[:self.width]
+                options = options[: self.width]
 
                 for i, opt in enumerate(options):
                     node_counter += 1
-                    node_id = f"{chr(65 + (node_counter - 1) // self.width)}{(node_counter - 1) % self.width + 1}" if step > 0 else chr(65 + i)
+                    col = (node_counter - 1) % self.width + 1
+                    row = chr(65 + (node_counter - 1) // self.width)
+                    node_id = f"{row}{col}" if step > 0 else chr(65 + i)
                     new_thought = thought_path + "\n" + opt.strip()
                     candidates.append((new_thought, node_id, parent_id, opt.strip()))
 
             # 2. Evaluate Candidates
             scored_candidates = []
             for thought_path, node_id, parent_id, content in candidates:
-                eval_prompt = f"Problem: {query}\nProposed Reasoning Path:\n{thought_path}\n\nRate this reasoning path from 0.0 to 1.0 based on correctness and promise. Output ONLY the number."
+                if not self._check_budget():
+                    yield StreamEvent(event_type="text", data=f"\n{self._budget_exceeded_msg}\n")
+                    break
+
+                eval_prompt = (
+                    f"Problem: {query}\nProposed Reasoning Path:\n{thought_path}\n\n"
+                    "Rate this reasoning path from 0.0 to 1.0 based on correctness "
+                    "and promise. Output ONLY the number."
+                )
 
                 score_str = ""
                 for chunk in self.client.generate(eval_prompt, stream=False):
@@ -80,15 +110,11 @@ class ToTAgent(BaseAgent):
                     if not match:
                         match = re.search(r"\b(0\.\d+|1\.0|0|1)\b", score_str)
                     score = float(match.group(1)) if match else 0.1
-                except:
+                except Exception:
                     score = 0.1
 
                 node = TreeNode(
-                    id=node_id,
-                    depth=step + 1,
-                    content=content,
-                    score=score,
-                    parent_id=parent_id
+                    id=node_id, depth=step + 1, content=content, score=score, parent_id=parent_id
                 )
                 all_nodes[node_id] = node
                 yield StreamEvent(event_type="node", data=node)
@@ -97,8 +123,8 @@ class ToTAgent(BaseAgent):
 
             # 3. Prune - keep top width
             scored_candidates.sort(key=lambda x: x[0], reverse=True)
-            kept = scored_candidates[:self.width]
-            pruned = scored_candidates[self.width:]
+            kept = scored_candidates[: self.width]
+            pruned = scored_candidates[self.width :]
 
             # Mark pruned nodes
             for _, _, node_id, _ in pruned:
@@ -117,12 +143,26 @@ class ToTAgent(BaseAgent):
         else:
             best_path = "No valid path found."
 
-        yield StreamEvent(event_type="text", data="\n[Best Logic Trace selected. Generating Final Answer]\n")
+        yield StreamEvent(
+            event_type="text", data="\n[Best Logic Trace selected. Generating Final Answer]\n"
+        )
 
-        final_prompt = f"Problem: {query}\n\nReasoning Trace:\n{best_path}\n\nInstruction: Based on the reasoning above, provide a comprehensive and detailed final answer to the problem."
-        system_msg = "You are a logic engine. You provide detailed, academic answers based on reasoning traces. Do not use conversational fillers like 'Okay' or 'Sure'."
+        final_prompt = (
+            f"Problem: {query}\n\nReasoning Trace:\n{best_path}\n\n"
+            "Instruction: Based on the reasoning above, provide a comprehensive "
+            "and detailed final answer to the problem."
+        )
+        system_msg = (
+            "You are a logic engine. You provide detailed, academic answers based on "
+            "reasoning traces. Do not use conversational fillers like 'Okay' or 'Sure'."
+        )
 
         final_response = ""
+        if not self._check_budget():
+            yield StreamEvent(event_type="text", data=f"\n{self._budget_exceeded_msg}\n")
+            yield StreamEvent(event_type="final", data=best_path)
+            return
+
         for chunk in self.client.generate(final_prompt, system=system_msg):
             final_response += chunk
             yield StreamEvent(event_type="text", data=chunk)

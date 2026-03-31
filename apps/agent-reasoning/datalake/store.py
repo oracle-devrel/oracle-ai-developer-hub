@@ -12,8 +12,8 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Any, Dict, Generator, List, Optional
 
-from sqlalchemy import create_engine, func, or_, text
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import create_engine, func, or_
+from sqlalchemy.orm import sessionmaker
 
 from datalake.config import DatabaseConfig, get_db_config
 from datalake.models import (
@@ -236,11 +236,7 @@ class ReasoningStore:
             status: Final status (completed, failed, cancelled).
         """
         with self.SessionFactory() as db:
-            session = (
-                db.query(ReasoningSession)
-                .filter(ReasoningSession.id == session_id)
-                .first()
-            )
+            session = db.query(ReasoningSession).filter(ReasoningSession.id == session_id).first()
             if session is None:
                 raise ValueError(f"Session {session_id} not found")
 
@@ -286,11 +282,7 @@ class ReasoningStore:
             Dict with session data, events list, and metrics, or None.
         """
         with self.SessionFactory() as db:
-            session = (
-                db.query(ReasoningSession)
-                .filter(ReasoningSession.id == session_id)
-                .first()
-            )
+            session = db.query(ReasoningSession).filter(ReasoningSession.id == session_id).first()
             if session is None:
                 return None
 
@@ -333,10 +325,7 @@ class ReasoningStore:
             total = query.count()
 
             sessions = (
-                query.order_by(ReasoningSession.created_at.desc())
-                .offset(offset)
-                .limit(limit)
-                .all()
+                query.order_by(ReasoningSession.created_at.desc()).offset(offset).limit(limit).all()
             )
 
             return {
@@ -346,9 +335,7 @@ class ReasoningStore:
                 "offset": offset,
             }
 
-    def replay_session(
-        self, session_id: str
-    ) -> Generator[Dict, None, None]:
+    def replay_session(self, session_id: str) -> Generator[Dict, None, None]:
         """
         Replay a session's events in order.
 
@@ -538,12 +525,8 @@ class ReasoningStore:
                 "performance": {
                     "avg_ttft_ms": round(perf[0], 2) if perf and perf[0] else None,
                     "avg_total_ms": round(perf[1], 2) if perf and perf[1] else None,
-                    "avg_tokens_per_sec": (
-                        round(perf[2], 2) if perf and perf[2] else None
-                    ),
-                    "avg_token_count": (
-                        round(perf[3], 2) if perf and perf[3] else None
-                    ),
+                    "avg_tokens_per_sec": (round(perf[2], 2) if perf and perf[2] else None),
+                    "avg_token_count": (round(perf[3], 2) if perf and perf[3] else None),
                 },
                 "strategy_performance": strategy_performance,
             }
@@ -702,8 +685,8 @@ class ReasoningStore:
                 [
                     "## Performance Metrics",
                     "",
-                    f"| Metric | Value |",
-                    f"|--------|-------|",
+                    "| Metric | Value |",
+                    "|--------|-------|",
                     f"| TTFT | {m.get('ttft_ms', 'N/A')} ms |",
                     f"| Total Duration | {m.get('total_ms', 'N/A')} ms |",
                     f"| Tokens/sec | {m.get('tokens_per_sec', 'N/A')} |",
@@ -725,10 +708,7 @@ class ReasoningStore:
             )
             for evt in events:
                 update_tag = " (update)" if evt.get("is_update") else ""
-                lines.append(
-                    f"### Event #{evt['sequence_num']}: "
-                    f"`{evt['event_type']}`{update_tag}"
-                )
+                lines.append(f"### Event #{evt['sequence_num']}: `{evt['event_type']}`{update_tag}")
                 lines.append("")
                 if evt.get("data"):
                     lines.append("```json")
@@ -745,11 +725,7 @@ class ReasoningStore:
     def delete_session(self, session_id: str) -> bool:
         """Delete a session and all its events/metrics (cascade)."""
         with self.SessionFactory() as db:
-            session = (
-                db.query(ReasoningSession)
-                .filter(ReasoningSession.id == session_id)
-                .first()
-            )
+            session = db.query(ReasoningSession).filter(ReasoningSession.id == session_id).first()
             if session is None:
                 return False
             db.delete(session)

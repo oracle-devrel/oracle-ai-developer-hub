@@ -1,14 +1,17 @@
 import re
-from agent_reasoning.agents.base import BaseAgent
-from agent_reasoning.visualization.models import StreamEvent, TaskStatus
+from dataclasses import dataclass
+from typing import Optional
+
 from termcolor import colored
-from dataclasses import dataclass, field
-from typing import Optional, List
+
+from agent_reasoning.agents.base import BaseAgent
+from agent_reasoning.visualization.models import StreamEvent
 
 
 @dataclass
 class PipelineStage:
     """A single stage in the refinement pipeline."""
+
     name: str
     description: str
     critic_prompt_template: str
@@ -22,6 +25,7 @@ class PipelineStage:
 @dataclass
 class PipelineIteration:
     """Tracks the current state of the pipeline refinement."""
+
     stage_index: int
     stage_name: str
     iteration_in_stage: int
@@ -65,7 +69,7 @@ Technical Accuracy Feedback:
 {feedback}
 
 Rewrite the complete article below, fixing all technical inaccuracies. Do not ask for input or add commentary — output the corrected article directly:
-"""
+""",
     ),
     PipelineStage(
         name="Structure & Clarity",
@@ -98,7 +102,7 @@ Structure & Clarity Feedback:
 {feedback}
 
 Rewrite the complete article below, fixing all structural issues. Do not ask for input or add commentary — output the restructured article directly:
-"""
+""",
     ),
     PipelineStage(
         name="Technical Depth",
@@ -131,7 +135,7 @@ Technical Depth Feedback:
 {feedback}
 
 Rewrite the complete article below, adding all requested technical details. Do not ask for input or add commentary — output the enhanced article directly:
-"""
+""",
     ),
     PipelineStage(
         name="Examples & Analogies",
@@ -164,7 +168,7 @@ Examples & Analogies Feedback:
 {feedback}
 
 Rewrite the complete article below, adding all requested examples and analogies. Do not ask for input or add commentary — output the illustrated article directly:
-"""
+""",
     ),
     PipelineStage(
         name="Professional Polish",
@@ -197,7 +201,7 @@ Polish Feedback:
 {feedback}
 
 Rewrite the complete article below, applying all polish improvements. Do not ask for input or add commentary — output the polished article directly:
-"""
+""",
     ),
 ]
 
@@ -216,13 +220,17 @@ class ComplexRefinementLoopAgent(BaseAgent):
     Each stage loops until score >= threshold before proceeding to next stage.
     """
 
-    def __init__(self, model="gemma3:270m", score_threshold=0.9, max_iterations_per_stage=3):
-        super().__init__(model)
+    def __init__(
+        self, model="gemma3:270m", score_threshold=0.9, max_iterations_per_stage=3, **kwargs
+    ):
+        super().__init__(model, **kwargs)
         self.name = "ComplexRefinementLoopAgent"
         self.color = "magenta"
         self.score_threshold = score_threshold
         self.max_iterations_per_stage = max_iterations_per_stage
-        self.stages = [PipelineStage(**{k: v for k, v in stage.__dict__.items()}) for stage in PIPELINE_STAGES]
+        self.stages = [
+            PipelineStage(**{k: v for k, v in stage.__dict__.items()}) for stage in PIPELINE_STAGES
+        ]
 
     def run(self, query):
         self.log_thought(f"Processing query with Complex Refinement Pipeline: {query}")
@@ -241,21 +249,29 @@ class ComplexRefinementLoopAgent(BaseAgent):
             elif event.event_type == "pipeline":
                 iteration = event.data
                 if iteration.is_stage_complete:
-                    yield colored(f"\n[✓ Stage '{iteration.stage_name}' COMPLETE - Score: {iteration.score:.2f}]\n", "green")
+                    yield colored(
+                        f"\n[✓ Stage '{iteration.stage_name}' COMPLETE - Score: {iteration.score:.2f}]\n",
+                        "green",
+                    )
                 if iteration.is_pipeline_complete:
-                    yield colored(f"\n[✓ PIPELINE COMPLETE - All 5 stages passed!]\n", "green", attrs=["bold"])
+                    yield colored(
+                        "\n[✓ PIPELINE COMPLETE - All 5 stages passed!]\n", "green", attrs=["bold"]
+                    )
 
     def stream_structured(self, query):
         """Structured event streaming for visualization."""
         yield StreamEvent(event_type="query", data=query)
-        yield StreamEvent(event_type="text", data=f"Processing via Complex Refinement Pipeline (5 stages, threshold={self.score_threshold})...\n")
+        yield StreamEvent(
+            event_type="text",
+            data=f"Processing via Complex Refinement Pipeline (5 stages, threshold={self.score_threshold})...\n",
+        )
 
         # Display pipeline overview
-        yield StreamEvent(event_type="text", data="\n" + "="*60 + "\n")
+        yield StreamEvent(event_type="text", data="\n" + "=" * 60 + "\n")
         yield StreamEvent(event_type="text", data="PIPELINE STAGES:\n")
         for i, stage in enumerate(self.stages, 1):
             yield StreamEvent(event_type="text", data=f"  {i}. {stage.name}: {stage.description}\n")
-        yield StreamEvent(event_type="text", data="="*60 + "\n\n")
+        yield StreamEvent(event_type="text", data="=" * 60 + "\n\n")
 
         # 1. GENERATE: Initial draft
         yield StreamEvent(event_type="text", data="[GENERATOR] Creating initial draft...\n")
@@ -277,10 +293,12 @@ Provide a comprehensive answer suitable for a technical blog:"""
 
         # 2. PIPELINE: Process through each stage
         for stage_idx, stage in enumerate(self.stages):
-            yield StreamEvent(event_type="text", data=f"\n{'='*60}\n")
-            yield StreamEvent(event_type="text", data=f"[STAGE {stage_idx + 1}/5] {stage.name.upper()}\n")
+            yield StreamEvent(event_type="text", data=f"\n{'=' * 60}\n")
+            yield StreamEvent(
+                event_type="text", data=f"[STAGE {stage_idx + 1}/5] {stage.name.upper()}\n"
+            )
             yield StreamEvent(event_type="text", data=f"Goal: {stage.description}\n")
-            yield StreamEvent(event_type="text", data=f"{'='*60}\n")
+            yield StreamEvent(event_type="text", data=f"{'=' * 60}\n")
 
             stage_complete = False
             iteration_in_stage = 0
@@ -289,9 +307,14 @@ Provide a comprehensive answer suitable for a technical blog:"""
                 iteration_in_stage += 1
 
                 # CRITIQUE for this stage
-                yield StreamEvent(event_type="text", data=f"\n[CRITIC - {stage.name}] Iteration {iteration_in_stage}/{self.max_iterations_per_stage}...\n")
+                yield StreamEvent(
+                    event_type="text",
+                    data=f"\n[CRITIC - {stage.name}] Iteration {iteration_in_stage}/{self.max_iterations_per_stage}...\n",
+                )
 
-                critic_prompt = stage.critic_prompt_template.format(query=query, draft=current_draft)
+                critic_prompt = stage.critic_prompt_template.format(
+                    query=query, draft=current_draft
+                )
 
                 critique_response = ""
                 yield StreamEvent(event_type="text", data="Critique: ")
@@ -311,10 +334,13 @@ Provide a comprehensive answer suitable for a technical blog:"""
                     draft=current_draft,
                     critique=critique_response,
                     feedback=feedback,
-                    score=score
+                    score=score,
                 )
 
-                yield StreamEvent(event_type="text", data=f"\n   -> Score: {score:.2f}, Threshold: {self.score_threshold}\n")
+                yield StreamEvent(
+                    event_type="text",
+                    data=f"\n   -> Score: {score:.2f}, Threshold: {self.score_threshold}\n",
+                )
 
                 # Check if stage passes
                 if score >= self.score_threshold:
@@ -327,20 +353,25 @@ Provide a comprehensive answer suitable for a technical blog:"""
                         pipeline_iter.is_pipeline_complete = True
 
                     yield StreamEvent(event_type="pipeline", data=pipeline_iter)
-                    yield StreamEvent(event_type="text", data=colored(
-                        f"\n[✓ STAGE PASSED] {stage.name} complete with score {score:.2f}\n", "green"
-                    ))
+                    yield StreamEvent(
+                        event_type="text",
+                        data=colored(
+                            f"\n[✓ STAGE PASSED] {stage.name} complete with score {score:.2f}\n",
+                            "green",
+                        ),
+                    )
                     break
 
                 yield StreamEvent(event_type="pipeline", data=pipeline_iter)
 
                 # REFINE for this stage
-                yield StreamEvent(event_type="text", data=f"\n[REFINER - {stage.name}] Improving based on feedback...\n")
+                yield StreamEvent(
+                    event_type="text",
+                    data=f"\n[REFINER - {stage.name}] Improving based on feedback...\n",
+                )
 
                 refiner_prompt = stage.refiner_prompt_template.format(
-                    query=query,
-                    draft=current_draft,
-                    feedback=feedback
+                    query=query, draft=current_draft, feedback=feedback
                 )
 
                 new_draft = ""
@@ -353,29 +384,42 @@ Provide a comprehensive answer suitable for a technical blog:"""
                 # Guard: if the model produced a placeholder instead of actual content,
                 # keep the previous draft (common with smaller models)
                 new_draft_lower = new_draft.strip().lower()
-                if (len(new_draft.strip()) < len(current_draft.strip()) * 0.3
-                        or "paste" in new_draft_lower[:100]
-                        or "provide the" in new_draft_lower[:100]
-                        or "i'm ready" in new_draft_lower[:100]):
-                    yield StreamEvent(event_type="text", data=colored(
-                        "\n[GUARD] Refiner output appears to be a placeholder. Keeping previous draft.\n", "yellow"
-                    ))
+                if (
+                    len(new_draft.strip()) < len(current_draft.strip()) * 0.3
+                    or "paste" in new_draft_lower[:100]
+                    or "provide the" in new_draft_lower[:100]
+                    or "i'm ready" in new_draft_lower[:100]
+                ):
+                    yield StreamEvent(
+                        event_type="text",
+                        data=colored(
+                            "\n[GUARD] Refiner output appears to be a placeholder. Keeping previous draft.\n",
+                            "yellow",
+                        ),
+                    )
                 else:
                     current_draft = new_draft
 
             if not stage_complete:
-                yield StreamEvent(event_type="text", data=colored(
-                    f"\n[MAX ITERATIONS] Stage '{stage.name}' reached {self.max_iterations_per_stage} iterations. Moving to next stage.\n", "yellow"
-                ))
+                yield StreamEvent(
+                    event_type="text",
+                    data=colored(
+                        f"\n[MAX ITERATIONS] Stage '{stage.name}' reached {self.max_iterations_per_stage} iterations. Moving to next stage.\n",
+                        "yellow",
+                    ),
+                )
                 stage.is_complete = True  # Mark complete to proceed
 
         # 3. FINAL OUTPUT
-        yield StreamEvent(event_type="text", data="\n" + "="*60 + "\n")
+        yield StreamEvent(event_type="text", data="\n" + "=" * 60 + "\n")
         yield StreamEvent(event_type="text", data="PIPELINE SUMMARY:\n")
         for i, stage in enumerate(self.stages, 1):
             status = "✓" if stage.is_complete else "○"
-            yield StreamEvent(event_type="text", data=f"  {status} Stage {i}: {stage.name} (score: {stage.score:.2f})\n")
-        yield StreamEvent(event_type="text", data="="*60 + "\n")
+            yield StreamEvent(
+                event_type="text",
+                data=f"  {status} Stage {i}: {stage.name} (score: {stage.score:.2f})\n",
+            )
+        yield StreamEvent(event_type="text", data="=" * 60 + "\n")
 
         yield StreamEvent(event_type="text", data="\nFINAL RESULT:\n")
         yield StreamEvent(event_type="text", data=current_draft)

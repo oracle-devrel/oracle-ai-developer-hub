@@ -17,6 +17,15 @@ repos:
         pass_filenames: false
         always_run: true
 
+  - repo: local
+    hooks:
+      - id: build-tui
+        name: Build TUI (Go)
+        entry: bash -c 'cd tui && go build -o agent-tui .'
+        language: system
+        pass_filenames: false
+        always_run: true
+
   # ── Secret detection (added by install-pre-commit-hooks.sh) ──────────
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0

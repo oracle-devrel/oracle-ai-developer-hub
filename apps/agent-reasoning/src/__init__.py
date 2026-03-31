@@ -1,5 +1,6 @@
-from src.agents.standard import StandardAgent
-from src.agents.cot import CoTAgent
-from src.agents.self_reflection import SelfReflectionAgent
-from src.agents.react import ReActAgent
-from src.agents.tot import ToTAgent
+# Re-export for backward compatibility
+from agent_reasoning.agents.cot import CoTAgent as CoTAgent
+from agent_reasoning.agents.react import ReActAgent as ReActAgent
+from agent_reasoning.agents.self_reflection import SelfReflectionAgent as SelfReflectionAgent
+from agent_reasoning.agents.standard import StandardAgent as StandardAgent
+from agent_reasoning.agents.tot import ToTAgent as ToTAgent

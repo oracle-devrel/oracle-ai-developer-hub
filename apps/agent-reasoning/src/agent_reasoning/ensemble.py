@@ -14,9 +14,8 @@ Usage:
 
 import asyncio
 import time
-from typing import Dict, List, Any, Optional
 from concurrent.futures import ThreadPoolExecutor
-import numpy as np
+from typing import Any, Dict, List, Optional
 
 from agent_reasoning.agents import AGENT_MAP
 
@@ -31,7 +30,7 @@ class ReasoningEnsemble:
         self,
         model_name: str = "gemma3:270m",
         similarity_threshold: float = 0.85,
-        embedding_model: str = "all-MiniLM-L6-v2"
+        embedding_model: str = "all-MiniLM-L6-v2",
     ):
         """
         Initialize the ensemble.
@@ -53,6 +52,7 @@ class ReasoningEnsemble:
         if self._embedding_model is None:
             try:
                 from sentence_transformers import SentenceTransformer
+
                 self._embedding_model = SentenceTransformer(self.embedding_model_name)
             except ImportError:
                 raise ImportError(
@@ -67,10 +67,7 @@ class ReasoningEnsemble:
         return list(set(AGENT_MAP.keys()))
 
     async def run(
-        self,
-        query: str,
-        strategies: List[str],
-        config: Optional[Dict[str, Any]] = None
+        self, query: str, strategies: List[str], config: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Run ensemble of reasoning strategies.
@@ -101,10 +98,14 @@ class ReasoningEnsemble:
 
         if not valid_strategies:
             return {
-                "winner": {"strategy": None, "response": "No valid strategies provided", "vote_count": 0},
+                "winner": {
+                    "strategy": None,
+                    "response": "No valid strategies provided",
+                    "vote_count": 0,
+                },
                 "all_responses": [],
                 "total_duration_ms": 0,
-                "voting_details": None
+                "voting_details": None,
             }
 
         # Single strategy - return directly without voting
@@ -114,18 +115,12 @@ class ReasoningEnsemble:
             response, duration = await self._run_single_strategy(query, strategy, strategy_config)
 
             return {
-                "winner": {
-                    "strategy": strategy,
-                    "response": response,
-                    "vote_count": 1
-                },
-                "all_responses": [{
-                    "strategy": strategy,
-                    "response": response,
-                    "duration_ms": duration
-                }],
+                "winner": {"strategy": strategy, "response": response, "vote_count": 1},
+                "all_responses": [
+                    {"strategy": strategy, "response": response, "duration_ms": duration}
+                ],
                 "total_duration_ms": (time.time() - start_time) * 1000,
-                "voting_details": None  # No voting for single strategy
+                "voting_details": None,  # No voting for single strategy
             }
 
         # Multiple strategies - run in parallel
@@ -140,14 +135,11 @@ class ReasoningEnsemble:
             "winner": winner,
             "all_responses": responses,
             "total_duration_ms": total_duration,
-            "voting_details": voting_details
+            "voting_details": voting_details,
         }
 
     async def _run_single_strategy(
-        self,
-        query: str,
-        strategy: str,
-        config: Dict[str, Any]
+        self, query: str, strategy: str, config: Dict[str, Any]
     ) -> tuple:
         """Run a single strategy and return (response, duration_ms)."""
         start = time.time()
@@ -164,20 +156,13 @@ class ReasoningEnsemble:
 
         # Run in thread pool to not block event loop
         loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            self._executor,
-            agent.run,
-            query
-        )
+        response = await loop.run_in_executor(self._executor, agent.run, query)
 
         duration = (time.time() - start) * 1000
         return response, duration
 
     async def _run_parallel(
-        self,
-        query: str,
-        strategies: List[str],
-        config: Dict[str, Any]
+        self, query: str, strategies: List[str], config: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Run multiple strategies in parallel."""
         tasks = []
@@ -191,20 +176,24 @@ class ReasoningEnsemble:
 
         for (strategy, _), result in zip(tasks, results):
             if isinstance(result, Exception):
-                responses.append({
-                    "strategy": strategy,
-                    "response": f"Error: {str(result)}",
-                    "duration_ms": 0,
-                    "error": True
-                })
+                responses.append(
+                    {
+                        "strategy": strategy,
+                        "response": f"Error: {str(result)}",
+                        "duration_ms": 0,
+                        "error": True,
+                    }
+                )
             else:
                 response, duration = result
-                responses.append({
-                    "strategy": strategy,
-                    "response": response,
-                    "duration_ms": duration,
-                    "error": False
-                })
+                responses.append(
+                    {
+                        "strategy": strategy,
+                        "response": response,
+                        "duration_ms": duration,
+                        "error": False,
+                    }
+                )
 
         return responses
 
@@ -219,19 +208,17 @@ class ReasoningEnsemble:
         valid_responses = [r for r in responses if not r.get("error", False)]
 
         if not valid_responses:
-            return {
-                "strategy": None,
-                "response": "All strategies failed",
-                "vote_count": 0
-            }, {"clusters": [], "threshold": self.similarity_threshold}
+            return {"strategy": None, "response": "All strategies failed", "vote_count": 0}, {
+                "clusters": [],
+                "threshold": self.similarity_threshold,
+            }
 
         if len(valid_responses) == 1:
             r = valid_responses[0]
-            return {
-                "strategy": r["strategy"],
-                "response": r["response"],
-                "vote_count": 1
-            }, {"clusters": [[0]], "threshold": self.similarity_threshold}
+            return {"strategy": r["strategy"], "response": r["response"], "vote_count": 1}, {
+                "clusters": [[0]],
+                "threshold": self.similarity_threshold,
+            }
 
         # Get embeddings for all responses
         texts = [r["response"] for r in valid_responses]
@@ -260,20 +247,22 @@ class ReasoningEnsemble:
         return {
             "strategy": winner["strategy"],
             "response": winner["response"],
-            "vote_count": len(largest_cluster)
+            "vote_count": len(largest_cluster),
         }, {
             "clusters": clusters,
             "threshold": self.similarity_threshold,
-            "total_responses": len(valid_responses)
+            "total_responses": len(valid_responses),
         }
 
-    def _cluster_by_similarity(self, embeddings: np.ndarray) -> List[List[int]]:
+    def _cluster_by_similarity(self, embeddings) -> List[List[int]]:
         """
         Cluster embeddings by cosine similarity.
 
         Returns list of clusters, where each cluster is a list of indices.
         """
         n = len(embeddings)
+
+        import numpy as np
 
         # Normalize for cosine similarity
         norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
@@ -305,10 +294,7 @@ class ReasoningEnsemble:
         return clusters
 
     def run_sync(
-        self,
-        query: str,
-        strategies: List[str],
-        config: Optional[Dict[str, Any]] = None
+        self, query: str, strategies: List[str], config: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Synchronous wrapper for run()."""
         return asyncio.run(self.run(query, strategies, config))

@@ -1,12 +1,13 @@
-from agent_reasoning.agents.base import BaseAgent
-from agent_reasoning.visualization.models import VotingSample, StreamEvent, TaskStatus
-from termcolor import colored
-from collections import Counter
 import re
+from collections import Counter
+
+from agent_reasoning.agents.base import BaseAgent
+from agent_reasoning.visualization.models import StreamEvent, TaskStatus, VotingSample
+
 
 class ConsistencyAgent(BaseAgent):
-    def __init__(self, model="gemma3:270m", samples=5):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", samples=5, **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "ConsistencyAgent"
         self.color = "cyan"
         self.samples = samples
@@ -30,18 +31,28 @@ class ConsistencyAgent(BaseAgent):
     def stream_structured(self, query):
         """Structured event streaming for visualization."""
         yield StreamEvent(event_type="query", data=query)
-        yield StreamEvent(event_type="text", data=f"Processing query via Self-Consistency (k={self.samples}): {query}\n")
+        yield StreamEvent(
+            event_type="text",
+            data=f"Processing query via Self-Consistency (k={self.samples}): {query}\n",
+        )
 
         samples = []
 
         for i in range(self.samples):
+            if not self._check_budget():
+                yield StreamEvent(event_type="text", data=f"\n{self._budget_exceeded_msg}\n")
+                break
+
             sample = VotingSample(id=i + 1, status=TaskStatus.RUNNING)
             samples.append(sample)
             yield StreamEvent(event_type="sample", data=sample)
 
-            yield StreamEvent(event_type="text", data=f"\n**[Path {i+1}/{self.samples}]**\n")
+            yield StreamEvent(event_type="text", data=f"\n**[Path {i + 1}/{self.samples}]**\n")
 
-            prompt = f"Question: {query}\nThink step-by-step to answer this question. End your answer with 'Final Answer: <answer>'."
+            prompt = (
+                f"Question: {query}\nThink step-by-step to answer "
+                "this question. End your answer with 'Final Answer: <answer>'."
+            )
 
             trace_content = ""
             for chunk in self.client.generate(prompt, temperature=0.7, stream=True):
@@ -59,7 +70,10 @@ class ConsistencyAgent(BaseAgent):
             yield StreamEvent(event_type="sample", data=sample, is_update=True)
 
         # Majority Voting
-        answers = [s.answer for s in samples]
+        answers = [s.answer for s in samples if s.answer is not None]
+        if not answers:
+            yield StreamEvent(event_type="final", data="No answers generated (budget exceeded)")
+            return
         counter = Counter(answers)
         best_answer, count = counter.most_common(1)[0]
 
@@ -72,7 +86,10 @@ class ConsistencyAgent(BaseAgent):
         yield StreamEvent(event_type="voting_complete", data=True)
 
         yield StreamEvent(event_type="text", data="\n---\n")
-        yield StreamEvent(event_type="text", data=f"**Majority Logic:** {best_answer} ({count}/{self.samples} votes)\n")
+        yield StreamEvent(
+            event_type="text",
+            data=f"**Majority Logic:** {best_answer} ({count}/{self.samples} votes)\n",
+        )
         yield StreamEvent(event_type="text", data="\n**Final Consolidated Answer:**\n")
         yield StreamEvent(event_type="text", data=best_answer)
         yield StreamEvent(event_type="text", data="\n")

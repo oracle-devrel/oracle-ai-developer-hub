@@ -47,28 +47,57 @@ type Sidebar struct {
 	focused  bool
 }
 
-// NewSidebar creates a new sidebar component
-func NewSidebar() *Sidebar {
+// AgentItem is a minimal struct used to populate the sidebar dynamically,
+// avoiding circular imports with the app package.
+type AgentItem struct {
+	ID   string
+	Name string
+}
+
+// buildSidebarItems constructs the full item list from an agent slice.
+func buildSidebarItems(agents []AgentItem) []SidebarItem {
 	items := []SidebarItem{}
 
-	// Add agents
-	for _, agent := range DefaultAgents() {
+	for _, a := range agents {
 		items = append(items, SidebarItem{
-			Label:   agent.Name,
-			Value:   agent.ID,
+			Label:   a.Name,
+			Value:   a.ID,
 			IsAgent: true,
 		})
 	}
 
-	// Add separator and special items
+	// Action items
 	items = append(items, SidebarItem{IsSeparator: true})
 	items = append(items, SidebarItem{Label: "Arena Mode", Value: "arena"})
+	items = append(items, SidebarItem{Label: "Head-to-Head", Value: "duel"})
+	items = append(items, SidebarItem{Label: "Debugger", Value: "debug"})
 	items = append(items, SidebarItem{Label: "Benchmarks", Value: "benchmark"})
+	items = append(items, SidebarItem{Label: "Sessions", Value: "sessions"})
+	items = append(items, SidebarItem{Label: "Agent Guide", Value: "agent_info"})
 	items = append(items, SidebarItem{IsSeparator: true})
 	items = append(items, SidebarItem{Label: "Select Model", Value: "model"})
 
+	return items
+}
+
+// NewSidebar creates a new sidebar component using the default hardcoded agents.
+func NewSidebar() *Sidebar {
+	agents := []AgentItem{}
+	for _, a := range DefaultAgents() {
+		agents = append(agents, AgentItem{ID: a.ID, Name: a.Name})
+	}
 	return &Sidebar{
-		items:    items,
+		items:    buildSidebarItems(agents),
+		selected: 0,
+		height:   20,
+		focused:  true,
+	}
+}
+
+// NewSidebarFromAgents creates a sidebar from a dynamic agent list fetched from the server.
+func NewSidebarFromAgents(agents []AgentItem) *Sidebar {
+	return &Sidebar{
+		items:    buildSidebarItems(agents),
 		selected: 0,
 		height:   20,
 		focused:  true,

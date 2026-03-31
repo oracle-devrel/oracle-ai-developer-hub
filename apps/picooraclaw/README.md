@@ -43,6 +43,25 @@ PicoOraClaw is a fork of [PicoClaw](https://github.com/jasperan/picooraclaw) tha
   </tr>
 </table>
 
+## Architecture at a Glance
+
+> **Full interactive presentation**: Open [`picooraclaw-presentation.html`](picooraclaw-presentation.html) in your browser for all 24 slides with animations and keyboard navigation.
+
+<table>
+<tr>
+<td align="center"><strong>Title</strong><br><img src="docs/slides/01-title.jpg" alt="PicoOraClaw Title" width="400"/></td>
+<td align="center"><strong>By the Numbers</strong><br><img src="docs/slides/02-pitch.jpg" alt="The Pitch" width="400"/></td>
+</tr>
+<tr>
+<td align="center"><strong>23 Packages</strong><br><img src="docs/slides/04-architecture.jpg" alt="Architecture" width="400"/></td>
+<td align="center"><strong>10 Channels</strong><br><img src="docs/slides/08-channels.jpg" alt="Channels" width="400"/></td>
+</tr>
+<tr>
+<td align="center"><strong>Hardware Tools</strong><br><img src="docs/slides/11-hardware.jpg" alt="Hardware" width="400"/></td>
+<td align="center"><strong>Oracle Schema</strong><br><img src="docs/slides/15-schema.jpg" alt="Oracle Schema" width="400"/></td>
+</tr>
+</table>
+
 ## Installation
 
 <!-- one-command-install -->
@@ -610,7 +629,7 @@ If you prefer a cloud provider, set `provider` and add your API key:
   },
   "providers": {
     "openrouter": {
-      "api_key": "sk-or-v1-xxx",
+      "api_key": "sk-or-v1-xxx",  # pragma: allowlist secret
       "api_base": "https://openrouter.ai/api/v1"
     }
   }
@@ -634,7 +653,7 @@ Get a key at [openrouter.ai/keys](https://openrouter.ai/keys) (200K free tokens/
   },
   "providers": {
     "zhipu": {
-      "api_key": "your-key",
+      "api_key": "your-key",  # pragma: allowlist secret
       "api_base": "https://open.bigmodel.cn/api/paas/v4"
     }
   }
@@ -708,7 +727,7 @@ PicoOraClaw can optionally use **OCI Generative AI** as an LLM backend via the `
    {
      "provider": "openai",
      "api_base": "http://localhost:9999/v1",
-     "api_key": "oci-genai",
+     "api_key": "oci-genai",  # pragma: allowlist secret
      "model": "meta.llama-3.3-70b-instruct"
    }
    ```
@@ -801,7 +820,7 @@ Run `picooraclaw gateway` after configuring.
     "mode": "adb",
     "dsn": "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-ashburn-1.oraclecloud.com))(connect_data=(service_name=xxx_myatp_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))",
     "user": "picooraclaw",
-    "password": "YourPass123"
+    "password": "YourPass123"  # pragma: allowlist secret
   }
 }
 ```
@@ -821,7 +840,7 @@ Run `picooraclaw gateway` after configuring.
     "service": "xxx_myatp_low.adb.oraclecloud.com",
     "walletPath": "/path/to/wallet",
     "user": "picooraclaw",
-    "password": "YourPass123"
+    "password": "YourPass123"  # pragma: allowlist secret
   }
 }
 ```
@@ -917,7 +936,7 @@ make vet            # go vet ./...
 
 ```bash
 # Full stack with Oracle
-PICO_ORACLE_PASSWORD=YourPass123 docker compose --profile oracle --profile gateway up -d
+PICO_ORACLE_PASSWORD=YourPass123 docker compose --profile oracle --profile gateway up -d  # pragma: allowlist secret
 
 # Without Oracle
 docker compose --profile gateway up -d

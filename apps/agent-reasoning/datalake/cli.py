@@ -14,19 +14,14 @@ Usage:
 """
 
 import json
-import sys
 import time
 
 import click
 from rich.console import Console
 from rich.panel import Panel
+from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
-from rich.tree import Tree
-from rich.syntax import Syntax
-from rich.columns import Columns
-from rich.live import Live
-from rich.progress import Progress
 
 from datalake.config import get_db_config
 from datalake.store import ReasoningStore
@@ -87,9 +82,7 @@ def sessions(strategy, model, status, limit, search):
             results = store.search_sessions(search, limit=limit)
             total = len(results)
         else:
-            data = store.list_sessions(
-                strategy=strategy, model=model, status=status, limit=limit
-            )
+            data = store.list_sessions(strategy=strategy, model=model, status=status, limit=limit)
             results = data["sessions"]
             total = data["total"]
 
@@ -169,9 +162,7 @@ def show(session_id):
         console.print(Panel(header, title="Session Detail", border_style="cyan"))
 
         # Query
-        console.print(
-            Panel(session["query"], title="Query", border_style="yellow")
-        )
+        console.print(Panel(session["query"], title="Query", border_style="yellow"))
 
         # Final answer
         if session.get("final_answer"):
@@ -209,9 +200,7 @@ def show(session_id):
                     f"{evt['event_type']:15s}[/{evt_style}]{update_tag}"
                 )
 
-            console.print(
-                f"\n[dim]Use 'datalake replay {session_id}' for step-by-step view.[/dim]"
-            )
+            console.print(f"\n[dim]Use 'datalake replay {session_id}' for step-by-step view.[/dim]")
 
     except click.Abort:
         pass
@@ -333,9 +322,7 @@ def _render_event_data(event_type: str, data: dict):
         desc = data.get("description", "")
         status = data.get("status", "pending")
         progress = data.get("progress", 0)
-        console.print(
-            f"  Task {task_id}: {desc[:100]} [{status}] {progress:.0%}"
-        )
+        console.print(f"  Task {task_id}: {desc[:100]} [{status}] {progress:.0%}")
         if data.get("result"):
             console.print(f"  [dim]Result: {data['result'][:150]}[/dim]")
 
@@ -349,15 +336,9 @@ def _render_event_data(event_type: str, data: dict):
     elif event_type in ("iteration", "refinement"):
         iteration = data.get("iteration", "?")
         score = data.get("score", 0)
-        accepted = (
-            " [green](ACCEPTED)[/green]" if data.get("is_accepted") else ""
-        )
-        correct = (
-            " [green](CORRECT)[/green]" if data.get("is_correct") else ""
-        )
-        console.print(
-            f"  Iteration {iteration} (score={score:.2f}){accepted}{correct}"
-        )
+        accepted = " [green](ACCEPTED)[/green]" if data.get("is_accepted") else ""
+        correct = " [green](CORRECT)[/green]" if data.get("is_correct") else ""
+        console.print(f"  Iteration {iteration} (score={score:.2f}){accepted}{correct}")
         if data.get("draft"):
             console.print(f"  [dim]Draft: {data['draft'][:150]}[/dim]")
         if data.get("critique"):
@@ -368,11 +349,7 @@ def _render_event_data(event_type: str, data: dict):
         stage_idx = data.get("stage_index", 0)
         iteration = data.get("iteration_in_stage", 0)
         score = data.get("score", 0)
-        complete = (
-            " [green](STAGE COMPLETE)[/green]"
-            if data.get("is_stage_complete")
-            else ""
-        )
+        complete = " [green](STAGE COMPLETE)[/green]" if data.get("is_stage_complete") else ""
         pipeline_done = (
             " [bold green](PIPELINE COMPLETE)[/bold green]"
             if data.get("is_pipeline_complete")
@@ -441,9 +418,7 @@ def stats():
             table = Table(title="By Strategy")
             table.add_column("Strategy", style="cyan")
             table.add_column("Sessions", justify="right")
-            for strat, count in sorted(
-                data["by_strategy"].items(), key=lambda x: -x[1]
-            ):
+            for strat, count in sorted(data["by_strategy"].items(), key=lambda x: -x[1]):
                 table.add_row(strat, str(count))
             console.print(table)
 
@@ -452,9 +427,7 @@ def stats():
             table = Table(title="By Model")
             table.add_column("Model", style="blue")
             table.add_column("Sessions", justify="right")
-            for model, count in sorted(
-                data["by_model"].items(), key=lambda x: -x[1]
-            ):
+            for model, count in sorted(data["by_model"].items(), key=lambda x: -x[1]):
                 table.add_row(model, str(count))
             console.print(table)
 
@@ -465,15 +438,9 @@ def stats():
             perf_table.add_column("Metric", style="cyan")
             perf_table.add_column("Value", justify="right")
             perf_table.add_row("Avg TTFT", f"{perf.get('avg_ttft_ms', 'N/A')} ms")
-            perf_table.add_row(
-                "Avg Duration", f"{perf.get('avg_total_ms', 'N/A')} ms"
-            )
-            perf_table.add_row(
-                "Avg Tokens/sec", str(perf.get("avg_tokens_per_sec", "N/A"))
-            )
-            perf_table.add_row(
-                "Avg Token Count", str(perf.get("avg_token_count", "N/A"))
-            )
+            perf_table.add_row("Avg Duration", f"{perf.get('avg_total_ms', 'N/A')} ms")
+            perf_table.add_row("Avg Tokens/sec", str(perf.get("avg_tokens_per_sec", "N/A")))
+            perf_table.add_row("Avg Token Count", str(perf.get("avg_token_count", "N/A")))
             console.print(perf_table)
 
         # Per-strategy performance
@@ -499,9 +466,7 @@ def stats():
             table = Table(title="Event Type Distribution")
             table.add_column("Event Type", style="magenta")
             table.add_column("Count", justify="right")
-            for etype, count in sorted(
-                data["by_event_type"].items(), key=lambda x: -x[1]
-            ):
+            for etype, count in sorted(data["by_event_type"].items(), key=lambda x: -x[1]):
                 table.add_row(etype, str(count))
             console.print(table)
 
@@ -609,15 +574,10 @@ def compare(session_ids):
         table.add_row("Model", *[s["model"] for s in sessions])
         table.add_row(
             "Status",
-            *[
-                Text(s["status"], style=STATUS_STYLES.get(s["status"], "white"))
-                for s in sessions
-            ],
+            *[Text(s["status"], style=STATUS_STYLES.get(s["status"], "white")) for s in sessions],
         )
         table.add_row("Events", *[str(s.get("event_count", 0)) for s in sessions])
-        table.add_row(
-            "Tokens", *[str(s.get("total_tokens", "N/A")) for s in sessions]
-        )
+        table.add_row("Tokens", *[str(s.get("total_tokens", "N/A")) for s in sessions])
 
         # Metrics rows
         metrics_fields = [

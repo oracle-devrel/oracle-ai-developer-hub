@@ -61,6 +61,11 @@ target-version = "py310"
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W"]
 
+[tool.ruff.lint.per-file-ignores]
+"src/agents/*.py" = ["E501", "E722", "F841"]
+"src/benchmarks/*.py" = ["E501"]
+"verification/*.py" = ["E501"]
+
 [tool.ruff.format]
 quote-style = "double"
 
@@ -73,7 +78,6 @@ asyncio_mode = "auto"
 pythonpath = ["src"]
 
 [project.scripts]
-agent-reasoning = "agent_reasoning.cli:main"
 agent-reasoning-server = "agent_reasoning.server:main"
 
 [tool.setuptools.packages.find]

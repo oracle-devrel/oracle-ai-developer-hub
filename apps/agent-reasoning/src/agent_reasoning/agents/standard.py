@@ -1,9 +1,11 @@
-from agent_reasoning.agents.base import BaseAgent
 from termcolor import colored
 
+from agent_reasoning.agents.base import BaseAgent
+
+
 class StandardAgent(BaseAgent):
-    def __init__(self, model="gemma3:270m"):
-        super().__init__(model)
+    def __init__(self, model="gemma3:270m", **kwargs):
+        super().__init__(model, **kwargs)
         self.name = "StandardAgent"
         self.color = "cyan"
 
@@ -15,7 +17,7 @@ class StandardAgent(BaseAgent):
         for chunk in self.stream(query):
             print(colored(chunk, self.color), end="", flush=True)
             full_response += chunk
-        print() 
+        print()
         return full_response
 
     def stream(self, query):

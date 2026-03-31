@@ -6,6 +6,7 @@ write_files:
       ${indent(6, setup_script)}
 
   - path: /etc/environment.d/picooraclaw.conf
+    permissions: '0600'
     content: |
       ORACLE_MODE=${oracle_mode}
       ORACLE_PWD=${oracle_password}
@@ -13,8 +14,9 @@ write_files:
       ADB_WALLET_BASE64=${adb_wallet_base64}
 
 runcmd:
-  - export ORACLE_MODE="${oracle_mode}"
-  - export ORACLE_PWD="${oracle_password}"
-  - export ADB_DSN="${adb_dsn}"
-  - export ADB_WALLET_BASE64="${adb_wallet_base64}"
-  - /opt/picooraclaw-setup/setup.sh
+  - |
+    export ORACLE_MODE="${oracle_mode}"
+    export ORACLE_PWD="${oracle_password}"
+    export ADB_DSN="${adb_dsn}"
+    export ADB_WALLET_BASE64="${adb_wallet_base64}"
+    /opt/picooraclaw-setup/setup.sh

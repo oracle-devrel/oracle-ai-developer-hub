@@ -1,6 +1,31 @@
 # How I Gave Memory to an AI Agent Using Spring AI and Oracle Database
 
+### Three types of persistent memory, one database, and very little code
+
 ![Logo](logo.png)
+
+## Key Takeaways
+
+- **LLMs forget everything between sessions.** Episodic, semantic, and procedural memory fix that — chat history, domain knowledge retrieval, and actionable tool calls, all persisted in the database.
+- **One database handles it all.** Oracle AI Database 26ai stores chat history, runs hybrid vector search, and hosts the application tables — no need to bolt on a separate vector database or search engine.
+- **Hybrid search beats pure vector search.** Combining dense embeddings with keyword matching (fused via Reciprocal Rank Fusion) means the agent finds documents by meaning _and_ by exact terms like order IDs.
+- **Embeddings stay in the database.** A loaded ONNX model computes embeddings on insert — no external embedding API calls, no extra infrastructure.
+
+## Frequently Asked Questions
+
+**Why does the agent need three types of memory instead of just chat history?**
+Chat history (episodic memory) only covers what was said in the conversation. Semantic memory lets the agent retrieve domain knowledge — like return policies or shipping rules — that was never mentioned in chat. Procedural memory lets it take actions, such as looking up an order or initiating a return, by calling tool methods backed by real database queries.
+
+**Why use hybrid search instead of plain vector similarity?**
+Pure vector search matches by meaning, which works well for natural-language questions but struggles with exact terms like product codes or order IDs. Hybrid search runs vector and keyword search in parallel and merges the results by rank position (Reciprocal Rank Fusion), so the agent finds relevant documents whether the match is semantic, lexical, or both.
+
+**Do I need a separate vector database to build this?**
+No. Oracle AI Database 26ai supports relational tables, hybrid vector indexes, and full-text search in a single instance. The POC uses one connection pool and one set of credentials for chat history, vector retrieval, and all application data.
+
+**How are the embeddings generated?**
+An ONNX model (all-MiniLM-L12-v2) is loaded directly into Oracle Database. Embeddings are computed automatically whenever a row is inserted into the indexed table — no external API calls and no separate embedding service required.
+
+---
 
 Every LLM has the same problem: it forgets everything the moment the conversation ends, sometimes even during long conversations. Spend twenty minutes explaining your project setup, your constraints, your preferences; and it nails the answer. Close the tab, open a new session, and it greets you like a stranger. All that context, gone.
 

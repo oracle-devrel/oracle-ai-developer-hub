@@ -7,3 +7,9 @@ src/web/venv/
 
 # Local config (contains credentials)
 src/chatserver/src/main/resources/application-local.yaml
+
+# ONNX models (large binaries)
+models/
+
+# Oracle database data
+oradata/

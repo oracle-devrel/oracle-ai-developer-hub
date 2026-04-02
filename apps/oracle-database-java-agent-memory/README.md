@@ -104,7 +104,7 @@ Download the pre-built `all-MiniLM-L12-v2` ONNX model from [Oracle ML](https://b
 
 ```bash
 podman exec oradb mkdir -p /opt/oracle/dumps
-podman cp all_MiniLM_L12_v2.onnx oradb:/opt/oracle/dumps/
+podman cp models/all_MiniLM_L12_v2.onnx oradb:/opt/oracle/dumps/
 podman exec -i oradb sqlplus pdbadmin/Oracle123@freepdb1 < setup-hybrid-search.sql
 ```
 

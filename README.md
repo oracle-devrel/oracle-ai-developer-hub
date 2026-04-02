@@ -27,14 +27,25 @@ Jupyter notebooks and interactive tutorials covering:
 - Data preparation and analysis workflows
 - Agent development and orchestration examples
 
-| Name                                | Description                                                                                             | Stack                                               | Link                                                                                                                                             |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| agentic_rag_langchain_oracledb_demo | Multi-agent RAG with langchain-oracledb: OracleVS, OracleEmbeddings, OracleTextSplitter, and CoT agents | Oracle AI Database, langchain-oracledb, Ollama      | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/agentic_rag_langchain_oracledb_demo.ipynb) |
-| fs_vs_dbs                           | Compare filesystem vs database agent memory architectures.                                              | LangChain, Oracle AI Database, OpenAI               | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/fs_vs_dbs.ipynb)                           |
-| memory_context_engineering_agents   | Build AI agents with 6 types of persistent memory.                                                      | LangChain, Oracle AI Database, OpenAI, Tavily       | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/memory_context_engineering_agents.ipynb)   |
-| oracle_langchain_example            | Build a RAG application using Oracle 26ai vector storage and LangChain                                  | Oracle AI Database, langchain-oracledb, HuggingFace | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_langchain_example.ipynb)            |
-| oracle_rag_agents_zero_to_hero      | Learn to build RAG agents from scratch using Oracle AI Database.                                        | Oracle AI Database, OpenAI, OpenAI Agents SDK       | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_agents_zero_to_hero.ipynb)      |
-| oracle_rag_with_evals               | Build RAG systems with comprehensive evaluation metrics                                                 | Oracle AI Database, OpenAI, BEIR, Galileo           | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_with_evals.ipynb)               |
+| Name                                | Description                                                                                                     | Stack                                                     | Link                                                                                                                                             |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| agentic_rag_langchain_oracledb_demo | Multi-agent RAG with langchain-oracledb: OracleVS, OracleEmbeddings, OracleTextSplitter, and CoT agents         | Oracle AI Database, langchain-oracledb, Ollama            | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/agentic_rag_langchain_oracledb_demo.ipynb) |
+| fs_vs_dbs                           | Compare filesystem vs database agent memory architectures.                                                      | LangChain, Oracle AI Database, OpenAI                     | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/fs_vs_dbs.ipynb)                           |
+| memory_context_engineering_agents   | Build AI agents with 6 types of persistent memory.                                                              | LangChain, Oracle AI Database, OpenAI, Tavily             | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/memory_context_engineering_agents.ipynb)   |
+| oracle_langchain_example            | Build a RAG application using Oracle 26ai vector storage and LangChain                                          | Oracle AI Database, langchain-oracledb, HuggingFace       | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_langchain_example.ipynb)            |
+| oracle_rag_agents_zero_to_hero      | Learn to build RAG agents from scratch using Oracle AI Database.                                                | Oracle AI Database, OpenAI, OpenAI Agents SDK             | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_agents_zero_to_hero.ipynb)      |
+| oracle_rag_with_evals               | Build RAG systems with comprehensive evaluation metrics                                                         | Oracle AI Database, OpenAI, BEIR, Galileo                 | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_rag_with_evals.ipynb)               |
+| agent_reasoning_demo                | Interactive demo of 11 cognitive architectures (CoT, ToT, ReAct, Self-Reflection, and more) for agent reasoning | Ollama, agent-reasoning                                   | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/agent_reasoning_demo.ipynb)                |
+| oracle_agentic_rag_hybrid_search    | Agentic RAG with vector, keyword, and hybrid search in a single SQL query using LangGraph ReAct agent           | Oracle AI Database, langchain-oracledb, LangGraph, OpenAI | [![Open Notebook](https://img.shields.io/badge/Open%20Notebook-orange?style=flat-square)](./notebooks/oracle_agentic_rag_hybrid_search.ipynb)    |
+
+### 📚 **Guides** (`/guides`)
+
+Comprehensive documentation, reference materials, and conference presentations covering AI agent architecture, reasoning strategies, and memory systems.
+
+| Name                                                              | Description                                                                                                                                                                                                                                                                                                               | Link                                                                                                                                              |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Building the Brain and Backbone of Enterprise AI Agents           | Advanced reasoning and infrastructure strategies for enterprise AI agents. Covers the 2026 agent stack (layered architecture), reasoning patterns (Chain of Thought, Tree of Thoughts, Self-Reflection, Least-to-Most, Decomposed Prompting), and context/belief updates. Presented at DevWeek SF 2026 by Nacho Martinez. | [![View Guide](https://img.shields.io/badge/View%20Guide-green?style=flat-square)](./guides/brain_backbone_enterprise_agents_devweek_sf_2026.pdf) |
+| Memory Engineering: The Discipline Behind Memory Augmented Agents | Deep dive into memory engineering as a discipline for AI agents — the science of helping agents remember, reason, and act. Covers the memory ecosystem, form factors, and key disciplines shaping memory-augmented agents. Presented at DevWeek SF 2026 (Keynote) by Richmond Alake.                                      | [![View Guide](https://img.shields.io/badge/View%20Guide-green?style=flat-square)](./guides/memory_engineering_devweek_sf_2026.pdf)               |
 
 ### 🎓 **Workshops** (`/workshops`)
 
@@ -48,20 +59,6 @@ Hands-on workshops and guided learning experiences:
 | Name          | Description                  | Link |
 | ------------- | ---------------------------- | ---- |
 | _Coming soon_ | Workshops will be added here | -    |
-
-### 📚 **Guides** (`/guides`)
-
-Comprehensive documentation and reference materials:
-
-- Architecture patterns and design guides
-- API documentation and integration examples
-- Deployment and operations guides
-- Troubleshooting and optimization tips
-- Security and compliance best practices
-
-| Name          | Description               | Link |
-| ------------- | ------------------------- | ---- |
-| _Coming soon_ | Guides will be added here | -    |
 
 ### 🤝 **Partners** (`/partners`)
 

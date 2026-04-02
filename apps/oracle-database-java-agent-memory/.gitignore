@@ -1,0 +1,9 @@
+# Gradle
+src/chatserver/build/
+src/chatserver/.gradle/
+
+# Python
+src/web/venv/
+
+# Local config (contains credentials)
+src/chatserver/src/main/resources/application-local.yaml

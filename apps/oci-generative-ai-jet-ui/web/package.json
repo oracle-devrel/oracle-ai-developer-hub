@@ -19,7 +19,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.52.0",
-    "react-router-dom": "^6.23.1",
+    "react-router-dom": "^6.30.2",
     "uuid": "^9.0.1",
     "ws": "^8.17.1"
   },
@@ -31,6 +31,6 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "vite": "^5.4.6"
+    "vite": "^7.3.1"
   }
 }

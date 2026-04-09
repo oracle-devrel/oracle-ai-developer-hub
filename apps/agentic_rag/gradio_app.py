@@ -1234,7 +1234,7 @@ def create_interface():
                             gr.JSON(value=all_cards.get("synthesizer_agent_v2", {}))
     
     try:
-        with gr.Blocks(title="Agentic RAG System") as interface:
+        with gr.Blocks(title="Agentic RAG System", css=CUSTOM_CSS, theme=gr.themes.Soft()) as interface:
             gr.Markdown("""
             # 🤖 Agentic RAG System
             
@@ -2111,9 +2111,7 @@ def main():
         server_name="0.0.0.0",
         server_port=7860,
         share=True,
-        inbrowser=True,
-        css=CUSTOM_CSS,
-        theme=gr.themes.Soft()
+        inbrowser=True
     )
 
 def download_model(model_type: str) -> str:

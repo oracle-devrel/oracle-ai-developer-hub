@@ -68,8 +68,7 @@ def start_gradio_ui(host: str = "0.0.0.0", port: int = 7860):
 
     try:
         # Import here to avoid loading Gradio unnecessarily
-        from gradio_app import create_interface, CUSTOM_CSS
-        import gradio as gr
+        from gradio_app import create_interface
 
         print(f"\n🎨 Starting Gradio UI on http://{host}:{port}")
 
@@ -79,8 +78,6 @@ def start_gradio_ui(host: str = "0.0.0.0", port: int = 7860):
             server_port=port,
             share=False,  # Don't create public link in unified mode
             inbrowser=False,  # Don't auto-open browser
-            css=CUSTOM_CSS,
-            theme=gr.themes.Soft(),
             quiet=True
         )
     except Exception as e:

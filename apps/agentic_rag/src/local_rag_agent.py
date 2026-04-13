@@ -248,29 +248,120 @@ class LocalRAGAgent:
                 return self._process_query_with_cot(query)
             else:
                 return self._process_query_standard(query)
-    
+
+    async def query(self, query: str, collection: str = None, use_cot: bool = False, max_results: int = 3) -> Dict[str, Any]:
+        """Async query method for A2A protocol compatibility.
+
+        Temporarily overrides instance collection/use_cot settings for this request,
+        then delegates to the synchronous process_query() via an executor.
+        """
+        import asyncio
+
+        # Map short/lowercase collection names to display names used by process_query
+        collection_map = {
+            'PDF': 'PDF Collection',
+            'pdf': 'PDF Collection',
+            'Web': 'Web Knowledge Base',
+            'web': 'Web Knowledge Base',
+            'Repository': 'Repository Collection',
+            'repository': 'Repository Collection',
+            'General': 'General Knowledge',
+            'general': 'General Knowledge',
+        }
+
+        orig_collection = self.collection
+        orig_use_cot = self.use_cot
+
+        try:
+            if collection:
+                self.collection = collection_map.get(collection, collection)
+            self.use_cot = use_cot
+
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(None, lambda: self.process_query(query))
+            return result
+        finally:
+            self.collection = orig_collection
+            self.use_cot = orig_use_cot
+
+    async def process_document(self, document_type: str, content: str, metadata: dict = None) -> Dict[str, Any]:
+        """Process and store a document in the vector store (A2A protocol)."""
+        import asyncio
+
+        type_to_method = {
+            'pdf': 'add_pdf_chunks',
+            'web': 'add_web_chunks',
+            'repository': 'add_repo_chunks',
+            'general': 'add_general_knowledge',
+        }
+
+        method_name = type_to_method.get(document_type.lower(), 'add_general_knowledge')
+        add_method = getattr(self.vector_store, method_name, None)
+
+        if not add_method:
+            return {'status': 'error', 'message': f'Vector store has no {method_name} method'}
+
+        try:
+            doc_id = metadata.get('document_id', 'a2a_upload') if metadata else 'a2a_upload'
+            chunks = [{'content': content, 'metadata': metadata or {}}]
+
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, lambda: add_method(chunks, doc_id))
+
+            return {
+                'status': 'success',
+                'message': f'Document stored via {method_name}',
+                'document_type': document_type,
+            }
+        except Exception as e:
+            logger.error(f"Error processing document: {e}")
+            return {'status': 'error', 'message': str(e)}
+
+    def _retrieve_context_for_collection(self, query: str, n_results: int = 3) -> List[Dict[str, Any]]:
+        """Retrieve context from the appropriate collection(s).
+
+        When self.collection is None (no collection specified), searches all
+        available collections and returns the top results by score.
+        """
+        collection = self.collection
+        db_type = "Oracle DB" if self.use_oracle_db else "ChromaDB"
+
+        if collection == "PDF Collection":
+            print(f"\U0001f504 Using {db_type} for retrieving PDF Collection context")
+            return self.vector_store.query_pdf_collection(query, n_results=n_results)
+        elif collection == "Repository Collection":
+            print(f"\U0001f504 Using {db_type} for retrieving Repository Collection context")
+            return self.vector_store.query_repo_collection(query, n_results=n_results)
+        elif collection == "Web Knowledge Base":
+            print(f"\U0001f504 Using {db_type} for retrieving Web Knowledge Base context")
+            return self.vector_store.query_web_collection(query, n_results=n_results)
+        elif collection == "General Knowledge":
+            return []
+        elif collection is None:
+            # No collection specified -- search all available collections
+            print(f"\U0001f504 Using {db_type} to search all collections")
+            all_results: List[Dict[str, Any]] = []
+            for method_name in ('query_pdf_collection', 'query_web_collection', 'query_repo_collection'):
+                method = getattr(self.vector_store, method_name, None)
+                if method:
+                    try:
+                        results = method(query, n_results=n_results)
+                        all_results.extend(results)
+                    except Exception as e:
+                        logger.warning(f"Error querying {method_name}: {e}")
+            # Sort by similarity score descending, take top n_results
+            all_results.sort(key=lambda x: x.get('score', 0), reverse=True)
+            return all_results[:n_results]
+        else:
+            logger.warning(f"Unknown collection '{collection}', returning empty context")
+            return []
+
     def _process_query_with_cot(self, query: str) -> Dict[str, Any]:
         """Process query using Chain of Thought reasoning"""
         try:
-            # Get context based on collection type
-            if self.collection == "PDF Collection":
-                db_type = "Oracle DB" if self.use_oracle_db else "ChromaDB"
-                print(f"🔄 Using {db_type} for retrieving PDF Collection context")
-                context = self.vector_store.query_pdf_collection(query)
-            elif self.collection == "Repository Collection":
-                db_type = "Oracle DB" if self.use_oracle_db else "ChromaDB"
-                print(f"🔄 Using {db_type} for retrieving Repository Collection context")
-                context = self.vector_store.query_repo_collection(query)
-            elif self.collection == "Web Knowledge Base":
-                db_type = "Oracle DB" if self.use_oracle_db else "ChromaDB"
-                print(f"🔄 Using {db_type} for retrieving Web Knowledge Base context")
-                context = self.vector_store.query_web_collection(query)
-            else:
-                context = []
-            
-            # Log number of chunks retrieved
+            context = self._retrieve_context_for_collection(query)
             logger.info(f"Retrieved {len(context)} chunks from {self.collection}")
-            
+
             # Create agents if not already created
             if not self.agents:
                 self.agents = create_agents(self.llm, self.vector_store)
@@ -364,25 +455,9 @@ class LocalRAGAgent:
     def _process_query_standard(self, query: str) -> Dict[str, Any]:
         """Process query using standard RAG approach"""
         try:
-            # Get context based on collection type
-            if self.collection == "PDF Collection":
-                db_type = "Oracle DB" if self.use_oracle_db else "ChromaDB"
-                print(f"🔄 Using {db_type} for retrieving PDF Collection context")
-                context = self.vector_store.query_pdf_collection(query)
-            elif self.collection == "Repository Collection":
-                db_type = "Oracle DB" if self.use_oracle_db else "ChromaDB"
-                print(f"🔄 Using {db_type} for retrieving Repository Collection context")
-                context = self.vector_store.query_repo_collection(query)
-            elif self.collection == "Web Knowledge Base":
-                db_type = "Oracle DB" if self.use_oracle_db else "ChromaDB"
-                print(f"🔄 Using {db_type} for retrieving Web Knowledge Base context")
-                context = self.vector_store.query_web_collection(query)
-            else:
-                context = []
-            
-            # Log number of chunks retrieved
+            context = self._retrieve_context_for_collection(query)
             logger.info(f"Retrieved {len(context)} chunks from {self.collection}")
-            
+
             # Generate response using context
             response = self._generate_response(query, context)
             return response

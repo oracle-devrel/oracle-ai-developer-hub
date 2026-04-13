@@ -4,10 +4,8 @@ File handling utilities for document processing.
 Supports processing various file types for RAG ingestion or temporary context.
 """
 
-import os
 import re
 import uuid
-import mimetypes
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime

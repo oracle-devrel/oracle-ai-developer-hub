@@ -1,27 +1,29 @@
-import sys
 import os
+import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import argparse
+
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
-from src.store import VectorStore
+
 # from rag_agent import RAGAgent # Removed
 from src.local_rag_agent import LocalRAGAgent
-import yaml
+from src.store import VectorStore
 
 # Configure rich console
 console = Console()
 
-def test_multi_agent_cot(agent, query: str, description: str):
-    """Test the multi-agent Chain of Thought system"""
+def run_multi_agent_cot(agent, query: str, description: str):
+    """Run a multi-agent Chain of Thought test case"""
     console.print(f"\n[bold cyan]Test Case: {description}")
     console.print(Panel(f"Query: {query}", style="yellow"))
-    
+
     # Process query with multi-agent CoT
     response = agent.process_query(query)
-    
+
     # Print each step's result
     if response.get("reasoning_steps"):
         for i, step in enumerate(response["reasoning_steps"]):
@@ -30,14 +32,14 @@ def test_multi_agent_cot(agent, query: str, description: str):
                 title=f"Reasoning Step {i+1}",
                 style="blue"
             ))
-    
+
     # Print final answer
     console.print(Panel(
         f"[bold]Final Answer:[/bold]\n{response['answer']}",
         title="Synthesized Response",
         style="green"
     ))
-    
+
     # Print sources if available
     if response.get("context"):
         console.print("\n[bold]Sources Used:[/bold]")
@@ -55,13 +57,13 @@ def main():
     parser.add_argument("--model", default='local', help="Model to use (default: local gemma3:270m)")
     parser.add_argument("--store-path", default="embeddings", help="Path to the vector store")
     args = parser.parse_args()
-    
+
     # Load environment variables and config
     load_dotenv()
-    
+
     console.print("\n[bold]Testing Multi-Agent Chain of Thought System[/bold]")
     console.print("=" * 80)
-    
+
     try:
         # Initialize vector store
         # Try Oracle first, then Chroma
@@ -72,15 +74,15 @@ def main():
         except ImportError:
             store = VectorStore(persist_directory=args.store_path)
             console.print("[yellow]Using ChromaDB Vector Store[/yellow]")
-        
+
         # Initialize appropriate agent
         # Always use LocalRAGAgent with gemma3:270m
         agent = LocalRAGAgent(store, model_name="gemma3:270m", use_cot=True)
         model_name = "gemma3:270m"
-        
+
         console.print(f"\n[bold]Using {model_name} with Multi-Agent CoT[/bold]")
         console.print("=" * 80)
-        
+
         # Test cases that demonstrate multi-agent CoT benefits
         test_cases = [
             {
@@ -96,15 +98,15 @@ def main():
                 "description": "Trade-off analysis requiring multiple perspectives"
             }
         ]
-        
+
         # Run test cases
         for test_case in test_cases:
-            test_multi_agent_cot(agent, test_case["query"], test_case["description"])
+            run_multi_agent_cot(agent, test_case["query"], test_case["description"])
             console.print("\n" + "=" * 80)
-    
+
     except Exception as e:
         console.print(f"\n[red]Error: {str(e)}")
         sys.exit(1)
 
 if __name__ == "__main__":
-    main() 
+    main()

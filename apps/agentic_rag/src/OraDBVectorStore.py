@@ -1,11 +1,6 @@
 from typing import List, Dict, Any, Optional
 import json
 import argparse
-import yaml
-import os
-from pathlib import Path
-import oracledb
-from langchain_core.documents import Document
 from langchain_oracledb import OracleVS, OracleEmbeddings
 try:
     from src.db_utils import load_config, get_db_connection
@@ -83,7 +78,7 @@ class OraDBVectorStore:
             if isinstance(embed_params, str):
                  try:
                      embed_params = json.loads(embed_params)
-                 except:
+                 except Exception:
                      pass
             
             self.embeddings = OracleEmbeddings(conn=self.connection, params=embed_params)
@@ -258,7 +253,7 @@ class OraDBVectorStore:
             if result:
                 return result[0]
             return 0
-        except Exception as e:
+        except Exception:
             # Table might not exist yet
             return 0
 

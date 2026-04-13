@@ -5,7 +5,6 @@ import argparse
 from docling.document_converter import DocumentConverter
 from urllib.parse import urlparse
 import warnings
-import transformers
 import uuid
 import os
 from langchain_oracledb.document_loaders.oracleai import OracleTextSplitter
@@ -24,7 +23,7 @@ def is_url(string: str) -> bool:
     try:
         result = urlparse(string)
         return all([result.scheme, result.netloc])
-    except:
+    except Exception:
         return False
 
 class PDFProcessor:
@@ -49,7 +48,9 @@ class PDFProcessor:
             print("Successfully initialized OracleTextSplitter")
         except Exception as e:
             print(f"Failed to initialize OracleTextSplitter: {e}")
-            raise
+            self.connection = None
+            self.splitter = None
+            self.splitter_params = {}
     
     def _split_text_with_oracle(self, text: str) -> List[str]:
         """Split text using OracleTextSplitter"""

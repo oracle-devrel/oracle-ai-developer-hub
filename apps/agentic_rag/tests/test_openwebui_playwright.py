@@ -15,14 +15,13 @@ Prerequisites:
 Run with: pytest tests/test_openwebui_playwright.py -v --browser chromium
 """
 
+
 import pytest
-import asyncio
-import time
-from typing import Optional
+import pytest_asyncio
 
 # Try to import playwright
 try:
-    from playwright.async_api import async_playwright, Page, Browser, expect
+    from playwright.async_api import Page, async_playwright
     from playwright.async_api import TimeoutError as PlaywrightTimeoutError
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
@@ -34,28 +33,33 @@ OPENWEBUI_URL = "http://localhost:3000"
 BACKEND_URL = "http://localhost:8000"
 DEFAULT_TIMEOUT = 30000  # 30 seconds
 
+def _openwebui_reachable() -> bool:
+    """Check if Open WebUI is reachable."""
+    try:
+        import requests
+        requests.get(OPENWEBUI_URL, timeout=2)
+        return True
+    except Exception:
+        return False
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create event loop for async tests."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(not PLAYWRIGHT_AVAILABLE, reason="Playwright not installed"),
+    pytest.mark.skipif(not _openwebui_reachable(), reason="Open WebUI not running at localhost:3000"),
+]
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def browser():
     """Create browser instance."""
-    if not PLAYWRIGHT_AVAILABLE:
-        pytest.skip("Playwright not installed")
-
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         yield browser
         await browser.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def page(browser):
     """Create new page for each test."""
     context = await browser.new_context()
@@ -65,7 +69,6 @@ async def page(browser):
     await context.close()
 
 
-@pytest.mark.skipif(not PLAYWRIGHT_AVAILABLE, reason="Playwright not installed")
 class TestOpenWebUIConnection:
     """Test Open WebUI connection and basic functionality."""
 
@@ -101,7 +104,6 @@ class TestOpenWebUIConnection:
         assert response["data"]["status"] == "ok"
 
 
-@pytest.mark.skipif(not PLAYWRIGHT_AVAILABLE, reason="Playwright not installed")
 class TestModelSelection:
     """Test model selection in Open WebUI."""
 
@@ -147,11 +149,10 @@ class TestModelSelection:
             pytest.skip("Could not locate model selector - UI structure may differ")
 
 
-@pytest.mark.skipif(not PLAYWRIGHT_AVAILABLE, reason="Playwright not installed")
 class TestChatFunctionality:
     """Test chat functionality."""
 
-    async def _find_chat_input(self, page: Page) -> Optional[str]:
+    async def _find_chat_input(self, page: Page) -> str | None:
         """Find the chat input element."""
         possible_selectors = [
             'textarea[placeholder*="message"]',
@@ -171,7 +172,7 @@ class TestChatFunctionality:
                 continue
         return None
 
-    async def _find_send_button(self, page: Page) -> Optional[str]:
+    async def _find_send_button(self, page: Page) -> str | None:
         """Find the send button element."""
         possible_selectors = [
             'button[type="submit"]',
@@ -290,7 +291,6 @@ class TestChatFunctionality:
             pytest.fail("Timeout during streaming test")
 
 
-@pytest.mark.skipif(not PLAYWRIGHT_AVAILABLE, reason="Playwright not installed")
 class TestErrorHandling:
     """Test error handling in the UI."""
 

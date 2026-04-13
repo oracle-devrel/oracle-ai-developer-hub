@@ -7,10 +7,8 @@ JSON-RPC 2.0 requests and routes them to appropriate methods.
 import asyncio
 import logging
 import os
-import re
 import yaml
-from typing import Dict, Any, Optional
-from .a2a_models import A2ARequest, A2AResponse, A2AError, TaskInfo, TaskStatus, DocumentQueryParams, DocumentUploadParams, TaskCreateParams, TaskStatusParams, AgentDiscoverParams, AgentCard, AgentCapability, AgentEndpoint
+from .a2a_models import A2AResponse, A2AError, DocumentUploadParams, AgentCard
 from .task_manager import TaskManager
 from .agent_registry import AgentRegistry
 from .specialized_agent_cards import get_all_specialized_agent_cards, get_agent_card_by_id

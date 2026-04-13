@@ -10,7 +10,6 @@ Make sure your server is running: python main.py
 
 import requests
 import json
-import sys
 from pathlib import Path
 
 
@@ -47,7 +46,7 @@ def make_request(method, endpoint, data=None, files=None, base_url="http://local
         try:
             error_detail = response.json()
             return {"error": f"HTTP {e.response.status_code}: {error_detail.get('detail', str(e))}"}
-        except:
+        except Exception:
             return {"error": f"HTTP {e.response.status_code}: {str(e)}"}
     except Exception as e:
         return {"error": f"Request failed: {str(e)}"}

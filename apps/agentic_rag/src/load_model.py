@@ -1,7 +1,6 @@
 
 import oracledb
 import yaml
-import os
 import requests
 import zipfile
 import io

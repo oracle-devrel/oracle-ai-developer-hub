@@ -552,31 +552,31 @@ class OraDBEventLogger:
             self.cursor.execute(sql)
             avg_a2a_duration = self.cursor.fetchone()[0]
             stats["avg_a2a_duration_ms"] = float(avg_a2a_duration) if avg_a2a_duration else 0
-        except:
+        except Exception:
             stats["avg_a2a_duration_ms"] = 0
-        
+
         # Get average response times for model events
         try:
             sql = "SELECT AVG(duration_ms) FROM MODEL_EVENTS WHERE duration_ms IS NOT NULL"
             self.cursor.execute(sql)
             avg_model_duration = self.cursor.fetchone()[0]
             stats["avg_model_duration_ms"] = float(avg_model_duration) if avg_model_duration else 0
-        except:
+        except Exception:
             stats["avg_model_duration_ms"] = 0
-        
+
         # Get most used models
         try:
             sql = """
-            SELECT model_name, COUNT(*) as count 
-            FROM MODEL_EVENTS 
-            GROUP BY model_name 
-            ORDER BY count DESC 
+            SELECT model_name, COUNT(*) as count
+            FROM MODEL_EVENTS
+            GROUP BY model_name
+            ORDER BY count DESC
             FETCH FIRST 5 ROWS ONLY
             """
             self.cursor.execute(sql)
             rows = self.cursor.fetchall()
             stats["top_models"] = [{"model": row[0], "count": row[1]} for row in rows]
-        except:
+        except Exception:
             stats["top_models"] = []
         
         return stats

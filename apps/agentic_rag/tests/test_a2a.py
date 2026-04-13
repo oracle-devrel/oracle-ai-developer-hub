@@ -12,30 +12,32 @@ This script tests all A2A protocol functionality including:
 Make sure A2A server is running: python main.py
 """
 
-import requests
 import json
-import time
 import sys
+import time
+
+import requests
+
 
 class A2ATester:
     """A2A Protocol Tester"""
-    
+
     def __init__(self, base_url="http://localhost:8000"):
         self.base_url = base_url
         self.test_results = []
-    
+
     def make_a2a_request(self, method, params, request_id=None):
         """Make an A2A JSON-RPC request"""
         if request_id is None:
             request_id = f"test-{int(time.time())}"
-        
+
         payload = {
             "jsonrpc": "2.0",
             "method": method,
             "params": params,
             "id": request_id
         }
-        
+
         try:
             response = requests.post(
                 f"{self.base_url}/a2a",
@@ -46,11 +48,11 @@ class A2ATester:
             return response.json()
         except Exception as e:
             return {"error": {"message": str(e), "code": -1}}
-    
+
     def test_health_check(self):
         """Test A2A health check"""
         print("🏥 Testing Health Check...")
-        
+
         try:
             response = requests.get(f"{self.base_url}/a2a/health", timeout=5)
             if response.status_code == 200:
@@ -71,11 +73,11 @@ class A2ATester:
             print(f"❌ Health Check: ERROR - {str(e)}")
             self.test_results.append(("Health Check", False, str(e)))
             return False
-    
+
     def test_agent_card(self):
         """Test A2A agent card retrieval"""
         print("🔍 Testing Agent Card...")
-        
+
         try:
             response = requests.get(f"{self.base_url}/agent_card", timeout=10)
             if response.status_code == 200:
@@ -94,29 +96,29 @@ class A2ATester:
             print(f"❌ Agent Card: ERROR - {str(e)}")
             self.test_results.append(("Agent Card", False, str(e)))
             return False
-    
+
     def test_agent_registration(self):
         """Test A2A agent registration"""
         print("📝 Testing Agent Registration...")
-        
+
         try:
             # First get the agent card to register
             card_response = requests.get(f"{self.base_url}/agent_card", timeout=10)
             if card_response.status_code != 200:
                 print(f"❌ Agent Registration: FAILED - Could not get agent card (HTTP {card_response.status_code})")
-                self.test_results.append(("Agent Registration", False, f"Could not get agent card"))
+                self.test_results.append(("Agent Registration", False, "Could not get agent card"))
                 return False
-            
+
             agent_card_data = card_response.json()
-            
+
             # Register the agent using the agent card data
             response = self.make_a2a_request(
                 "agent.register",
                 {"agent_card": agent_card_data}
             )
-            
+
             print(f"Registration response: {json.dumps(response, indent=2)}")
-            
+
             if response.get("error") is not None:
                 print(f"❌ Agent Registration: FAILED - Full response: {json.dumps(response, indent=2)}")
                 self.test_results.append(("Agent Registration", False, str(response)))
@@ -124,21 +126,21 @@ class A2ATester:
             else:
                 result = response.get("result", {})
                 print(f"Full registration result: {json.dumps(result, indent=2)}")
-                
+
                 success = result.get("success", False)
                 agent_id = result.get("agent_id")
                 capabilities = result.get("capabilities", 0)
                 registry_size = result.get("registry_size", 0)
-                
+
                 if success and agent_id:
-                    print(f"✅ Agent Registration: PASSED")
+                    print("✅ Agent Registration: PASSED")
                     print(f"   Agent ID: {agent_id}")
                     print(f"   Capabilities: {capabilities}")
                     print(f"   Registry Size: {registry_size}")
                     self.test_results.append(("Agent Registration", True, f"Registered agent {agent_id}"))
                     return True
                 else:
-                    print(f"❌ Agent Registration: FAILED - Registration unsuccessful")
+                    print("❌ Agent Registration: FAILED - Registration unsuccessful")
                     print(f"   Success: {success}")
                     print(f"   Agent ID: {agent_id}")
                     print(f"   Full result: {json.dumps(result, indent=2)}")
@@ -148,19 +150,19 @@ class A2ATester:
             print(f"❌ Agent Registration: ERROR - {str(e)}")
             self.test_results.append(("Agent Registration", False, str(e)))
             return False
-    
+
     def test_agent_discovery(self):
         """Test A2A agent discovery"""
         print("🔍 Testing Agent Discovery...")
-        
+
         try:
             response = self.make_a2a_request(
                 "agent.discover",
                 {"capability": "document.query"}
             )
-            
+
             print(f"Discovery response: {json.dumps(response, indent=2)}")
-            
+
             if response.get("error") is not None:
                 print(f"❌ Agent Discovery: FAILED - Full response: {json.dumps(response, indent=2)}")
                 self.test_results.append(("Agent Discovery", False, str(response)))
@@ -187,11 +189,11 @@ class A2ATester:
             print(f"❌ Agent Discovery: ERROR - {str(e)}")
             self.test_results.append(("Agent Discovery", False, str(e)))
             return False
-    
+
     def test_document_query(self):
         """Test A2A document query"""
         print("📄 Testing Document Query...")
-        
+
         try:
             response = self.make_a2a_request(
                 "document.query",
@@ -202,7 +204,7 @@ class A2ATester:
                     "max_results": 3
                 }
             )
-            
+
             if response.get("error") is not None:
                 print(f"❌ Document Query: FAILED - Full response: {json.dumps(response, indent=2)}")
                 self.test_results.append(("Document Query", False, str(response)))
@@ -212,12 +214,12 @@ class A2ATester:
                 print(f"Full document query result: {json.dumps(result, indent=2)}")
                 answer = result.get("answer", "")
                 if answer and answer != "No answer provided" and answer.strip():
-                    print(f"✅ Document Query: PASSED")
+                    print("✅ Document Query: PASSED")
                     print(f"   Answer: {answer[:100]}...")
                     self.test_results.append(("Document Query", True, "Query processed successfully"))
                     return True
                 else:
-                    print(f"❌ Document Query: FAILED - No valid answer")
+                    print("❌ Document Query: FAILED - No valid answer")
                     print(f"   Full result: {json.dumps(result, indent=2)}")
                     self.test_results.append(("Document Query", False, "No valid answer returned"))
                     return False
@@ -225,11 +227,11 @@ class A2ATester:
             print(f"❌ Document Query: ERROR - {str(e)}")
             self.test_results.append(("Document Query", False, str(e)))
             return False
-    
+
     def test_task_operations(self):
         """Test A2A task creation and status"""
         print("📋 Testing Task Operations...")
-        
+
         try:
             # Create task
             create_response = self.make_a2a_request(
@@ -243,90 +245,90 @@ class A2ATester:
                     }
                 }
             )
-            
+
             if create_response.get("error") is not None:
                 print(f"❌ Task Creation: FAILED - Full response: {json.dumps(create_response, indent=2)}")
                 self.test_results.append(("Task Creation", False, str(create_response)))
                 return False
-            
+
             result = create_response.get("result", {})
             print(f"Full task creation result: {json.dumps(result, indent=2)}")
             task_id = result.get("task_id")
-            
+
             if not task_id:
                 print("❌ Task Creation: FAILED - No task ID returned")
                 print(f"   Full result: {json.dumps(result, indent=2)}")
                 self.test_results.append(("Task Creation", False, "No task ID returned"))
                 return False
-            
+
             print(f"✅ Task Creation: PASSED - Created task {task_id}")
             self.test_results.append(("Task Creation", True, f"Created task {task_id}"))
-            
+
             # Check task status
             time.sleep(1)
             status_response = self.make_a2a_request(
                 "task.status",
                 {"task_id": task_id}
             )
-            
+
             if status_response.get("error") is not None:
                 print(f"❌ Task Status: FAILED - Full response: {json.dumps(status_response, indent=2)}")
                 self.test_results.append(("Task Status", False, str(status_response)))
                 return False
-            
+
             status_result = status_response.get("result", {})
             print(f"Full task status result: {json.dumps(status_result, indent=2)}")
             task_status = status_result.get("status", "unknown")
             print(f"✅ Task Status: PASSED - Status: {task_status}")
             self.test_results.append(("Task Status", True, f"Status: {task_status}"))
-            
+
             return True
-            
+
         except Exception as e:
             print(f"❌ Task Operations: ERROR - {str(e)}")
             self.test_results.append(("Task Operations", False, str(e)))
             return False
-    
+
     def run_all_tests(self):
         """Run all A2A tests"""
         print("🧪 Running A2A Test Suite...")
         print("=" * 60)
-        
+
         all_passed = True
-        
+
         # Test 1: Health Check
         if not self.test_health_check():
             all_passed = False
-        
+
         # Test 2: Agent Card
         if not self.test_agent_card():
             all_passed = False
-        
+
         # Test 3: Agent Registration
         if not self.test_agent_registration():
             all_passed = False
-        
+
         # Test 4: Agent Discovery
         if not self.test_agent_discovery():
             all_passed = False
-        
+
         # Test 5: Document Query
         if not self.test_document_query():
             all_passed = False
-        
+
         # Test 6: Task Operations
         if not self.test_task_operations():
             all_passed = False
-        
+
         # Summary
         print("\n" + "=" * 60)
         print("📊 Test Results Summary:")
         print("-" * 60)
-        
+
         for test_name, passed, message in self.test_results:
             status = "✅ PASS" if passed else "❌ FAIL"
             print(f"{status} {test_name}: {message}")
-        
+
         print("-" * 60)
         if all_passed:
             print("🎉 All A2A tests passed!")
@@ -343,7 +345,7 @@ def main():
     print("=" * 60)
     print("Make sure A2A server is running: python main.py")
     print()
-    
+
     tester = A2ATester()
     return tester.run_all_tests()
 

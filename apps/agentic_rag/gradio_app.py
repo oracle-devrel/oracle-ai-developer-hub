@@ -48,7 +48,11 @@ def load_config():
         return {}
 
 # Initialize components
-pdf_processor = PDFProcessor()
+try:
+    pdf_processor = PDFProcessor()
+except Exception as e:
+    print(f"Warning: PDFProcessor init failed (Oracle DB unavailable): {e}")
+    pdf_processor = None
 web_processor = WebProcessor()
 repo_processor = RepoProcessor()
 

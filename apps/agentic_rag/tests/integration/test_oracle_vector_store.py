@@ -11,7 +11,6 @@ What this catches:
 """
 import pytest
 
-
 pytestmark = [pytest.mark.integration, pytest.mark.requires_oracle]
 
 

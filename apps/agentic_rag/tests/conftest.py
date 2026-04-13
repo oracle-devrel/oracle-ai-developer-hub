@@ -29,10 +29,8 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # Path setup: make src/ importable for all tests in this project.
@@ -48,7 +46,7 @@ if str(_SRC) not in sys.path:
 # ---------------------------------------------------------------------------
 # Oracle DB configuration helpers.
 # ---------------------------------------------------------------------------
-def _oracle_config_from_env() -> Dict[str, str]:
+def _oracle_config_from_env() -> dict[str, str]:
     """Build an Oracle DB config dict from environment variables.
 
     Defaults match the docker-compose.test.yml setup so a developer who
@@ -62,7 +60,7 @@ def _oracle_config_from_env() -> Dict[str, str]:
     }
 
 
-def _oracle_reachable(config: Dict[str, str], timeout: float = 2.0) -> bool:
+def _oracle_reachable(config: dict[str, str], timeout: float = 2.0) -> bool:
     """Quick TCP probe of the Oracle DSN host:port."""
     dsn = config.get("ORACLE_DB_DSN", "")
     # DSN format: host:port/service
@@ -75,7 +73,7 @@ def _oracle_reachable(config: Dict[str, str], timeout: float = 2.0) -> bool:
     try:
         with socket.create_connection((host, port), timeout=timeout):
             return True
-    except (OSError, socket.timeout):
+    except (TimeoutError, OSError):
         return False
 
 
@@ -99,7 +97,7 @@ class DeterministicEmbedding:
 
     DIM = 384
 
-    def _vec(self, text: str) -> List[float]:
+    def _vec(self, text: str) -> list[float]:
         # Hash the text into enough bytes, then map each byte to [-1, 1].
         h = hashlib.sha256(text.encode("utf-8")).digest()
         # Expand to DIM bytes by repeating the digest.
@@ -107,10 +105,10 @@ class DeterministicEmbedding:
         expanded = (h * repeats)[: self.DIM]
         return [(b / 127.5) - 1.0 for b in expanded]
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         return [self._vec(t) for t in texts]
 
-    def embed_query(self, text: str) -> List[float]:
+    def embed_query(self, text: str) -> list[float]:
         return self._vec(text)
 
 
@@ -147,7 +145,7 @@ def _patch_load_config():
 # Service availability fixtures.
 # ---------------------------------------------------------------------------
 @pytest.fixture(scope="session")
-def oracle_config() -> Dict[str, str]:
+def oracle_config() -> dict[str, str]:
     return _oracle_config_from_env()
 
 
@@ -211,8 +209,8 @@ def ollama_test_model(ollama_available, ollama_host) -> str:
             f"Ollama not reachable at {ollama_host}. "
             "Start it with `ollama serve` or set OLLAMA_HOST."
         )
-    import urllib.request
     import json
+    import urllib.request
 
     # Check if model is already present.
     try:

@@ -7,7 +7,7 @@ allowing agents to register themselves and discover other agents.
 
 import logging
 from typing import Dict, List, Optional, Any
-from src.a2a_models import AgentCard, AgentCapability
+from src.a2a_models import AgentCard
 
 logger = logging.getLogger(__name__)
 

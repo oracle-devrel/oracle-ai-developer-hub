@@ -7,10 +7,9 @@ Provides endpoints to configure:
 - System preferences
 """
 import os
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-import json
 
 router = APIRouter(prefix="/v1/settings", tags=["Settings"])
 
@@ -106,7 +105,6 @@ async def get_current_model_endpoint():
 @router.put("/model")
 async def update_model(request: UpdateModelRequest):
     """Update the active LLM model."""
-    available = get_available_ollama_models()
     old_model = _current_settings["model_name"]
     set_current_model(request.model_name)
     return {

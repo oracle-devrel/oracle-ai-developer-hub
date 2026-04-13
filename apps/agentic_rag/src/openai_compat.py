@@ -18,13 +18,11 @@ import re
 import os
 import queue
 import threading
-import sys
 import logging
 from datetime import datetime
-from typing import List, Dict, Any, Optional, AsyncGenerator, Union
-from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import StreamingResponse, JSONResponse
-from pydantic import BaseModel
+from typing import List, Dict, Any, Optional, AsyncGenerator
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)
 
@@ -34,13 +32,11 @@ try:
 except ImportError:
     INTERCEPTOR_AVAILABLE = False
 
-from .openai_models import (
+from .openai_models import (  # noqa: E402
     ChatCompletionRequest, ChatCompletionResponse, ChatCompletionChoice,
-    ChatCompletionChunk, ChatCompletionChunkChoice, ChatMessage, DeltaContent,
-    ModelList, ModelInfo, UsageInfo, ErrorResponse, ErrorDetail, ContentPart,
-    FileAttachment, REASONING_MODELS, get_model_list, get_model_config
+    ChatMessage, ModelList, ModelInfo, UsageInfo, get_model_list, get_model_config
 )
-from .web_processor import WebProcessor, is_url
+from .web_processor import WebProcessor, is_url  # noqa: E402
 
 router = APIRouter(prefix='/v1', tags=['OpenAI Compatible'])
 

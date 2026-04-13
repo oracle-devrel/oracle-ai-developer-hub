@@ -7,7 +7,10 @@ from urllib.parse import urlparse
 import warnings
 import uuid
 import os
-from langchain_oracledb.document_loaders.oracleai import OracleTextSplitter
+try:
+    from langchain_oracledb.document_loaders.oracleai import OracleTextSplitter
+except ImportError:
+    OracleTextSplitter = None
 try:
     from src.db_utils import get_db_connection
 except ImportError:
@@ -53,7 +56,20 @@ class PDFProcessor:
             self.splitter_params = {}
     
     def _split_text_with_oracle(self, text: str) -> List[str]:
-        """Split text using OracleTextSplitter"""
+        """Split text using OracleTextSplitter, with character-based fallback."""
+        if self.splitter is None:
+            # Fallback: split into ~1000-char chunks on paragraph boundaries.
+            chunks = []
+            for para in text.split("\n\n"):
+                para = para.strip()
+                if not para:
+                    continue
+                if len(para) <= 1000:
+                    chunks.append(para)
+                else:
+                    for i in range(0, len(para), 1000):
+                        chunks.append(para[i:i + 1000])
+            return chunks if chunks else [text]
         try:
             return self.splitter.split_text(text)
         except Exception as e:

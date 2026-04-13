@@ -156,6 +156,7 @@ def _classify(text):
         )
     ):
         return "http"
+    return "info"
 
 
 _stream_lock = threading.Lock()

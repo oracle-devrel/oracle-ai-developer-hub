@@ -25,6 +25,7 @@ try:
     from playwright.async_api import TimeoutError as PlaywrightTimeoutError
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
+    Page = None  # type: ignore[assignment,misc]
     PLAYWRIGHT_AVAILABLE = False
 
 

@@ -18,6 +18,7 @@ import re
 import os
 import queue
 import threading
+from pathlib import Path
 import logging
 from datetime import datetime
 from typing import List, Dict, Any, Optional, AsyncGenerator
@@ -236,7 +237,7 @@ async def process_file_references(message):
         cleaned_message = cleaned_message.replace(f'@@{filename}', '').strip()
         try:
             result = await asyncio.get_event_loop().run_in_executor(
-                None, lambda f=filename: _file_handler.process_file(f, permanent=True)
+                None, lambda f=filename: _file_handler.process_file(Path(f))
             )
             if result and result.get('content'):
                 file_context += f'\n\n--- Content from {filename} ---\n{result["content"]}\n'
@@ -266,7 +267,7 @@ async def process_file_references(message):
         cleaned_message = cleaned_message.replace(f'@{filename}', '').strip()
         try:
             result = await asyncio.get_event_loop().run_in_executor(
-                None, lambda f=filename: _file_handler.process_file(f, permanent=False)
+                None, lambda f=filename: _file_handler.process_file(Path(f))
             )
             if result and result.get('content'):
                 file_context += f'\n\n--- Content from {filename} ---\n{result["content"]}\n'
@@ -793,7 +794,7 @@ async def execute_via_a2a(
         }
 
     try:
-        from a2a_models import A2ARequest
+        from src.a2a_models import A2ARequest
         if not request_id:
             request_id = str(uuid.uuid4())
 
@@ -885,7 +886,7 @@ async def persist_openwebui_context_to_rag(message_content):
             # Store in WEBCOLLECTION
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(
-                None, lambda c=web_chunks: _vector_store.add_web_chunks(c)
+                None, lambda c=web_chunks, u=url: _vector_store.add_web_chunks(c, source_id=u or 'openwebui')
             )
             total_chunks_stored += len(web_chunks)
 
@@ -977,7 +978,7 @@ async def process_openwebui_url_uploads(request_files):
 
                 # Store in WEBCOLLECTION
                 await loop.run_in_executor(
-                    None, lambda c=web_chunks: _vector_store.add_web_chunks(c)
+                    None, lambda c=web_chunks, u=url: _vector_store.add_web_chunks(c, source_id=u)
                 )
 
                 urls_processed += 1

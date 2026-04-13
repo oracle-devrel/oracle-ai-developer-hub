@@ -240,6 +240,8 @@ async def upload_pdf(file: UploadFile = File(...)):
             buffer.write(content)
         
         # Process the PDF
+        if not pdf_processor:
+            raise HTTPException(status_code=503, detail="PDF processor not available (Oracle DB may be unreachable)")
         chunks, document_id = pdf_processor.process_pdf(temp_path)
         
         # Add chunks to vector store
@@ -553,17 +555,12 @@ async def sync_openwebui_embeddings(request: EmbeddingSyncRequest):
 
         # Log the sync event
         if EVENT_LOGGING_ENABLED:
-            event_logger.log_ingest_event(
+            event_logger.log_document_event(
                 document_type="openwebui_sync",
-                source_path=request.collection_name,
-                total_chunks=len(chunks),
-                successful_chunks=len(chunks),
-                failed_chunks=0,
-                collection_used=collection_target,
-                metadata={
-                    "source": request.source,
-                    "original_collection": request.collection_name
-                }
+                document_id=request.collection_name,
+                source=request.source,
+                chunks_processed=len(chunks),
+                status="success"
             )
             event_logger.log_api_event(
                 endpoint="/sync/embeddings",

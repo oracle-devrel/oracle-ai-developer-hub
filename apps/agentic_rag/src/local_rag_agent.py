@@ -525,8 +525,8 @@ Answer:"""
                 if 'page' in metadata:
                     sources[source].add(str(metadata['page']))
                 # Add file path if available for code
-                if 'file_path' in metadata:
-                    sources[source] = metadata['file_path']
+                elif 'file_path' in metadata:
+                    sources[source].add(metadata['file_path'])
             
             # Print concise source information
             print("\nSources detected:")

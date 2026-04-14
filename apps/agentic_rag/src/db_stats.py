@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import sys
-import os
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel

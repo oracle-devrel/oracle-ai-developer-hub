@@ -18,13 +18,12 @@ import re
 import os
 import queue
 import threading
-import sys
+from pathlib import Path
 import logging
 from datetime import datetime
-from typing import List, Dict, Any, Optional, AsyncGenerator, Union
-from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import StreamingResponse, JSONResponse
-from pydantic import BaseModel
+from typing import List, Dict, Any, Optional, AsyncGenerator
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)
 
@@ -34,13 +33,11 @@ try:
 except ImportError:
     INTERCEPTOR_AVAILABLE = False
 
-from openai_models import (
+from .openai_models import (  # noqa: E402
     ChatCompletionRequest, ChatCompletionResponse, ChatCompletionChoice,
-    ChatCompletionChunk, ChatCompletionChunkChoice, ChatMessage, DeltaContent,
-    ModelList, ModelInfo, UsageInfo, ErrorResponse, ErrorDetail, ContentPart,
-    FileAttachment, REASONING_MODELS, get_model_list, get_model_config
+    ChatMessage, ModelList, ModelInfo, UsageInfo, get_model_list, get_model_config
 )
-from web_processor import WebProcessor, is_url
+from .web_processor import WebProcessor, is_url  # noqa: E402
 
 router = APIRouter(prefix='/v1', tags=['OpenAI Compatible'])
 
@@ -240,7 +237,7 @@ async def process_file_references(message):
         cleaned_message = cleaned_message.replace(f'@@{filename}', '').strip()
         try:
             result = await asyncio.get_event_loop().run_in_executor(
-                None, lambda f=filename: _file_handler.process_file(f, permanent=True)
+                None, lambda f=filename: _file_handler.process_file(Path(f))
             )
             if result and result.get('content'):
                 file_context += f'\n\n--- Content from {filename} ---\n{result["content"]}\n'
@@ -270,7 +267,7 @@ async def process_file_references(message):
         cleaned_message = cleaned_message.replace(f'@{filename}', '').strip()
         try:
             result = await asyncio.get_event_loop().run_in_executor(
-                None, lambda f=filename: _file_handler.process_file(f, permanent=False)
+                None, lambda f=filename: _file_handler.process_file(Path(f))
             )
             if result and result.get('content'):
                 file_context += f'\n\n--- Content from {filename} ---\n{result["content"]}\n'
@@ -797,7 +794,7 @@ async def execute_via_a2a(
         }
 
     try:
-        from a2a_models import A2ARequest
+        from src.a2a_models import A2ARequest
         if not request_id:
             request_id = str(uuid.uuid4())
 
@@ -889,7 +886,7 @@ async def persist_openwebui_context_to_rag(message_content):
             # Store in WEBCOLLECTION
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(
-                None, lambda c=web_chunks: _vector_store.add_web_chunks(c)
+                None, lambda c=web_chunks, u=url: _vector_store.add_web_chunks(c, source_id=u or 'openwebui')
             )
             total_chunks_stored += len(web_chunks)
 
@@ -981,7 +978,7 @@ async def process_openwebui_url_uploads(request_files):
 
                 # Store in WEBCOLLECTION
                 await loop.run_in_executor(
-                    None, lambda c=web_chunks: _vector_store.add_web_chunks(c)
+                    None, lambda c=web_chunks, u=url: _vector_store.add_web_chunks(c, source_id=u)
                 )
 
                 urls_processed += 1

@@ -6,7 +6,6 @@ This script demonstrates the A2A protocol functionality by making
 sample requests to the agentic_rag system.
 """
 
-import asyncio
 import json
 import requests
 from typing import Dict, Any

@@ -9,18 +9,30 @@ This test suite verifies that:
 Run with: pytest tests/test_openwebui_streaming.py -v
 """
 
-import pytest
-import requests
 import json
-import time
-import asyncio
-from typing import Generator, List
 from concurrent.futures import ThreadPoolExecutor
 
+import pytest
+import requests
 
 # Backend configuration
 BACKEND_URL = "http://localhost:8000"
 TIMEOUT = 60  # seconds
+
+
+def _backend_reachable() -> bool:
+    """Check if the backend server is reachable."""
+    try:
+        requests.get(f"{BACKEND_URL}/v1/health", timeout=2)
+        return True
+    except Exception:
+        return False
+
+
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(not _backend_reachable(), reason="Backend not running at localhost:8000"),
+]
 
 
 class TestBackendHealth:
@@ -103,7 +115,7 @@ class TestNonStreamingChatCompletions:
 class TestStreamingChatCompletions:
     """Test streaming chat completions."""
 
-    def _consume_stream(self, response) -> List[dict]:
+    def _consume_stream(self, response) -> list[dict]:
         """Consume SSE stream and return parsed chunks."""
         chunks = []
         for line in response.iter_lines(decode_unicode=True):
@@ -175,10 +187,10 @@ class TestStreamingChatCompletions:
 
         lines = list(response.iter_lines(decode_unicode=True))
         # Filter non-empty lines
-        data_lines = [l for l in lines if l and l.startswith("data:")]
+        data_lines = [line for line in lines if line and line.startswith("data:")]
 
         assert len(data_lines) > 0, "No data lines received"
-        assert "data: [DONE]" in lines or any(l.strip() == "data: [DONE]" for l in lines), \
+        assert "data: [DONE]" in lines or any(line.strip() == "data: [DONE]" for line in lines), \
             "Missing [DONE] marker"
 
     def test_streaming_chunk_format(self):

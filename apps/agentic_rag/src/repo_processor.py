@@ -3,7 +3,6 @@ from typing import List, Dict, Any, Tuple
 import json
 import argparse
 from urllib.parse import urlparse
-import warnings
 import uuid
 from gitingest import ingest
 
@@ -12,7 +11,7 @@ def is_github_url(url: str) -> bool:
     try:
         parsed = urlparse(url)
         return parsed.netloc.lower() == "github.com"
-    except:
+    except Exception:
         return False
 
 def extract_repo_name(repo_path: str) -> str:

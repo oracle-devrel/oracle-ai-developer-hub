@@ -8,11 +8,9 @@ This script demonstrates the data lake functionality by:
 4. Showing recent events
 """
 
-import sys
-import time
-from datetime import datetime
-
 import os
+import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 try:
@@ -32,9 +30,9 @@ def print_section(title):
 
 def test_event_logging():
     """Test the event logging system"""
-    
+
     print_section("Oracle DB Data Lake Event Logger Test")
-    
+
     # Initialize logger
     print("1️⃣ Initializing Event Logger...")
     try:
@@ -43,10 +41,10 @@ def test_event_logging():
     except Exception as e:
         print(f"❌ Failed to initialize event logger: {str(e)}")
         return
-    
+
     # Test A2A Event Logging
     print_section("Testing A2A Event Logging")
-    
+
     print("Logging Planner Agent event...")
     logger.log_a2a_event(
         agent_id="planner_agent_v1",
@@ -60,7 +58,7 @@ def test_event_logging():
         status="success"
     )
     print("✅ Planner event logged\n")
-    
+
     print("Logging Researcher Agent event...")
     logger.log_a2a_event(
         agent_id="researcher_agent_v1",
@@ -74,7 +72,7 @@ def test_event_logging():
         status="success"
     )
     print("✅ Researcher event logged\n")
-    
+
     print("Logging Synthesizer Agent event...")
     logger.log_a2a_event(
         agent_id="synthesizer_agent_v1",
@@ -88,10 +86,10 @@ def test_event_logging():
         status="success"
     )
     print("✅ Synthesizer event logged\n")
-    
+
     # Test API Event Logging
     print_section("Testing API Event Logging")
-    
+
     print("Logging /query endpoint event...")
     logger.log_api_event(
         endpoint="/query",
@@ -111,7 +109,7 @@ def test_event_logging():
         client_ip="127.0.0.1"
     )
     print("✅ API event logged\n")
-    
+
     print("Logging /a2a endpoint event...")
     logger.log_api_event(
         endpoint="/a2a",
@@ -128,10 +126,10 @@ def test_event_logging():
         duration_ms=2567.8
     )
     print("✅ A2A API event logged\n")
-    
+
     # Test Model Event Logging
     print_section("Testing Model Event Logging")
-    
+
     print("Logging gemma3:270m model inference...")
     logger.log_model_event(
         model_name="gemma3:270m",
@@ -146,7 +144,7 @@ def test_event_logging():
         context_chunks=0
     )
     print("✅ Model event logged\n")
-    
+
     print("Logging deepseek-r1 model inference with CoT...")
     logger.log_model_event(
         model_name="deepseek-r1",
@@ -161,10 +159,10 @@ def test_event_logging():
         context_chunks=5
     )
     print("✅ Model event logged\n")
-    
+
     # Test Document Event Logging
     print_section("Testing Document Event Logging")
-    
+
     print("Logging PDF document processing...")
     logger.log_document_event(
         document_type="pdf",
@@ -175,7 +173,7 @@ def test_event_logging():
         status="success"
     )
     print("✅ Document event logged\n")
-    
+
     print("Logging repository processing...")
     logger.log_document_event(
         document_type="repository",
@@ -186,10 +184,10 @@ def test_event_logging():
         status="success"
     )
     print("✅ Repository event logged\n")
-    
+
     # Test Query Event Logging
     print_section("Testing Query Event Logging")
-    
+
     print("Logging vector store query...")
     logger.log_query_event(
         query_text="machine learning algorithms",
@@ -199,10 +197,10 @@ def test_event_logging():
         metadata={"similarity_threshold": 0.7}
     )
     print("✅ Query event logged\n")
-    
+
     # Get Statistics
     print_section("Event Statistics")
-    
+
     stats = logger.get_statistics()
     print(f"Total Events:          {stats['total_events']}")
     print(f"A2A Events:            {stats['a2a_events']}")
@@ -212,15 +210,15 @@ def test_event_logging():
     print(f"Query Events:          {stats['query_events']}")
     print(f"\nAvg A2A Duration:      {stats['avg_a2a_duration_ms']:.2f} ms")
     print(f"Avg Model Duration:    {stats['avg_model_duration_ms']:.2f} ms")
-    
+
     if stats['top_models']:
         print("\nTop Models:")
         for i, model_stat in enumerate(stats['top_models'], 1):
             print(f"  {i}. {model_stat['model']}: {model_stat['count']} calls")
-    
+
     # Show Recent Events
     print_section("Recent A2A Events (Last 5)")
-    
+
     recent_events = logger.get_events(event_type="a2a", limit=5)
     for i, event in enumerate(recent_events, 1):
         print(f"{i}. Agent: {event.get('AGENT_NAME', 'Unknown')}")
@@ -229,10 +227,10 @@ def test_event_logging():
         print(f"   Status: {event.get('STATUS', 'N/A')}")
         print(f"   Time: {event.get('TIMESTAMP', 'N/A')}")
         print()
-    
+
     # Show Recent Model Events
     print_section("Recent Model Events (Last 3)")
-    
+
     model_events = logger.get_events(event_type="model", limit=3)
     for i, event in enumerate(model_events, 1):
         print(f"{i}. Model: {event.get('MODEL_NAME', 'Unknown')} ({event.get('MODEL_TYPE', 'N/A')})")
@@ -241,19 +239,19 @@ def test_event_logging():
         print(f"   Context Chunks: {event.get('CONTEXT_CHUNKS', 0)}")
         print(f"   Time: {event.get('TIMESTAMP', 'N/A')}")
         print()
-    
+
     # Show Event Counts
     print_section("Event Counts by Type")
-    
+
     for event_type in ["a2a", "api", "model", "document", "query"]:
         count = logger.get_event_count(event_type)
         print(f"{event_type.upper():12s}: {count:6d} events")
-    
+
     # Close connection
     print_section("Cleanup")
     logger.close()
     print("✅ Database connection closed")
-    
+
     print_section("Test Complete")
     print("✅ All event types tested successfully!")
     print("\nThe data lake is now storing all events in Oracle AI Database 26ai.")

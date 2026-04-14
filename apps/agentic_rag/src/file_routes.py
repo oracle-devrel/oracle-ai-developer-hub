@@ -7,15 +7,13 @@ Provides endpoints for:
 - Temporary file cleanup
 """
 
-import os
 import uuid
 import shutil
 from pathlib import Path
 from typing import Optional, List
-from datetime import datetime
 
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, Query
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from .file_handler import FileHandler, _temporary_files

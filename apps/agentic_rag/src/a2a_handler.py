@@ -7,15 +7,13 @@ JSON-RPC 2.0 requests and routes them to appropriate methods.
 import asyncio
 import logging
 import os
-import re
 import yaml
-from typing import Dict, Any, Optional
-from a2a_models import A2ARequest, A2AResponse, A2AError, TaskInfo, TaskStatus, DocumentQueryParams, DocumentUploadParams, TaskCreateParams, TaskStatusParams, AgentDiscoverParams, AgentCard, AgentCapability, AgentEndpoint
-from task_manager import TaskManager
-from agent_registry import AgentRegistry
-from specialized_agent_cards import get_all_specialized_agent_cards, get_agent_card_by_id
-from reasoning.rag_ensemble import RAGReasoningEnsemble
-from reasoning_agent_cards import get_all_reasoning_agent_cards, get_reasoning_agent_card_by_id
+from .a2a_models import A2AResponse, A2AError, DocumentUploadParams, AgentCard
+from .task_manager import TaskManager
+from .agent_registry import AgentRegistry
+from .specialized_agent_cards import get_all_specialized_agent_cards, get_agent_card_by_id
+from .reasoning.rag_ensemble import RAGReasoningEnsemble
+from .reasoning_agent_cards import get_all_reasoning_agent_cards, get_reasoning_agent_card_by_id
 logger = logging.getLogger(__name__)
 
 
@@ -113,7 +111,7 @@ class A2AHandler:
         if self._self_registered:
             return
         try:
-            from agent_card import get_agent_card
+            from .agent_card import get_agent_card
             card_data = get_agent_card()
             agent_card = AgentCard(**card_data)
             self.agent_registry.register_agent(agent_card)
@@ -394,7 +392,7 @@ class A2AHandler:
 
     async def handle_agent_card(self, params):
         '''Handle agent card requests'''
-        from agent_card import get_agent_card
+        from .agent_card import get_agent_card
         return get_agent_card()
 
     async def handle_reasoning_execute(self, params):

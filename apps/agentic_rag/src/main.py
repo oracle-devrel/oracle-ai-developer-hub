@@ -28,7 +28,7 @@ from .agent_card import get_agent_card
 from .openai_compat import router as openai_router, init_openai_compat
 
 # Settings API
-from .settings import router as settings_router, register_model_change_callback, get_current_model
+from .settings import router as settings_router, register_model_change_callback
 
 # Reasoning ensemble import
 try:
@@ -78,7 +78,11 @@ app.add_middleware(
 )
 
 # Initialize components
-pdf_processor = PDFProcessor()
+try:
+    pdf_processor = PDFProcessor()
+except Exception as e:
+    print(f"⚠️ PDFProcessor init failed (Oracle DB unavailable): {e}")
+    pdf_processor = None
 
 # Initialize vector store (prefer Oracle DB if available)
 if ORACLE_DB_AVAILABLE:
@@ -95,7 +99,7 @@ else:
 
 # Check for Ollama availability
 try:
-    import ollama
+    import ollama  # noqa: F401
     ollama_available = True
     print("\nOllama is available. You can use Ollama models for RAG.")
 except ImportError:
@@ -139,7 +143,7 @@ if FILE_HANDLER_AVAILABLE:
         print("\nInitializing File Handler for @file references...")
         file_handler = FileHandler(documents_dir="./documents", vector_store=vector_store)
         init_file_routes(file_handler)
-        print(f"File Handler initialized. Documents directory: ./documents")
+        print("File Handler initialized. Documents directory: ./documents")
     except Exception as e:
         print(f"⚠️ Failed to initialize File Handler: {str(e)}")
 
@@ -204,7 +208,7 @@ def on_model_change(new_model_name: str):
         file_handler=file_handler,
         a2a_handler=a2a_handler
     )
-    print(f"✅ OpenAI-compatible API updated")
+    print("✅ OpenAI-compatible API updated")
 
 
 register_model_change_callback(on_model_change)
@@ -236,6 +240,8 @@ async def upload_pdf(file: UploadFile = File(...)):
             buffer.write(content)
         
         # Process the PDF
+        if not pdf_processor:
+            raise HTTPException(status_code=503, detail="PDF processor not available (Oracle DB may be unreachable)")
         chunks, document_id = pdf_processor.process_pdf(temp_path)
         
         # Add chunks to vector store
@@ -543,24 +549,18 @@ async def sync_openwebui_embeddings(request: EmbeddingSyncRequest):
             collection_target = "WEBCOLLECTION"
 
         # Sync to Oracle AI Database
-        source_id = f"openwebui_{request.collection_name}"
         vector_store._add_chunks_to_collection(chunks, collection_target)
 
         processing_time = (time.time() - start_time) * 1000
 
         # Log the sync event
         if EVENT_LOGGING_ENABLED:
-            event_logger.log_ingest_event(
+            event_logger.log_document_event(
                 document_type="openwebui_sync",
-                source_path=request.collection_name,
-                total_chunks=len(chunks),
-                successful_chunks=len(chunks),
-                failed_chunks=0,
-                collection_used=collection_target,
-                metadata={
-                    "source": request.source,
-                    "original_collection": request.collection_name
-                }
+                document_id=request.collection_name,
+                source=request.source,
+                chunks_processed=len(chunks),
+                status="success"
             )
             event_logger.log_api_event(
                 endpoint="/sync/embeddings",
@@ -621,7 +621,7 @@ async def get_sync_status():
                 try:
                     # Try to get count (this is Oracle-specific)
                     collections[name] = {"status": "available"}
-                except:
+                except Exception:
                     collections[name] = {"status": "unknown"}
             else:
                 collections[name] = {"status": "not_initialized"}

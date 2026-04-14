@@ -4,7 +4,7 @@ Agent cards for reasoning strategies.
 Enables A2A discovery of all reasoning agents.
 """
 
-from typing import Dict, List, Any
+from typing import Dict, Any
 
 
 def get_reasoning_ensemble_card(base_url: str = "http://localhost:8000") -> Dict[str, Any]:

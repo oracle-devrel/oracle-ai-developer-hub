@@ -1,23 +1,25 @@
-import sys
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.local_rag_agent import LocalRAGAgent
-# from rag_agent import RAGAgent  # Removed as we are standardizing on LocalRAGAgent
-from src.store import VectorStore
-from dotenv import load_dotenv
-import yaml
 import argparse
+
+import yaml
+from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
+from src.local_rag_agent import LocalRAGAgent
+
+# from rag_agent import RAGAgent  # Removed as we are standardizing on LocalRAGAgent
+from src.store import VectorStore
 
 console = Console()
 
 def load_config():
     """Load configuration from config.yaml and .env"""
     try:
-        with open('config.yaml', 'r') as f:
+        with open('config.yaml') as f:
             config = yaml.safe_load(f)
         load_dotenv()
         return {
@@ -32,7 +34,7 @@ def compare_responses(agent, query: str, description: str):
     """Compare standard vs CoT responses for the same query"""
     console.print(f"\n[bold cyan]Test Case: {description}")
     console.print(Panel(f"Query: {query}", style="yellow"))
-    
+
     # Standard response
     agent.use_cot = False
     standard_response = agent.process_query(query)
@@ -41,7 +43,7 @@ def compare_responses(agent, query: str, description: str):
         title="Without Chain of Thought",
         style="blue"
     ))
-    
+
     # CoT response
     agent.use_cot = True
     cot_response = agent.process_query(query)
@@ -54,26 +56,26 @@ def compare_responses(agent, query: str, description: str):
 def main():
     parser = argparse.ArgumentParser(description="Compare standard vs Chain of Thought prompting")
     parser.add_argument("--model", default='local', help="Model to use (default: gemma3:270m)")
-    args = parser.parse_args()
-    
-    config = load_config()
-    
+    _args = parser.parse_args()
+
+    _config = load_config()
+
     # Try Oracle first, then Chroma
     try:
-        from OraDBVectorStore import OraDBVectorStore
+        from src.OraDBVectorStore import OraDBVectorStore
         store = OraDBVectorStore()
         console.print("[green]Using Oracle DB Vector Store[/green]")
     except ImportError:
         store = VectorStore(persist_directory="embeddings")
         console.print("[yellow]Using ChromaDB Vector Store[/yellow]")
-    
+
     # Initialize agent
     agent = LocalRAGAgent(store, model_name="gemma3:270m")
     model_name = "gemma3:270m"
-    
+
     console.print(f"\n[bold]Testing {model_name} Responses[/bold]")
     console.print("=" * 80)
-    
+
     # Test cases that highlight CoT benefits
     test_cases = [
         {
@@ -89,14 +91,14 @@ def main():
             "description": "Philosophical question requiring detailed reasoning"
         }
     ]
-    
+
     for test_case in test_cases:
         try:
             compare_responses(agent, test_case["query"], test_case["description"])
         except Exception as e:
             console.print(f"[red]Error in test case '{test_case['description']}': {str(e)}")
-    
+
     console.print("\n[bold green]Testing complete!")
 
 if __name__ == "__main__":
-    main() 
+    main()

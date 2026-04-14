@@ -11,14 +11,10 @@ Provides:
 import asyncio
 import logging
 import sys
-import io
 import time
 import json
 import re
-import base64
 import threading
-from queue import Queue
-from collections import deque
 from datetime import datetime
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, StreamingResponse, Response
@@ -160,6 +156,7 @@ def _classify(text):
         )
     ):
         return "http"
+    return "info"
 
 
 _stream_lock = threading.Lock()

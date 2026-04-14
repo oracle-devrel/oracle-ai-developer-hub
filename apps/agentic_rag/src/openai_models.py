@@ -5,7 +5,7 @@ These models define the request/response format for the OpenAI-compatible
 endpoints that Open WebUI and other clients can consume.
 """
 
-from typing import List, Optional, Dict, Any, Union, Literal
+from typing import List, Optional, Dict, Any, Union
 from pydantic import BaseModel, Field
 from enum import Enum
 import time

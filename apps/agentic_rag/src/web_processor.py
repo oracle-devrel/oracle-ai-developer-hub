@@ -4,14 +4,13 @@ import argparse
 from typing import List, Dict, Any
 from trafilatura import fetch_url, extract, extract_metadata
 from urllib.parse import urlparse
-import re
 
 def is_url(string: str) -> bool:
     """Check if a string is a valid URL"""
     try:
         result = urlparse(string)
         return all([result.scheme, result.netloc])
-    except:
+    except Exception:
         return False
 
 def get_domain(url: str) -> str:

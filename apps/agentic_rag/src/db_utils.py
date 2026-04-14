@@ -2,7 +2,6 @@ from typing import Dict, Optional
 import yaml
 from pathlib import Path
 import oracledb
-import os
 
 def load_config() -> Dict[str, str]:
     """Load configuration from config.yaml"""

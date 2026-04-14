@@ -15,7 +15,6 @@ import asyncio
 
 import pytest
 
-
 pytestmark = [pytest.mark.integration, pytest.mark.requires_oracle]
 
 

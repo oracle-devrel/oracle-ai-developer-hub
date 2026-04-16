@@ -30,6 +30,7 @@ dependencies {
 	implementation 'org.springframework.ai:spring-ai-starter-model-chat-memory-repository-jdbc'
 	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
 	implementation 'com.oracle.database.spring:oracle-spring-boot-starter-ucp:26.0.0'
+	implementation 'com.oracle.database.spring:oracle-spring-boot-starter-wallet:26.0.0'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

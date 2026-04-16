@@ -1,9 +1,12 @@
+import logging
 import os
 import pathlib
 import uuid
 
 import requests
 import streamlit as st
+
+logger = logging.getLogger("shopassist")
 
 # --- Constants ---
 FAVICON = pathlib.Path(__file__).parent / "favicon.ico"
@@ -110,8 +113,9 @@ def send_message(prompt, url):
                 )
                 resp.raise_for_status()
                 answer = resp.text
-            except Exception as e:
-                answer = f"Error contacting backend: {e}"
+            except Exception:
+                logger.exception("Error contacting backend at %s", url)
+                answer = "Sorry, I couldn't reach the assistant right now. Please try again in a moment."
         st.markdown(answer)
     st.session_state.messages.append({"role": "assistant", "content": answer})
 

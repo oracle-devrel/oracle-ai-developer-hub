@@ -60,6 +60,10 @@ graph TD
     K --> L[Response]
 ```
 
+## Deploying to Oracle Cloud
+
+To deploy this stack on Oracle Cloud Infrastructure (Autonomous Database + compute instances for backend, web, Ollama and ops, with full Terraform + Ansible automation), see [CLOUD_DEPLOYMENT.md](./CLOUD_DEPLOYMENT.md). The local-machine flow below remains the supported way to run the demo on a laptop.
+
 ## Prerequisites
 
 - Java 21+
@@ -73,11 +77,10 @@ graph TD
 
 ```bash
 mkdir -p ./oradata
-podman run -d --name oradb \
-  -p 1521:1521 \
-  -e ORACLE_PWD=Oracle123 \
-  -v ./oradata:/opt/oracle/oradata \
-  container-registry.oracle.com/database/free:latest
+```
+
+```bash
+podman run -d --name oradb -p 1521:1521 -e ORACLE_PWD=Oracle123 -v ./oradata:/opt/oracle/oradata container-registry.oracle.com/database/free:latest
 ```
 
 Wait for the database to be ready:
@@ -100,15 +103,25 @@ podman exec -i oradb sqlplus sys/Oracle123@freepdb1 as sysdba < setup-db.sql
 
 Load the ONNX embedding model into Oracle and create the hybrid vector index. This is a one-time setup.
 
-Download the pre-built `all-MiniLM-L12-v2` ONNX model from [Oracle ML](https://blogs.oracle.com/machinelearning/use-our-prebuilt-onnx-model-now-available-for-embedding-generation-in-oracle-database-23ai), then:
+Download the pre-built `all-MiniLM-L12-v2` ONNX model from [Oracle ML](https://blogs.oracle.com/machinelearning/use-our-prebuilt-onnx-model-now-available-for-embedding-generation-in-oracle-database-23ai).
+
+Create the dumps directory inside the container:
 
 ```bash
 podman exec oradb mkdir -p /opt/oracle/dumps
-podman cp all_MiniLM_L12_v2.onnx oradb:/opt/oracle/dumps/
-podman exec -i oradb sqlplus pdbadmin/Oracle123@freepdb1 < setup-hybrid-search.sql
 ```
 
-This loads the ONNX model into the database, creates the `POLICY_DOCS` table, and creates a hybrid vector index that combines vector similarity search with Oracle Text keyword search.
+Copy the ONNX model into the container:
+
+```bash
+podman cp models/all_MiniLM_L12_v2.onnx oradb:/opt/oracle/dumps/
+```
+
+Run the hybrid search setup script. This loads the ONNX model into the database, creates the `POLICY_DOCS` table, and creates a hybrid vector index that combines vector similarity search with Oracle Text keyword search:
+
+```bash
+podman exec -i oradb sqlplus pdbadmin/Oracle123@freepdb1 < setup-hybrid-search.sql
+```
 
 ### 4. Install Ollama, start the server, and pull the chat model
 
@@ -130,10 +143,10 @@ Verify it's running:
 curl -s http://localhost:11434/api/tags | jq .
 ```
 
-Pull the chat model:
+Pull the chat model. `qwen2.5` is used because it supports tool calling:
 
 ```bash
-ollama pull qwen2.5          # chat model with tool calling support
+ollama pull qwen2.5
 ```
 
 > From cURL:
@@ -149,6 +162,7 @@ Embeddings are computed in-database by the ONNX model loaded in step 3 — no Ol
 ```bash
 cd src/chatserver/src/main/resources
 cp application-local.yaml.example application-local.yaml
+cd ../../../../
 ```
 
 Ollama defaults (`localhost:11434`, `qwen2.5`) are configured in `application.yaml`. The local profile only overrides database credentials and logging.
@@ -158,47 +172,47 @@ Ollama defaults (`localhost:11434`, `qwen2.5`) are configured in `application.ya
 ```bash
 cd src/chatserver
 ./gradlew bootRun --args='--spring.profiles.active=local'
+cd ../..
 ```
 
 The local profile uses the `PDBADMIN` user that already exists in the Oracle Free container (privileges granted in step 2).
 
 ### 7. Start the Web UI
 
+Install the Python dependencies:
+
 ```bash
 cd src/web
 pip install -r requirements.txt
-streamlit run app.py
+cd ../..
 ```
 
-Opens on `http://localhost:8501`.
+Start Streamlit. Opens on `http://localhost:8501`:
+
+```bash
+cd src/web
+streamlit run app.py
+cd ../..
+```
 
 ### 8. Test with curl
 
 Chat (with conversation memory):
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/agent/chat \
-  -H "Content-Type: text/plain" \
-  -H "X-Conversation-Id: test-1" \
-  -d "What orders do I have?"
+curl -X POST http://localhost:8080/api/v1/agent/chat -H "Content-Type: text/plain" -H "X-Conversation-Id: test-1" -d "What orders do I have?"
 ```
 
 Ask about policies (semantic memory -- auto-seeded on startup):
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/agent/chat \
-  -H "Content-Type: text/plain" \
-  -H "X-Conversation-Id: test-1" \
-  -d "What's your return policy?"
+curl -X POST http://localhost:8080/api/v1/agent/chat -H "Content-Type: text/plain" -H "X-Conversation-Id: test-1" -d "What's your return policy?"
 ```
 
 Use tools (procedural memory):
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/agent/chat \
-  -H "Content-Type: text/plain" \
-  -H "X-Conversation-Id: test-1" \
-  -d "I want to return order ORD-1001, the product was defective."
+curl -X POST http://localhost:8080/api/v1/agent/chat -H "Content-Type: text/plain" -H "X-Conversation-Id: test-1" -d "I want to return order ORD-1001, the product was defective."
 ```
 
 ## API Reference
@@ -258,8 +272,15 @@ Only `build.gradle` dependency and `application.yaml` config need to change. Emb
 
 ### Oracle Database
 
+Remove the container:
+
 ```bash
 podman rm -f oradb
+```
+
+Remove the data volume:
+
+```bash
 rm -rf ./oradata
 ```
 

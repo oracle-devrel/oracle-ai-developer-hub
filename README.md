@@ -85,9 +85,9 @@ Hands-on workshops and guided learning experiences that take developers from fun
 
 Notebooks and apps contributed by partners in the AI ecosystem. AI Developers can use these resources to understand how to use Oracle AI Database and OCI alongside tools such as LangChain, Galileo, LlamaIndex, and other popular AI/ML frameworks and platforms.
 
-| Name          | Description                                      | Stack | Link |
-| ------------- | ------------------------------------------------ | ----- | ---- |
-| _Coming soon_ | Partner-contributed resources will be added here | -     | -    |
+| Name | Description | Stack | Link |
+| --- | --- | --- | --- |
+| spraay_x402_payment_agents_oracle | Build payment-enabled AI agents with Oracle AI Database and Spraay x402 Gateway — cost-aware agents that pay for premium inference via USDC micropayments | Oracle AI Database, langchain-oracledb, LangChain, Spraay x402 | [Open Notebook](partners/spraay/spraay_x402_payment_agents_oracle.ipynb) |
 
 ## Getting Started
 

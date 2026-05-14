@@ -16,7 +16,7 @@ require (
 	github.com/open-dingtalk/dingtalk-stream-sdk-go v0.9.1
 	github.com/openai/openai-go/v3 v3.22.0
 	github.com/sijms/go-ora/v2 v2.9.0
-	github.com/slack-go/slack v0.17.3
+	github.com/slack-go/slack v0.23.1
 	github.com/stretchr/testify v1.11.1
 	github.com/tencent-connect/botgo v0.2.1
 	golang.org/x/oauth2 v0.35.0

@@ -181,10 +181,10 @@ apps/agentic_rag/cot_chat_debug.json
 apps/agentic_rag/docs/plans/
 apps/agentic_rag/frontend/docs/plans/
 
-# choose-your-path local user testing — each user's scaffolded test projects
+# build-paths local user testing — each user's scaffolded test projects
 # live here and are not meant to be committed.
-choose-your-path/tests/*
-!choose-your-path/tests/.gitkeep
+build-paths/tests/*
+!build-paths/tests/.gitkeep
 
 # Claude Code / AI tooling
 .playwright-mcp/
@@ -229,4 +229,4 @@ notebooks/config.yaml
 !apps/tanstack-shoe-store/src/lib/**
 !apps/tanstack-shoe-store/.vscode/
 
-choose-your-path/tests/
+build-paths/tests/

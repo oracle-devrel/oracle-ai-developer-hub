@@ -337,6 +337,7 @@ def create_tool_executor(
                 )
             elif tool_name == "suggest_portfolio_hedge":
                 from agent.sprawl_tools import suggest_portfolio_hedge_sprawl
+
                 return suggest_portfolio_hedge_sprawl(pg_conn, tool_args, query_logger)
             else:
                 return f"Error: Unknown tool '{tool_name}'"
@@ -769,9 +770,19 @@ def _suggest_portfolio_hedge(conn, args, query_logger):
     """
 
     columns = [
-        "ROW_TYPE", "ID", "LABEL", "TICKER", "SECTOR", "REGION",
-        "ASSET_CLASS", "RISK_RATING", "PCT", "RISK_PROFILE",
-        "ESG_MANDATE", "MAX_POSITION", "EXCLUDED_SECTORS",
+        "ROW_TYPE",
+        "ID",
+        "LABEL",
+        "TICKER",
+        "SECTOR",
+        "REGION",
+        "ASSET_CLASS",
+        "RISK_RATING",
+        "PCT",
+        "RISK_PROFILE",
+        "ESG_MANDATE",
+        "MAX_POSITION",
+        "EXCLUDED_SECTORS",
     ]
 
     rows, _ = execute_query(
@@ -978,22 +989,26 @@ def _build_hedge_recommendations(rows, account_id, risk_focus):
             for h in _HEDGE_CATALOGUE["market"]:
                 if esg_mandate and h["ticker"] in ("SQQQ",):
                     continue  # Skip leveraged products for ESG/conservative accounts
-                recommendations.append({**h, "hedge_dimension": "market", "trigger": f"equity_pct={equity_pct:.1f}%"})
+                recommendations.append(
+                    {**h, "hedge_dimension": "market", "trigger": f"equity_pct={equity_pct:.1f}%"}
+                )
 
         if high_risk:
             high_risk_pct = sum(float(r["PCT"] or 0) for r in high_risk)
             risk_factors.append(
                 f"{len(high_risk)} high-risk positions (risk_rating ≥ 7) totalling {high_risk_pct:.1f}% of portfolio."
             )
-            recommendations.append({
-                "ticker": "GLD",
-                "name": "SPDR Gold Shares",
-                "type": "Safe Haven",
-                "rationale": f"Gold allocation offsets tail risk from {len(high_risk)} high-rated positions.",
-                "risk_level": "low",
-                "hedge_dimension": "market",
-                "trigger": f"high_risk_positions={len(high_risk)}",
-            })
+            recommendations.append(
+                {
+                    "ticker": "GLD",
+                    "name": "SPDR Gold Shares",
+                    "type": "Safe Haven",
+                    "rationale": f"Gold allocation offsets tail risk from {len(high_risk)} high-rated positions.",
+                    "risk_level": "low",
+                    "hedge_dimension": "market",
+                    "trigger": f"high_risk_positions={len(high_risk)}",
+                }
+            )
 
     # --- Sector risk ---
     if risk_focus in ("sector", "all") and sectors:
@@ -1012,7 +1027,13 @@ def _build_hedge_recommendations(rows, account_id, risk_focus):
                     continue
                 if top_sector_name in excluded_sectors:
                     continue
-                recommendations.append({**h, "hedge_dimension": "sector", "trigger": f"{top_sector_name}={top_sector_pct:.1f}%"})
+                recommendations.append(
+                    {
+                        **h,
+                        "hedge_dimension": "sector",
+                        "trigger": f"{top_sector_name}={top_sector_pct:.1f}%",
+                    }
+                )
 
     # --- Regional risk ---
     if risk_focus in ("regional", "all") and regions:
@@ -1027,12 +1048,19 @@ def _build_hedge_recommendations(rows, account_id, risk_focus):
                 top_region_name, _HEDGE_CATALOGUE["regional"]["DEFAULT"]
             )
             for h in region_hedges:
-                recommendations.append({**h, "hedge_dimension": "regional", "trigger": f"{top_region_name}={top_region_pct:.1f}%"})
+                recommendations.append(
+                    {
+                        **h,
+                        "hedge_dimension": "regional",
+                        "trigger": f"{top_region_name}={top_region_pct:.1f}%",
+                    }
+                )
 
     # --- Currency risk ---
     if risk_focus in ("currency", "all"):
         intl_pct = sum(
-            float(r["PCT"] or 0) for r in regions
+            float(r["PCT"] or 0)
+            for r in regions
             if (r["ID"] or "").lower() not in ("north america", "usa", "us")
         )
         if intl_pct > 25:
@@ -1040,7 +1068,9 @@ def _build_hedge_recommendations(rows, account_id, risk_focus):
                 f"International exposure: {intl_pct:.1f}% of portfolio is outside North America, creating FX risk."
             )
             for h in _HEDGE_CATALOGUE["currency"]:
-                recommendations.append({**h, "hedge_dimension": "currency", "trigger": f"intl_pct={intl_pct:.1f}%"})
+                recommendations.append(
+                    {**h, "hedge_dimension": "currency", "trigger": f"intl_pct={intl_pct:.1f}%"}
+                )
 
     # De-duplicate by ticker, keeping first occurrence
     seen_tickers = set()
@@ -1060,7 +1090,9 @@ def _build_hedge_recommendations(rows, account_id, risk_focus):
             "high_risk_positions": len(high_risk),
             "sector_breakdown": [{"sector": r["ID"], "pct": r["PCT"]} for r in sectors],
             "region_breakdown": [{"region": r["ID"], "pct": r["PCT"]} for r in regions],
-            "asset_class_breakdown": [{"asset_class": r["ID"], "pct": r["PCT"]} for r in asset_classes],
+            "asset_class_breakdown": [
+                {"asset_class": r["ID"], "pct": r["PCT"]} for r in asset_classes
+            ],
         },
         "risk_factors_identified": risk_factors,
         "hedge_recommendations": unique_recommendations,

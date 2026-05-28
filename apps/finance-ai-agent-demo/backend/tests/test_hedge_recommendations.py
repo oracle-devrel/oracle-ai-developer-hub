@@ -5,19 +5,18 @@ recommendation logic directly with pre-built row fixtures.
 """
 
 import json
-import sys
 import os
+import sys
 
 # Ensure the backend package root is on the path so imports resolve
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import pytest
 from agent.tools import _build_hedge_recommendations
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def tickers(recommendations):
     return [r["ticker"] for r in recommendations]
@@ -31,13 +30,19 @@ def dimensions(recommendations):
 # Output structure
 # ---------------------------------------------------------------------------
 
+
 class TestOutputStructure:
     def test_returns_dict_with_required_keys(self, tech_heavy_rows):
         result = _build_hedge_recommendations(tech_heavy_rows, "ACC-001", "all")
         for key in (
-            "account_id", "risk_profile", "esg_mandate", "risk_focus",
-            "portfolio_summary", "risk_factors_identified",
-            "hedge_recommendations", "disclaimer",
+            "account_id",
+            "risk_profile",
+            "esg_mandate",
+            "risk_focus",
+            "portfolio_summary",
+            "risk_factors_identified",
+            "hedge_recommendations",
+            "disclaimer",
         ):
             assert key in result, f"Missing key: {key}"
 
@@ -69,8 +74,15 @@ class TestOutputStructure:
     def test_each_recommendation_has_required_fields(self, tech_heavy_rows):
         result = _build_hedge_recommendations(tech_heavy_rows, "ACC-001", "all")
         for rec in result["hedge_recommendations"]:
-            for field in ("ticker", "name", "type", "rationale", "risk_level",
-                          "hedge_dimension", "trigger"):
+            for field in (
+                "ticker",
+                "name",
+                "type",
+                "rationale",
+                "risk_level",
+                "hedge_dimension",
+                "trigger",
+            ):
                 assert field in rec, f"Recommendation missing field: {field}"
 
     def test_no_duplicate_tickers(self, tech_heavy_rows):
@@ -87,6 +99,7 @@ class TestOutputStructure:
 # ---------------------------------------------------------------------------
 # Market risk detection
 # ---------------------------------------------------------------------------
+
 
 class TestMarketRiskDetection:
     def test_equity_heavy_triggers_market_risk_factor(self, tech_heavy_rows):
@@ -122,6 +135,7 @@ class TestMarketRiskDetection:
 # Sector risk detection
 # ---------------------------------------------------------------------------
 
+
 class TestSectorRiskDetection:
     def test_tech_overweight_triggers_sector_risk_factor(self, tech_heavy_rows):
         result = _build_hedge_recommendations(tech_heavy_rows, "ACC-001", "sector")
@@ -147,6 +161,7 @@ class TestSectorRiskDetection:
 # ---------------------------------------------------------------------------
 # Regional risk detection
 # ---------------------------------------------------------------------------
+
 
 class TestRegionalRiskDetection:
     def test_na_heavy_triggers_regional_risk_factor(self, tech_heavy_rows):
@@ -174,11 +189,14 @@ class TestRegionalRiskDetection:
 # Currency risk detection
 # ---------------------------------------------------------------------------
 
+
 class TestCurrencyRiskDetection:
     def test_intl_heavy_triggers_currency_risk_factor(self, intl_heavy_rows):
         result = _build_hedge_recommendations(intl_heavy_rows, "ACC-001", "currency")
-        assert any("fx" in f.lower() or "international" in f.lower()
-                   for f in result["risk_factors_identified"])
+        assert any(
+            "fx" in f.lower() or "international" in f.lower()
+            for f in result["risk_factors_identified"]
+        )
 
     def test_intl_heavy_includes_currency_hedge_instruments(self, intl_heavy_rows):
         result = _build_hedge_recommendations(intl_heavy_rows, "ACC-001", "currency")
@@ -199,6 +217,7 @@ class TestCurrencyRiskDetection:
 # ---------------------------------------------------------------------------
 # ESG mandate filtering
 # ---------------------------------------------------------------------------
+
 
 class TestEsgMandateFiltering:
     def test_esg_mandate_detected_from_rows(self, esg_rows):
@@ -228,6 +247,7 @@ class TestEsgMandateFiltering:
 # risk_focus scoping
 # ---------------------------------------------------------------------------
 
+
 class TestRiskFocusScoping:
     def test_all_can_return_multiple_dimensions(self, tech_heavy_rows):
         result = _build_hedge_recommendations(tech_heavy_rows, "ACC-001", "all")
@@ -256,6 +276,7 @@ class TestRiskFocusScoping:
 # Empty / edge cases
 # ---------------------------------------------------------------------------
 
+
 class TestEdgeCases:
     def test_empty_rows_returns_no_risk_factors_or_recommendations(self):
         # No holdings at all — _suggest_portfolio_hedge would catch this upstream,
@@ -267,18 +288,34 @@ class TestEdgeCases:
     def test_none_pct_values_do_not_crash(self):
         rows = [
             {
-                "ROW_TYPE": "HOLDING", "ID": "H001", "LABEL": "Foo", "TICKER": "FOO",
-                "SECTOR": "Technology", "REGION": "North America", "ASSET_CLASS": "Equity",
-                "RISK_RATING": 5, "PCT": None,
-                "RISK_PROFILE": "moderate", "ESG_MANDATE": None,
-                "MAX_POSITION": "0.10", "EXCLUDED_SECTORS": "[]",
+                "ROW_TYPE": "HOLDING",
+                "ID": "H001",
+                "LABEL": "Foo",
+                "TICKER": "FOO",
+                "SECTOR": "Technology",
+                "REGION": "North America",
+                "ASSET_CLASS": "Equity",
+                "RISK_RATING": 5,
+                "PCT": None,
+                "RISK_PROFILE": "moderate",
+                "ESG_MANDATE": None,
+                "MAX_POSITION": "0.10",
+                "EXCLUDED_SECTORS": "[]",
             },
             {
-                "ROW_TYPE": "ASSET_CLASS", "ID": "Equity", "LABEL": "Equity",
-                "TICKER": None, "SECTOR": None, "REGION": None, "ASSET_CLASS": None,
-                "RISK_RATING": None, "PCT": None,
-                "RISK_PROFILE": None, "ESG_MANDATE": None,
-                "MAX_POSITION": None, "EXCLUDED_SECTORS": None,
+                "ROW_TYPE": "ASSET_CLASS",
+                "ID": "Equity",
+                "LABEL": "Equity",
+                "TICKER": None,
+                "SECTOR": None,
+                "REGION": None,
+                "ASSET_CLASS": None,
+                "RISK_RATING": None,
+                "PCT": None,
+                "RISK_PROFILE": None,
+                "ESG_MANDATE": None,
+                "MAX_POSITION": None,
+                "EXCLUDED_SECTORS": None,
             },
         ]
         # Should not raise even with None PCT values
@@ -288,27 +325,65 @@ class TestEdgeCases:
     def test_malformed_excluded_sectors_does_not_crash(self):
         rows = [
             {
-                "ROW_TYPE": "HOLDING", "ID": "H001", "LABEL": "Foo", "TICKER": "FOO",
-                "SECTOR": "Technology", "REGION": "North America", "ASSET_CLASS": "Equity",
-                "RISK_RATING": 5, "PCT": 50.0,
-                "RISK_PROFILE": "moderate", "ESG_MANDATE": None,
-                "MAX_POSITION": "0.10", "EXCLUDED_SECTORS": "NOT_VALID_JSON",
+                "ROW_TYPE": "HOLDING",
+                "ID": "H001",
+                "LABEL": "Foo",
+                "TICKER": "FOO",
+                "SECTOR": "Technology",
+                "REGION": "North America",
+                "ASSET_CLASS": "Equity",
+                "RISK_RATING": 5,
+                "PCT": 50.0,
+                "RISK_PROFILE": "moderate",
+                "ESG_MANDATE": None,
+                "MAX_POSITION": "0.10",
+                "EXCLUDED_SECTORS": "NOT_VALID_JSON",
             },
-            {"ROW_TYPE": "SECTOR", "ID": "Technology", "LABEL": "Technology",
-             "TICKER": None, "SECTOR": None, "REGION": None, "ASSET_CLASS": None,
-             "RISK_RATING": None, "PCT": 50.0,
-             "RISK_PROFILE": None, "ESG_MANDATE": None,
-             "MAX_POSITION": None, "EXCLUDED_SECTORS": None},
-            {"ROW_TYPE": "REGION", "ID": "North America", "LABEL": "North America",
-             "TICKER": None, "SECTOR": None, "REGION": None, "ASSET_CLASS": None,
-             "RISK_RATING": None, "PCT": 100.0,
-             "RISK_PROFILE": None, "ESG_MANDATE": None,
-             "MAX_POSITION": None, "EXCLUDED_SECTORS": None},
-            {"ROW_TYPE": "ASSET_CLASS", "ID": "Equity", "LABEL": "Equity",
-             "TICKER": None, "SECTOR": None, "REGION": None, "ASSET_CLASS": None,
-             "RISK_RATING": None, "PCT": 100.0,
-             "RISK_PROFILE": None, "ESG_MANDATE": None,
-             "MAX_POSITION": None, "EXCLUDED_SECTORS": None},
+            {
+                "ROW_TYPE": "SECTOR",
+                "ID": "Technology",
+                "LABEL": "Technology",
+                "TICKER": None,
+                "SECTOR": None,
+                "REGION": None,
+                "ASSET_CLASS": None,
+                "RISK_RATING": None,
+                "PCT": 50.0,
+                "RISK_PROFILE": None,
+                "ESG_MANDATE": None,
+                "MAX_POSITION": None,
+                "EXCLUDED_SECTORS": None,
+            },
+            {
+                "ROW_TYPE": "REGION",
+                "ID": "North America",
+                "LABEL": "North America",
+                "TICKER": None,
+                "SECTOR": None,
+                "REGION": None,
+                "ASSET_CLASS": None,
+                "RISK_RATING": None,
+                "PCT": 100.0,
+                "RISK_PROFILE": None,
+                "ESG_MANDATE": None,
+                "MAX_POSITION": None,
+                "EXCLUDED_SECTORS": None,
+            },
+            {
+                "ROW_TYPE": "ASSET_CLASS",
+                "ID": "Equity",
+                "LABEL": "Equity",
+                "TICKER": None,
+                "SECTOR": None,
+                "REGION": None,
+                "ASSET_CLASS": None,
+                "RISK_RATING": None,
+                "PCT": 100.0,
+                "RISK_PROFILE": None,
+                "ESG_MANDATE": None,
+                "MAX_POSITION": None,
+                "EXCLUDED_SECTORS": None,
+            },
         ]
         result = _build_hedge_recommendations(rows, "ACC-999", "all")
         assert isinstance(result, dict)

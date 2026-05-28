@@ -88,5 +88,10 @@ export function makeRunningToolCall(overrides = {}) {
 }
 
 export function makeErrorToolCall(overrides = {}) {
-  return makeToolCall({ status: "error", output: "Database connection failed", elapsed_ms: 55, ...overrides });
+  return makeToolCall({
+    status: "error",
+    output: "Database connection failed",
+    elapsed_ms: 55,
+    ...overrides,
+  });
 }

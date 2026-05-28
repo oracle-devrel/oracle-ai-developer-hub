@@ -4,13 +4,12 @@ Verifies the tool is correctly declared in TOOL_SCHEMAS and PRELOADED_TOOLS
 so the LLM will always have access to it.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import pytest
-from agent.tools import TOOL_SCHEMAS, PRELOADED_TOOLS
+from agent.tools import PRELOADED_TOOLS, TOOL_SCHEMAS
 
 
 def _find_tool(tools, name):
@@ -77,9 +76,12 @@ class TestToolDispatcherRouting:
             lambda conn, sql, params, query_logger, description="": ([], []),
         )
         # Patch ARCH_MODE to converged
-        monkeypatch.setattr("agent.tools.os.getenv", lambda k, d="": "converged" if k == "ARCH_MODE" else d)
+        monkeypatch.setattr(
+            "agent.tools.os.getenv", lambda k, d="": "converged" if k == "ARCH_MODE" else d
+        )
 
         import types
+
         fake_config = types.ModuleType("config")
         fake_config.ARCH_MODE = "converged"
         monkeypatch.setitem(sys.modules, "config", fake_config)
@@ -98,11 +100,13 @@ class TestToolDispatcherRouting:
 
     def test_unknown_tool_returns_error_string(self, monkeypatch):
         import types
+
         fake_config = types.ModuleType("config")
         fake_config.ARCH_MODE = "converged"
         monkeypatch.setitem(sys.modules, "config", fake_config)
 
         import agent.tools as tools_module
+
         monkeypatch.setattr(
             "agent.tools.execute_query",
             lambda *a, **kw: ([], []),

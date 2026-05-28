@@ -683,9 +683,19 @@ def suggest_portfolio_hedge_sprawl(pg_conn, args, query_logger):
     """
 
     columns = [
-        "ROW_TYPE", "ID", "LABEL", "TICKER", "SECTOR", "REGION",
-        "ASSET_CLASS", "RISK_RATING", "PCT", "RISK_PROFILE",
-        "ESG_MANDATE", "MAX_POSITION", "EXCLUDED_SECTORS",
+        "ROW_TYPE",
+        "ID",
+        "LABEL",
+        "TICKER",
+        "SECTOR",
+        "REGION",
+        "ASSET_CLASS",
+        "RISK_RATING",
+        "PCT",
+        "RISK_PROFILE",
+        "ESG_MANDATE",
+        "MAX_POSITION",
+        "EXCLUDED_SECTORS",
     ]
 
     rows, _ = execute_query(
@@ -700,5 +710,6 @@ def suggest_portfolio_hedge_sprawl(pg_conn, args, query_logger):
         return f"No holdings found for account '{account_id}'"
 
     from agent.tools import _build_hedge_recommendations
+
     results = [dict(zip(columns, row, strict=False)) for row in rows]
     return _json.dumps(_build_hedge_recommendations(results, account_id, risk_focus), default=str)

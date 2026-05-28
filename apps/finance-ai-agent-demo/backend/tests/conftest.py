@@ -1,12 +1,11 @@
 """Shared pytest fixtures for the finance-ai-agent backend test suite."""
 
-import json
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # Minimal portfolio rows as returned by _suggest_portfolio_hedge's SQL query
 # ---------------------------------------------------------------------------
+
 
 def _holding(
     holding_id,
@@ -116,18 +115,72 @@ def tech_heavy_rows():
     """Portfolio that is tech-heavy (40% sector) and equity-heavy (80% equities),
     located primarily in North America (70%), with two high-risk positions."""
     return [
-        _holding("H001", "Apple Inc", "AAPL", "Technology", "North America", "Equity", 6, 25.0,
-                 risk_profile="aggressive"),
-        _holding("H002", "Microsoft Corp", "MSFT", "Technology", "North America", "Equity", 5, 15.0,
-                 risk_profile="aggressive"),
-        _holding("H003", "ExxonMobil", "XOM", "Energy", "North America", "Equity", 4, 20.0,
-                 risk_profile="aggressive"),
-        _holding("H004", "Riskco Ltd", "RSK", "Technology", "Europe", "Equity", 8, 10.0,
-                 risk_profile="aggressive"),
-        _holding("H005", "DangerFund", "DNG", "Financials", "Asia", "Equity", 9, 10.0,
-                 risk_profile="aggressive"),
-        _holding("H006", "Safe Bond A", "SBA", "Government", "North America", "Bond", 2, 20.0,
-                 risk_profile="aggressive"),
+        _holding(
+            "H001",
+            "Apple Inc",
+            "AAPL",
+            "Technology",
+            "North America",
+            "Equity",
+            6,
+            25.0,
+            risk_profile="aggressive",
+        ),
+        _holding(
+            "H002",
+            "Microsoft Corp",
+            "MSFT",
+            "Technology",
+            "North America",
+            "Equity",
+            5,
+            15.0,
+            risk_profile="aggressive",
+        ),
+        _holding(
+            "H003",
+            "ExxonMobil",
+            "XOM",
+            "Energy",
+            "North America",
+            "Equity",
+            4,
+            20.0,
+            risk_profile="aggressive",
+        ),
+        _holding(
+            "H004",
+            "Riskco Ltd",
+            "RSK",
+            "Technology",
+            "Europe",
+            "Equity",
+            8,
+            10.0,
+            risk_profile="aggressive",
+        ),
+        _holding(
+            "H005",
+            "DangerFund",
+            "DNG",
+            "Financials",
+            "Asia",
+            "Equity",
+            9,
+            10.0,
+            risk_profile="aggressive",
+        ),
+        _holding(
+            "H006",
+            "Safe Bond A",
+            "SBA",
+            "Government",
+            "North America",
+            "Bond",
+            2,
+            20.0,
+            risk_profile="aggressive",
+        ),
         _sector("Technology", 40.0),
         _sector("Energy", 20.0),
         _sector("Government", 20.0),
@@ -146,10 +199,30 @@ def tech_heavy_rows():
 def esg_rows():
     """Portfolio with ESG mandate set — leveraged/high-risk instruments should be filtered."""
     return [
-        _holding("H001", "Green Energy ETF", "GRN", "Energy", "North America", "Equity", 3, 70.0,
-                 risk_profile="conservative", esg_mandate="yes"),
-        _holding("H002", "Clean Tech Fund", "CLT", "Technology", "North America", "Equity", 4, 30.0,
-                 risk_profile="conservative", esg_mandate="yes"),
+        _holding(
+            "H001",
+            "Green Energy ETF",
+            "GRN",
+            "Energy",
+            "North America",
+            "Equity",
+            3,
+            70.0,
+            risk_profile="conservative",
+            esg_mandate="yes",
+        ),
+        _holding(
+            "H002",
+            "Clean Tech Fund",
+            "CLT",
+            "Technology",
+            "North America",
+            "Equity",
+            4,
+            30.0,
+            risk_profile="conservative",
+            esg_mandate="yes",
+        ),
         _sector("Energy", 70.0),
         _sector("Technology", 30.0),
         _region("North America", 100.0),

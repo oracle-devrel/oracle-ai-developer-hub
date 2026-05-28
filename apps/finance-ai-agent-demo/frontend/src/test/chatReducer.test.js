@@ -56,7 +56,12 @@ function chatReducer(state, action) {
           ...state,
           messages: state.messages.map((m) =>
             m.id === action.payload.message_id
-              ? { ...m, content: action.payload.response || m.content, isStreaming: false, toolCalls: [...state.toolCalls] }
+              ? {
+                  ...m,
+                  content: action.payload.response || m.content,
+                  isStreaming: false,
+                  toolCalls: [...state.toolCalls],
+                }
               : m
           ),
           isLoading: false,
@@ -125,9 +130,19 @@ describe("chatReducer — ADD_TOOL_CALL_START for suggest_portfolio_hedge", () =
   });
 
   it("does not mutate existing toolCalls", () => {
-    const existingCall = { id: "tc-existing", name: "get_account_details", args: {}, status: "success", output: "{}", elapsed_ms: 50 };
+    const existingCall = {
+      id: "tc-existing",
+      name: "get_account_details",
+      args: {},
+      status: "success",
+      output: "{}",
+      elapsed_ms: 50,
+    };
     const stateWithExisting = { ...emptyState, toolCalls: [existingCall] };
-    const next = chatReducer(stateWithExisting, { type: "ADD_TOOL_CALL_START", payload: startPayload });
+    const next = chatReducer(stateWithExisting, {
+      type: "ADD_TOOL_CALL_START",
+      payload: startPayload,
+    });
     expect(next.toolCalls).toHaveLength(2);
     expect(next.toolCalls[0]).toEqual(existingCall);
   });
@@ -155,19 +170,28 @@ describe("chatReducer — UPDATE_TOOL_CALL for suggest_portfolio_hedge", () => {
   };
 
   it("updates status to success", () => {
-    const state = chatReducer(stateWithRunning, { type: "UPDATE_TOOL_CALL", payload: completePayload });
+    const state = chatReducer(stateWithRunning, {
+      type: "UPDATE_TOOL_CALL",
+      payload: completePayload,
+    });
     expect(state.toolCalls[0].status).toBe("success");
   });
 
   it("sets output on the correct tool call", () => {
-    const state = chatReducer(stateWithRunning, { type: "UPDATE_TOOL_CALL", payload: completePayload });
+    const state = chatReducer(stateWithRunning, {
+      type: "UPDATE_TOOL_CALL",
+      payload: completePayload,
+    });
     const output = JSON.parse(state.toolCalls[0].output);
     expect(output.account_id).toBe("ACC-001");
     expect(output.hedge_recommendations).toBeInstanceOf(Array);
   });
 
   it("sets elapsed_ms", () => {
-    const state = chatReducer(stateWithRunning, { type: "UPDATE_TOOL_CALL", payload: completePayload });
+    const state = chatReducer(stateWithRunning, {
+      type: "UPDATE_TOOL_CALL",
+      payload: completePayload,
+    });
     expect(state.toolCalls[0].elapsed_ms).toBe(142);
   });
 
@@ -181,8 +205,16 @@ describe("chatReducer — UPDATE_TOOL_CALL for suggest_portfolio_hedge", () => {
   });
 
   it("handles error status correctly", () => {
-    const errorPayload = { tool_call_id: "tc-001", status: "error", output: "DB error", elapsed_ms: 10 };
-    const state = chatReducer(stateWithRunning, { type: "UPDATE_TOOL_CALL", payload: errorPayload });
+    const errorPayload = {
+      tool_call_id: "tc-001",
+      status: "error",
+      output: "DB error",
+      elapsed_ms: 10,
+    };
+    const state = chatReducer(stateWithRunning, {
+      type: "UPDATE_TOOL_CALL",
+      payload: errorPayload,
+    });
     expect(state.toolCalls[0].status).toBe("error");
     expect(state.toolCalls[0].output).toBe("DB error");
   });
@@ -197,11 +229,20 @@ describe("chatReducer — AGENT_COMPLETE attaches hedge tool calls to message", 
   let state = emptyState;
   state = chatReducer(state, {
     type: "ADD_TOOL_CALL_START",
-    payload: { tool_call_id: "tc-001", tool_name: "suggest_portfolio_hedge", tool_args: { account_id: "ACC-001" } },
+    payload: {
+      tool_call_id: "tc-001",
+      tool_name: "suggest_portfolio_hedge",
+      tool_args: { account_id: "ACC-001" },
+    },
   });
   state = chatReducer(state, {
     type: "UPDATE_TOOL_CALL",
-    payload: { tool_call_id: "tc-001", status: "success", output: JSON.stringify(hedgeOutput), elapsed_ms: 142 },
+    payload: {
+      tool_call_id: "tc-001",
+      status: "success",
+      output: JSON.stringify(hedgeOutput),
+      elapsed_ms: 142,
+    },
   });
 
   const completeAction = {
@@ -242,7 +283,15 @@ describe("chatReducer — AGENT_COMPLETE attaches hedge tool calls to message", 
     // Simulate a streaming message already existing
     const streamingState = {
       ...state,
-      messages: [{ id: "msg-001", role: "assistant", content: "partial...", isStreaming: true, toolCalls: [] }],
+      messages: [
+        {
+          id: "msg-001",
+          role: "assistant",
+          content: "partial...",
+          isStreaming: true,
+          toolCalls: [],
+        },
+      ],
     };
     const next = chatReducer(streamingState, completeAction);
     const assistantMsg = next.messages.find((m) => m.id === "msg-001");
@@ -262,14 +311,23 @@ describe("chatReducer — full suggest_portfolio_hedge lifecycle", () => {
     // 1. Tool call starts
     s = chatReducer(s, {
       type: "ADD_TOOL_CALL_START",
-      payload: { tool_call_id: "tc-hedge", tool_name: "suggest_portfolio_hedge", tool_args: { account_id: "ACC-005", risk_focus: "sector" } },
+      payload: {
+        tool_call_id: "tc-hedge",
+        tool_name: "suggest_portfolio_hedge",
+        tool_args: { account_id: "ACC-005", risk_focus: "sector" },
+      },
     });
     expect(s.toolCalls[0].status).toBe("running");
 
     // 2. Tool call completes
     s = chatReducer(s, {
       type: "UPDATE_TOOL_CALL",
-      payload: { tool_call_id: "tc-hedge", status: "success", output: JSON.stringify(hedgeOutput), elapsed_ms: 200 },
+      payload: {
+        tool_call_id: "tc-hedge",
+        status: "success",
+        output: JSON.stringify(hedgeOutput),
+        elapsed_ms: 200,
+      },
     });
     expect(s.toolCalls[0].status).toBe("success");
 

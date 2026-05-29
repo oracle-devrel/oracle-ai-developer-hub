@@ -27,7 +27,10 @@ pip install -q --no-cache-dir \
   ipywidgets \
   matplotlib \
   tiktoken \
-  pydantic
+  pydantic \
+  opentelemetry-api \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp-proto-http
 
 echo ""
 echo "[2/2] Registering Jupyter kernel..."

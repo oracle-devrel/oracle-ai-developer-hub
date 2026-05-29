@@ -18,8 +18,9 @@ A **Research Paper Assistant** — an AI agent that searches, retrieves, and rea
 | 4    | Context engineering: summarisation and offloading  | [Part 4 Guide](docs/part-4-context-engineering.md) |
 | 5    | Web access with Tavily                             | [Part 5 Guide](docs/part-5-web-search.md)          |
 | 6    | Agent execution and memory vs no-memory comparison | [Part 6 Guide](docs/part-6-agent-execution.md)     |
+| 7    | Agent observability with OpenTelemetry and Jaeger  | [Part 7 Guide](docs/part-7-observability.md)       |
 
-> **[TODO Checklist](docs/TODO-checklist.md)** — all 16 tasks at a glance with links to their guide sections.
+> **[TODO Checklist](docs/TODO-checklist.md)** — all 19 tasks at a glance with links to their guide sections.
 
 ## Getting Started
 
@@ -40,6 +41,9 @@ cd workshops/agent_memory_workshop
 
 # Start Oracle AI Database
 docker compose -f .devcontainer/docker-compose.yml up -d oracle
+
+# Optional for Part 7: start Jaeger observability
+docker compose -f .devcontainer/docker-compose.yml --profile observability up -d jaeger
 
 # Install dependencies
 pip install -r requirements.txt
@@ -74,7 +78,8 @@ agent-memory-workshop/
 │   ├── part-4-context-engineering.md
 │   ├── part-5-web-search.md
 │   ├── part-6-agent-execution.md
-│   ├── TODO-checklist.md        All 16 tasks at a glance
+│   ├── part-7-observability.md
+│   ├── TODO-checklist.md        All 19 tasks at a glance
 │   └── troubleshooting.md       Common issues and solutions
 ├── images/                      Screenshots and architecture diagrams
 └── README.md
@@ -88,6 +93,7 @@ agent-memory-workshop/
 - `openai` — OCI GenAI (xAI Grok 3 Fast) via OpenAI-compatible endpoint
 - `tavily-python` — web search for agents
 - `oracledb` — Python Oracle driver
+- OpenTelemetry + Jaeger — local trace collection and inspection for Part 7
 
 ## Where to Next?
 

@@ -207,6 +207,57 @@ os.environ["TAVILY_API_KEY"] = "tvly-..."
 
 ---
 
+## Observability and Jaeger Issues
+
+### Jaeger UI does not open
+
+**Symptom:** `http://localhost:16686` does not load, or Codespaces does not show a forwarded Jaeger UI port.
+
+**Cause:** The observability profile is not running.
+
+**Fix:**
+
+```bash
+docker compose -f .devcontainer/docker-compose.yml --profile observability up -d jaeger
+docker ps --filter name=agent-memory-jaeger
+```
+
+If you are in Codespaces, check the **Ports** tab and open the forwarded **Jaeger UI** port.
+
+---
+
+### No traces appear in Jaeger
+
+**Symptom:** Part 7 runs, but Jaeger has no `agent-memory-workshop` service.
+
+**Cause:** The notebook cannot reach the OTLP HTTP endpoint, or the tracer provider was configured before Jaeger started.
+
+**Fix:** Start Jaeger, then rerun the Part 7 OpenTelemetry configuration cell and the observed agent call:
+
+```bash
+docker compose -f .devcontainer/docker-compose.yml --profile observability up -d jaeger
+```
+
+In the notebook, confirm the endpoint is:
+
+```python
+print(os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318"))
+```
+
+The Part 7 cells use `http://localhost:4318/v1/traces` for OTLP HTTP export.
+
+---
+
+### Traces contain too much information
+
+**Symptom:** You see prompt text, tool output, or document text in trace attributes.
+
+**Cause:** A custom span attribute captured raw content.
+
+**Fix:** Use lengths and counts instead of content. For example, record `query.length`, `response.length`, `memory.result_count`, and `tool.result_length`. Do not record API keys, raw prompts, retrieved documents, full Tavily output, or database connection strings.
+
+---
+
 ## Checking System Status
 
 If something is not working and you are not sure where the problem is, run this diagnostic cell:

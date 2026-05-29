@@ -1,6 +1,6 @@
 # Workshop TODO Checklist
 
-16 hands-on tasks across Parts 2–6. Complete them in order — each builds on the last.
+19 hands-on tasks across Parts 2–7. Complete them in order — each builds on the last.
 
 Part 1 (Oracle setup) is pre-built — just run the cells to connect.
 
@@ -36,3 +36,9 @@ Part 1 (Oracle setup) is pre-built — just run the cells to connect.
 
 15. Assemble `build_context()` from all memory types (TODO 15)
 16. Run 5 test questions before memory recall (TODO 16)
+
+### Part 7 — Agent Observability ([Guide](part-7-observability.md))
+
+17. Configure OpenTelemetry export to Jaeger (TODO 17)
+18. Create `call_agent_observed()` with spans around the agent loop (TODO 18)
+19. Run observed turns and inspect the trace in Jaeger (TODO 19)

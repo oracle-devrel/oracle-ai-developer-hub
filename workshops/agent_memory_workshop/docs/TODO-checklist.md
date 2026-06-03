@@ -39,6 +39,6 @@ Part 1 (Oracle setup) is pre-built — just run the cells to connect.
 
 ### Part 7 — Agent Observability ([Guide](part-7-observability.md))
 
-17. Configure OpenTelemetry export to Jaeger (TODO 17)
-18. Create `call_agent_observed()` with spans around the agent loop (TODO 18)
-19. Run observed turns and inspect the trace in Jaeger (TODO 19)
+17. Configure LangSmith tracing (TODO 17)
+18. Create `call_agent_observed()` with trace runs around the agent loop (TODO 18)
+19. Run observed turns and inspect the trace in LangSmith (TODO 19)

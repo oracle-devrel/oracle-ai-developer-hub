@@ -18,7 +18,7 @@ A **Research Paper Assistant** — an AI agent that searches, retrieves, and rea
 | 4    | Context engineering: summarisation and offloading  | [Part 4 Guide](docs/part-4-context-engineering.md) |
 | 5    | Web access with Tavily                             | [Part 5 Guide](docs/part-5-web-search.md)          |
 | 6    | Agent execution and memory vs no-memory comparison | [Part 6 Guide](docs/part-6-agent-execution.md)     |
-| 7    | Agent observability with OpenTelemetry and Jaeger  | [Part 7 Guide](docs/part-7-observability.md)       |
+| 7    | Agent observability with LangSmith                 | [Part 7 Guide](docs/part-7-observability.md)       |
 
 > **[TODO Checklist](docs/TODO-checklist.md)** — all 19 tasks at a glance with links to their guide sections.
 
@@ -42,8 +42,10 @@ cd workshops/agent_memory_workshop
 # Start Oracle AI Database
 docker compose -f .devcontainer/docker-compose.yml up -d oracle
 
-# Optional for Part 7: start Jaeger observability
-docker compose -f .devcontainer/docker-compose.yml --profile observability up -d jaeger
+# Optional for Part 7: export your LangSmith key
+export LANGSMITH_API_KEY="lsv2_..."
+export LANGSMITH_TRACING=true
+export LANGSMITH_PROJECT=agent-memory-workshop
 
 # Install dependencies
 pip install -r requirements.txt
@@ -93,7 +95,7 @@ agent-memory-workshop/
 - `openai` — OCI GenAI (xAI Grok 3 Fast) via OpenAI-compatible endpoint
 - `tavily-python` — web search for agents
 - `oracledb` — Python Oracle driver
-- OpenTelemetry + Jaeger — local trace collection and inspection for Part 7
+- LangSmith — agent trace collection and inspection for Part 7
 
 ## Where to Next?
 

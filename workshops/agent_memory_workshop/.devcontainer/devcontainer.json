@@ -13,12 +13,9 @@
     }
   },
 
-  "forwardPorts": [1521, 16686, 4317, 4318],
+  "forwardPorts": [1521],
   "portsAttributes": {
-    "1521": { "label": "Oracle DB", "onAutoForward": "silent" },
-    "16686": { "label": "Jaeger UI", "onAutoForward": "notify" },
-    "4317": { "label": "OTLP gRPC", "onAutoForward": "silent" },
-    "4318": { "label": "OTLP HTTP", "onAutoForward": "silent" }
+    "1521": { "label": "Oracle DB", "onAutoForward": "silent" }
   },
 
   "onCreateCommand": "bash .devcontainer/setup_build.sh",
@@ -45,8 +42,9 @@
     "ORACLE_DSN": "localhost:1521/FREEPDB1",
     "ORACLE_USER": "VECTOR",
     "ORACLE_PASSWORD": "VectorPwd_2025",
-    "OTEL_SERVICE_NAME": "agent-memory-workshop",
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
+    "LANGSMITH_TRACING": "true",
+    "LANGSMITH_PROJECT": "agent-memory-workshop",
+    "LANGSMITH_API_KEY": "${localEnv:LANGSMITH_API_KEY}",
     "TAVILY_API_KEY": "${localEnv:TAVILY_API_KEY}",
     "OCI_GENAI_API_KEY": "${localEnv:OCI_GENAI_API_KEY}",
     "OCI_GENAI_ENDPOINT": "${localEnv:OCI_GENAI_ENDPOINT}"

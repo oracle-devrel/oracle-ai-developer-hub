@@ -2,67 +2,68 @@
 
 ## Three TODOs in This Part
 
-Part 7 adds OpenTelemetry tracing to the agent you built in Part 6. You will keep the original `call_agent()` function unchanged and create an observed wrapper that sends traces to Jaeger.
+Part 7 adds LangSmith tracing to the agent you built in Part 6. You will keep the original `call_agent()` function unchanged and create an observed wrapper that sends traces to a LangSmith project.
 
-Before running the Part 7 notebook cells, start Jaeger:
+Before running the Part 7 notebook cells, set a LangSmith API key:
 
 ```bash
-docker compose -f .devcontainer/docker-compose.yml --profile observability up -d jaeger
+export LANGSMITH_API_KEY="lsv2_..."
+export LANGSMITH_TRACING=true
+export LANGSMITH_PROJECT=agent-memory-workshop
 ```
 
-Open the Jaeger UI from the forwarded **Jaeger UI** port, or go to:
+Then open your project in LangSmith:
 
 ```text
-http://localhost:16686
+https://smith.langchain.com
 ```
 
 ---
 
-## TODO 17: Configure OpenTelemetry
+## TODO 17: Configure LangSmith
 
-OpenTelemetry has three moving parts in this lab:
+LangSmith has three moving parts in this lab:
 
-- **Tracer provider** — creates tracers for your Python process
-- **Exporter** — sends spans out of the notebook
-- **Backend** — receives and displays the trace; here, Jaeger
+- **Client** - connects the notebook to LangSmith
+- **Project** - groups traces for this workshop
+- **Trace runs** - records parent and child operations for one agent turn
 
 **Complete solution:**
 
 ```python
-from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+import os
+
+import langsmith as ls
+from langsmith import Client
 
 def configure_agent_observability(
-    service_name: str = "agent-memory-workshop",
-    endpoint: str = "http://localhost:4318/v1/traces",
+    project_name: str = "agent-memory-workshop",
 ):
-    resource = Resource.create({
-        "service.name": service_name,
-        "workshop.part": "7",
-        "workshop.topic": "agent-observability",
-    })
-    provider = TracerProvider(resource=resource)
-    provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=endpoint)))
-    trace.set_tracer_provider(provider)
-    return trace.get_tracer("agent-memory-workshop.part7")
+    os.environ.setdefault("LANGSMITH_TRACING", "true")
+    os.environ.setdefault("LANGSMITH_PROJECT", project_name)
 
-tracer = configure_agent_observability()
+    if not os.environ.get("LANGSMITH_API_KEY"):
+        raise RuntimeError(
+            "Set LANGSMITH_API_KEY before running Part 7. "
+            "Create an API key in LangSmith, then export it in your shell or set it in this notebook."
+        )
+
+    client = Client()
+    return {"client": client, "project_name": project_name}
+
+observability = configure_agent_observability()
+tracer = ls
 ```
 
-**Why the endpoint includes `/v1/traces`:** The notebook uses the OTLP HTTP exporter. Jaeger receives OTLP HTTP on port `4318`, and trace export uses the `/v1/traces` path.
-
-**Privacy default:** This lab records metadata, not content. Trace attributes should include lengths, counts, model names, tool names, memory types, and error status — not full prompts, retrieved documents, API keys, or raw tool output.
+**Privacy default:** This lab records metadata, not content. Trace inputs, outputs, and metadata should include lengths, counts, model names, tool names, memory types, and error status - not full prompts, retrieved documents, API keys, raw tool output, or database connection strings.
 
 ---
 
 ## TODO 18: `call_agent_observed()`
 
-The original `call_agent()` remains your working agent harness. In Part 7, you create a second function, `call_agent_observed()`, that follows the same flow but wraps each major operation in spans.
+The original `call_agent()` remains your working agent harness. In Part 7, you create a second function, `call_agent_observed()`, that follows the same flow but wraps each major operation in LangSmith trace runs.
 
-**Span shape:**
+**Trace shape:**
 
 ```text
 agent.run
@@ -83,9 +84,9 @@ agent.run
 └── agent.memory.write assistant_message
 ```
 
-**Important attributes to record:**
+**Important metadata to record:**
 
-| Attribute | Example | Why it is safe |
+| Field | Example | Why it is safe |
 |---|---|---|
 | `agent.thread_id` | `0022` | Identifier, not content |
 | `query.length` | `74` | Length only |
@@ -96,7 +97,7 @@ agent.run
 | `tool.result_length` | `1800` | Length only |
 | `llm.model` | `xai.grok-3-fast` | Model name only |
 
-**Why manual spans first:** Automatic LLM instrumentation is useful, but it can hide the architecture. Manual spans show exactly how your Part 6 harness works. Once you understand that trace, automatic instrumentation is easier to reason about.
+**Why manual trace runs first:** LangSmith can trace LangChain applications automatically, but manual runs make this notebook's Part 6 architecture visible. Once you understand that trace, automatic instrumentation is easier to reason about.
 
 ---
 
@@ -115,29 +116,31 @@ for q in [
     call_agent_observed(q, thread_id=observed_thread, max_iterations=5)
 ```
 
-Then open Jaeger:
+Then open LangSmith:
 
-1. Select service `agent-memory-workshop`
-2. Click **Find Traces**
+1. Open `https://smith.langchain.com`
+2. Select the `agent-memory-workshop` project
 3. Open the most recent `agent.run` trace
-4. Expand the child spans
+4. Expand the child runs
 
 You should see where the agent spent time and which operations happened during the turn.
 
+![LangSmith trace for an observed agent run](../images/part7-langsmith-trace.png)
+
 ## What to Look For
 
-**Context build spans:** These show which memory systems were read before the LLM call.
+**Context build runs:** These show which memory systems were read before the LLM call.
 
-**Tool spans:** These show whether the model called Tavily or summary tools.
+**Tool runs:** These show whether the model called Tavily or summary tools.
 
-**Context check spans:** These show estimated context window size without exposing the full prompt.
+**Context check runs:** These show estimated context window size without exposing the full prompt.
 
-**Memory write spans:** These show the durable writes that make the next turn memory-aware.
+**Memory write runs:** These show the durable writes that make the next turn memory-aware.
 
 ## Key Takeaways
 
 **Observability makes agent behavior inspectable.** The Part 6 chart shows that the memory-aware agent controls context growth. Part 7 shows the operational path behind that chart.
 
-**The trace is not the memory store.** Oracle AI Database still stores the agent's memory. Jaeger only shows what happened during execution.
+**The trace is not the memory store.** Oracle AI Database still stores the agent's memory. LangSmith shows what happened during execution.
 
 **Safe traces are designed.** A useful trace does not need full prompts or raw tool results. In most labs and production systems, counts, names, durations, statuses, and sanitized IDs are enough to debug the flow.

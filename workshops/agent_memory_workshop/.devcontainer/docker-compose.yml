@@ -18,15 +18,5 @@ services:
       - oracle-data:/opt/oracle/oradata
       - ./oracle-init:/container-entrypoint-initdb.d
 
-  jaeger:
-    image: cr.jaegertracing.io/jaegertracing/jaeger:2.18.0
-    container_name: agent-memory-jaeger
-    profiles:
-      - observability
-    ports:
-      - "16686:16686"  # Jaeger UI
-      - "4317:4317"    # OTLP gRPC
-      - "4318:4318"    # OTLP HTTP
-
 volumes:
   oracle-data:

@@ -28,9 +28,7 @@ pip install -q --no-cache-dir \
   matplotlib \
   tiktoken \
   pydantic \
-  opentelemetry-api \
-  opentelemetry-sdk \
-  opentelemetry-exporter-otlp-proto-http
+  langsmith
 
 echo ""
 echo "[2/2] Registering Jupyter kernel..."

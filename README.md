@@ -94,7 +94,7 @@ Notebooks and apps contributed by partners in the AI ecosystem. AI Developers ca
 
 | Name          | Description                                      | Stack | Link |
 | ------------- | ------------------------------------------------ | ----- | ---- |
-| _Coming soon_ | Partner-contributed resources will be added here | -     | -    |
+| CopilotKit | Agentic, memory-augmented chat on Oracle AI Database with CopilotKit as the frontend over AG-UI — includes a portable Oracle Agent Spec agent on LangGraph with Oracle Agent Memory and human-in-the-loop. | CopilotKit, Agent Spec, LangGraph, AG-UI, oracleagentmemory | [![View Partner](https://img.shields.io/badge/View%20Partner-blue?style=flat-square)](./partners/copilotkit) |
 
 ## Getting Started
 

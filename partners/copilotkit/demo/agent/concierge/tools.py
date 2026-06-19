@@ -82,11 +82,31 @@ _FLIGHTS = [
 ]
 
 
+# Durable record types worth recalling. Excludes "message" — the raw chat turns
+# (including the agent's own replies like "You usually fly out of SFO…"), which
+# otherwise dominate recall and re-assert stale preferences.
+DURABLE_RECORD_TYPES = ["preference", "memory", "fact", "guideline"]
+
+
 def _recall_sync(query: str) -> str:
     try:
         memory = get_memory()
-        results = memory.search(query=query, scope=SearchScope(user_id=DEMO_USER_ID))
-        contents = [r.content for r in results[:6] if r.content]
+        results = memory.search(
+            query=query,
+            scope=SearchScope(user_id=DEMO_USER_ID),
+            record_types=DURABLE_RECORD_TYPES,
+            max_results=20,
+        )
+        contents: list[str] = []
+        seen: set[str] = set()
+        for r in results:
+            c = (r.content or "").strip()
+            if not c or c.lower() in seen:
+                continue
+            seen.add(c.lower())
+            contents.append(c)
+            if len(contents) >= 6:
+                break
         return "\n".join(f"- {c}" for c in contents) if contents else "No relevant memories."
     except Exception as exc:  # memory is an enhancement, not a hard dependency
         print(f"[recall_memory] warning: memory search failed, degrading gracefully ({exc})")

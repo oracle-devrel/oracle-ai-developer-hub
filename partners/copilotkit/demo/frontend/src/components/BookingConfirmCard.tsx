@@ -19,7 +19,7 @@ export function BookingConfirmCard({
 }: BookingConfirmCardProps) {
   const [submitting, setSubmitting] = useState(false);
   return (
-    <div className="rounded-xl border border-indigo-200 bg-indigo-50/40 p-5 space-y-4">
+    <div className="mt-3 rounded-xl border border-indigo-200 bg-indigo-50/40 p-5 space-y-4">
       <h3 className="text-base font-semibold text-gray-900">Confirm your booking</h3>
 
       {flight ? (

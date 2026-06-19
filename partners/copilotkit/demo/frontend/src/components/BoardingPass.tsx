@@ -11,7 +11,7 @@ interface BoardingPassProps {
 
 export function BoardingPass({ flight, flightId, booked }: BoardingPassProps) {
   return (
-    <div className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm max-w-lg">
+    <div className="mt-3 rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm max-w-lg">
       {/* Colored top stripe */}
       <div className="h-2 bg-indigo-600" />
 

@@ -22,9 +22,40 @@ from fastapi.responses import StreamingResponse
 
 from .agent import build_agent_json
 from .memory import get_memory
+from .reconcile import reconcile_durable_memories
 from .tools import DEMO_USER_ID, TOOL_REGISTRY
 
 load_dotenv()
+
+
+# ── Multi-turn fix (upstream adapter workaround) ──────────────────────────────
+# The ag_ui_agentspec LangGraph runner checkpoints history per thread_id and, on
+# each turn, tries to append only the client messages whose ids aren't already in
+# the checkpoint (filter_only_new_messages). But CopilotKit re-sends the *full*
+# history with ids that never match the checkpoint's, so a second copy of the
+# assistant(tool_calls)/tool block gets appended; OpenAI then rejects the malformed
+# sequence on the next turn (400: "a message with role 'tool' must be a response to
+# a preceeding message with 'tool_calls'"), breaking every follow-up after a server
+# tool runs. See docs/known-issues/agentspec-multiturn-toolcall-correlation.md.
+#
+# Since the client already sends the full, valid history each turn, we replace the
+# adapter's incremental merge with a full-history *replace*: clear the checkpoint's
+# messages (RemoveMessage) and use the client's history verbatim. Drop this once the
+# upstream adapter records ToolExecutionRequests so the ids correlate.
+from langchain_core.messages import RemoveMessage  # noqa: E402
+from langgraph.graph.message import REMOVE_ALL_MESSAGES  # noqa: E402
+import ag_ui_agentspec.runtimes.langgraph_runner as _lg_runner  # noqa: E402
+
+
+async def _replace_history_with_client(_agent, _thread_id, input_messages):
+    """Replace the checkpoint's messages with the client's full history each turn."""
+    if not input_messages:
+        return input_messages
+    return [RemoveMessage(id=REMOVE_ALL_MESSAGES), *input_messages]
+
+
+_lg_runner.filter_only_new_messages = _replace_history_with_client
+
 
 app = FastAPI(title="Oracle Concierge Agent")
 app.add_middleware(
@@ -53,7 +84,15 @@ def _last_user_message(messages: list) -> str:
 
 
 def _persist_sync(user_text: str, assistant_text: str) -> None:
-    """Write the latest user/assistant exchange to Oracle Agent Memory."""
+    """Persist the exchange for memory extraction, then supersede stale facts.
+
+    Both turns are stored: extraction reliably distills durable facts from a full
+    user+assistant exchange, whereas a lone user turn often yields only a raw
+    "message" record and no extracted fact. The agent's echoes land as "message"
+    records too, but recall_memory filters those out (see tools.DURABLE_RECORD_TYPES),
+    so they never re-assert a stale preference. Reconciliation then deletes
+    outdated/duplicate *durable* facts so an updated preference wins on recall.
+    """
     exchange: list[dict[str, str]] = []
     if user_text:
         exchange.append({"role": "user", "content": user_text})
@@ -61,9 +100,17 @@ def _persist_sync(user_text: str, assistant_text: str) -> None:
         exchange.append({"role": "assistant", "content": assistant_text})
     if not exchange:
         return
-    memory = get_memory()
-    thread = memory.create_thread(user_id=DEMO_USER_ID)
-    thread.add_messages(exchange)  # triggers automatic memory extraction
+    try:
+        memory = get_memory()
+        thread = memory.create_thread(user_id=DEMO_USER_ID)
+        thread.add_messages(exchange)  # triggers automatic memory extraction
+        # Delete outdated/duplicate durable facts so the newest preference wins on recall.
+        reconcile_durable_memories(DEMO_USER_ID)
+    except Exception as exc:  # persistence is best-effort; a DB blip must not 500 the run
+        # Mirror recall_memory's graceful degradation: the chat reply already streamed
+        # successfully, so swallow + log rather than raising out of the SSE generator's
+        # finally (which surfaced as "Exception in ASGI application" while the DB was down).
+        print(f"[persist] warning: memory persist failed, degrading gracefully ({exc})")
 
 
 @app.post("/run")

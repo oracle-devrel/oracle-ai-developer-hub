@@ -45,9 +45,28 @@ Observed in the Oracle × CopilotKit cookbook: turn 1 (recall + search via `sear
 
 Record a `ToolExecutionRequest` for every server-tool invocation so the emitted tool result carries the *same* `tool_call_id` the assistant `tool_calls` entry used (and is visible to the frontend), so the replayed history is a valid `assistant(tool_calls) → tool(result)` sequence. Alternatively, reconcile tool_call_ids when reconstructing LangGraph message history from the incoming AG-UI `messages` so orphaned `tool` messages are repaired or dropped before the model call.
 
-## Workaround
+## Workaround (implemented)
 
-Single-turn interactions work. There is no clean multi-turn workaround at the cookbook layer (the correlation happens inside the adapter). Pin to a fixed adapter commit and re-test as the integration matures.
+The cookbook now applies a server-side workaround in `agent/concierge/server.py`. The
+LangGraph runner is checkpointed per `thread_id` and, each turn, tries to append only
+the client messages whose ids aren't already in the checkpoint
+(`filter_only_new_messages`). But CopilotKit re-sends the **full** history with ids
+that never match the checkpoint's, so a second copy of the
+`assistant(tool_calls)`/`tool` block is appended and the merged history is invalid.
+
+Since the client already sends the full, valid history every turn, we replace the
+adapter's incremental merge with a full-history **replace**: monkey-patch
+`filter_only_new_messages` to prepend a `RemoveMessage(REMOVE_ALL_MESSAGES)` and return
+the client's history verbatim, so `add_messages` clears the checkpoint's copy and uses
+the client's valid history. This restores multi-turn conversations **and** makes the
+`book_flight` (`requires_confirmation`) HITL flow reachable (search → pick → confirm →
+boarding pass all work). The adapter drives every turn — including HITL resume — through
+`astream({"messages": ...})`, so the replace covers that path too.
+
+This is a workaround, not a fix: it lives in cookbook code and reaches into a private
+adapter function. Remove it once the upstream adapter records `ToolExecutionRequest`s so
+the emitted tool-call ids correlate (the "Suggested direction" above). Pin to a fixed
+adapter commit and re-test as the integration matures.
 
 ## Environment
 

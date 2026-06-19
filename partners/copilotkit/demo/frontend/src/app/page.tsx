@@ -6,11 +6,14 @@ import { CopilotKitProvider, CopilotChat } from "@copilotkit/react-core/v2";
 import { useThreadStore } from "@/lib/threads";
 import { ThreadSidebar } from "@/components/ThreadSidebar";
 import { ConciergeTools } from "@/components/ConciergeTools";
+import { ErrorNotice } from "@/components/ErrorNotice";
+import { ThreadTitler } from "@/components/ThreadTitler";
 
 export default function Home() {
-  const { ready, threads, activeThreadId, newThread, selectThread } =
+  const { ready, threads, activeThreadId, newThread, selectThread, renameThread } =
     useThreadStore();
   const [collapsed, setCollapsed] = useState(false);
+  const activeTitle = threads.find((t) => t.id === activeThreadId)?.title ?? "";
 
   return (
     <CopilotKitProvider runtimeUrl="/api/copilotkit">
@@ -41,6 +44,16 @@ export default function Home() {
 
           {/* Tool renderers — mount once, render inline in the chat stream */}
           <ConciergeTools />
+
+          {/* Surfaces run errors the chat UI would otherwise swallow */}
+          <ErrorNotice />
+
+          {/* Names a thread after its first user message */}
+          <ThreadTitler
+            activeThreadId={activeThreadId}
+            activeTitle={activeTitle}
+            onTitle={renameThread}
+          />
 
           {/* Chat region */}
           <div className="flex-1 min-h-0">

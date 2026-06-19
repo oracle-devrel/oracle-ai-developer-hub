@@ -9,6 +9,7 @@ A personal **travel concierge** that shows how to use three things together — 
 Tell the concierge your travel preferences, come back in a brand-new session, and
 it still knows them — recalled from Oracle AI Database, not the current chat.
 
+> 🌐 Try it live: [hosted demo on Railway](https://showcase-oracle-agent-memory-production.up.railway.app)
 > 📖 Full write-up: [`../cookbook.md`](../cookbook.md)
 
 ## How it works
@@ -27,7 +28,7 @@ Next.js + CopilotKit (V2) ──/api/copilotkit──▶ CopilotRuntime (HttpAge
 The agent is **defined once** in Agent Spec (`agent/concierge/agent.py`) and run on
 LangGraph via the `ag_ui_agentspec` adapter. `recall_memory` pulls durable
 preferences from Oracle Agent Memory before planning; each turn is persisted so new
-preferences are extracted for next time. CopilotKit consumes the AG-UI endpoint
+preferences are extracted for next time, and a reconcile pass supersedes outdated facts so an updated preference wins on the next recall. CopilotKit consumes the AG-UI endpoint
 with an `HttpAgent`, so the agent owns the LLM call.
 
 ## Prerequisites
@@ -84,11 +85,10 @@ Open http://localhost:3000.
    and surfaces flights like **AMS-001 — KLM KL606, nonstop, $740** as clickable flight
    cards — driven by what it remembered, not what you said in this thread.
 
-**Booking in one shot:** ask *"Book me flight AMS-001 to Amsterdam"* in a single message,
+**Book it:** select a flight from the cards (or ask *"Book me flight AMS-001 to Amsterdam"*),
 then click **Confirm &amp; book** on the confirmation card to get the boarding pass.
-`book_flight` is a CopilotKit **ClientTool** so confirm→book happens in one agent run.
-Sending a follow-up message in the same thread after a server-tool call still hits an
-upstream adapter bug — see Notes below.
+`book_flight` is a CopilotKit **ClientTool** so the confirm→book step resolves in one agent run.
+Multi-turn follow-ups in the same thread work too, via a server-side workaround — see Notes below.
 
 ## Tests
 
@@ -105,11 +105,13 @@ cd frontend && npm run test:e2e
   adapter doesn't forward `forwarded_props`, so to scope memory per real user, set
   `user_id` from a ContextVar populated by a FastAPI dependency. See
   `agent/concierge/tools.py`.
-- **Booking (human-in-the-loop)** — `book_flight` is a CopilotKit **ClientTool**
-  (`useHumanInTheLoop`), so the confirm→book flow works end-to-end in a single agent
-  run. Sending a *follow-up* message in the same thread after any server-tool call
-  still fails due to an upstream Agent Spec × AG-UI adapter bug (`tool_call_id`
-  correlation) — that's why booking is phrased as a single request and why
-  cross-session recall is tested via **"+ New thread"**. See
+- **Multi-turn & booking** — `book_flight` is a CopilotKit **ClientTool**
+  (`useHumanInTheLoop`), so the confirm→book step resolves inside a single agent run.
+  Follow-up messages after a server-tool call would otherwise trip an upstream Agent
+  Spec × AG-UI adapter bug (`tool_call_id` correlation); the cookbook works around it in
+  `concierge/server.py` by replacing the adapter's incremental message merge with a
+  full-history replace each turn, so multi-turn conversations work end-to-end. The
+  **"+ New thread"** flow above just proves recall is user-scoped — a fresh thread still
+  remembers you. See
   [`docs/known-issues/agentspec-multiturn-toolcall-correlation.md`](docs/known-issues/agentspec-multiturn-toolcall-correlation.md).
 - **Models** — set `CHAT_MODEL`, `MEMORY_LLM_MODEL`, `EMBEDDING_MODEL` in `agent/.env`.

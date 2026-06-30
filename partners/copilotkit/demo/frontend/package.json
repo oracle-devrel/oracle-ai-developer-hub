@@ -22,7 +22,7 @@
     "@copilotkit/runtime-client-gql": "0.0.0-mme-ag-ui-0-0-46-20260227141603",
     "@copilotkit/shared": "0.0.0-mme-ag-ui-0-0-46-20260227141603",
     "hono": "^4.11.4",
-    "next": "16.0.10",
+    "next": "16.2.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "zod": "^3.25.75"

@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+*.env
+*-wallet/
+wallet/
+exports/
+private/
+sources/*/
+.DS_Store
+node_modules/

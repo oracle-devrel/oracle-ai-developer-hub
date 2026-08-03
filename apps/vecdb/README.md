@@ -1,7 +1,13 @@
-# Autonomous AI Vector Database is in Limited Availability
+# Sample Apps
 
-Autonomous AI Vector Database is a fully managed vector database that helps AI developers and data scientists quickly build semantic search, RAG, and agentic applications using easy-to-use vector APIs—with enterprise-grade reliability, security, and stock-exchange robustness to help you meet compliance requirements.
+This directory hosts VecDB sample applications demonstrating how to build AI-powered experiences on Oracle AI Database (VecDB). Each entry links directly to the app folder so you can dive into its README and source code.
 
-Autonomous AI Vector Database is in Limited Availability now, and we’re inviting you to try it. Reach out to your Oracle account team, and we’ll help get you set up in the OCI region and tenancy that works for you.
+| Title | Stack | Highlights | Path |
+| ----- | ----- | ---------- | ---- |
+| Doc Chatbot | Streamlit, Oracle VecDB, OpenAI/Ollama | Upload documents, embed them, and chat with retrieval-augmented answers citing source chunks. | [Open](./doc_chatbot) |
+| Fashion Product Search | FastAPI, React, Oracle VecDB, Transformers | Multimodal search over product catalog images and descriptions with metadata filtering and streaming assets. | [Open](./fashion_products_search) |
+| Product Recommendation | FastAPI, React, Oracle VecDB, CLIP | Semantic search and recommendation flow for catalog items with pricing filters and CLIP embeddings. | [Open](./product_recommendation) |
+| Semantic Code Search | FastAPI, React, Oracle VecDB, Jina Embeddings | Index Python repositories and explore relevant code via similarity search with expandable context panes. | [Open](./semantic_code_search) |
+| Ask the Parks | Python, Oracle VecDB, Leaflet | Semantic National Park Service search with city/radius and GeoJSON QBE filters, map results, and park details. | [Open](./vecdb_ask_parks) |
 
-Learn more here: [Autonomous AI Vector Database Announcement](https://blogs.oracle.com/database/announcing-oracle-autonomous-ai-vector-database-limited-availability)
+Looking for notebook tutorials instead? Jump to the [Sample Notebooks](../../notebooks/vecdb) collection.

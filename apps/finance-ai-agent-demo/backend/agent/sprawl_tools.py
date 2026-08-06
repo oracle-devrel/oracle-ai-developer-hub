@@ -581,3 +581,135 @@ def convergent_search_sprawl(
         return f"No results found for account '{account_id}'"
 
     return json.dumps(all_results, default=str)
+
+
+# ---------------------------------------------------------------------------
+# suggest_portfolio_hedge (PostgreSQL sprawl mode)
+# ---------------------------------------------------------------------------
+
+
+def suggest_portfolio_hedge_sprawl(pg_conn, args, query_logger):
+    """Hedge recommendation tool for sprawl/PostgreSQL mode.
+
+    Mirrors _suggest_portfolio_hedge in tools.py but uses PostgreSQL syntax
+    (%(param)s placeholders, JSONB operators, window functions).
+    """
+    import json as _json
+
+    account_id = args.get("account_id", "")
+    risk_focus = args.get("risk_focus", "all")
+
+    sql = """
+        WITH holdings AS (
+            SELECT
+                ph.holding_id,
+                ph.asset_class,
+                ph.instrument_name,
+                ph.ticker,
+                ph.sector,
+                ph.region,
+                ph.risk_rating,
+                ph.current_value,
+                SUM(ph.current_value) OVER () AS total_value,
+                ROUND(
+                    ph.current_value / NULLIF(SUM(ph.current_value) OVER (), 0) * 100, 2
+                ) AS pct_of_portfolio,
+                ca.risk_profile,
+                ca.metadata->>'esg_mandate' AS esg_mandate,
+                ca.metadata->>'max_single_position' AS max_position,
+                ca.metadata->'excluded_sectors' AS excluded_sectors
+            FROM portfolio_holdings ph
+            JOIN client_accounts ca ON ca.account_id = ph.account_id
+            WHERE ph.account_id = %(account_id)s
+        ),
+        sector_exposure AS (
+            SELECT sector,
+                   ROUND(SUM(pct_of_portfolio)::numeric, 2) AS sector_pct
+            FROM holdings
+            GROUP BY sector
+            ORDER BY sector_pct DESC
+        ),
+        region_exposure AS (
+            SELECT region,
+                   ROUND(SUM(pct_of_portfolio)::numeric, 2) AS region_pct
+            FROM holdings
+            GROUP BY region
+            ORDER BY region_pct DESC
+        ),
+        asset_class_exposure AS (
+            SELECT asset_class,
+                   ROUND(SUM(pct_of_portfolio)::numeric, 2) AS asset_class_pct
+            FROM holdings
+            GROUP BY asset_class
+            ORDER BY asset_class_pct DESC
+        ),
+        high_risk_positions AS (
+            SELECT holding_id, instrument_name, ticker, sector, region,
+                   risk_rating, pct_of_portfolio
+            FROM holdings
+            WHERE risk_rating >= 7
+            ORDER BY pct_of_portfolio DESC
+        )
+        SELECT 'HOLDING'        AS row_type,
+               h.holding_id     AS id,
+               h.instrument_name AS label,
+               h.ticker         AS ticker,
+               h.sector         AS sector,
+               h.region         AS region,
+               h.asset_class    AS asset_class,
+               h.risk_rating    AS risk_rating,
+               h.pct_of_portfolio AS pct,
+               h.risk_profile   AS risk_profile,
+               h.esg_mandate    AS esg_mandate,
+               h.max_position   AS max_position,
+               h.excluded_sectors::text AS excluded_sectors
+        FROM holdings h
+        UNION ALL
+        SELECT 'SECTOR', sector, sector, NULL, NULL, NULL, NULL,
+               NULL, sector_pct, NULL, NULL, NULL, NULL
+        FROM sector_exposure
+        UNION ALL
+        SELECT 'REGION', region, region, NULL, NULL, NULL, NULL,
+               NULL, region_pct, NULL, NULL, NULL, NULL
+        FROM region_exposure
+        UNION ALL
+        SELECT 'ASSET_CLASS', asset_class, asset_class, NULL, NULL, NULL, NULL,
+               NULL, asset_class_pct, NULL, NULL, NULL, NULL
+        FROM asset_class_exposure
+        UNION ALL
+        SELECT 'HIGH_RISK', holding_id, instrument_name, ticker, sector, region,
+               NULL, risk_rating, pct_of_portfolio, NULL, NULL, NULL, NULL
+        FROM high_risk_positions
+    """
+
+    columns = [
+        "ROW_TYPE",
+        "ID",
+        "LABEL",
+        "TICKER",
+        "SECTOR",
+        "REGION",
+        "ASSET_CLASS",
+        "RISK_RATING",
+        "PCT",
+        "RISK_PROFILE",
+        "ESG_MANDATE",
+        "MAX_POSITION",
+        "EXCLUDED_SECTORS",
+    ]
+
+    rows, _ = execute_query(
+        pg_conn,
+        sql,
+        {"account_id": account_id},
+        query_logger,
+        description=f"Hedge analysis (PostgreSQL): {account_id}",
+    )
+
+    if not rows:
+        return f"No holdings found for account '{account_id}'"
+
+    from agent.tools import _build_hedge_recommendations
+
+    results = [dict(zip(columns, row, strict=False)) for row in rows]
+    return _json.dumps(_build_hedge_recommendations(results, account_id, risk_focus), default=str)

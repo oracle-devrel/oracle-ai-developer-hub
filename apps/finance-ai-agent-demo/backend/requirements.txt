@@ -24,3 +24,5 @@ pandas>=2.0
 pydantic>=2.0
 python-dotenv>=1.0
 tiktoken>=0.7
+pytest>=8.0
+pytest-mock>=3.12

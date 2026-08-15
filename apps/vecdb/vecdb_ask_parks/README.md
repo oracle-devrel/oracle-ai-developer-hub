@@ -16,6 +16,7 @@ The advanced filter panel shows the generated QBE alongside the filtered map and
 
 Ask the Parks is a map-and-list explorer for demonstrating Oracle VecDB with a real spatial dataset. A natural-language prompt, such as `waterfall hikes` or `peaceful desert park with short hikes`, is always sent as a semantic VecDB query. Location is optional: entering a city applies a GeoJSON `$near` radius filter; clearing the location returns to a nationwide semantic search. The Advanced metadata panel builds QBE filters for rich CSV fields without asking users to write JSON.
 
+![Ask the Parks Demo](static/assets/ask_the_parks_demo.gif)
 The interface is designed for a live demo:
 
 - Results appear as linked cards and map markers; selecting either highlights the other.
@@ -53,13 +54,13 @@ When configured, the app calls `OracleVecDB.query()` with a hosted text query an
 For example:
 
 ```json
-{"PARK_CODE": "yose"}
+{ "PARK_CODE": "yose" }
 ```
 
 The builder's **Contains** option uses a generated `$regex` expression. Its **Matches regex** option accepts a regex pattern directly; for example, filtering Park name with `.*Adams.*` generates:
 
 ```json
-{"NAME": {"$regex": ".*Adams.*"}}
+{ "NAME": { "$regex": ".*Adams.*" } }
 ```
 
 The configured table must contain the park metadata, including `location: {"type":"Point","coordinates":[longitude,latitude]}`. If no VecDB variables are set, the supplied dense vectors are used for local cosine ranking and GeoJSON radius filtering; custom Metadata QBE requires an Oracle VecDB connection.
@@ -104,9 +105,19 @@ The metadata controls also support `$in`, `$nin`, `$ne`, and `$exists`; choose *
 For example, use this small San Francisco Bay Area polygon to verify either `$within` or `$intersects`:
 
 ```json
-{"type":"Polygon","coordinates":[[[-123.2,37.2],[-121.7,37.2],[-121.7,38.3],[-123.2,38.3],[-123.2,37.2]]]}
+{
+  "type": "Polygon",
+  "coordinates": [
+    [
+      [-123.2, 37.2],
+      [-121.7, 37.2],
+      [-121.7, 38.3],
+      [-123.2, 38.3],
+      [-123.2, 37.2]
+    ]
+  ]
+}
 ```
-
 
 ## Developer notebook
 

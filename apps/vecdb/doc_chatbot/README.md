@@ -67,7 +67,7 @@ This sample highlights Oracle AI Database as the vector retrieval layer of the a
 - Streamlit
 - Access to Oracle AI Database (26ai) with Vector capabilities exposed via ORDS (VecDB API)
   - An ORDS-exposed Oracle VecDB endpoint reachable from the machine running the app
-  - ORDS VecDB base URL (e.g. https://<host>/ords/vector3/\_/db-api/stable/vecdb)
+  - ORDS VecDB base URL (e.g. `https://<host>/ords/vector3/_/db-api/stable/vecdb`)
   - Database username and password for a user/schema with vector privileges (e.g. VECTOR3)
 - Ollama (for local LLM/embeddings) OR API from LLM providers (like OpenAI, Openrouter, etc.)
 

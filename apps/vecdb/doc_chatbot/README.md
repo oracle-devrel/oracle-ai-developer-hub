@@ -108,7 +108,7 @@ This sample highlights Oracle AI Database as the vector retrieval layer of the a
 
 2. Configure the sidebar
    - Vector Store (Oracle VecDB):
-     - ORDS VecDB Base URL: e.g. https://<host>/ords/vector3/\_/db-api/stable/vecdb
+     - ORDS VecDB Base URL: e.g. `https://<host>/ords/vector3/_/db-api/stable/vecdb`
      - Database Username: e.g. VECTOR3
      - Password: your password
      - Click "Test Connection"

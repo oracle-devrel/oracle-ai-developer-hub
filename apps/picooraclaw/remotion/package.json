@@ -14,7 +14,7 @@
     "@remotion/transitions": "4.0.301",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "remotion": "4.0.301"
+    "remotion": "4.0.410"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

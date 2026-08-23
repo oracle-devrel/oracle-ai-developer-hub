@@ -6,7 +6,7 @@ This app showcases a Retrieval-Augmented Generation (RAG) QA chatbot that allows
 
 Oracle VecDB acts as the retrieval backbone of the workflow: document chunks are embedded, stored as dense vectors together with metadata, and queried at runtime using top-k similarity search. The retrieved chunk context is then passed into the configured chat model to generate grounded answers.
 
- ---
+---
 
 ## What you can do with this app
 
@@ -16,13 +16,12 @@ Oracle VecDB acts as the retrieval backbone of the workflow: document chunks are
 - Switch between multiple chat and embedding backends
 - Inspect retrieved context used for answer generation
 
-
 <p align="center">
   <img src="./images/diagram3.png" width="10000"/>
 </p>
 <p align="center"><em>High-level document ingestion and retrieval flow using Oracle VecDB.</em></p>
 
----
+## ![Doc Chatbot Demo](images/doc_chat_bot.gif)
 
 ## Architecture Flow
 
@@ -68,7 +67,7 @@ This sample highlights Oracle AI Database as the vector retrieval layer of the a
 - Streamlit
 - Access to Oracle AI Database (26ai) with Vector capabilities exposed via ORDS (VecDB API)
   - An ORDS-exposed Oracle VecDB endpoint reachable from the machine running the app
-  - ORDS VecDB base URL (e.g. https://<host>/ords/vector3/_/db-api/stable/vecdb)
+  - ORDS VecDB base URL (e.g. `https://<host>/ords/vector3/_/db-api/stable/vecdb`)
   - Database username and password for a user/schema with vector privileges (e.g. VECTOR3)
 - Ollama (for local LLM/embeddings) OR API from LLM providers (like OpenAI, Openrouter, etc.)
 
@@ -77,12 +76,14 @@ This sample highlights Oracle AI Database as the vector retrieval layer of the a
 ## Installation
 
 1. Clone this repository
+
    ```bash
    git clone <repo-url>
    cd doc_chatbot
    ```
 
 2. (Recommended) Create and activate a virtual environment
+
    ```bash
    python3 -m venv venv
    source venv/bin/activate
@@ -98,20 +99,22 @@ This sample highlights Oracle AI Database as the vector retrieval layer of the a
 ## Usage
 
 1. Run the application
+
    ```bash
    streamlit run app/main.py
    ```
+
    The app will open at http://localhost:8501
 
 2. Configure the sidebar
    - Vector Store (Oracle VecDB):
-     - ORDS VecDB Base URL: e.g. https://<host>/ords/vector3/_/db-api/stable/vecdb
-     - Database Username: e.g. VECTOR3
+     - ORDS VecDB Base URL: e.g. `https://<host>/ords/vector3/_/db-api/stable/vecdb`
+     - Database Username: your vector user
      - Password: your password
      - Click "Test Connection"
    - Language Model: Choose your preferred chat model (OpenAI-compatible API or Ollama)
    - Embedding Model: Select embedding generation method (Sentence-Transformers, OpenAI-compatible API, or Ollama)
-  
+
   <p align="center">
   <img src="./images/upload.png" width="600"/>
 </p>
@@ -154,6 +157,7 @@ See the implementation in `app/main.py`.
 ## Stored Vector Payload
 
 Each processed chunk is uploaded into Oracle VecDB as a dense vector record with:
+
 - `id`: generated chunk vector identifier
 - `dense_vector`: embedding array generated for the chunk text
 - `metadata.source`: original uploaded file name
@@ -188,14 +192,17 @@ doc_chatbot/
 ## Configuration
 
 ### Vector Database (Oracle VecDB via ORDS)
+
 - Provide the ORDS VecDB base URL, DB username, and password in the sidebar
 - Click **Test Connection** to validate connectivity
 
 ### Language Model
+
 - **Ollama**: Local Ollama-compatible chat models
 - **OpenAI-compatible API**: Remote chat model endpoints
 
 ### Embedding Model
+
 - **Sentence-Transformers**: Local sentence-transformers models
 - **Ollama**: Local embedding generation through Ollama
 - **OpenAI-compatible API**: Remote embedding model endpoints

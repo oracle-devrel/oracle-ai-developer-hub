@@ -3,6 +3,7 @@
 A full-stack application for semantic code search over a local Python codebase, combining natural-language query understanding, Oracle VecDB retrieval, and interactive file exploration.
 
 ## 🚀 Overview
+
 - Displays a navigable file tree of your repository.
 - On search matches, reveals function snippets and surrounding context with a "Reveal" button.
 - Built with a FastAPI backend (Python), Jina embeddings, and a React + TailwindCSS frontend.
@@ -20,9 +21,10 @@ Oracle VecDB acts as the retrieval layer of the application. Parsed code snippet
 - Reveal contextual lines around matching snippets
 - Explore how code embeddings and vector search can support developer productivity workflows
 
----
+## ![Demo of semantic code search](images/semantic_code_search.gif)
 
 ## 🧩 Features
+
 - **Natural-language code search**: Search a local Python codebase using descriptive queries
 - **Oracle VecDB integration**: Store and retrieve code embeddings with similarity search
 - **Interactive file explorer**: Browse repository files and inspect source code from the UI
@@ -32,7 +34,6 @@ Oracle VecDB acts as the retrieval layer of the application. Parsed code snippet
 - **React + FastAPI architecture**: Lightweight frontend and backend stack for developer-facing search workflows
 
 ---
-
 
 ## 🧭 Architecture Flow
 
@@ -59,6 +60,7 @@ This sample uses Oracle VecDB as the retrieval backbone for semantic code search
 ---
 
 ## Pre-Installation
+
 Before indexing a codebase, make sure you have a local Python repository available. You can use the LangChain repository as an example, or any other repository of your choice that contains Python files.
 
 ```bash
@@ -98,26 +100,33 @@ You can still override other settings via environment variables, such as `ORACLE
 ## Installation
 
 ### Backend Setup (FastAPI + Oracle VecDB)
+
 **Requirement:** Ensure you have Python **3.10+** installed on your machine.
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
 Before running the backend, do the following:
 
 1. Navigate to where the LangChain repository had been cloned. This repository contains the codebase through which the app will search.
 2. Navigate to the `libs/core/langchain_core` directory inside the cloned repository:
+
 ```bash
 cd langchain/libs/core/langchain_core
 ```
+
 3. Copy the absolute path to the `langchain_core` folder.
 4. **Set the `CODE_DIR` path** in your `.env` file:
 
 Create or edit the `.env` file in the `backend` folder of your project and add the following line:
+
 ```env
 CODE_DIR=/absolute/path/to/langchain/libs/core/langchain_core
 ```
+
 Replace with the path that you copied.
 
 5. Ensure you have `python-dotenv` installed (already included in the backend requirements).
@@ -133,7 +142,6 @@ npm install
 ```
 
 ---
-
 
 ## Running the Application
 
@@ -164,6 +172,7 @@ pip install -r requirements.txt
 python load_chunks.py
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
+
 ---
 
 ## Project Structure
@@ -188,6 +197,7 @@ semantic_code_search/
 │   └── screenshot.png
 └── README.md
 ```
+
 ---
 
 ## Vector Database Configuration (Oracle VecDB)
@@ -203,6 +213,7 @@ semantic_code_search/
 ## Stored Metadata
 
 Each indexed code snippet stores metadata such as:
+
 - `context_snippet_type`
 - `context_name`
 - `context_file_name`

@@ -1,0 +1,142 @@
+openapi: 3.0.3
+info:
+  title: Credit Decision Service
+  version: 1.0.0
+paths:
+  /credit-decisions:
+    post:
+      summary: Create a credit decision
+      operationId: createCreditDecision
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditDecisionRequest'
+      responses:
+        '200':
+          description: Credit decision response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditDecisionResponse'
+  /credit-decisions/evaluate:
+    post:
+      summary: Evaluate a credit decision without persistence
+      description: Runs the same blocking decision workflow as the create endpoint, but skips the database write.
+      operationId: evaluateCreditDecision
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditDecisionRequest'
+      responses:
+        '200':
+          description: Credit decision response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditDecisionResponse'
+  /credit-decisions/{decisionId}:
+    get:
+      summary: Fetch a credit decision
+      operationId: getCreditDecision
+      parameters:
+        - name: decisionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Credit decision response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditDecisionResponse'
+        '404':
+          description: Decision not found
+  /credit-decisions/customer/{customerId}:
+    get:
+      summary: Fetch decisions for a customer
+      operationId: getCustomerDecisions
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer decision history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditDecisionResponse'
+  /health/simple:
+    get:
+      summary: Simple service health endpoint
+      responses:
+        '200':
+          description: Service is healthy
+components:
+  schemas:
+    CreditDecisionRequest:
+      type: object
+      required:
+        - customerId
+        - requestedAmount
+        - termMonths
+        - annualIncome
+        - monthlyDebt
+        - creditScore
+      properties:
+        customerId:
+          type: string
+          example: C10293
+        requestedAmount:
+          type: number
+          format: double
+          example: 25000
+        termMonths:
+          type: integer
+          example: 36
+        annualIncome:
+          type: number
+          format: double
+          example: 125000
+        monthlyDebt:
+          type: number
+          format: double
+          example: 1800
+        creditScore:
+          type: integer
+          example: 742
+    CreditDecisionResponse:
+      type: object
+      properties:
+        decisionId:
+          type: string
+        customerId:
+          type: string
+        approved:
+          type: boolean
+        riskBand:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        annualRate:
+          type: number
+          format: double
+        monthlyPayment:
+          type: number
+          format: double
+        explanation:
+          type: string
+        processingMillis:
+          type: integer
+          format: int64
+        runtime:
+          type: string

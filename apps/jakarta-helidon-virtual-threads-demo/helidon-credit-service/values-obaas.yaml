@@ -1,0 +1,71 @@
+# OBaaS deployment values for helidon-credit-service.
+# Edit image.repository, image.tag, obaas.releaseName, and database secret names for another cluster.
+fullnameOverride: "helidon-credit-service"
+
+image:
+  repository: "us-ashburn-1.ocir.io/maacloud/jakartademo/helidon-credit-service"
+  tag: "1.0.0-SNAPSHOT"
+  pullPolicy: Always
+
+obaas:
+  releaseName: "obaas"
+  framework: "HELIDON"
+
+helidon:
+  datasource:
+    name: "credit"
+  otel:
+    serviceName: "helidon-credit-service"
+  metrics:
+    rest_request_enabled: true
+    virtual_threads_enabled: true
+
+service:
+  type: ClusterIP
+  port: 8080
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 768Mi
+
+database:
+  authN:
+    secretName: "signoz134inst-db-authn"
+  # Existing OBaaS 2.1.1 ADB wallet for platform release `obaas`, revision 1.
+  walletSecret: "obaas-adb-tns-admin-1"
+
+env:
+  - name: OTEL_INSTRUMENTATION_LOGBACK_MDC_ENABLED
+    value: "true"
+
+# Eureka and SigNoz/OpenTelemetry are wired by the OBaaS app chart.
+eureka:
+  enabled: true
+
+configServer:
+  enabled: false
+
+otel:
+  enabled: true
+
+# The OBaaS OpenTelemetry injector and chart security settings require an explicit non-root UID.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 185
+  runAsGroup: 0
+  fsGroup: 0
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL

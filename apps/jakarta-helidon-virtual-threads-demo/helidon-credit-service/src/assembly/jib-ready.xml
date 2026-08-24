@@ -1,0 +1,22 @@
+<assembly>
+    <id>deployment</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <includes>
+                <include>${project.build.finalName}.jar</include>
+            </includes>
+            <outputDirectory>.</outputDirectory>
+            <fileMode>755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/libs</directory>
+            <outputDirectory>app/libs</outputDirectory>
+            <fileMode>644</fileMode>
+        </fileSet>
+    </fileSets>
+</assembly>

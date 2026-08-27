@@ -16,3 +16,4 @@ ipywidgets
 matplotlib
 tiktoken
 pydantic
+langsmith

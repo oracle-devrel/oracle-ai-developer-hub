@@ -1,6 +1,6 @@
-# Deep Research Agent with Oracle 23AI Vector Database
+# Deep Research Agent with Oracle 26AI AI Database
 
-A sophisticated AI research agent that demonstrates the powerful vector search capabilities of Oracle 23AI Database, combining traditional SQL with modern AI embeddings for intelligent memory and retrieval.
+A sophisticated AI research agent that demonstrates the powerful vector search capabilities of Oracle 26AI AI Database, combining traditional SQL with modern AI embeddings for intelligent memory and retrieval.
 
 ## 🚀 What We Built
 
@@ -10,7 +10,7 @@ This project showcases a **Deep Research Agent** that can:
 - **Search** through memory using semantic similarity (not just keywords)
 - **Scale** with Oracle's enterprise-grade vector database
 
-## 🎯 Oracle 23AI Features Demonstrated
+## 🎯 Oracle 26AI AI Database Features Demonstrated
 
 ### 1. Native Vector Data Type
 ```sql
@@ -46,8 +46,8 @@ FETCH FIRST 5 ROWS ONLY
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────────┐
-│   User Query    │───▶│  OpenAI Embedding │───▶│   Oracle 23AI       │
-└─────────────────┘    └──────────────────┘    │   Vector Database   │
+│   User Query    │───▶│  OpenAI Embedding │───▶│   Oracle 26AI       │
+└─────────────────┘    └──────────────────┘    │   AI Database       │
                                                │                     │
 ┌─────────────────┐    ┌──────────────────┐    │  • Native Vectors   │
 │  Smart Results  │◀───│  Vector Search    │◀───│  • HNSW Index      │
@@ -59,7 +59,7 @@ FETCH FIRST 5 ROWS ONLY
 
 ### Prerequisites
 - Python 3.8+
-- Oracle 23AI Database (Autonomous or On-Premises)
+- Oracle 26AI AI Database (Autonomous or On-Premises)
 - OpenAI API Key
 
 ### 1. Clone and Install Dependencies
@@ -183,7 +183,7 @@ cursor.execute("""
 - ❌ Separate vector database required
 - ❌ Complex data synchronization
 
-### After (Oracle 23AI Vector Search)
+### After (Oracle 26AI AI Database Vector Search)
 - ✅ Semantic understanding of queries
 - ✅ Finds related content automatically
 - ✅ Single database for all data types
@@ -222,7 +222,7 @@ WHERE created_at > SYSDATE - 7
 GROUP BY CLUSTER_ID(query_embedding USING KMEANS);
 ```
 
-## 🏆 Why Oracle 23AI for Vector Search?
+## 🏆 Why Oracle 26AI AI Database for Vector Search?
 
 ### Enterprise Features
 - **Native SQL Integration**: No separate vector database needed
@@ -252,7 +252,7 @@ GROUP BY CLUSTER_ID(query_embedding USING KMEANS);
 
 ## 🤝 Contributing
 
-This project demonstrates Oracle 23AI's vector capabilities. Feel free to:
+This project demonstrates Oracle 26AI AI Database's vector capabilities. Feel free to:
 - Add new vector search algorithms
 - Implement multi-modal embeddings
 - Create advanced analytics dashboards
@@ -260,8 +260,8 @@ This project demonstrates Oracle 23AI's vector capabilities. Feel free to:
 
 ## 📄 License
 
-MIT License - Feel free to use this as a foundation for your own Oracle 23AI vector projects!
+MIT License - Feel free to use this as a foundation for your own Oracle 26AI AI Database vector projects!
 
 ---
 
-**Built with ❤️ using Oracle 23AI Vector Database - Where Enterprise meets AI**
+**Built with ❤️ using Oracle 26AI AI Database - Where Enterprise meets AI**

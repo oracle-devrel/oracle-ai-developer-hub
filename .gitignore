@@ -146,7 +146,7 @@ logs/
 .wallet/
 
 # Logs
-*.log 
+*.log
 
 # Distribution / packaging
 dist/
@@ -169,6 +169,7 @@ apps/agentic_rag/kubectl
 *.lock.hcl
 *.lock
 !workshops/soccer-analytics-agent/uv.lock
+!apps/team-brain/uv.lock
 
 CLAUDE.md
 

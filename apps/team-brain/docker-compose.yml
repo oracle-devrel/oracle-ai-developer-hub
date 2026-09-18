@@ -1,0 +1,61 @@
+# Oracle AI Database 26ai Free: the one shared table, the vector search, the
+# full-text index, the in-database embedding model, and the row policy all live
+# in this one container.
+#
+#   docker compose up -d --wait --wait-timeout 900
+#   uv run python scripts/bootstrap_db.py   # users, grants, embedding model
+#
+# Pulling container-registry.oracle.com/database/free needs a free Oracle
+# account (accept the licence once, then `docker login container-registry.oracle.com`).
+services:
+  oracle:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: team-brain-oracle
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PWD: TeamBrain123 # SYS/SYSTEM password; bootstrap_db.py reads it off the container
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+    # No model mount needed: scripts/bootstrap_db.py streams the ONNX embedding
+    # model into the database over the connection as a BLOB.
+    healthcheck:
+      test: ["CMD", "/opt/oracle/checkDBStatus.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+
+  ords:
+    profiles: ["browser"]
+    image: container-registry.oracle.com/database/ords:latest
+    container_name: team-brain-ords
+    ports:
+      - "8181:8080"
+    environment:
+      ORACLE_PWD: TeamBrain123
+      ORACLE_USER_PWD: TeamBrain123
+      DBHOST: oracle
+      DBPORT: 1521
+      DBSERVICENAME: FREEPDB1
+    depends_on:
+      oracle:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "--output",
+          "/dev/null",
+          "http://localhost:8080/ords/sql-developer",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 90
+      start_period: 30s
+
+volumes:
+  oracle_data:

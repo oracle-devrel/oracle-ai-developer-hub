@@ -1,6 +1,6 @@
 annotated-types==0.7.0
 anthropic==0.102.0
-anyio==4.13.0
+anyio==4.14.2
 appnope==0.1.4
 argon2-cffi==25.1.0
 argon2-cffi-bindings==25.1.0

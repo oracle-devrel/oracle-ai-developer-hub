@@ -42,6 +42,9 @@
     "ORACLE_DSN": "localhost:1521/FREEPDB1",
     "ORACLE_USER": "VECTOR",
     "ORACLE_PASSWORD": "VectorPwd_2025",
+    "LANGSMITH_TRACING": "true",
+    "LANGSMITH_PROJECT": "agent-memory-workshop",
+    "LANGSMITH_API_KEY": "${localEnv:LANGSMITH_API_KEY}",
     "TAVILY_API_KEY": "${localEnv:TAVILY_API_KEY}",
     "OCI_GENAI_API_KEY": "${localEnv:OCI_GENAI_API_KEY}",
     "OCI_GENAI_ENDPOINT": "${localEnv:OCI_GENAI_ENDPOINT}"

@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
-    "express": "^4.21.2",
+    "express": "^4.22.3",
     "oci-common": "^2.105.0",
     "oci-generativeaiinference": "^2.105.0",
     "oracledb": "^6.7.0",

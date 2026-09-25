@@ -1,0 +1,43 @@
+[project]
+name = "oracle-memory-system-demo"
+version = "0.1.0"
+description = "CLI chat + notebook demonstrating typed agent memory on Oracle AI Database"
+requires-python = ">=3.11,<3.13"
+license = "UPL-1.0"
+# Keep in sync with requirements.txt, which the notebook and README install from.
+dependencies = [
+    "oracledb>=3.4.0",
+    "python-dotenv>=1.0.0",
+    "openai>=1.40.0",
+    "rich>=13.0",
+    "prompt-toolkit>=3.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["memory*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP"]
+ignore = ["E501", "B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["memory", "data"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+markers = [
+    "integration: full-stack test requiring Oracle DB or a live model API",
+    "requires_oracle: test needs a reachable Oracle DB",
+    "requires_openai: test needs an OPENAI_API_KEY",
+]

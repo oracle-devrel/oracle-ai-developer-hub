@@ -1,0 +1,20 @@
+{
+  "name": "codex-oam",
+  "interface": {
+    "displayName": "Oracle AI Agent Memory"
+  },
+  "plugins": [
+    {
+      "name": "oracle-ai-agent-memory",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

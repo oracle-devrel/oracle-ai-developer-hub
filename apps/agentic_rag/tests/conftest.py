@@ -31,6 +31,7 @@ import time
 from pathlib import Path
 
 import pytest
+from langchain_core.embeddings import Embeddings
 
 # ---------------------------------------------------------------------------
 # Path setup: make src/ importable for all tests in this project.
@@ -86,7 +87,7 @@ def _oracle_reachable(config: dict[str, str], timeout: float = 2.0) -> bool:
 # deterministic hash-based embedding so the vector store table / query
 # pipeline is exercised without needing the real model.
 # ---------------------------------------------------------------------------
-class DeterministicEmbedding:
+class DeterministicEmbedding(Embeddings):
     """Minimal embedding function compatible with langchain_oracledb.OracleVS.
 
     Maps each input string to a 384-dim vector derived from its SHA-256 hash.

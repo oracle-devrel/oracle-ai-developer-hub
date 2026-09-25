@@ -1,0 +1,43 @@
+# Python compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+wheels/
+*.egg-info/
+
+# Unit test / coverage reports
+.pytest_cache/
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+coverage.xml
+*.cover
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE directories
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files
+.env
+!.env.template
+
+# Log files
+*.log
+
+# Miscellaneous
+.DS_Store
+junit.xml

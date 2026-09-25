@@ -1,0 +1,56 @@
+# Golden questions for retrieval eval. Grounded in the seed data
+# (data/seed/docs + data/seed/slack_export.json), so results are deterministic.
+#
+# Fields:
+#   question         the query
+#   user             who is asking (drives permission filtering)
+#   expected_source  a top-k result must come from this source (optional)
+#   must_include     a top-k result body must contain this phrase (optional)
+#   must_not_include NO result may contain this phrase — permission/safety (optional)
+
+- question: "how do we deploy the billing service to production?"
+  user: alice
+  expected_source: markdown
+  must_include: "blue-green"
+
+- question: "how do I roll back a bad billing deploy?"
+  user: alice
+  expected_source: markdown
+  must_include: "previous release"
+
+- question: "when does the on-call rotation hand over?"
+  user: alice
+  must_include: "Monday"
+
+- question: "what happens if a page is not acknowledged?"
+  user: alice
+  must_include: "secondary"
+
+- question: "why is onnxruntime pinned below 1.26?"
+  user: bob
+  expected_source: slack
+  must_include: "1.26"
+
+- question: "what do we do for a severity 1 customer-facing outage?"
+  user: alice
+  must_include: "incident commander"
+
+- question: "where does the stripe webhook secret live?"
+  user: alice
+  must_include: "billing-prod"
+
+- question: "how long do we have to write a postmortem?"
+  user: alice
+  must_include: "48 hours"
+
+# Permission: alice is NOT in the private security channel — the leaked secret
+# must never surface for her.
+- question: "leaked password prod outage postmortem"
+  user: alice
+  must_not_include: "hunter2"
+
+# The same knowledge IS available to bob, who is a member.
+- question: "what caused the api outage postmortem?"
+  user: bob
+  expected_source: slack
+  must_include: "leaked staging database"

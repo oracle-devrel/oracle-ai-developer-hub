@@ -1,0 +1,75 @@
+[project]
+name = "oraviz_mcp"
+version = "0.1.0"
+description = "A minimal, visualization-first MCP server for Oracle AI Database 26ai Free: query data and turn it into charts"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+authors = [
+    { name = "jasperan" }
+]
+keywords = ["mcp", "oracle", "database", "visualization", "charts", "sql", "ai", "assistant"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "fastmcp>=4.0.0",
+    "oracledb>=2.5.0",
+    "matplotlib>=3.9.0",
+    "numpy>=1.26",
+    "python-dotenv>=1.0.0",
+    "structlog>=24.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2,<10",
+    "pytest-cov>=7.0.0",
+    "pytest-asyncio>=1.2.0",
+    "pytest-mock>=3.15.0",
+    "tiktoken>=0.7",
+]
+
+[project.scripts]
+oraviz-mcp = "oraviz_mcp.main:run_server"
+
+[tool.setuptools]
+packages = ["oraviz_mcp"]
+package-dir = {"" = "src"}
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+python_classes = "Test*"
+addopts = "--cov=src --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["src/oraviz_mcp"]
+omit = ["*/__pycache__/*", "*/tests/*", "*/.venv/*", "*/venv/*"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError"
+]
+
+[tool.coverage.html]
+directory = "htmlcov"

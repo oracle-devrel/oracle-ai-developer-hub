@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+data/models/
+*.egg-info/
+dist/
+build/
+oracle/onnx/

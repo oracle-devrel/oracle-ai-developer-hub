@@ -1,0 +1,83 @@
+{
+  "principal_map": { "U_JEFF": "jeff", "U_JULIA": "julia", "U_SAM": "sam", "U_BRIAN": "brian" },
+  "users": {
+    "U_JEFF": "jeff",
+    "U_JULIA": "julia",
+    "U_SAM": "sam",
+    "U_BRIAN": "brian"
+  },
+  "channels": [
+    {
+      "id": "C_OPS",
+      "name": "ops-team",
+      "is_private": false,
+      "domains": ["ops"],
+      "members": ["U_JEFF", "U_BRIAN"],
+      "threads": [
+        {
+          "thread_ts": "1718000000.000100",
+          "messages": [
+            {
+              "user": "U_JEFF",
+              "text": "The batch cluster keeps hitting node pressure during nightly reindex. Should we bump the autoscaler max?",
+              "ts": "1718000000.000100"
+            },
+            {
+              "user": "U_JEFF",
+              "text": "Decision: raised the ops batch node pool autoscaler max from 6 to 10 nodes and set a scale-down cooldown of 15 minutes. Reindex now finishes under an hour.",
+              "ts": "1718000000.000200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C_MKT",
+      "name": "marketing-team",
+      "is_private": false,
+      "domains": ["marketing"],
+      "members": ["U_JULIA", "U_BRIAN"],
+      "threads": [
+        {
+          "thread_ts": "1718100000.000100",
+          "messages": [
+            {
+              "user": "U_JULIA",
+              "text": "What UTM scheme are we using for the Q3 webinar funnel so the landing page conversions attribute correctly?",
+              "ts": "1718100000.000100"
+            },
+            {
+              "user": "U_JULIA",
+              "text": "Standardized on utm_source=webinar, utm_campaign=q3-teambrain, utm_medium=email. The landing page converted at 14% off the nurture sequence.",
+              "ts": "1718100000.000200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C_SALES",
+      "name": "sales-team",
+      "is_private": false,
+      "domains": ["sales"],
+      "members": ["U_SAM", "U_BRIAN"],
+      "threads": [
+        {
+          "thread_ts": "1718200000.000100",
+          "messages": [
+            {
+              "user": "U_SAM",
+              "text": "What's our ceiling on enterprise discounting before I have to loop in leadership?",
+              "ts": "1718200000.000100"
+            },
+            {
+              "user": "U_SAM",
+              "text": "Deal desk policy: reps can offer up to 20% off list on an annual contract. Anything past 20% needs VP of Sales sign-off. Multi-year can go to 30% with the same approval.",
+              "ts": "1718200000.000200"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

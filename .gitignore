@@ -100,6 +100,8 @@ lib/
 lib64/
 !workshops/soccer-analytics-agent/frontend/src/lib/
 !workshops/soccer-analytics-agent/frontend/src/lib/**
+!apps/generative-ui-data-chat/src/lib/
+!apps/generative-ui-data-chat/src/lib/**
 parts/
 sdist/
 var/

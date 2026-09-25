@@ -109,6 +109,8 @@ WHERE CONTAINS(chunk_text, :textQuery, 1) > 0
 ORDER BY hybrid_score DESC
 FETCH FIRST 5 ROWS ONLY`;
 
+const DEFAULT_LLM_MODEL = "xai.grok-4.3";
+
 const AUTO_RENEWAL_VECTOR = "[0.95,0.87,0.13,0.05,0.09,0.04,0.03,0.02]";
 const MARCH_DIP_VECTOR = "[0.10,0.14,0.90,0.83,0.72,0.10,0.05,0.03]";
 
@@ -226,10 +228,10 @@ function expectedStrategy(intent: DataChatPlan["intent"]): DataChatPlan["strateg
 async function createPlan(message: string, signal?: AbortSignal): Promise<DataChatPlan> {
   const baseUrl = process.env.LLM_BASE_URL?.replace(/\/$/, "");
   const apiKey = process.env.LLM_API_KEY;
-  const model = process.env.LLM_MODEL;
+  const model = process.env.LLM_MODEL || DEFAULT_LLM_MODEL;
 
-  if (!baseUrl || !apiKey || !model) {
-    throw new Error("LLM_BASE_URL, LLM_API_KEY, and LLM_MODEL must be configured.");
+  if (!baseUrl || !apiKey) {
+    throw new Error("LLM_BASE_URL and LLM_API_KEY must be configured.");
   }
 
   const response = await fetch(`${baseUrl}/chat/completions`, {

@@ -64,7 +64,7 @@ Open http://localhost:3000.
 | --- | --- | --- |
 | `LLM_BASE_URL` | Yes | OpenAI-compatible base URL, for example `http://localhost:9999/v1` for an OCI GenAI proxy. |
 | `LLM_API_KEY` | Yes | API key or proxy token. |
-| `LLM_MODEL` | Yes | Model id, for example `xai.grok-4`, `meta.llama-3.3-70b-instruct`, or another OCI-hosted model id exposed by your proxy. |
+| `LLM_MODEL` | No | Model id. Defaults to `xai.grok-4.3`; override with any OCI-hosted model id exposed by your proxy, for example `meta.llama-3.3-70b-instruct`. |
 | `ORACLE_USER` | Yes | App user. Local default: `DATA_CHAT`. |
 | `ORACLE_PASSWORD` | Yes | App password. Local default: `DataChatPwd_2026`. |
 | `ORACLE_CONNECTION_STRING` | Yes | Local default: `127.0.0.1:1522/FREEPDB1`. |

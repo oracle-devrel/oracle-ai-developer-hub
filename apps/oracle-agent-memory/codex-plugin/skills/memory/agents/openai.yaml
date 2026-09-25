@@ -1,0 +1,4 @@
+interface:
+  display_name: "Memory"
+  short_description: "Search and update persistent agent memory."
+  default_prompt: "Use $memory to manually add or search for memories."

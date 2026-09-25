@@ -56,6 +56,7 @@ export async function POST(request: Request) {
           request.signal.addEventListener("abort", markClosed, { once: true });
 
           void runDataChat(body.message, {
+            signal: request.signal,
             onProgress: (progress) => {
               safeEnqueue("status", progress);
             }
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const response = await runDataChat(body.message);
+    const response = await runDataChat(body.message, { signal: request.signal });
 
     return NextResponse.json(response);
   } catch (error) {

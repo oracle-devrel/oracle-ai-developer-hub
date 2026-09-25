@@ -11,9 +11,6 @@ A Next.js and [OpenUI](https://github.com/thesysdev/openui) reference app showin
 
 https://github.com/user-attachments/assets/34cb03eb-5648-4fa0-9cba-8de8faebaa81
 
-
-[Watch the demo video](./oracle.mp4)
-
 ## Architecture
 
 ```text

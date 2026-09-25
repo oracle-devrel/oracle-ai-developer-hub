@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OCI IAM Memory Access Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  </head>
+  <body>
+    <header>
+      <div>
+        <p class="product">Oracle Agent Memory</p>
+        <h1>OCI IAM Memory Access Lab</h1>
+      </div>
+      {% if session %}
+        <form method="post" action="{{ url_for('web.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+          <button class="quiet" type="submit">Sign out</button>
+        </form>
+      {% endif %}
+    </header>
+
+    <div class="warning" role="alert">
+      Learning example only. This application is not production-ready.
+    </div>
+
+    <main>
+      {% if not session %}
+        <section class="signed-out">
+          <h2>Sign in to inspect database-enforced memory access</h2>
+          <p>OCI IAM authenticates you. Oracle Deep Data Security decides which rows you can use.</p>
+          <a class="button" href="{{ url_for('web.login') }}">Sign in with OCI IAM</a>
+        </section>
+      {% else %}
+        <div class="identity">
+          Signed in as <strong>{{ session.end_user_token.username }}</strong>
+        </div>
+
+        {% if message %}
+          <div class="notice" role="status">{{ message }}</div>
+        {% endif %}
+
+        <section>
+          <h2>Add a memory</h2>
+          <form class="memory-form" method="post">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+            <label for="content">Memory</label>
+            <textarea id="content" name="content" rows="3" maxlength="4000" required></textarea>
+            <label for="username">Store for username</label>
+            <input
+              id="username"
+              name="username"
+              value="{{ session.end_user_token.username }}"
+              maxlength="255"
+              required
+            >
+            <button type="submit">Add memory</button>
+          </form>
+        </section>
+
+        <section>
+          <div class="section-heading">
+            <h2>Visible memories</h2>
+            <span>{{ memories|length }}</span>
+          </div>
+          {% if memories %}
+            <ol class="memory-list">
+              {% for memory in memories %}
+                <li>
+                  <p>{{ memory.content }}</p>
+                  <dl>
+                    <div><dt>Owner</dt><dd>{{ memory.user_id or "Global" }}</dd></div>
+                    <div><dt>Created</dt><dd>{{ memory.timestamp or "Unknown" }}</dd></div>
+                  </dl>
+                </li>
+              {% endfor %}
+            </ol>
+          {% else %}
+            <p class="empty">No memories are visible to this identity.</p>
+          {% endif %}
+        </section>
+      {% endif %}
+    </main>
+  </body>
+</html>

@@ -4,21 +4,13 @@ version = "0.1.0"
 description = "CLI chat + notebook demonstrating typed agent memory on Oracle AI Database"
 requires-python = ">=3.11,<3.13"
 license = "UPL-1.0"
+# Keep in sync with requirements.txt, which the notebook and README install from.
 dependencies = [
-    "nbformat>=5.10.4",
-    "jupyter>=1.1.1",
-    "nbconvert>=7.17.1",
-    "python-dotenv>=1.2.2",
-    "oracledb>=4.0.0",
+    "oracledb>=3.4.0",
+    "python-dotenv>=1.0.0",
     "openai>=1.40.0",
     "rich>=13.0",
     "prompt-toolkit>=3.0",
-]
-
-[tool.rye]
-dev-dependencies = [
-    "pytest>=9.0.3",
-    "pytest-asyncio>=1.3.0",
 ]
 
 [tool.setuptools.packages.find]

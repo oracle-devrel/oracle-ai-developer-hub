@@ -1,0 +1,47 @@
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - oracleUser
+      - oraclePassword
+    properties:
+      oracleUser:
+        type: string
+        description: Dedicated Oracle reader with CREATE SESSION and object-level READ grants
+      oraclePassword:
+        type: string
+        description: Password for the Oracle database user
+      oracleHost:
+        type: string
+        description: Database hostname, e.g. localhost
+        default: localhost
+      oraclePort:
+        type: number
+        description: Listener port, e.g. 1521
+        default: 1521
+      oracleService:
+        type: string
+        description: Service name, e.g. FREEPDB1
+        default: FREEPDB1
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    |-
+    (config) => ({
+      command: 'oraviz-mcp',
+      args: [],
+      env: {
+        ORACLE_USER: config.oracleUser,
+        ORACLE_PASSWORD: config.oraclePassword,
+        ORACLE_HOST: config.oracleHost || 'localhost',
+        ORACLE_PORT: String(config.oraclePort || 1521),
+        ORACLE_SERVICE: config.oracleService || 'FREEPDB1'
+      }
+    })
+  exampleConfig:
+    oracleUser: oraviz_reader
+    oraclePassword: REPLACE_WITH_RUNTIME_SECRET
+    oracleHost: localhost
+    oraclePort: 1521
+    oracleService: FREEPDB1

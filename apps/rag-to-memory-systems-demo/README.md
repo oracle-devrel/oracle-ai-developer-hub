@@ -5,7 +5,8 @@ Companion artifacts for [From RAG to Memory Systems: Building Stateful AI Archit
 Two artifacts share one `memory/` Python package:
 
 - `app.py` — interactive CLI chat that demonstrates the loop turn-by-turn
-- `notebooks/memory_loop_deep_dive.ipynb` — every query the app issues, dissected
+- [`notebooks/memory_loop_deep_dive.ipynb`](../../notebooks/memory_loop_deep_dive.ipynb), in the
+  repository's `notebooks/` folder — every query the app issues, dissected
 
 ## Architecture
 
@@ -42,46 +43,59 @@ graph LR
 
 - Oracle AI Database Free running locally:
   `docker run -d --name oracle-free -p 1521:1521 container-registry.oracle.com/database/free:latest-lite`
-- A database user with `DB_DEVELOPER_ROLE` and `CTXAPP` grants
-- Python 3.11–3.12
+- The database user from the repository-root `.env` (`DB_USER`, `DB_PASSWORD`, `DB_DSN`), the same
+  user the Developer Hub notebooks use, with `DB_DEVELOPER_ROLE` and `CTXAPP` grants
+- Outbound HTTPS to Oracle Object Storage, to download the ONNX embedding model the first time
 
-## Quick start
+## Run the notebook
+
+From the repository root:
 
 ```bash
-python -m venv .venv
+jupyter lab notebooks/memory_loop_deep_dive.ipynb
+```
+
+The notebook needs no separate setup. Its first code cell installs `requirements.txt` into the
+running kernel, §2 creates the tables, §3 loads the ONNX embedding model if the schema doesn't
+have it yet, and §4 seeds the demo tenant.
+
+## Run the CLI
+
+The CLI runs in a terminal, so it needs its own environment. Create it with Python 3.11 or 3.12;
+Homebrew and other system Pythons refuse `pip install` outside a virtual environment.
+
+```bash
+cd apps/rag-to-memory-systems-demo
+python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
+# Optional: override demo settings such as the tenant or OpenAI key. Database
+# credentials come from the repository-root .env.
 cp .env.example .env
-# edit .env with your DB credentials
 
-# 1. Create the typed memory tables.
+# One-time setup: create the tables, load the ONNX embedding model (~130 MB
+# download, straight into the database), and seed the demo tenant.
 python -m memory.ddl setup
-
-# 2. Download the augmented ONNX embedding model (~120 MB) and copy it into
-#    Oracle's DATA_PUMP_DIR, then load it.
 python -m memory.onnx_loader
-#    The script will print the docker cp command you need to run.
-
-# 3. Seed the demo tenant with example policies, preferences, facts, and episodes.
 python -m data.seed
 
-# 4. Run the CLI.
 python app.py
-
-# Or, open the notebook:
-jupyter notebook notebooks/memory_loop_deep_dive.ipynb
 ```
+
+To run the tests or the pre-commit hooks, install `requirements-dev.txt` instead of
+`requirements.txt`.
 
 ## Environment variables
 
-All variables have defaults — the demo runs out of the box. Override anything in `.env`.
+Database credentials come from the repository-root `.env`. Every other variable has a default;
+override any of them in this app's `.env`.
 
 | Variable               | Default                   | Notes                                                                                                                              |
 | ---------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `ORACLE_DB_USERNAME`   | `memory_demo`             | Oracle DB user. Insecure default — change for anything beyond local dev.                                                           |
-| `ORACLE_DB_PASSWORD`   | `memory_demo`             | Oracle DB password. Insecure default — change for anything beyond local dev.                                                       |
-| `ORACLE_DB_DSN`        | `localhost:1521/FREEPDB1` | EZConnect string.                                                                                                                  |
+| `DB_USER`              | `memory_demo`             | Oracle DB user. Read from the repository-root `.env` unless this app's `.env` sets it.                                             |
+| `DB_PASSWORD`          | `memory_demo`             | Oracle DB password. Read from the repository-root `.env` unless this app's `.env` sets it.                                         |
+| `DB_DSN`               | `localhost:1521/FREEPDB1` | EZConnect string. Read from the repository-root `.env` unless this app's `.env` sets it.                                          |
 | `DEMO_TENANT_ID`       | `acme-support`            | Scopes every row in the demo.                                                                                                      |
 | `DEMO_USER_ID`         | `jane_doe@example.com`    | Raw identifier — the demo adds the `customer:` prefix itself; do not pre-prefix it.                                                |
 | `DEMO_AGENT_ID`        | `agent:support_v1`        | Identity for the calling agent.                                                                                                    |

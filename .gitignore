@@ -225,6 +225,13 @@ apps/agent-reasoning/benchmarks/accuracy_full_*.json
 apps/agent-reasoning/benchmarks/accuracy_summary_*.tsv
 apps/agent-reasoning/benchmarks/results/
 
+# Agent Memory app specifics
+!apps/oracle-agent-memory/_downloads/*.zip
+!apps/oracle-agent-memory/codex-plugin/.mcp.json
+!apps/oracle-agent-memory/codex-plugin/.agents/
+!apps/oracle-agent-memory/codex-plugin/.agents/plugins/
+!apps/oracle-agent-memory/codex-plugin/.agents/plugins/marketplace.json
+
 # Notebook-specific
 notebooks/episodic
 notebooks/config.yaml

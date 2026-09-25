@@ -170,6 +170,8 @@ apps/agentic_rag/kubectl
 *.lock
 !workshops/soccer-analytics-agent/uv.lock
 !apps/team-brain/uv.lock
+# OraViz MCP ships its lockfile: the container build runs `uv sync --frozen`
+!apps/oraviz-mcp/uv.lock
 
 CLAUDE.md
 
@@ -225,6 +227,13 @@ apps/agent-reasoning/benchmarks/*_results.json
 apps/agent-reasoning/benchmarks/accuracy_full_*.json
 apps/agent-reasoning/benchmarks/accuracy_summary_*.tsv
 apps/agent-reasoning/benchmarks/results/
+
+# Agent Memory app specifics
+!apps/oracle-agent-memory/_downloads/*.zip
+!apps/oracle-agent-memory/codex-plugin/.mcp.json
+!apps/oracle-agent-memory/codex-plugin/.agents/
+!apps/oracle-agent-memory/codex-plugin/.agents/plugins/
+!apps/oracle-agent-memory/codex-plugin/.agents/plugins/marketplace.json
 
 # Notebook-specific
 notebooks/episodic

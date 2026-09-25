@@ -1,0 +1,78 @@
+{
+    "name": "Oracle Viz MCP Server",
+    "id": "oraviz-mcp",
+    "version": "0.1.0",
+    "description": "Sets up the environment for the Oracle Viz Model Context Protocol server",
+    "options": {
+        "version": {
+            "type": "string",
+            "default": "latest",
+            "description": "Reviewed commit ID, tag or branch to install; latest follows the default branch (development only)"
+        },
+        "oracleUser": {
+            "type": "string",
+            "default": "oraviz_reader",
+            "description": "Dedicated Oracle reader with CREATE SESSION and object READ grants"
+        },
+        "oraclePassword": {
+            "type": "string",
+            "default": "",
+            "description": "Legacy local-only option; leave empty and inject ORACLE_PASSWORD at runtime, never in devcontainer.json"
+        },
+        "oracleHost": {
+            "type": "string",
+            "default": "localhost",
+            "description": "Oracle database hostname"
+        },
+        "oraclePort": {
+            "type": "string",
+            "default": "1521",
+            "description": "Oracle listener port"
+        },
+        "oracleService": {
+            "type": "string",
+            "default": "FREEPDB1",
+            "description": "Oracle service name"
+        },
+        "oravizMcpRepo": {
+            "type": "string",
+            "default": "https://github.com/jasperan/oraviz-mcp",
+            "description": "OraViz MCP repository URL"
+        }
+    },
+    "dependsOn": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    },
+    "postCreateCommand": "docker build -t oraviz-mcp /opt/oraviz-mcp/.",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "mcp": {
+                    "servers": {
+                        "oraviz-mcp": {
+                            "type": "stdio",
+                            "command": "docker",
+                            "args": [
+                                "run",
+                                "--rm",
+                                "-i",
+                                "-e",
+                                "ORACLE_USER",
+                                "-e",
+                                "ORACLE_PASSWORD",
+                                "-e",
+                                "ORACLE_HOST",
+                                "-e",
+                                "ORACLE_PORT",
+                                "-e",
+                                "ORACLE_SERVICE",
+                                "oraviz-mcp"
+                            ],
+                            "envFile": "${userHome}/.oraviz-mcp-env"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

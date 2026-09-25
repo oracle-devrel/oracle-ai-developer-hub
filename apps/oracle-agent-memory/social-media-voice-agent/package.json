@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
-    "express": "^4.21.2",
+    "express": "^4.22.3",
     "oci-common": "^2.105.0",
     "oci-generativeaiinference": "^2.105.0",
     "oracledb": "^6.7.0",
@@ -29,10 +29,10 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
-    "concurrently": "^9.1.2",
-    "tsx": "^4.19.2",
+    "concurrently": "^9.2.4",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.3",
-    "vite": "^6.0.7"
+    "vite": "^8.3.1"
   },
   "engines": {
     "node": ">=20"

@@ -1,0 +1,83 @@
+# Dependabot configuration.
+#
+# This repository previously had no dependabot.yml, so every security advisory
+# produced its own pull request across ~26 manifest locations. Each pull
+# request triggers the pull_request_target workflows, which turned advisory
+# churn into CI notification noise.
+#
+# Here, security updates are grouped per ecosystem (one pull request per group
+# instead of one per advisory) and version updates are disabled with
+# `open-pull-requests-limit: 0` (security updates are not subject to that
+# limit). Raise the limit or drop it to re-enable scheduled version updates.
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directories:
+      - "/apps/picooraclaw"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 0
+    groups:
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directories:
+      - "/apps/agent-reasoning/interactive"
+      - "/apps/agentic_rag/scripts"
+      - "/apps/finance-ai-agent-demo/frontend"
+      - "/apps/idp-oracle-ai-database"
+      - "/apps/idp-oracle-ai-database/scripts"
+      - "/apps/oci-generative-ai-jet-ui/app"
+      - "/apps/oci-generative-ai-jet-ui/web"
+      - "/apps/oracle-agent-memory/social-media-voice-agent"
+      - "/apps/oracle-data-migration-harness/ui"
+      - "/apps/picooraclaw/remotion"
+      - "/apps/supplychain-demand-planning-agent/app/frontend"
+      - "/apps/tanstack-shoe-store"
+      - "/apps/vecdb/fashion_products_search/frontend"
+      - "/apps/vecdb/product_recommendation/frontend"
+      - "/apps/vecdb/semantic_code_search/frontend"
+      - "/partners/copilotkit/demo/frontend"
+      - "/workshops/enterprise-data-agent-harness-workshop/app/frontend"
+      - "/workshops/soccer-analytics-agent/frontend"
+      - "/workshops/supplychain_demand_agent_workshop/app/frontend"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 0
+    groups:
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directories:
+      - "/apps/agentic_rag"
+      - "/apps/oci-generative-ai-jet-ui/service/python"
+      - "/apps/vecdb/semantic_code_search/backend"
+      - "/workshops/agent-communication-matrix"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 0
+    groups:
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: "uv"
+    directories:
+      - "/apps/oraviz-mcp"
+      - "/partners/copilotkit/demo/agent"
+      - "/workshops/soccer-analytics-agent"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 0
+    groups:
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"

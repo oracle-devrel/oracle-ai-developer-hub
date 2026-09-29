@@ -1,0 +1,39 @@
+# Access-control seed for the FULL Acme Ledger knowledge base demo. Extends
+# the original four principals (data/seed/access.yaml) with three more so the
+# domain-permission story covers finance and cross-functional (marketing +
+# sales) grants too, plus a dedicated engineering principal (Alice) who is
+# also on the ops rotation.
+#
+# Seed it:   team-brain access seed --file data/seed_full/access.yaml
+# Tokens are stored HASHED; plaintext below is only so the demo can wire a
+# token into a client. The original four tokens are UNCHANGED so the small
+# seed's demo/tests keep working if re-seeded from data/seed/access.yaml.
+
+groups:
+  ops: { domains: [ops] }
+  marketing: { domains: [marketing] }
+  sales: { domains: [sales] }
+  finance: { domains: [finance] }
+  engineering:
+    { domains: [] } # company-wide by design; a formal
+    # group for org-chart clarity, not
+    # an extra domain grant
+  leadership: { all_domains: true } # sees every domain, including new ones
+
+principals:
+  jeff: { display_name: "Jeff — Ops", groups: [ops] }
+  julia: { display_name: "Julia — Marketing", groups: [marketing, ops] } # cross-domain grant
+  sam: { display_name: "Sam — Sales", groups: [sales] }
+  brian: { display_name: "Brian — CEO", groups: [leadership] }
+  alice: { display_name: "Alice — Engineering", groups: [engineering, ops] } # eng + on ops rotation
+  bob: { display_name: "Bob — Finance", groups: [finance] }
+  priya: { display_name: "Priya — Marketing+Sales", groups: [marketing, sales] } # cross-functional grant
+
+tokens:
+  jeff: "tb_ops_jeff_7f3a9c21"
+  julia: "tb_mkt_julia_5b8e0d44"
+  sam: "tb_sales_sam_1a6f2e90"
+  brian: "tb_exec_brian_9d4c7b13"
+  alice: "tb_eng_alice_3c8a41f7"
+  bob: "tb_fin_bob_6e29d5b0"
+  priya: "tb_mktsl_priya_a4197c62"

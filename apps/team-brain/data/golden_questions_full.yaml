@@ -1,0 +1,183 @@
+# Golden questions for the FULL Acme Ledger knowledge base
+# (data/seed_full/docs + data/seed_full/slack_export.json). Grounded in that
+# seed data so results are deterministic. Companion to data/golden_questions.yaml,
+# which still passes against this larger seed too (see scripts/eval_full.py).
+#
+# Fields: question, user | principal | token, expected_source, must_include,
+# must_not_include. See team_brain/evaluate.py for exact semantics.
+
+# --- A. Company-wide docs, raw `user:` identity (no domain grant needed) ----
+
+- question: "how do we deploy the billing service to production?"
+  user: alice
+  expected_source: markdown
+  must_include: "blue-green"
+
+- question: "how do I roll back a bad billing deploy?"
+  user: alice
+  expected_source: markdown
+  must_include: "previous release"
+
+- question: "when does the on-call rotation hand over?"
+  user: alice
+  must_include: "Monday"
+
+- question: "what happens if a page is not acknowledged?"
+  user: alice
+  must_include: "secondary"
+
+- question: "what do we do for a severity 1 customer-facing outage?"
+  user: alice
+  must_include: "incident commander"
+
+- question: "where does the stripe webhook secret live?"
+  user: alice
+  must_include: "billing-prod"
+
+- question: "how long do we have to write a postmortem?"
+  user: alice
+  must_include: "48 hours"
+
+- question: "why did we move ledger-core to event sourcing?"
+  user: alice
+  expected_source: markdown
+  must_include: "event"
+
+- question: "what happens on a new engineer's first week?"
+  user: carla
+  expected_source: markdown
+  must_include: "on-call handover"
+
+- question: "how many weeks of paid parental leave does the primary caregiver get?"
+  user: henry
+  expected_source: markdown
+  must_include: "16 weeks"
+
+- question: "what are the stages of the interview loop?"
+  user: henry
+  expected_source: markdown
+  must_include: "System design"
+
+# --- B. Exact-string / keyword questions (error codes, flags, version pins) -
+
+- question: "why is onnxruntime pinned below 1.26?"
+  user: bob
+  expected_source: slack
+  must_include: "1.26"
+
+- question: "what does the ORA-12154 error mean during a ledger-core migration?"
+  user: alice
+  must_include: "ORA-12154"
+
+- question: "what causes an ERR_BILLING_407 error?"
+  user: alice
+  must_include: "ERR_BILLING_407"
+
+- question: "what's the ff-invoice-v2-templates rollout percentage, and are we watching error rates closely?"
+  user: alice
+  expected_source: slack
+  must_include: "ff-invoice-v2-templates"
+
+- question: "what caused the api outage postmortem?"
+  user: bob
+  expected_source: slack
+  must_include: "leaked staging database"
+
+# --- C. Semantic paraphrase (no exact phrase overlap with the source) ------
+
+- question: "how does the team handle a really bad outage that customers can see?"
+  user: alice
+  must_include: "incident commander"
+
+- question: "when do new engineers get put on the pager rotation?"
+  user: alice
+  expected_source: markdown
+  must_include: "30 days"
+
+- question: "why did ops give the nightly batch job more machines?"
+  principal: jeff
+  must_include: "6 to 10"
+
+# --- D. Principal grants: POSITIVE (must see their own domain's content) ---
+
+- question: "what's the current autoscaler range for the batch node pool?"
+  principal: jeff
+  expected_source: markdown
+  must_include: "6 to 10"
+
+- question: "what's our ceiling on enterprise discounting?"
+  principal: sam
+  expected_source: slack
+  must_include: "20%"
+
+- question: "what UTM parameters do we use for the webinar campaign?"
+  principal: julia
+  expected_source: slack
+  must_include: "utm_source=webinar"
+
+- question: "what's the max discount on a 2-year annual-upfront contract with VP sign-off?"
+  principal: priya
+  expected_source: markdown
+  must_include: "30%"
+
+- question: "how do we recognize revenue on a multi-year contract?"
+  principal: bob
+  expected_source: markdown
+  must_include: "ratably"
+
+- question: "what's the batch autoscaler max, and does alice's ops access cover it?"
+  principal: alice
+  must_include: "6 to 10"
+
+- question: "what discount ceiling did the team agree on for enterprise deals?"
+  principal: brian
+  must_include: "20%"
+
+# --- E. Principal grants: NEGATIVE (must NOT leak another domain) ----------
+
+- question: "what's our maximum discount on a multi-year contract?"
+  principal: jeff
+  must_not_include: "30%"
+
+- question: "what was discussed in the private leadership channel this week?"
+  principal: sam
+  must_not_include: "comp-band"
+
+- question: "what came up in the private security-incidents channel recently?"
+  principal: bob
+  must_not_include: "scraping attempt"
+
+- question: "what's our maximum discount on an annual contract?"
+  principal: alice
+  must_not_include: "20% off list"
+
+- question: "what's bob's take on the vendor payment terms this month?"
+  principal: priya
+  must_not_include: "Net-45"
+
+- question: "what's the current status of the acquisition talks?"
+  principal: priya
+  must_not_include: "acquiring"
+
+- question: "what's the ops autoscaler max node count?"
+  principal: bob
+  must_not_include: "6 to 10"
+
+- question: "what's the enterprise discount ceiling?"
+  principal: bob
+  must_not_include: "30%"
+
+# --- F. "Who knows" style ----------------------------------------------------
+
+- question: "who owns the batch autoscaler decision and infra capacity planning?"
+  principal: jeff
+  must_include: "Jeff"
+
+- question: "who is the incident commander for on-call escalations?"
+  user: alice
+  must_include: "Alice"
+
+- question: "who should I ask about ledger-core's event schema?"
+  user: dave
+  expected_source: markdown
+  must_include: "Carla"

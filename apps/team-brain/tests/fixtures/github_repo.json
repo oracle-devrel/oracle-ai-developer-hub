@@ -1,0 +1,37 @@
+{
+  "repo": { "private": false, "default_branch": "main", "pushed_at": "2026-05-01T00:00:00Z" },
+  "readme_text": "# Widgets\n\nWidgets computes money with banker's rounding and retries flaky fetches.",
+  "readme_html_url": "https://github.com/acme/widgets/blob/main/README.md",
+  "issues": [
+    {
+      "number": 1,
+      "title": "Add retry to fetcher",
+      "body": "the fetcher should retry on HTTP 429 with exponential backoff",
+      "html_url": "https://github.com/acme/widgets/issues/1",
+      "user": { "login": "alice" },
+      "created_at": "2026-04-01T00:00:00Z",
+      "state": "open"
+    },
+    {
+      "number": 2,
+      "title": "fix money rounding",
+      "body": "use banker's rounding, round half to even to avoid drift",
+      "html_url": "https://github.com/acme/widgets/pull/2",
+      "user": { "login": "bob" },
+      "created_at": "2026-04-02T00:00:00Z",
+      "state": "closed",
+      "pull_request": { "url": "https://api.github.com/repos/acme/widgets/pulls/2" }
+    }
+  ],
+  "tree": [
+    { "type": "blob", "path": "src/money.py" },
+    { "type": "blob", "path": "README.md" },
+    { "type": "blob", "path": "docs/guide.txt" }
+  ],
+  "files": {
+    "src/money.py": {
+      "text": "def round_half_even(x):\n    return round(x)\n\n\nclass Money:\n    def __init__(self, cents):\n        self.cents = cents\n",
+      "html_url": "https://github.com/acme/widgets/blob/main/src/money.py"
+    }
+  }
+}

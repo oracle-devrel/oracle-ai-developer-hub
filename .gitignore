@@ -100,6 +100,8 @@ lib/
 lib64/
 !workshops/soccer-analytics-agent/frontend/src/lib/
 !workshops/soccer-analytics-agent/frontend/src/lib/**
+!apps/generative-ui-data-chat/src/lib/
+!apps/generative-ui-data-chat/src/lib/**
 parts/
 sdist/
 var/
@@ -146,7 +148,7 @@ logs/
 .wallet/
 
 # Logs
-*.log 
+*.log
 
 # Distribution / packaging
 dist/
@@ -169,6 +171,9 @@ apps/agentic_rag/kubectl
 *.lock.hcl
 *.lock
 !workshops/soccer-analytics-agent/uv.lock
+!apps/team-brain/uv.lock
+# OraViz MCP ships its lockfile: the container build runs `uv sync --frozen`
+!apps/oraviz-mcp/uv.lock
 
 CLAUDE.md
 

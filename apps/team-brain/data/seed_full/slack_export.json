@@ -1,0 +1,683 @@
+{
+  "principal_map": {
+    "U_ALICE": "alice",
+    "U_BOB": "bob",
+    "U_CARLA": "carla",
+    "U_DAVE": "dave",
+    "U_JEFF": "jeff",
+    "U_ELENA": "elena",
+    "U_JULIA": "julia",
+    "U_INES": "ines",
+    "U_SAM": "sam",
+    "U_FRANK": "frank",
+    "U_PRIYA": "priya",
+    "U_GRACE": "grace",
+    "U_HENRY": "henry",
+    "U_BRIAN": "brian"
+  },
+  "users": {
+    "U_ALICE": "alice",
+    "U_BOB": "bob",
+    "U_CARLA": "carla",
+    "U_DAVE": "dave",
+    "U_JEFF": "jeff",
+    "U_ELENA": "elena",
+    "U_JULIA": "julia",
+    "U_INES": "ines",
+    "U_SAM": "sam",
+    "U_FRANK": "frank",
+    "U_PRIYA": "priya",
+    "U_GRACE": "grace",
+    "U_HENRY": "henry",
+    "U_BRIAN": "brian"
+  },
+  "channels": [
+    {
+      "id": "C_ENG",
+      "name": "engineering",
+      "is_private": false,
+      "domains": [],
+      "members": ["U_ALICE", "U_CARLA", "U_DAVE", "U_JEFF", "U_BOB"],
+      "threads": [
+        {
+          "thread_ts": "1786000000.000100",
+          "messages": [
+            {
+              "user": "U_DAVE",
+              "text": "Why do we pin onnxruntime below 1.26 in the embeddings service?",
+              "ts": "1786000000.000100"
+            },
+            {
+              "user": "U_ALICE",
+              "text": "FastEmbed breaks on onnxruntime 1.26+, the model load throws. We pinned <1.26 until FastEmbed ships a fix.",
+              "ts": "1786000000.000200"
+            },
+            {
+              "user": "U_DAVE",
+              "text": "Got it, thanks. Adding a comment in pyproject so nobody bumps it by accident.",
+              "ts": "1786000000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786060000.000100",
+          "messages": [
+            {
+              "user": "U_CARLA",
+              "text": "Staging ledger-core is throwing ORA-12154 on every connection attempt since the datacenter migration finished.",
+              "ts": "1786060000.000100"
+            },
+            {
+              "user": "U_JEFF",
+              "text": "TNS alias still points at the decommissioned host. Fixing tnsnames.ora now, give me 10 minutes.",
+              "ts": "1786060000.000200"
+            },
+            {
+              "user": "U_JEFF",
+              "text": "Fixed, ORA-12154 cleared. Updated the DSN doc in ops/infra-capacity-planning.md so this doesn't bite us again.",
+              "ts": "1786060000.000300"
+            },
+            {
+              "user": "U_CARLA",
+              "text": "Confirmed, staging is healthy again.",
+              "ts": "1786060000.000400"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786120000.000100",
+          "messages": [
+            {
+              "user": "U_ALICE",
+              "text": "Rolling ff-invoice-v2-templates out to 10% of accounts today, watching error rates closely.",
+              "ts": "1786120000.000100"
+            },
+            {
+              "user": "U_DAVE",
+              "text": "Reconciliation-worker's drift alert threshold is 1 dollar now so we'll catch anything weird fast.",
+              "ts": "1786120000.000200"
+            },
+            {
+              "user": "U_ALICE",
+              "text": "+1, no issues after 4 hours. Bumping to 25% tomorrow if it holds overnight.",
+              "ts": "1786120000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786180000.000100",
+          "messages": [
+            {
+              "user": "U_BOB",
+              "text": "For the record since finance keeps asking: what actually caused the API outage postmortem back in the spring?",
+              "ts": "1786180000.000100"
+            },
+            {
+              "user": "U_ALICE",
+              "text": "Root cause was a leaked staging database password used against prod. We rotated all credentials and added an allowlist between staging and prod.",
+              "ts": "1786180000.000200"
+            },
+            {
+              "user": "U_BOB",
+              "text": "Appreciate the summary, that's the part finance needed for the audit trail.",
+              "ts": "1786180000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786240000.000100",
+          "messages": [
+            {
+              "user": "U_CARLA",
+              "text": "PR up for the reconciliation-worker checkpoint fix, small diff.",
+              "ts": "1786240000.000100"
+            },
+            {
+              "user": "U_DAVE",
+              "text": "lgtm, shipping it",
+              "ts": "1786240000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786300000.000100",
+          "messages": [
+            {
+              "user": "U_ALICE",
+              "text": "New hires, read the architecture overview before your first on-call shadow Monday.",
+              "ts": "1786300000.000100"
+            },
+            {
+              "user": "U_DAVE",
+              "text": "+1 also read ADR-0007 if you'll touch ledger-core at all, explains why migrations need a maintenance window.",
+              "ts": "1786300000.000200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C_OPS",
+      "name": "ops-team",
+      "is_private": false,
+      "domains": ["ops"],
+      "members": ["U_JEFF", "U_ELENA", "U_BRIAN"],
+      "threads": [
+        {
+          "thread_ts": "1786500000.000100",
+          "messages": [
+            {
+              "user": "U_JEFF",
+              "text": "The batch cluster keeps hitting node pressure during nightly reindex. Should we bump the autoscaler max?",
+              "ts": "1786500000.000100"
+            },
+            {
+              "user": "U_JEFF",
+              "text": "Decision: raised the ops batch node pool autoscaler max from 6 to 10 nodes and set a scale-down cooldown of 15 minutes. Reindex now finishes under an hour.",
+              "ts": "1786500000.000200"
+            },
+            {
+              "user": "U_ELENA",
+              "text": "Logged in the decision log. Peak batch spend is up about 18% but the SLA breach is gone.",
+              "ts": "1786500000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786560000.000100",
+          "messages": [
+            {
+              "user": "U_ELENA",
+              "text": "Anyone else getting paged twice a week from the same flaky reconciliation-worker health check?",
+              "ts": "1786560000.000100"
+            },
+            {
+              "user": "U_JEFF",
+              "text": "Yeah, bumping the health check timeout from 2s to 5s, it's a false alarm not a real degradation.",
+              "ts": "1786560000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786620000.000100",
+          "messages": [
+            {
+              "user": "U_JEFF",
+              "text": "Scoping the move to spot instances for half the monthly statement batch run, projecting ~35% compute cost cut.",
+              "ts": "1786620000.000100"
+            },
+            {
+              "user": "U_BRIAN",
+              "text": "Good, bring numbers to the Q4 planning review.",
+              "ts": "1786620000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786680000.000100",
+          "messages": [
+            {
+              "user": "U_ELENA",
+              "text": "Request-serving pool staying at 8 nodes fixed for now, no signed-contract growth this quarter that changes that.",
+              "ts": "1786680000.000100"
+            },
+            {
+              "user": "U_JEFF",
+              "text": "Agreed, revisit next quarterly capacity review.",
+              "ts": "1786680000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786740000.000100",
+          "messages": [
+            {
+              "user": "U_ELENA",
+              "text": "Thanks for covering my on-call swap last week Jeff",
+              "ts": "1786740000.000100"
+            },
+            {
+              "user": "U_JEFF",
+              "text": "np, anytime",
+              "ts": "1786740000.000200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C_MKT",
+      "name": "marketing-team",
+      "is_private": false,
+      "domains": ["marketing"],
+      "members": ["U_JULIA", "U_INES", "U_PRIYA", "U_BRIAN"],
+      "threads": [
+        {
+          "thread_ts": "1787000000.000100",
+          "messages": [
+            {
+              "user": "U_JULIA",
+              "text": "What UTM scheme are we using for the Q3 webinar funnel so the landing page conversions attribute correctly?",
+              "ts": "1787000000.000100"
+            },
+            {
+              "user": "U_JULIA",
+              "text": "Standardized on utm_source=webinar, utm_campaign=q3-teambrain, utm_medium=email. The landing page converted at 14% off the nurture sequence.",
+              "ts": "1787000000.000200"
+            },
+            {
+              "user": "U_PRIYA",
+              "text": "Passing the same UTM fields to sales for CRM lead-source tracking.",
+              "ts": "1787000000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1787060000.000100",
+          "messages": [
+            {
+              "user": "U_INES",
+              "text": "Draft landing page copy up for review, tried to keep it number-first per the brand voice guide.",
+              "ts": "1787060000.000100"
+            },
+            {
+              "user": "U_JULIA",
+              "text": "Good, cut 'revolutionize' from the headline though, that's exactly what the guide bans.",
+              "ts": "1787060000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1787120000.000100",
+          "messages": [
+            {
+              "user": "U_JULIA",
+              "text": "Q2 outbound retro is up. 2-hour follow-up beat next-day by 2.3x on reply rate, making that the default going forward.",
+              "ts": "1787120000.000100"
+            },
+            {
+              "user": "U_INES",
+              "text": "Cutting the LinkedIn touch too then, negligible lift for the extra production time.",
+              "ts": "1787120000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1787180000.000100",
+          "messages": [
+            {
+              "user": "U_PRIYA",
+              "text": "Two attendees asked about discount structure during the webinar Q&A, I deferred to 'talk to your account rep' per policy.",
+              "ts": "1787180000.000100"
+            },
+            {
+              "user": "U_JULIA",
+              "text": "Perfect, that's exactly right, never quote numbers on a public call.",
+              "ts": "1787180000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1787240000.000100",
+          "messages": [
+            {
+              "user": "U_INES",
+              "text": "nice work on the webinar everyone",
+              "ts": "1787240000.000100"
+            },
+            {
+              "user": "U_JULIA",
+              "text": "+1 team effort",
+              "ts": "1787240000.000200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C_SALES",
+      "name": "sales-team",
+      "is_private": false,
+      "domains": ["sales"],
+      "members": ["U_SAM", "U_FRANK", "U_PRIYA", "U_BRIAN"],
+      "threads": [
+        {
+          "thread_ts": "1787500000.000100",
+          "messages": [
+            {
+              "user": "U_SAM",
+              "text": "What's our ceiling on enterprise discounting before I have to loop in leadership?",
+              "ts": "1787500000.000100"
+            },
+            {
+              "user": "U_SAM",
+              "text": "Deal desk policy: reps can offer up to 20% off list on an annual contract. Anything past 20% needs VP of Sales sign-off. Multi-year can go to 30% with the same approval.",
+              "ts": "1787500000.000200"
+            },
+            {
+              "user": "U_FRANK",
+              "text": "Good, that matches the discount matrix table, quarterly terms cap 5 points lower at every length.",
+              "ts": "1787500000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1787560000.000100",
+          "messages": [
+            {
+              "user": "U_FRANK",
+              "text": "Prospect is comparing us against Ledgerly, they're fixated on Ledgerly's lower list price.",
+              "ts": "1787560000.000100"
+            },
+            {
+              "user": "U_SAM",
+              "text": "Pull up the Ledgerly battlecard, lead with our 9-day implementation vs their 6-8 weeks, don't just chase price.",
+              "ts": "1787560000.000200"
+            },
+            {
+              "user": "U_FRANK",
+              "text": "Did that, also offered a reference call with a customer who migrated off Ledgerly last year.",
+              "ts": "1787560000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1787620000.000100",
+          "messages": [
+            {
+              "user": "U_SAM",
+              "text": "Requesting a Net-60 exception for a prospect, they want quarterly billing too.",
+              "ts": "1787620000.000100"
+            },
+            {
+              "user": "U_PRIYA",
+              "text": "That routes through deal desk with the discount request together, not separately, per the payment terms doc.",
+              "ts": "1787620000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1787680000.000100",
+          "messages": [
+            {
+              "user": "U_FRANK",
+              "text": "22 sales-qualified leads from the webinar attendee list, 6 already in active evaluation.",
+              "ts": "1787680000.000100"
+            },
+            {
+              "user": "U_SAM",
+              "text": "Great pull, prioritize the 6 this week.",
+              "ts": "1787680000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1787740000.000100",
+          "messages": [
+            {
+              "user": "U_FRANK",
+              "text": "closed the mid-market deal, thanks for the help everyone",
+              "ts": "1787740000.000100"
+            },
+            {
+              "user": "U_SAM",
+              "text": "nice!! \ud83c\udf89",
+              "ts": "1787740000.000200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C_FIN",
+      "name": "finance",
+      "is_private": false,
+      "domains": ["finance"],
+      "members": ["U_BOB", "U_GRACE", "U_BRIAN"],
+      "threads": [
+        {
+          "thread_ts": "1788000000.000100",
+          "messages": [
+            {
+              "user": "U_GRACE",
+              "text": "Quick check: do we recognize a signed multi-year deal's full value the month it's signed?",
+              "ts": "1788000000.000100"
+            },
+            {
+              "user": "U_BOB",
+              "text": "No, ratably over the full term regardless of when cash lands. A 3-year deal doesn't front-load revenue just because a big check arrived in year one.",
+              "ts": "1788000000.000200"
+            },
+            {
+              "user": "U_GRACE",
+              "text": "Makes sense, updating the board deck language so it says 'bookings' not 'revenue' for the pipeline slide.",
+              "ts": "1788000000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1788060000.000100",
+          "messages": [
+            {
+              "user": "U_GRACE",
+              "text": "Someone submitted a hotel expense at 310 dollars a night in a major metro, over the 250 cap.",
+              "ts": "1788060000.000100"
+            },
+            {
+              "user": "U_BOB",
+              "text": "Flag it, ask for the manager approval that should've happened before booking. Cap is 250 in major metros, 180 elsewhere.",
+              "ts": "1788060000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1788120000.000100",
+          "messages": [
+            {
+              "user": "U_BOB",
+              "text": "Reviewing vendor terms, our cloud hosting vendor wants to renegotiate to Net-45 from Net-30.",
+              "ts": "1788120000.000100"
+            },
+            {
+              "user": "U_GRACE",
+              "text": "They're over the 5k/month threshold so that's in policy with your sign-off, no need to escalate to Brian unless they push for Net-60.",
+              "ts": "1788120000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1788180000.000100",
+          "messages": [
+            {
+              "user": "U_GRACE",
+              "text": "Invoicing SLA report for Q2: one miss, 200 accounts delayed 5 hours before the autoscaler fix shipped. Zero misses since.",
+              "ts": "1788180000.000100"
+            },
+            {
+              "user": "U_BOB",
+              "text": "Good, note it as 'known infra issue, already fixed' in the monthly review with Brian.",
+              "ts": "1788180000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1788240000.000100",
+          "messages": [
+            {
+              "user": "U_GRACE",
+              "text": "thanks for turning around the audit request so fast this week",
+              "ts": "1788240000.000100"
+            },
+            {
+              "user": "U_BOB",
+              "text": "of course",
+              "ts": "1788240000.000200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C_LEAD",
+      "name": "leadership",
+      "is_private": true,
+      "domains": [],
+      "members": ["U_BRIAN", "U_JULIA"],
+      "threads": [
+        {
+          "thread_ts": "1788400000.000100",
+          "messages": [
+            {
+              "user": "U_BRIAN",
+              "text": "Board deck for next week: I want to lead with the reconciliation drift metric and the Q3 webinar conversion, both strong stories.",
+              "ts": "1788400000.000100"
+            },
+            {
+              "user": "U_JULIA",
+              "text": "Agreed, I'll also flag the comp-band review we're doing for the senior engineering hires, that's a Q4 budget line the board should see coming.",
+              "ts": "1788400000.000200"
+            },
+            {
+              "user": "U_BRIAN",
+              "text": "Keep the comp-band specifics out of the deck itself, verbal only in the meeting, this stays between us until it's finalized.",
+              "ts": "1788400000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1788460000.000100",
+          "messages": [
+            {
+              "user": "U_JULIA",
+              "text": "Heads up, we're in early talks about acquiring a small competitor's customer list if their shutdown rumors are true. Keeping this fully off any shared doc for now.",
+              "ts": "1788460000.000100"
+            },
+            {
+              "user": "U_BRIAN",
+              "text": "Agreed, nothing in writing outside this channel until there's a term sheet.",
+              "ts": "1788460000.000200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C_SEC",
+      "name": "security-incidents",
+      "is_private": true,
+      "domains": ["ops"],
+      "members": ["U_BRIAN", "U_JEFF"],
+      "threads": [
+        {
+          "thread_ts": "1788500000.000100",
+          "messages": [
+            {
+              "user": "U_JEFF",
+              "text": "Seeing repeated ERR_BILLING_407 responses from an API key that isn't one of our known partner keys, looks like a scraping attempt against invoicing-api.",
+              "ts": "1788500000.000100"
+            },
+            {
+              "user": "U_JEFF",
+              "text": "Confirmed the key was a leaked demo-integration key from the webinar registration flow, sharing the same key as the public demo. Revoked it and cut a dedicated key for the demo integration.",
+              "ts": "1788500000.000200"
+            },
+            {
+              "user": "U_BRIAN",
+              "text": "Good catch. Keep this out of the public postmortem until we confirm no customer data was exposed through the rate-limited responses.",
+              "ts": "1788500000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1788560000.000100",
+          "messages": [
+            {
+              "user": "U_JEFF",
+              "text": "Rotating the billing-prod secret group's Stripe webhook secret proactively this week, unrelated to any known incident, just due for quarterly rotation.",
+              "ts": "1788560000.000100"
+            },
+            {
+              "user": "U_BRIAN",
+              "text": "Approved, coordinate the timing with Alice so it doesn't collide with a deploy-billing release.",
+              "ts": "1788560000.000200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "C_RANDOM",
+      "name": "random",
+      "is_private": false,
+      "domains": [],
+      "members": ["U_ALICE", "U_BOB", "U_CARLA", "U_DAVE", "U_JEFF", "U_JULIA", "U_SAM", "U_BRIAN"],
+      "threads": [
+        {
+          "thread_ts": "1786800000.000100",
+          "messages": [
+            {
+              "user": "U_DAVE",
+              "text": "anyone want to grab lunch at the new taco place",
+              "ts": "1786800000.000100"
+            },
+            {
+              "user": "U_CARLA",
+              "text": "yes please",
+              "ts": "1786800000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786860000.000100",
+          "messages": [
+            {
+              "user": "U_SAM",
+              "text": "office trivia night friday, who's in",
+              "ts": "1786860000.000100"
+            },
+            {
+              "user": "U_JULIA",
+              "text": "+1",
+              "ts": "1786860000.000200"
+            },
+            {
+              "user": "U_JEFF",
+              "text": "+1",
+              "ts": "1786860000.000300"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786920000.000100",
+          "messages": [
+            {
+              "user": "U_ALICE",
+              "text": "congrats to the team on shipping a quiet week, no pages all weekend",
+              "ts": "1786920000.000100"
+            },
+            {
+              "user": "U_BOB",
+              "text": "the real MVP is a quiet weekend",
+              "ts": "1786920000.000200"
+            }
+          ]
+        },
+        {
+          "thread_ts": "1786980000.000100",
+          "messages": [
+            {
+              "user": "U_BRIAN",
+              "text": "great all-hands today everyone, thanks for the questions",
+              "ts": "1786980000.000100"
+            },
+            {
+              "user": "U_DAVE",
+              "text": "+1 good energy",
+              "ts": "1786980000.000200"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

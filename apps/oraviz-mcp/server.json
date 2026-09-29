@@ -1,0 +1,150 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+  "name": "io.github.jasperan/oraviz-mcp",
+  "version": "0.1.0",
+  "description": "Visualization-first MCP server for Oracle AI Database: read-only queries, profiling, and PNG charts",
+  "repository": {
+    "url": "https://github.com/jasperan/oraviz-mcp",
+    "source": "github",
+    "id": "1369768566"
+  },
+  "homepage": "https://github.com/jasperan/oraviz-mcp",
+  "license": "MIT",
+  "author": {
+    "name": "jasperan"
+  },
+  "runtime": {
+    "type": "docker",
+    "image": "ghcr.io/jasperan/oraviz-mcp:0.1.0"
+  },
+  "transport": {
+    "type": "stdio"
+  },
+  "config": {
+    "required": {
+      "ORACLE_USER": {
+        "type": "string",
+        "description": "Dedicated Oracle reader with CREATE SESSION and object-level READ grants; never an administrator"
+      },
+      "ORACLE_PASSWORD": {
+        "type": "string",
+        "description": "Password for ORACLE_USER"
+      }
+    },
+    "optional": {
+      "ORACLE_HOST": {
+        "type": "string",
+        "description": "Database hostname (default: localhost)"
+      },
+      "ORACLE_PORT": {
+        "type": "integer",
+        "description": "Listener port (default: 1521)"
+      },
+      "ORACLE_SERVICE": {
+        "type": "string",
+        "description": "Service name (default: FREEPDB1)"
+      },
+      "ORACLE_DSN": {
+        "type": "string",
+        "description": "Full EZConnect descriptor (e.g. localhost:1521/FREEPDB1); overrides host/port/service"
+      },
+      "ORACLE_MCP_MAX_ROWS": {
+        "type": "integer",
+        "description": "Hard cap on rows returned per query, 1..5000 (default: 500)"
+      },
+      "ORACLE_MCP_PREVIEW_ROWS": {
+        "type": "integer",
+        "description": "Preview rows, 1..5000, also bounded by max rows (default: 25)"
+      },
+      "ORACLE_MCP_MAX_CELL_CHARS": {
+        "type": "integer",
+        "description": "Characters per cell, 1..4096 (default: 500)"
+      },
+      "ORACLE_MCP_MAX_RESULT_COLUMNS": {
+        "type": "integer",
+        "description": "Result columns, 1..200 (default: 64)"
+      },
+      "ORACLE_MCP_MAX_CONCURRENT": {
+        "type": "integer",
+        "description": "Admitted tool calls per process, 1..32 (default: 4)"
+      },
+      "ORACLE_MCP_ALLOWED_TOOLS": {
+        "type": "string",
+        "description": "Comma-separated exact tool names; unset enables seven, empty/unknown entries reject startup"
+      },
+      "ORACLE_CALL_TIMEOUT": {
+        "type": "integer",
+        "description": "Database round-trip timeout in seconds, 1..300; cannot disable (default: 60)"
+      },
+      "ORACLE_MCP_SERVER_TRANSPORT": {
+        "type": "string",
+        "description": "Transport: stdio (default), http, sse, streamable-http; every network transport requires auth"
+      },
+      "ORACLE_MCP_AUTH_ISSUER": {
+        "type": "string",
+        "description": "Required for network transports: HTTPS JWT issuer"
+      },
+      "ORACLE_MCP_AUTH_AUDIENCE": {
+        "type": "string",
+        "description": "Required for network transports: JWT resource audience"
+      },
+      "ORACLE_MCP_AUTH_JWKS_URL": {
+        "type": "string",
+        "description": "Required for network transports: HTTPS JWKS endpoint (RS256)"
+      },
+      "ORACLE_MCP_AUTH_REQUIRED_SCOPES": {
+        "type": "string",
+        "description": "Required for network transports: space-separated scopes, e.g. oraviz:read"
+      },
+      "ORACLE_MCP_AUTH_BASE_URL": {
+        "type": "string",
+        "description": "Optional public HTTPS base URL for OAuth discovery; omit /mcp or /sse"
+      },
+      "ORACLE_MCP_BIND_HOST": {
+        "type": "string",
+        "description": "Host to bind for network transports (default: 127.0.0.1)"
+      },
+      "ORACLE_MCP_BIND_PORT": {
+        "type": "integer",
+        "description": "Port to bind for network transports (default: 8080)"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "execute_query",
+      "description": "Executes a read-only SELECT/WITH query and returns a compact, preview-capped markdown table",
+      "category": "query"
+    },
+    {
+      "name": "list_tables",
+      "description": "Lists tables and views in the current or a given schema",
+      "category": "discovery"
+    },
+    {
+      "name": "get_table_schema",
+      "description": "Returns columns, types, nullability, and primary key membership for a table or view",
+      "category": "discovery"
+    },
+    {
+      "name": "sample_table_data",
+      "description": "Returns a small sample of rows from a table as a compact markdown table",
+      "category": "discovery"
+    },
+    {
+      "name": "get_table_details",
+      "description": "Returns table metadata and optimizer statistics, optionally an exact row count",
+      "category": "discovery"
+    },
+    {
+      "name": "profile_table",
+      "description": "Profiles columns (nulls, distinct counts, min/max/avg) to decide which chart fits the data",
+      "category": "analysis"
+    },
+    {
+      "name": "create_chart",
+      "description": "Runs a read-only query and renders the result as a PNG chart (bar, line, area, scatter, pie, histogram, vector/PCA)",
+      "category": "visualization"
+    }
+  ]
+}

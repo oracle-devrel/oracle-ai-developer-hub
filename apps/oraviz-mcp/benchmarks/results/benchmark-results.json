@@ -1,0 +1,233 @@
+{
+  "generated_at": "2026-09-16T14:15:14.032942+00:00",
+  "encodings": [
+    "cl100k_base",
+    "o200k_base"
+  ],
+  "servers": [
+    {
+      "server": "oraviz-mcp",
+      "schema_tokens": {
+        "cl100k_base": 862,
+        "o200k_base": 860
+      },
+      "setup_tokens": {
+        "cl100k_base": 0,
+        "o200k_base": 0
+      },
+      "steps": [
+        {
+          "step": "list objects",
+          "tool": "list_tables",
+          "setup": false,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 69,
+            "o200k_base": 68
+          },
+          "chars": 208
+        },
+        {
+          "step": "describe table",
+          "tool": "get_table_schema",
+          "setup": false,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 143,
+            "o200k_base": 143
+          },
+          "chars": 420
+        },
+        {
+          "step": "aggregate revenue by region",
+          "tool": "execute_query",
+          "setup": false,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 63,
+            "o200k_base": 63
+          },
+          "chars": 164
+        },
+        {
+          "step": "sample 10 rows",
+          "tool": "sample_table_data",
+          "setup": false,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 375,
+            "o200k_base": 375
+          },
+          "chars": 798
+        },
+        {
+          "step": "raw 96-row dump",
+          "tool": "execute_query",
+          "setup": false,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 825,
+            "o200k_base": 825
+          },
+          "chars": 1686
+        },
+        {
+          "step": "chart the aggregate (result set to PNG)",
+          "tool": "create_chart",
+          "setup": false,
+          "comparable": false,
+          "tokens": {
+            "cl100k_base": 123,
+            "o200k_base": 122
+          },
+          "chars": 402
+        }
+      ],
+      "answer_tokens": {
+        "cl100k_base": 2337,
+        "o200k_base": 2334
+      },
+      "grand_total": {
+        "cl100k_base": 2337,
+        "o200k_base": 2334
+      }
+    },
+    {
+      "server": "sqlcl-mcp",
+      "schema_tokens": {
+        "cl100k_base": 2139,
+        "o200k_base": 2142
+      },
+      "setup_tokens": {
+        "cl100k_base": 2,
+        "o200k_base": 2
+      },
+      "steps": [
+        {
+          "step": "connect",
+          "tool": "run-sqlcl",
+          "setup": true,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 2,
+            "o200k_base": 2
+          },
+          "chars": 11
+        },
+        {
+          "step": "list objects",
+          "tool": "schema-information",
+          "setup": false,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 354,
+            "o200k_base": 354
+          },
+          "chars": 1090
+        },
+        {
+          "step": "describe table",
+          "tool": "run-sql",
+          "setup": false,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 93,
+            "o200k_base": 92
+          },
+          "chars": 259
+        },
+        {
+          "step": "aggregate revenue by region",
+          "tool": "run-sql",
+          "setup": false,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 40,
+            "o200k_base": 41
+          },
+          "chars": 95
+        },
+        {
+          "step": "sample 10 rows",
+          "tool": "run-sql",
+          "setup": false,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 242,
+            "o200k_base": 239
+          },
+          "chars": 524
+        },
+        {
+          "step": "raw 96-row dump",
+          "tool": "run-sql",
+          "setup": false,
+          "comparable": true,
+          "tokens": {
+            "cl100k_base": 2136,
+            "o200k_base": 2119
+          },
+          "chars": 4367
+        }
+      ],
+      "answer_tokens": {
+        "cl100k_base": 5004,
+        "o200k_base": 4987
+      },
+      "grand_total": {
+        "cl100k_base": 5006,
+        "o200k_base": 4989
+      }
+    }
+  ],
+  "comparison": {
+    "cl100k_base": {
+      "schema_tokens": {
+        "oraviz-mcp": 862,
+        "sqlcl-mcp": 2139,
+        "savings_pct": 59.7
+      },
+      "answer_tokens": {
+        "oraviz-mcp": 2337,
+        "sqlcl-mcp": 5004,
+        "savings_pct": 53.3
+      },
+      "grand_total": {
+        "oraviz-mcp": 2337,
+        "sqlcl-mcp": 5006,
+        "savings_pct": 53.3
+      },
+      "step_savings_pct": {
+        "list objects": 80.5,
+        "describe table": -53.8,
+        "aggregate revenue by region": -57.5,
+        "sample 10 rows": -55.0,
+        "raw 96-row dump": 61.4
+      }
+    },
+    "o200k_base": {
+      "schema_tokens": {
+        "oraviz-mcp": 860,
+        "sqlcl-mcp": 2142,
+        "savings_pct": 59.9
+      },
+      "answer_tokens": {
+        "oraviz-mcp": 2334,
+        "sqlcl-mcp": 4987,
+        "savings_pct": 53.2
+      },
+      "grand_total": {
+        "oraviz-mcp": 2334,
+        "sqlcl-mcp": 4989,
+        "savings_pct": 53.2
+      },
+      "step_savings_pct": {
+        "list objects": 80.8,
+        "describe table": -55.4,
+        "aggregate revenue by region": -53.7,
+        "sample 10 rows": -56.9,
+        "raw 96-row dump": 61.1
+      }
+    }
+  }
+}

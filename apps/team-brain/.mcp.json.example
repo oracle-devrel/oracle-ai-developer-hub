@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "team-brain": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "team_brain.mcp_server"],
+      "env": {
+        "TEAM_BRAIN_TOKEN": "tb_ops_jeff_7f3a9c21"
+      }
+    }
+  }
+}

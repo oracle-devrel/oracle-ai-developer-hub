@@ -1,0 +1,4 @@
+.env
+node_modules/
+rag_results.json
+.ipynb_checkpoints/

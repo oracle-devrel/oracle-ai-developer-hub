@@ -1,0 +1,20 @@
+{
+  "name": "langchain-js-rag-oracle-ai-database",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "node langchain_rag.mjs",
+    "start": "npm run demo"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.0.0",
+    "@langchain/openai": "^1.0.0",
+    "@oracle/langchain-oracledb": "^1.0.0",
+    "dotenv": "^17.2.3",
+    "oracledb": "^6.10.0"
+  }
+}

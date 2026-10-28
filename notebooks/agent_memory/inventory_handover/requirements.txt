@@ -18,7 +18,7 @@ langchain-core==1.6.10
 langchain-openai==1.7.2
 langgraph==1.2.14
 langgraph-sdk==0.4.9
-litellm==1.95.1
+litellm==1.100.4
 oci==2.188.0
 openai==2.54.0
 oracleagentmemory==26.8.0

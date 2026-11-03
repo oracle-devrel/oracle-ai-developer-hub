@@ -1,0 +1,29 @@
+{
+  "name": "oracle-mem0-ts-memory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "engines": { "node": ">=22.0.0", "pnpm": ">=10.0.0" },
+  "scripts": {
+    "dev": "pnpm --filter @oracle-mem0-ts-memory/web dev",
+    "dev:api": "pnpm --filter @oracle-mem0-ts-memory/api dev",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "check": "pnpm typecheck && pnpm test && pnpm build",
+    "db:check": "tsx scripts/check.ts",
+    "seed": "tsx scripts/seed.ts",
+    "reset": "tsx scripts/reset.ts",
+    "check:live": "tsx scripts/live-check.ts",
+    "start": "pnpm --filter @oracle-mem0-ts-memory/api start"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "dotenv": "^17.2.3",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.6"
+  }
+}

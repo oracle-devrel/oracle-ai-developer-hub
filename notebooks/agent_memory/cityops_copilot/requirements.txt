@@ -1,0 +1,9 @@
+# CityOps Copilot notebook: the versions it was run with.
+oracleagentmemory==26.4.0      # the OAMP release this notebook is written for
+oracledb==3.4.2
+langchain-core==1.4.9
+langchain-ollama==1.1.0        # ChatOllama: the copilot's LLM
+langchain-oracledb==1.4.0      # OracleEmbeddings: in-database ONNX embeddings
+numpy>=1.26
+python-dotenv>=1.0
+jupyterlab>=4.0

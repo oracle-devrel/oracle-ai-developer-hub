@@ -1,0 +1,27 @@
+flowchart TB
+    INS(["Inspector"]) -->|"narrative"| COP["CityOps Copilot<br/>(call_copilot)"]
+    COP <-->|"prompt + answer"| LLM[/"Agent LLM (Ollama)"/]
+    COP <-->|"card summary + extraction<br/>(SDK LLM, per turn)"| SDKLLM[/"SDK LLM<br/>(card + extractor)"/]
+    COP -->|"answer"| INS
+
+    subgraph ORA["Oracle AI Database - single connection"]
+      subgraph DOM["Domain data · system of record<br/>(deliberate writes)"]
+        ASSET[("CITY_ASSET")]
+        FIND[("CITY_INSPECTION_FINDING<br/>VECTOR(384)")]
+      end
+      subgraph MEM["SDK memory<br/>(automatic writes)"]
+        MSG[("CITY_MESSAGE")]
+        MEMT[("CITY_MEMORY<br/>fact / preference / guideline")]
+        THR[("CITY_THREAD<br/>stored summary (write-path)")]
+      end
+    end
+
+    LOG[/"log_finding<br/>(deliberate)"/] ==>|"append finding"| FIND
+
+    COP -->|"asset lookup"| ASSET
+    COP -->|"vector search"| FIND
+    COP -->|"context card: recent msgs"| MSG
+    COP -->|"context card: relevant search"| MEMT
+    COP ==>|"add_messages (WRITE)"| MSG
+    MSG -.->|"extractor distills"| MEMT
+    MSG -.->|"summary refresh (stored)"| THR

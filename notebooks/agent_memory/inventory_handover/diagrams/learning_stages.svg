@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1920" role="img" aria-labelledby="title desc">
+  <title id="title">From an LLM call to a memory aware agent: a technical learning journey</title>
+  <desc id="desc">Four independent, vertically stacked architectures. First, supplied notes enter an LLM context and produce an answer. Second, a fresh request lacks those notes. Third, a LangChain loop exchanges messages and tool calls with Ollama and reads a procedure without retaining case history. Fourth, the same loop uses Oracle Agent Memory to retain messages, refine facts and recall evidence from Oracle AI Database. Every data-flow arrow is labelled.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#44647e"/></marker>
+    <marker id="memory-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#087e77"/></marker>
+    <g id="person" fill="none" stroke="currentColor" stroke-width="2"><circle cx="15" cy="8" r="6"/><path d="M2 33v-6c0-13 26-13 26 0v6"/></g>
+    <g id="context" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="30" height="28" rx="3"/><path d="M8 11h18M8 17h18M8 23h12"/></g>
+    <g id="chip" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="23" height="23" rx="3"/><path d="M12 0v6m12-6v6M12 29v6m12-6v6M0 12h6m-6 12h6m23-12h6m-6 12h6"/><rect x="12" y="12" width="11" height="11"/></g>
+    <g id="loop" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 13A14 14 0 0 1 29 8m0 15A14 14 0 0 1 4 28M21 8h9V0M12 28H3v8"/></g>
+    <g id="tool" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="30" height="25" rx="3"/><path d="M10 7V2h14v5M2 18h30M13 15v7h8v-7"/></g>
+    <g id="database" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="17" cy="6" rx="15" ry="5"/><path d="M2 6v23c0 7 30 7 30 0V6M2 17c0 7 30 7 30 0"/></g>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #183247; }
+      .title { font-size: 32px; font-weight: 700; }
+      .stage { font-size: 23px; font-weight: 700; }
+      .heading { font-size: 20px; font-weight: 700; }
+      .body { font-size: 18px; }
+      .small { font-size: 16px; fill: #4b6376; }
+      .label { font-size: 16px; text-anchor: middle; fill: #34566f; paint-order: stroke; stroke: white; stroke-width: 5; stroke-linejoin: round; }
+      .green-label { fill: #056d66; }
+      .card { fill: #fff; stroke: #c7d4df; stroke-width: 1.5; }
+      .node { fill: #f7fafc; stroke: #8ea9bd; stroke-width: 1.5; }
+      .model { fill: #f2edfc; stroke: #b7a1da; stroke-width: 1.5; }
+      .memory { fill: #eaf7f4; stroke: #68a99d; stroke-width: 1.5; }
+      .warning { fill: #fff7e7; stroke: #d6b76e; stroke-width: 1.5; }
+      .flow { fill: none; stroke: #44647e; stroke-width: 2; marker-end: url(#arrow); }
+      .memory-flow { fill: none; stroke: #087e77; stroke-width: 2.2; marker-end: url(#memory-arrow); }
+      .return { stroke-dasharray: 6 4; }
+      .icon { color: #44647e; }
+      .part { font-size: 16px; font-weight: 700; fill: #536d82; text-anchor: end; }
+    </style>
+  </defs>
+  <rect width="1440" height="1920" rx="20" fill="#f2f6fa"/>
+  <text x="35" y="53" class="title">From one LLM call to a memory aware agent</text>
+  <text x="35" y="87" class="body">Read downward: the same model and business question, with one new capability at each stage.</text>
+  <path d="M38 123H91" class="flow"/><text x="105" y="129" class="small">Request / instruction</text>
+  <path d="M340 123H394" class="flow return"/><text x="408" y="129" class="small">Returned data</text>
+  <path d="M610 123H664" class="memory-flow"/><text x="678" y="129" class="small">Durable-memory operation</text>
+  <text x="1400" y="129" class="part">Separate views, not one continuous execution</text>
+
+  <!-- Stage 1: a single call with supplied evidence. -->
+  <rect x="25" y="155" width="1390" height="250" rx="14" class="card"/>
+  <text x="50" y="192" class="stage">1 · Supply evidence to a bare LLM</text><text x="1385" y="192" class="part">PART 4 · SINGLE CALL</text>
+  <text x="50" y="222" class="small">The application chooses every message sent to the model. There is no tool loop or durable memory yet.</text>
+  <rect x="55" y="253" width="255" height="103" rx="10" class="node"/><use href="#person" x="70" y="267" class="icon"/>
+  <text x="116" y="289" class="heading">Planner input</text><text x="73" y="319" class="body">Question + Alice's notes</text><text x="73" y="342" class="small">80 proposed → 120 approved</text>
+  <rect x="420" y="253" width="285" height="103" rx="10" class="node"/><use href="#context" x="435" y="267" class="icon"/>
+  <text x="481" y="289" class="heading">Working context</text><text x="438" y="319" class="body">Instructions + notes + question</text><text x="438" y="342" class="small">Content of this request only</text>
+  <rect x="850" y="253" width="250" height="103" rx="10" class="model"/><use href="#chip" x="865" y="267" class="icon"/>
+  <text x="911" y="289" class="heading">Ollama / Llama</text><text x="868" y="319" class="body">Generate from messages</text><text x="868" y="342" class="small">Unchanged model weights</text>
+  <rect x="1185" y="253" width="200" height="103" rx="10" class="memory"/>
+  <text x="1203" y="289" class="heading">Answer</text><text x="1203" y="319" class="body">120 approved</text><text x="1203" y="342" class="small">No order submitted</text>
+  <path d="M310 308H420" class="flow"/><text x="365" y="280" class="label">question</text><text x="365" y="298" class="label">+ notes</text>
+  <path d="M705 308H850" class="flow"/><text x="778" y="298" class="label">chat messages</text>
+  <path d="M1100 308H1185" class="flow return"/><text x="1143" y="298" class="label">text</text>
+  <text x="50" y="386" class="small">Why it can answer: the approved quantity and order status are present in the current context window.</text>
+
+  <!-- Stage 2: reset the input without changing the model. -->
+  <rect x="25" y="430" width="1390" height="250" rx="14" class="card"/>
+  <text x="50" y="467" class="stage">2 · Start a fresh call without the case notes</text><text x="1385" y="467" class="part">PART 4.1 · THE CONTEXT GAP</text>
+  <text x="50" y="497" class="small">Earlier messages are not automatically replayed. A model does not become a case database because it answered once.</text>
+  <rect x="55" y="528" width="255" height="103" rx="10" class="node"/><use href="#person" x="70" y="542" class="icon"/>
+  <text x="116" y="564" class="heading">Fresh request</text><text x="73" y="594" class="body">Same inventory question</text><text x="73" y="617" class="small">No notes or previous answer</text>
+  <rect x="420" y="528" width="285" height="103" rx="10" class="warning"/><use href="#context" x="435" y="542" class="icon"/>
+  <text x="481" y="564" class="heading">Working context</text><text x="438" y="594" class="body">Instructions + question only</text><text x="438" y="617" class="small">Missing: this case's evidence</text>
+  <rect x="850" y="528" width="250" height="103" rx="10" class="model"/><use href="#chip" x="865" y="542" class="icon"/>
+  <text x="911" y="564" class="heading">Same model</text><text x="868" y="594" class="body">Infer from this request</text><text x="868" y="617" class="small">No cross-call recall</text>
+  <rect x="1185" y="528" width="200" height="103" rx="10" class="warning"/>
+  <text x="1203" y="564" class="heading">Evidence gap</text><text x="1203" y="594" class="body">Case facts unknown</text><text x="1203" y="617" class="small">Do not guess case facts</text>
+  <path d="M310 583H420" class="flow"/><text x="365" y="573" class="label">question</text>
+  <path d="M705 583H850" class="flow"/><text x="778" y="573" class="label">chat messages</text>
+  <path d="M1100 583H1185" class="flow return"/><text x="1143" y="573" class="label">text</text>
+  <text x="50" y="661" class="small">The missing capability is not language generation. It is recovering the right evidence for this new request.</text>
+
+  <!-- Stage 3: separate orchestration, inference and tool execution. -->
+  <rect x="25" y="705" width="1390" height="430" rx="14" class="card"/>
+  <text x="50" y="742" class="stage">3 · Add an agent loop and one read-only tool</text><text x="1385" y="742" class="part">PART 5 · NO CASE PERSISTENCE</text>
+  <text x="50" y="772" class="small">The model proposes a next step. LangChain executes an allowed tool, adds its observation and calls the model again.</text>
+  <rect x="65" y="820" width="320" height="105" rx="10" class="node"/><use href="#context" x="82" y="835" class="icon"/>
+  <text x="130" y="858" class="heading">Transient working context</text><text x="83" y="887" class="body">Question + instructions</text><text x="83" y="911" class="small">Observations added within this loop</text>
+  <rect x="555" y="820" width="320" height="105" rx="10" class="node"/><use href="#loop" x="572" y="835" class="icon"/>
+  <text x="620" y="858" class="heading">LangChain agent loop</text><text x="573" y="887" class="body">create_agent → ainvoke</text><text x="573" y="911" class="small">Choose → execute → observe → repeat</text>
+  <rect x="1065" y="820" width="300" height="105" rx="10" class="model"/><use href="#chip" x="1082" y="835" class="icon"/>
+  <text x="1130" y="858" class="heading">Ollama / Llama</text><text x="1083" y="887" class="body">ChatOllama · native chat API</text><text x="1083" y="911" class="small">Proposes a tool call or final answer</text>
+  <path d="M385 867H555" class="flow"/><text x="470" y="857" class="label">messages</text>
+  <path d="M875 849H1065" class="flow"/><text x="970" y="820" class="label">context +</text><text x="970" y="838" class="label">tool schemas</text>
+  <path d="M1065 903H875" class="flow return"/><text x="970" y="891" class="label">call / final text</text>
+  <rect x="555" y="1000" width="320" height="90" rx="10" class="node"/><use href="#tool" x="572" y="1014" class="icon"/>
+  <text x="620" y="1038" class="heading">read_reorder_policy()</text><text x="573" y="1068" class="body">Approved general procedure</text>
+  <rect x="1065" y="1000" width="300" height="90" rx="10" class="warning"/>
+  <text x="1083" y="1035" class="heading">Answer with procedure</text><text x="1083" y="1066" class="body">Not this case's missing approval</text>
+  <path d="M715 925V1000" class="flow"/><text x="785" y="967" class="label">allowed call</text>
+  <path d="M555 1047H225V925" class="flow return"/><text x="370" y="1033" class="label">procedure text / observation</text>
+  <path d="M875 921H965V1045H1065" class="flow return"/><text x="1013" y="1033" class="label">final text</text>
+  <text x="50" y="1117" class="small">Fresh session: the procedure remains available, but the earlier case conversation is not restored.</text>
+
+  <!-- Stage 4: the same loop, with explicit durable-memory boundaries. -->
+  <rect x="25" y="1160" width="1390" height="700" rx="14" fill="#fafffd" stroke="#68a99d" stroke-width="1.5"/>
+  <text x="50" y="1197" class="stage">4 · Make the same agent loop memory aware</text><text x="1385" y="1197" class="part">PARTS 6–9 · DURABLE RECALL</text>
+  <text x="50" y="1227" class="small">Recover relevant evidence, assemble the next context, reason with the same model, then retain selected experience.</text>
+  <rect x="65" y="1280" width="320" height="115" rx="10" class="node"/><use href="#context" x="82" y="1295" class="icon"/>
+  <text x="130" y="1318" class="heading">Curated working context</text><text x="83" y="1347" class="body">Question + recalled evidence</text><text x="83" y="1371" class="small">Summary + citations + observations</text>
+  <rect x="555" y="1280" width="320" height="115" rx="10" class="node"/><use href="#loop" x="572" y="1295" class="icon"/>
+  <text x="620" y="1318" class="heading">Same LangChain loop</text><text x="573" y="1347" class="body">Host fixes user / thread scope</text><text x="573" y="1371" class="small">Only the exposed read tools are callable</text>
+  <rect x="1065" y="1280" width="300" height="115" rx="10" class="model"/><use href="#chip" x="1082" y="1295" class="icon"/>
+  <text x="1130" y="1318" class="heading">Same Ollama model</text><text x="1083" y="1347" class="body">Reason from retrieved evidence</text><text x="1083" y="1371" class="small">No retraining or weight changes</text>
+  <path d="M385 1331H555" class="flow"/><text x="470" y="1320" class="label">messages</text>
+  <path d="M875 1308H1065" class="flow"/><text x="970" y="1280" class="label">context +</text><text x="970" y="1298" class="label">tool schemas</text>
+  <path d="M1065 1370H875" class="flow return"/><text x="970" y="1358" class="label">call / final text</text>
+
+  <rect x="65" y="1500" width="320" height="112" rx="10" class="node"/><use href="#person" x="82" y="1515" class="icon"/>
+  <text x="130" y="1538" class="heading">Application capture</text><text x="83" y="1568" class="body">Save turns; review facts and links</text><text x="83" y="1592" class="small">Human reviews the handover write</text>
+  <rect x="555" y="1500" width="320" height="112" rx="10" class="memory"/><use href="#tool" x="572" y="1515" class="icon"/>
+  <text x="620" y="1538" class="heading">Oracle Agent Memory</text><text x="573" y="1568" class="body">Python API · scoped search</text><text x="573" y="1592" class="small">Extract / link / summarize / retain</text>
+  <rect x="1065" y="1500" width="300" height="112" rx="10" class="memory"/>
+  <text x="1083" y="1538" class="heading">Reviewable handover</text><text x="1083" y="1568" class="body">120 approved under PO-1048</text><text x="1083" y="1592" class="small">No supplier order submitted</text>
+  <path d="M715 1395V1500" class="memory-flow"/><text x="795" y="1430" class="label green-label">scoped recall /</text><text x="795" y="1450" class="label green-label">episode lookup</text>
+  <path d="M555 1518H440V1437H225V1395" class="memory-flow return"/>
+  <text x="330" y="1424" class="label green-label">facts + source IDs + procedure</text>
+  <path d="M385 1590H555" class="memory-flow"/><text x="470" y="1548" class="label green-label">messages +</text><text x="470" y="1568" class="label green-label">reviewed writes</text>
+  <path d="M875 1390H965V1555H1065" class="flow return"/><text x="1015" y="1543" class="label">draft text</text>
+
+  <rect x="405" y="1732" width="660" height="97" rx="10" class="memory"/><use href="#database" x="425" y="1750" class="icon"/>
+  <text x="477" y="1768" class="heading">Oracle AI Database · durable memory and vector retrieval</text>
+  <text x="425" y="1798" class="body">Messages / episodes · typed facts · procedures · links · embeddings</text>
+  <path d="M660 1612V1732" class="memory-flow"/><text x="559" y="1680" class="label green-label">store / embed / search</text>
+  <path d="M785 1732V1612" class="memory-flow return"/><text x="886" y="1680" class="label green-label">ranked records + history</text>
+  <text x="65" y="1670" class="small">Extraction, summaries and pruning</text>
+  <text x="65" y="1693" class="small">use the same Ollama model (/v1).</text>
+  <text x="50" y="1848" class="small">Across sessions: retained records rebuild the context. The model cannot place supplier orders or bypass the host's review gate.</text>
+  <text x="35" y="1899" class="body">Working memory is the current context window. Durable memory is the evidence used to reconstruct it.</text>
+</svg>

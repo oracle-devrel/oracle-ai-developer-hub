@@ -1,0 +1,43 @@
+{
+  "case_id": "RESTOCK-101",
+  "sku": "SKU-MUG-01",
+  "product": "ceramic mug",
+  "initial_quantity": 80,
+  "approved_quantity": 120,
+  "approval_id": "PO-1048",
+  "procedures": [
+    {
+      "id": "reorder",
+      "text": "SOP-101: Before replenishing a low-stock product, check available stock, recent sales and existing open orders. A purchasing manager must approve the reorder quantity before an order is submitted. A proposed or approved quantity does not mean the supplier has received an order."
+    },
+    {
+      "id": "delivery",
+      "text": "SOP-102: If a supplier delivery is late, check the promised date and contact the supplier for a confirmed ETA. Record the supplier response and assign a follow-up owner. Do not promise a delivery date without supplier confirmation."
+    },
+    {
+      "id": "returns",
+      "text": "SOP-103: For damaged customer returns, inspect and quarantine the items. Do not add damaged units to sellable stock. Record the product and return reason before arranging a refund or replacement."
+    },
+    {
+      "id": "count",
+      "text": "SOP-104: When a warehouse count differs from the inventory system, recount the product and reconcile recent receipts, sales and returns. A warehouse lead must approve any inventory adjustment; do not silently overwrite the stock count."
+    }
+  ],
+  "alice_note": "RESTOCK-101: Our ceramic mug SKU-MUG-01 is running low after a promotion. I proposed reordering 80 units under request PO-1048, which is awaiting purchasing-manager approval. I prefer handovers with stock situation, evidence and the next action owner.",
+  "alice_update": "RESTOCK-101 update: the purchasing manager approved reordering 120 units of ceramic mug SKU-MUG-01 under PO-1048, replacing the earlier proposal of 80 units. This is an approval only: no supplier order has been submitted. The delivery date is not confirmed.",
+  "bob_note": "RESTOCK-202: Bob is reviewing damaged returns of tote bag SKU-BAG-02 under RET-771. This is a different product and workflow. Do not include RET-771 in the ceramic-mug replenishment handover.",
+  "evaluation": [
+    {
+      "query": "What checks and approval are needed before reordering a low-stock product?",
+      "expected": "reorder"
+    },
+    {
+      "query": "What should we do when a supplier delivery is late and its arrival date is uncertain?",
+      "expected": "delivery"
+    },
+    {
+      "query": "How should we reconcile a warehouse count that differs from inventory records?",
+      "expected": "count"
+    }
+  ]
+}

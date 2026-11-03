@@ -1,0 +1,10 @@
+# Inventory handover appbook. OAMP 26.8.0 and its companions: the notebook's own pins.
+-r ../../../notebooks/agent_memory/inventory_handover/requirements.txt
+fastapi>=0.110
+uvicorn>=0.27
+pandas>=2.0
+httpx>=0.27
+
+# Tests (offline contracts, live checks, browser checks)
+pytest>=8.0
+playwright>=1.48

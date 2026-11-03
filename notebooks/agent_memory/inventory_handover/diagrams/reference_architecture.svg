@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 980" role="img" aria-labelledby="title desc">
+<title id="title">Memory aware inventory agent: reference architecture</title>
+<desc id="desc">An inventory planner asks a LangChain agent a question. Ollama runs the local language model. The current context window holds working memory. Read-only tools recall evidence through Oracle Agent Memory 26.8. Oracle AI Database stores episodic, semantic and procedural memory and performs embedding and vector retrieval. A person separately approves saving an exact handover draft. No supplier order is submitted.</desc>
+<defs>
+<marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto-start-reverse"><path d="M0 0 L9 4.5 L0 9Z" fill="#536a80"/></marker>
+<g id="person" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="16" cy="8" r="6"/><path d="M3 32v-5c0-12 26-12 26 0v5M10 32v-8m12 8v-8"/></g>
+<g id="screen" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="1" y="2" width="31" height="22" rx="3"/><path d="M8 31h18m-10-7v7M6 9h20M6 15h12"/></g>
+<g id="box" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M2 9 17 2 32 9v19l-15 7-15-7Z M2 9l15 7 15-7M17 16v19M10 5l15 7v9"/></g>
+<g id="document" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 1h18l8 8v25H5ZM23 1v9h8M11 16h14M11 22h14M11 28h9"/></g>
+<g id="check" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M17 1 31 7v11c0 9-14 16-14 16S3 27 3 18V7Z"/><path d="m9 17 5 5 11-12"/></g>
+<g id="database" fill="none" stroke="currentColor" stroke-width="2.4"><ellipse cx="17" cy="6" rx="15" ry="5"/><path d="M2 6v23c0 7 30 7 30 0V6M2 17c0 7 30 7 30 0"/></g>
+<g id="chip" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="7" y="7" width="22" height="22" rx="3"/><path d="M12 0v7m12-7v7M12 29v7m12-7v7M0 12h7m-7 12h7m22-12h7m-7 12h7"/><rect x="13" y="13" width="10" height="10" rx="1"/></g>
+<g id="chat" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 3h30v23H15l-9 8v-8H3Z"/><path d="M9 10h18M9 17h12"/></g>
+<g id="stack" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m2 9 16-8 16 8-16 8ZM2 18l16 8 16-8M2 27l16 8 16-8"/></g>
+</defs>
+<rect width="1200" height="980" rx="18" fill="#f5f8fc"/>
+<g font-family="Arial,Helvetica,sans-serif" fill="#183247">
+<text x="36" y="43" font-size="27" font-weight="700">The destination: a memory aware inventory agent</text>
+<text x="36" y="76" font-size="17" fill="#4c6478">Same model and agent loop; curated context per turn, durable memory across shifts.</text>
+<g stroke="#536a80" stroke-width="2.2" fill="none" marker-end="url(#arrow)">
+<path d="M255 190H335"/>
+<path d="M755 180H885" marker-start="url(#arrow)"/>
+<path d="M545 295V252"/>
+<path d="M335 220H280V512H335"/>
+<path d="M545 465V412"/>
+<path d="M755 220H823V483H885"/>
+<path d="M1008 540V600H758V548"/>
+<path d="M545 580V655" marker-start="url(#arrow)"/>
+</g>
+<g font-size="14" fill="#4c6478">
+<text x="269" y="176">question</text>
+<text x="776" y="161">inference</text>
+<text x="563" y="279">this turn</text>
+<text x="152" y="382">read-only tools</text>
+<text x="563" y="442">recalled evidence</text>
+<text x="834" y="353">draft</text>
+<text x="844" y="589">approved summary only</text>
+<text x="565" y="633">persist / retrieve</text>
+</g>
+<rect x="35" y="140" width="220" height="112" rx="12" fill="#fff" stroke="#adbdcb"/>
+<use href="#person" x="52" y="158" color="#536a80"/>
+<text x="96" y="181" font-size="19" font-weight="700">Stock planner</text>
+<text x="53" y="216" font-size="16">Alice: ceramic mugs</text>
+<text x="53" y="239" font-size="15">Bob: a separate product</text>
+<rect x="335" y="140" width="420" height="112" rx="12" fill="#e4eefc" stroke="#5480b0"/>
+<use href="#screen" x="354" y="158" color="#3e6b99"/>
+<text x="401" y="182" font-size="21" font-weight="700">Python + LangChain agent</text>
+<text x="355" y="215" font-size="17">Choose tool → read result → reason → draft</text>
+<text x="355" y="239" font-size="15">Host fixes tools, scopes and iteration limits</text>
+<rect x="885" y="140" width="280" height="112" rx="12" fill="#eee8fa" stroke="#9380b5"/>
+<use href="#chip" x="904" y="157" color="#776191"/>
+<text x="953" y="182" font-size="22" font-weight="700">Ollama + LLM</text>
+<text x="905" y="216" font-size="16">Local Llama 3.2 3B inference</text>
+<text x="905" y="239" font-size="15">Generate, extract, summarize, prune</text>
+<rect x="335" y="295" width="420" height="117" rx="12" fill="#fff3db" stroke="#c39942"/>
+<use href="#chat" x="355" y="313" color="#a07629"/>
+<text x="402" y="337" font-size="21" font-weight="700">Working memory: context window</text>
+<text x="355" y="370" font-size="16">Instructions + recent messages + tool results</text>
+<text x="355" y="395" font-size="15">Selected evidence, bounded for this model turn</text>
+<rect x="335" y="465" width="420" height="115" rx="12" fill="#e4eefc" stroke="#5480b0"/>
+<use href="#stack" x="355" y="483" color="#3e6b99"/>
+<text x="402" y="507" font-size="21" font-weight="700">Oracle Agent Memory 26.8</text>
+<text x="355" y="540" font-size="17">Messages → extraction → links → recall</text>
+<text x="355" y="563" font-size="15">User/thread scopes, context cards, retention</text>
+<rect x="885" y="425" width="280" height="115" rx="12" fill="#fff3db" stroke="#c39942"/>
+<use href="#check" x="904" y="443" color="#a07629"/>
+<text x="951" y="468" font-size="20" font-weight="700">Human review</text>
+<text x="905" y="503" font-size="16">Review the exact proposed text</text>
+<text x="905" y="526" font-size="15">No purchasing or stock-write tool</text>
+<text x="35" y="467" font-size="17" font-weight="700">Application scopes</text>
+<text x="35" y="495" font-size="15">User, case and source labels</text>
+<text x="35" y="522" font-size="15">Select evidence; not authorization</text>
+<rect x="35" y="655" width="1130" height="271" rx="14" fill="#fff" stroke="#468478" stroke-width="2"/>
+<use href="#database" x="55" y="675" color="#327567"/>
+<text x="103" y="700" font-size="23" font-weight="700">Oracle AI Database · one workshop schema</text>
+<g>
+<rect x="55" y="723" width="345" height="128" rx="9" fill="#eef7f3" stroke="#bfd8ce"/>
+<use href="#chat" x="70" y="740" color="#327567"/>
+<text x="115" y="765" font-size="21" font-weight="700">Episodic memory</text>
+<text x="73" y="800" font-size="17">Shift notes + stock-report history</text>
+<text x="73" y="826" font-size="16">What happened, and in which order?</text>
+<rect x="427" y="723" width="345" height="128" rx="9" fill="#eef7f3" stroke="#bfd8ce"/>
+<use href="#box" x="442" y="740" color="#327567"/>
+<text x="487" y="765" font-size="21" font-weight="700">Semantic memory</text>
+<text x="445" y="800" font-size="17">Current approved quantity + preferences</text>
+<text x="445" y="826" font-size="16">120 replaces the earlier proposal of 80</text>
+<rect x="800" y="723" width="345" height="128" rx="9" fill="#eef7f3" stroke="#bfd8ce"/>
+<use href="#document" x="815" y="740" color="#327567"/>
+<text x="860" y="765" font-size="21" font-weight="700">Procedural memory</text>
+<text x="818" y="800" font-size="17">Approved SOPs + reusable checklists</text>
+<text x="818" y="826" font-size="16">How to handle the next restock case</text>
+</g>
+<rect x="55" y="870" width="1090" height="38" rx="6" fill="#dceee8"/>
+<text x="78" y="896" font-size="18" font-weight="700">In-database ONNX embedding → vector retrieval · source records remain inspectable</text>
+<text x="36" y="959" font-size="16" fill="#4c6478">A purchasing approval is business evidence. Saving a handover needs separate review. This lab never submits an order.</text>
+</g></svg>

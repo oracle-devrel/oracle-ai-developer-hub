@@ -1,0 +1,8 @@
+flowchart LR
+    MSG["New message<br/>add_messages(...)"]
+    MSG --> RAW[("CITY_MESSAGE<br/>verbatim")]
+    MSG --> EX{{"Extractor LLM<br/>(the SDK's own model)"}}
+    SUM["Running thread summary"] -.->|advisory| EX
+    PAST[("Past memories")] -.->|dedup / update| EX
+    EX --> REC["2-8 atomic typed records<br/>fact · preference · guideline · memory"]
+    REC --> MEM[("CITY_MEMORY")]

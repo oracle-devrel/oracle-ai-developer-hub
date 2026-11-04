@@ -39,12 +39,18 @@ def main() -> int:
         check("Docker CLI", shutil.which("docker") is not None, "docker found"),
     ]
 
-    docker_version = run("docker", "version", "--format", "{{.Server.Version}}") if shutil.which("docker") else None
+    docker_version = (
+        run("docker", "version", "--format", "{{.Server.Version}}")
+        if shutil.which("docker")
+        else None
+    )
     results.append(
         check(
             "Docker daemon",
             docker_version is not None and docker_version.returncode == 0,
-            (docker_version.stdout.strip() or docker_version.stderr.strip()) if docker_version else "docker CLI unavailable",
+            (docker_version.stdout.strip() or docker_version.stderr.strip())
+            if docker_version
+            else "docker CLI unavailable",
         )
     )
 
@@ -60,7 +66,13 @@ def main() -> int:
 
     for variable in ("ORACLE_USER", "ORACLE_PASSWORD", "ORACLE_DSN"):
         # Presence only: preflight never prints secrets.
-        results.append(check(variable, bool(os.environ.get(variable)), "set" if os.environ.get(variable) else "missing"))
+        results.append(
+            check(
+                variable,
+                bool(os.environ.get(variable)),
+                "set" if os.environ.get(variable) else "missing",
+            )
+        )
 
     return 0 if all(results) else 1
 

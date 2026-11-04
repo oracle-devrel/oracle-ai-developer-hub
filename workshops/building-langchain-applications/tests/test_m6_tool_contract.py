@@ -8,7 +8,6 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-
 NOTEBOOK = Path(__file__).parents[1] / "notebooks/01_oracle_rag_and_memory.ipynb"
 
 
@@ -16,7 +15,9 @@ class M6ToolContractTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         notebook = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
-        cell = next(cell for cell in notebook["cells"] if cell.get("id") == "weather-tool-definition")
+        cell = next(
+            cell for cell in notebook["cells"] if cell.get("id") == "weather-tool-definition"
+        )
         namespace = {"json": json}
         with contextlib.redirect_stdout(io.StringIO()):
             exec("".join(cell["source"]), namespace)

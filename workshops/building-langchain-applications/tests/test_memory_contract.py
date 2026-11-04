@@ -5,7 +5,6 @@ from pathlib import Path
 
 import nbformat
 
-
 NOTEBOOK = Path(__file__).parents[1] / "notebooks/01_oracle_rag_and_memory.ipynb"
 
 
@@ -18,7 +17,8 @@ class MemoryNotebookContractTest(unittest.TestCase):
         search_cells = [
             cell.source
             for cell in notebook.cells
-            if cell.cell_type == "code" and ("memory.search(" in cell.source or "memory.search_async(" in cell.source)
+            if cell.cell_type == "code"
+            and ("memory.search(" in cell.source or "memory.search_async(" in cell.source)
         ]
 
         self.assertGreaterEqual(len(search_cells), 4)
@@ -35,7 +35,9 @@ class MemoryNotebookContractTest(unittest.TestCase):
         ]
 
         self.assertGreaterEqual(len(write_cells), 1)
-        timestamped_write = next(source for source in write_cells if "preference_timestamp" in source)
+        timestamped_write = next(
+            source for source in write_cells if "preference_timestamp" in source
+        )
         self.assertIn("thread.add_memory_async(", timestamped_write)
         self.assertIn("timestamp=preference_timestamp", timestamped_write)
         self.assertIn("explicit_user_statement", timestamped_write)

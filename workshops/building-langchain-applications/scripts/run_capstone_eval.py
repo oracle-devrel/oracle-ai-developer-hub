@@ -16,23 +16,22 @@ from __future__ import annotations
 import argparse
 import ast
 import contextlib
-from dataclasses import dataclass
-from datetime import datetime, timezone
 import io
 import json
 import os
-from pathlib import Path
 import platform
 import re
 import subprocess
 import sys
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import nbformat
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-
 
 ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOK = ROOT / "notebooks/01_oracle_rag_and_memory.ipynb"
@@ -52,7 +51,11 @@ RUBRIC_WEIGHTS = {
 }
 
 sys.path.insert(0, str(ROOT))
-from src.evaluation import citation_urls_are_retrieved, citations_from_documents, grounding_decision
+from src.evaluation import (  # noqa: E402
+    citation_urls_are_retrieved,
+    citations_from_documents,
+    grounding_decision,
+)
 
 
 @dataclass
@@ -67,7 +70,9 @@ class EvaluationMemory:
 
 
 def _load_jsonl(path: Path) -> list[dict[str, Any]]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return [
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
 
 
 def _load_composer() -> Any:
@@ -141,13 +146,20 @@ def _run_offline_tool_evaluation(tool_cases: list[dict[str, Any]]) -> list[dict[
             result = weather_tool.invoke({"units": "celsius", "forecast": False})
             response_contract = {
                 "corpus_citations": [],
-                "live_tool_sources": [{"name": weather_tool.name, "source_url": result.get("source_url")}],
+                "live_tool_sources": [
+                    {"name": weather_tool.name, "source_url": result.get("source_url")}
+                ],
             }
-            passed = bool(response_contract["live_tool_sources"]) and response_contract["corpus_citations"] == []
+            passed = (
+                bool(response_contract["live_tool_sources"])
+                and response_contract["corpus_citations"] == []
+            )
             detail = "A weather source is represented separately from corpus citations."
         else:
             detail = f"Unknown tool evaluation check: {check}"
-        reports.append({"case_id": case["case_id"], "check": check, "passed": passed, "detail": detail})
+        reports.append(
+            {"case_id": case["case_id"], "check": check, "passed": passed, "detail": detail}
+        )
     return reports
 
 
@@ -159,9 +171,13 @@ def _load_reranker() -> Any:
         if cell.cell_type == "code" and cell.get("id") == "rerank-code"
     )
     tree = ast.parse(source, filename=str(NOTEBOOK))
-    function_nodes = [node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))]
+    function_nodes = [
+        node for node in tree.body if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    ]
     namespace: dict[str, Any] = {"re": re}
-    exec(compile(ast.Module(body=function_nodes, type_ignores=[]), str(NOTEBOOK), "exec"), namespace)
+    exec(
+        compile(ast.Module(body=function_nodes, type_ignores=[]), str(NOTEBOOK), "exec"), namespace
+    )
     return namespace["rerank_candidates"]
 
 
@@ -194,8 +210,16 @@ def _run_offline_reranking_evaluation(
             ]
             before_order = sorted(candidates, key=lambda row: row[1])
             reranked = rerank_candidates(case["question"], candidates)
-            before_rank = next(index for index, row in enumerate(before_order, start=1) if row[0].metadata["document_id"] == case["expected_document_id"])
-            after_rank = next(index for index, row in enumerate(reranked, start=1) if row[0].metadata["document_id"] == case["expected_document_id"])
+            before_rank = next(
+                index
+                for index, row in enumerate(before_order, start=1)
+                if row[0].metadata["document_id"] == case["expected_document_id"]
+            )
+            after_rank = next(
+                index
+                for index, row in enumerate(reranked, start=1)
+                if row[0].metadata["document_id"] == case["expected_document_id"]
+            )
             passed = before_rank > 1 and after_rank == 1
             detail = "The expected document moves from a non-top vector candidate to the top reranked candidate."
             report = {
@@ -252,10 +276,16 @@ def _load_concierge_prompt() -> ChatPromptTemplate:
         node
         for node in ast.walk(tree)
         if isinstance(node, ast.Assign)
-        and any(isinstance(target, ast.Name) and target.id == "concierge_prompt" for target in node.targets)
+        and any(
+            isinstance(target, ast.Name) and target.id == "concierge_prompt"
+            for target in node.targets
+        )
     )
     namespace: dict[str, Any] = {"ChatPromptTemplate": ChatPromptTemplate}
-    exec(compile(ast.Module(body=[prompt_assignment], type_ignores=[]), str(NOTEBOOK), "exec"), namespace)
+    exec(
+        compile(ast.Module(body=[prompt_assignment], type_ignores=[]), str(NOTEBOOK), "exec"),
+        namespace,
+    )
     return namespace["concierge_prompt"]
 
 
@@ -297,7 +327,9 @@ def _run_live_weather_tool_probe() -> dict[str, Any]:
         model = ChatOpenAI(model=os.environ["OPENAI_MODEL"]).bind_tools([weather_tool])
         response = model.invoke(
             [
-                SystemMessage(content="Use get_paris_weather for current weather questions. Do not answer from memory."),
+                SystemMessage(
+                    content="Use get_paris_weather for current weather questions. Do not answer from memory."
+                ),
                 HumanMessage(content="What is the current weather in Paris?"),
             ]
         )
@@ -312,7 +344,9 @@ def _run_live_weather_tool_probe() -> dict[str, Any]:
                 "tool_calls": response.tool_calls,
             }
         result = weather_tool.invoke(tool_call.get("args", {}))
-        valid_result = result.get("status") in {"live", "fallback"} and bool(result.get("source_url"))
+        valid_result = result.get("status") in {"live", "fallback"} and bool(
+            result.get("source_url")
+        )
         return {
             "status": "passed" if valid_result else "failed",
             "detail": (
@@ -324,7 +358,9 @@ def _run_live_weather_tool_probe() -> dict[str, Any]:
             "result_status": result.get("status"),
             "source_url": result.get("source_url"),
         }
-    except Exception as exc:  # pragma: no cover - live provider failures are reported in the audit report
+    except (
+        Exception
+    ) as exc:  # pragma: no cover - live provider failures are reported in the audit report
         return {
             "status": "failed",
             "detail": f"Live weather tool probe failed: {type(exc).__name__}",
@@ -389,7 +425,11 @@ def _case_passes(
             and citation_urls_are_retrieved(result["corpus_citations"], retrieved_documents)
         )
     if expected == "abstain_or_uncertainty":
-        return result["answer"] is None and result["corpus_citations"] == [] and bool(result["uncertainties"])
+        return (
+            result["answer"] is None
+            and result["corpus_citations"] == []
+            and bool(result["uncertainties"])
+        )
     if expected == "ignore_untrusted_instruction":
         answer = (result["answer"] or "").lower()
         return (
@@ -414,7 +454,9 @@ def _run_live_integration() -> dict[str, Any]:
         "tests.test_memory",
         "-v",
     ]
-    completed = subprocess.run(command, cwd=ROOT, env=environment, capture_output=True, text=True, check=False)
+    completed = subprocess.run(
+        command, cwd=ROOT, env=environment, capture_output=True, text=True, check=False
+    )
     output = (completed.stdout + "\n" + completed.stderr).strip()
     return {
         "status": "passed" if completed.returncode == 0 else "failed",
@@ -445,19 +487,27 @@ def run_evaluation(*, run_live: bool = False) -> dict[str, Any]:
         expected_ids = case["expected_document_ids"]
         selected_records = [records_by_id[record_id] for record_id in expected_ids]
         if any(not _record_matches_filter(record, case["filter"]) for record in selected_records):
-            raise ValueError(f"Evaluation case {case['case_id']} references a record outside its filter")
+            raise ValueError(
+                f"Evaluation case {case['case_id']} references a record outside its filter"
+            )
 
         inject = case["expected_behavior"] == "ignore_untrusted_instruction"
-        retrieved_documents = [_document(record, inject_untrusted_text=inject) for record in selected_records]
+        retrieved_documents = [
+            _document(record, inject_untrusted_text=inject) for record in selected_records
+        ]
         scored_results = [(document, 0.20) for document in retrieved_documents]
         grounding = grounding_decision(scored_results, MAX_COSINE_DISTANCE)
-        generated_answer = grounding["supporting_document"].page_content if grounding["grounded"] else None
+        generated_answer = (
+            grounding["supporting_document"].page_content if grounding["grounded"] else None
+        )
         if inject:
             generated_answer = selected_records[0]["body"] if grounding["grounded"] else None
         # Each fixed case starts from a clean fixture state. This prevents a
         # preference declared for user A in one case from leaking into another
         # case merely because it uses the same illustrative user ID.
-        memory_results = [EvaluationMemory(case["memory_content"])] if case.get("memory_content") else []
+        memory_results = (
+            [EvaluationMemory(case["memory_content"])] if case.get("memory_content") else []
+        )
         result = compose(
             generated_answer=generated_answer,
             grounding=grounding,
@@ -469,11 +519,16 @@ def run_evaluation(*, run_live: bool = False) -> dict[str, Any]:
             {
                 "case_id": case["case_id"],
                 "expected_behavior": case["expected_behavior"],
-                "observed_behavior": _observed_behavior(result, case["expected_behavior"], prompt_contract),
+                "observed_behavior": _observed_behavior(
+                    result, case["expected_behavior"], prompt_contract
+                ),
                 "passed": passed,
                 "expected_document_ids": expected_ids,
                 "cited_document_ids": sorted(
-                    {citation["chunk_id"].split("#", 1)[0] for citation in result["corpus_citations"]}
+                    {
+                        citation["chunk_id"].split("#", 1)[0]
+                        for citation in result["corpus_citations"]
+                    }
                 ),
                 "personalization_used": result["personalization_used"],
                 "uncertainties": result["uncertainties"],
@@ -494,27 +549,47 @@ def run_evaluation(*, run_live: bool = False) -> dict[str, Any]:
     injection_reports = case_by_behavior["ignore_untrusted_instruction"]
     hard_gates: dict[str, dict[str, Any]] = {
         "citation_precision": {
-            "status": "passed" if all(report["passed"] for report in case_reports if report["expected_behavior"] != "abstain_or_uncertainty") else "failed",
+            "status": "passed"
+            if all(
+                report["passed"]
+                for report in case_reports
+                if report["expected_behavior"] != "abstain_or_uncertainty"
+            )
+            else "failed",
             "detail": "Grounded cases cite an exact retrieved chunk from the expected release record.",
         },
         "memory_isolation": {
-            "status": "passed" if isolation_reports and all(report["passed"] and not report["personalization_used"] for report in isolation_reports) else "failed",
+            "status": "passed"
+            if isolation_reports
+            and all(
+                report["passed"] and not report["personalization_used"]
+                for report in isolation_reports
+            )
+            else "failed",
             "detail": "The second fixture user receives no first-user preference.",
         },
         "restraint": {
-            "status": "passed" if restraint_reports and all(report["passed"] for report in restraint_reports) else "failed",
+            "status": "passed"
+            if restraint_reports and all(report["passed"] for report in restraint_reports)
+            else "failed",
             "detail": "Unsupported/current-information cases abstain with uncertainty.",
         },
         "injection_resistance": {
-            "status": "passed" if injection_reports and all(report["passed"] for report in injection_reports) else "failed",
+            "status": "passed"
+            if injection_reports and all(report["passed"] for report in injection_reports)
+            else "failed",
             "detail": "The notebook prompt treats corpus text as untrusted data and preserves the policy boundary.",
         },
         "tool_use_correctness": {
-            "status": "passed" if tool_case_reports and all(report["passed"] for report in tool_case_reports) else "failed",
+            "status": "passed"
+            if tool_case_reports and all(report["passed"] for report in tool_case_reports)
+            else "failed",
             "detail": "The bounded weather tool exposes a typed contract, explicit fallback uncertainty, and a separate live-source field.",
         },
         "reranking_quality": {
-            "status": "passed" if reranking_case_reports and all(report["passed"] for report in reranking_case_reports) else "failed",
+            "status": "passed"
+            if reranking_case_reports and all(report["passed"] for report in reranking_case_reports)
+            else "failed",
             "detail": "The fixed reranking case demonstrates a before/after rank change while preserving document identity.",
         },
         "tool_agent_live": {
@@ -527,7 +602,10 @@ def run_evaluation(*, run_live: bool = False) -> dict[str, Any]:
         },
         "reproducibility_contract": {
             "status": "passed"
-            if all(path.exists() for path in (NOTEBOOK, CAPSTONE_EVAL, RELEASE, ROOT / "requirements.lock"))
+            if all(
+                path.exists()
+                for path in (NOTEBOOK, CAPSTONE_EVAL, RELEASE, ROOT / "requirements.lock")
+            )
             else "failed",
             "detail": "The notebook, versioned evaluation fixture, release corpus, and pinned dependency lockfile are present.",
         },
@@ -569,14 +647,16 @@ def run_evaluation(*, run_live: bool = False) -> dict[str, Any]:
         "metadata": {
             "corpus_name": evaluation["corpus_name"],
             "corpus_version": evaluation["corpus_version"],
-            "evaluation_mode": "offline_policy_contract" if not run_live else "offline_policy_contract_plus_live_integration",
+            "evaluation_mode": "offline_policy_contract"
+            if not run_live
+            else "offline_policy_contract_plus_live_integration",
             "max_cosine_distance": MAX_COSINE_DISTANCE,
             "code_revision": _git_revision(),
             "working_tree_dirty": _working_tree_dirty(),
             "oracle_image_reference": _oracle_image_reference(),
             "openai_model": os.environ.get("OPENAI_MODEL") if run_live else None,
             "embedding_model": os.environ.get("OPENAI_EMBEDDING_MODEL") if run_live else None,
-            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+            "timestamp_utc": datetime.now(UTC).isoformat(),
             "python": platform.python_version(),
         },
         "hard_gates": hard_gates,
@@ -589,7 +669,11 @@ def run_evaluation(*, run_live: bool = False) -> dict[str, Any]:
 
 def _git_revision() -> str:
     completed = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=False
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     return completed.stdout.strip() if completed.returncode == 0 else "unknown"
 

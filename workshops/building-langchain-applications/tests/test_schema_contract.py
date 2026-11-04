@@ -12,7 +12,11 @@ class DatasetSchemaTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.manifest = load_manifest(Path("data/manifest.yaml"))
-        cls.document = json.loads(Path("data/fixtures/paris_dataset_v2026.1.jsonl").read_text(encoding="utf-8").splitlines()[0])
+        cls.document = json.loads(
+            Path("data/fixtures/paris_dataset_v2026.1.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()[0]
+        )
         cls.sources = cls.manifest["sources"]
 
     def assert_rejected(self, document: dict[str, object]) -> None:

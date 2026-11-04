@@ -27,7 +27,10 @@ def citation_urls_are_retrieved(citations: list[dict[str, str]], documents: list
     source URL while representing different evidence.
     """
     retrieved_chunks = {
-        (document.metadata["source_url"], document.metadata.get("chunk_id", document.metadata["document_id"]))
+        (
+            document.metadata["source_url"],
+            document.metadata.get("chunk_id", document.metadata["document_id"]),
+        )
         for document in documents
     }
     cited_chunks = {(citation.get("url"), citation.get("chunk_id")) for citation in citations}

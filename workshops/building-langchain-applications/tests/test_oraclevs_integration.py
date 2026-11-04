@@ -19,7 +19,6 @@ import oracledb
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_oracledb.vectorstores import DistanceStrategy, OracleVS
-
 from src.evaluation import citation_urls_are_retrieved, citations_from_documents
 
 TABLE_NAME = "M3_RAG_INTEGRATION"
@@ -47,7 +46,9 @@ class TopicEmbeddings(Embeddings):
         return [0.0, 0.0, 0.0, 1.0]
 
 
-@unittest.skipUnless(RUN_INTEGRATION, "set RUN_ORACLE_INTEGRATION=1 to run against a local Oracle database")
+@unittest.skipUnless(
+    RUN_INTEGRATION, "set RUN_ORACLE_INTEGRATION=1 to run against a local Oracle database"
+)
 class OracleVSIntegrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -58,15 +59,26 @@ class OracleVSIntegrationTest(unittest.TestCase):
         )
         records = [
             json.loads(line)
-            for line in Path("data/releases/paris_dataset_v2026.1.jsonl").read_text(encoding="utf-8").splitlines()
+            for line in Path("data/releases/paris_dataset_v2026.1.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
         ]
-        cls.eval_cases = json.loads(Path("data/evals/rag_eval_v2026.1.json").read_text(encoding="utf-8"))["cases"]
+        cls.eval_cases = json.loads(
+            Path("data/evals/rag_eval_v2026.1.json").read_text(encoding="utf-8")
+        )["cases"]
         cls.documents = [
             Document(
                 page_content=record["body"],
                 metadata={
                     key: record[key]
-                    for key in ("document_id", "title", "topic", "place", "source_url", "retrieved_at")
+                    for key in (
+                        "document_id",
+                        "title",
+                        "topic",
+                        "place",
+                        "source_url",
+                        "retrieved_at",
+                    )
                 },
             )
             for record in records
@@ -100,7 +112,9 @@ class OracleVSIntegrationTest(unittest.TestCase):
 
     def test_ingests_filters_cites_and_rebuilds_the_release(self) -> None:
         store = self._rebuild_store()
-        museum_case = next(case for case in self.eval_cases if case["case_id"] == "museum-picasso-grounded")
+        museum_case = next(
+            case for case in self.eval_cases if case["case_id"] == "museum-picasso-grounded"
+        )
         results = store.similarity_search_with_score(
             museum_case["question"],
             k=len(museum_case["expected_document_ids"]),
@@ -109,9 +123,17 @@ class OracleVSIntegrationTest(unittest.TestCase):
 
         self.assertTrue(results)
         retrieved_documents = [document for document, _ in results]
-        self.assertTrue(all(document.metadata["topic"] == "museum" for document in retrieved_documents))
-        self.assertTrue(set(museum_case["expected_document_ids"]).issubset({document.metadata["document_id"] for document in retrieved_documents}))
-        self.assertTrue(all(document.metadata["corpus_version"] == "2026.1" for document in retrieved_documents))
+        self.assertTrue(
+            all(document.metadata["topic"] == "museum" for document in retrieved_documents)
+        )
+        self.assertTrue(
+            set(museum_case["expected_document_ids"]).issubset(
+                {document.metadata["document_id"] for document in retrieved_documents}
+            )
+        )
+        self.assertTrue(
+            all(document.metadata["corpus_version"] == "2026.1" for document in retrieved_documents)
+        )
         citations = citations_from_documents(retrieved_documents)
         self.assertTrue(citation_urls_are_retrieved(citations, retrieved_documents))
 

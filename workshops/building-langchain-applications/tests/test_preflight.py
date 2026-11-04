@@ -23,7 +23,9 @@ class PreflightTest(unittest.TestCase):
             "ORACLE_DSN": "localhost:1521/FREEPDB1",
         }
 
-    def run_main(self, arguments: list[str], *command_results: CompletedProcess[str]) -> tuple[int, str]:
+    def run_main(
+        self, arguments: list[str], *command_results: CompletedProcess[str]
+    ) -> tuple[int, str]:
         output = io.StringIO()
         with (
             patch.dict(os.environ, self.environment, clear=True),
@@ -44,7 +46,11 @@ class PreflightTest(unittest.TestCase):
     def test_missing_environment_variable_fails_without_printing_secret(self) -> None:
         output = io.StringIO()
         with (
-            patch.dict(os.environ, {"ORACLE_USER": "RAG_APP", "ORACLE_DSN": self.environment["ORACLE_DSN"]}, clear=True),
+            patch.dict(
+                os.environ,
+                {"ORACLE_USER": "RAG_APP", "ORACLE_DSN": self.environment["ORACLE_DSN"]},
+                clear=True,
+            ),
             patch.object(sys, "argv", ["preflight.py"]),
             patch("scripts.preflight.shutil.which", return_value="/usr/bin/docker"),
             patch("scripts.preflight.run", return_value=completed(stdout="26.1.0")),

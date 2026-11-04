@@ -19,7 +19,9 @@ class CapstoneEvaluationRunnerTest(unittest.TestCase):
         self.assertEqual(report["passed_cases"], report["total_cases"])
         self.assertEqual(report["hard_gates"]["memory_lifecycle_live"]["status"], "not_run")
         self.assertTrue(all(case["passed"] for case in report["cases"]))
-        injection_case = next(case for case in report["cases"] if case["case_id"] == "untrusted-corpus-instruction")
+        injection_case = next(
+            case for case in report["cases"] if case["case_id"] == "untrusted-corpus-instruction"
+        )
         self.assertEqual(injection_case["personalization_used"], [])
 
     def test_report_shape_is_json_serializable(self) -> None:

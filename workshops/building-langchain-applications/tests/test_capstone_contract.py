@@ -6,9 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import nbformat
-
 from src.evaluation import citation_urls_are_retrieved, citations_from_documents, grounding_decision
-
 
 NOTEBOOK = Path(__file__).parents[1] / "notebooks/01_oracle_rag_and_memory.ipynb"
 

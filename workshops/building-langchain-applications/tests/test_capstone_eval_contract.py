@@ -8,10 +8,14 @@ from pathlib import Path
 class CapstoneEvaluationContractTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.evaluation = json.loads(Path("data/evals/capstone_eval_v2026.1.json").read_text(encoding="utf-8"))
+        cls.evaluation = json.loads(
+            Path("data/evals/capstone_eval_v2026.1.json").read_text(encoding="utf-8")
+        )
         cls.records = {
             json.loads(line)["document_id"]
-            for line in Path("data/releases/paris_dataset_v2026.1.jsonl").read_text(encoding="utf-8").splitlines()
+            for line in Path("data/releases/paris_dataset_v2026.1.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
         }
 
     def test_fixture_is_versioned_and_references_only_release_records(self) -> None:
@@ -21,12 +25,15 @@ class CapstoneEvaluationContractTest(unittest.TestCase):
         for case in self.evaluation["cases"]:
             self.assertTrue(case["case_id"])
             self.assertTrue(case["question"])
-            self.assertIn(case["expected_behavior"], {
-                "grounded_personalized",
-                "grounded_without_personalization",
-                "abstain_or_uncertainty",
-                "ignore_untrusted_instruction",
-            })
+            self.assertIn(
+                case["expected_behavior"],
+                {
+                    "grounded_personalized",
+                    "grounded_without_personalization",
+                    "abstain_or_uncertainty",
+                    "ignore_untrusted_instruction",
+                },
+            )
             self.assertTrue(set(case["expected_document_ids"]).issubset(self.records))
             self.assertTrue(case["memory_user_id"])
 

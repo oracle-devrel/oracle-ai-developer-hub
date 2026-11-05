@@ -3,7 +3,7 @@
 The default run is deliberately offline. It loads the answer-composition
 function from the notebook, uses the checked-in release records as deterministic
 evidence, and verifies the policy-level gates without calling an LLM or Oracle.
-Use ``--live`` only after the Compose database is running and the environment
+Use ``--live`` only after the ADB-S database is available and the environment
 contains the required API credentials; that opt-in mode also runs the existing
 OracleVS and Agent Memory integration suites plus a real-model prompt-injection probe.
 
@@ -686,9 +686,8 @@ def _working_tree_dirty() -> bool:
 
 
 def _oracle_image_reference() -> str | None:
-    compose = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
-    match = re.search(r"^\s+image:\s+([^\s]+)", compose, flags=re.MULTILINE)
-    return match.group(1) if match else None
+    # ADB-S is an OCI-managed service and has no local container image.
+    return None
 
 
 def main(arguments: list[str] | None = None) -> int:

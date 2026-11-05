@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 import nbformat
+from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
@@ -49,6 +50,16 @@ RUBRIC_WEIGHTS = {
     "reranking_quality": 0,
     "tool_agent_live": 0,
 }
+
+
+def _resolve_notebook(notebook_path: Path | None) -> Path:
+    if notebook_path is None:
+        if NOTEBOOK.exists():
+            return NOTEBOOK
+        fallback = ROOT / "Untitled.ipynb"
+        return fallback if fallback.exists() else NOTEBOOK
+    return notebook_path if notebook_path.is_absolute() else ROOT / notebook_path
+
 
 sys.path.insert(0, str(ROOT))
 from src.evaluation import (  # noqa: E402
@@ -75,8 +86,8 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
     ]
 
 
-def _load_composer() -> Any:
-    notebook = nbformat.read(NOTEBOOK, as_version=4)
+def _load_composer(notebook_path: Path) -> Any:
+    notebook = nbformat.read(notebook_path, as_version=4)
     source = next(
         cell.source
         for cell in notebook.cells
@@ -86,30 +97,33 @@ def _load_composer() -> Any:
         "citations_from_documents": citations_from_documents,
         "citation_urls_are_retrieved": citation_urls_are_retrieved,
     }
-    exec(compile(source, str(NOTEBOOK), "exec"), namespace)
+    exec(compile(source, str(notebook_path), "exec"), namespace)
     return namespace["compose_concierge_result"]
 
 
-def _load_weather_tool() -> tuple[Any, dict[str, Any]]:
-    notebook = nbformat.read(NOTEBOOK, as_version=4)
+def _load_weather_tool(notebook_path: Path) -> tuple[Any, dict[str, Any]]:
+    notebook = nbformat.read(notebook_path, as_version=4)
     source = next(
         cell.source
         for cell in notebook.cells
-        if cell.cell_type == "code" and cell.get("id") == "weather-tool-definition"
+        if cell.cell_type == "code"
+        and (cell.get("id") == "weather-tool-definition" or "def get_paris_weather" in cell.source)
     )
     namespace: dict[str, Any] = {"json": json}
     with contextlib.redirect_stdout(io.StringIO()):
-        exec(compile(source, str(NOTEBOOK), "exec"), namespace)
+        exec(compile(source, str(notebook_path), "exec"), namespace)
     return namespace["get_paris_weather"], namespace
 
 
-def _run_offline_tool_evaluation(tool_cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _run_offline_tool_evaluation(
+    tool_cases: list[dict[str, Any]], notebook_path: Path
+) -> list[dict[str, Any]]:
     """Exercise the notebook's tool contract without a network call or model call."""
     if not tool_cases:
         return []
 
     try:
-        weather_tool, namespace = _load_weather_tool()
+        weather_tool, namespace = _load_weather_tool(notebook_path)
         namespace["WEATHER_ENDPOINT"] = "http://127.0.0.1:1/forecast"
     except Exception as exc:  # pragma: no cover - a contract failure is reported, not hidden
         return [
@@ -163,32 +177,36 @@ def _run_offline_tool_evaluation(tool_cases: list[dict[str, Any]]) -> list[dict[
     return reports
 
 
-def _load_reranker() -> Any:
-    notebook = nbformat.read(NOTEBOOK, as_version=4)
+def _load_reranker(notebook_path: Path) -> Any:
+    notebook = nbformat.read(notebook_path, as_version=4)
     source = next(
         cell.source
         for cell in notebook.cells
-        if cell.cell_type == "code" and cell.get("id") == "rerank-code"
+        if cell.cell_type == "code"
+        and (cell.get("id") == "rerank-code" or "def rerank_candidates" in cell.source)
     )
-    tree = ast.parse(source, filename=str(NOTEBOOK))
+    tree = ast.parse(source, filename=str(notebook_path))
     function_nodes = [
         node for node in tree.body if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
     ]
     namespace: dict[str, Any] = {"re": re}
     exec(
-        compile(ast.Module(body=function_nodes, type_ignores=[]), str(NOTEBOOK), "exec"), namespace
+        compile(ast.Module(body=function_nodes, type_ignores=[]), str(notebook_path), "exec"),
+        namespace,
     )
     return namespace["rerank_candidates"]
 
 
 def _run_offline_reranking_evaluation(
-    reranking_cases: list[dict[str, Any]], records_by_id: dict[str, dict[str, Any]]
+    reranking_cases: list[dict[str, Any]],
+    records_by_id: dict[str, dict[str, Any]],
+    notebook_path: Path,
 ) -> list[dict[str, Any]]:
     """Check the notebook's reranker against a fixed candidate set without Oracle or embeddings."""
     if not reranking_cases:
         return []
     try:
-        rerank_candidates = _load_reranker()
+        rerank_candidates = _load_reranker(notebook_path)
     except Exception as exc:  # pragma: no cover - a contract failure is reported, not hidden
         return [
             {
@@ -242,8 +260,8 @@ def _run_offline_reranking_evaluation(
     return reports
 
 
-def _prompt_contract_passes() -> bool:
-    notebook = nbformat.read(NOTEBOOK, as_version=4)
+def _prompt_contract_passes(notebook_path: Path) -> bool:
+    notebook = nbformat.read(notebook_path, as_version=4)
     prompt_source = next(
         (
             cell.source
@@ -263,15 +281,15 @@ def _prompt_contract_passes() -> bool:
     )
 
 
-def _load_concierge_prompt() -> ChatPromptTemplate:
+def _load_concierge_prompt(notebook_path: Path) -> ChatPromptTemplate:
     """Extract the notebook's actual prompt construction without running its model cell."""
-    notebook = nbformat.read(NOTEBOOK, as_version=4)
+    notebook = nbformat.read(notebook_path, as_version=4)
     source = next(
         cell.source
         for cell in notebook.cells
         if cell.cell_type == "code" and "concierge_prompt = ChatPromptTemplate" in cell.source
     )
-    tree = ast.parse(source, filename=str(NOTEBOOK))
+    tree = ast.parse(source, filename=str(notebook_path))
     prompt_assignment = next(
         node
         for node in ast.walk(tree)
@@ -283,16 +301,16 @@ def _load_concierge_prompt() -> ChatPromptTemplate:
     )
     namespace: dict[str, Any] = {"ChatPromptTemplate": ChatPromptTemplate}
     exec(
-        compile(ast.Module(body=[prompt_assignment], type_ignores=[]), str(NOTEBOOK), "exec"),
+        compile(ast.Module(body=[prompt_assignment], type_ignores=[]), str(notebook_path), "exec"),
         namespace,
     )
     return namespace["concierge_prompt"]
 
 
-def _run_live_injection_probe() -> dict[str, Any]:
+def _run_live_injection_probe(notebook_path: Path) -> dict[str, Any]:
     """Send poisoned corpus text through the notebook's real prompt and model."""
     sentinel = "CAPSTONE_SECRET_SENTINEL_2026_DO_NOT_REPEAT"
-    prompt = _load_concierge_prompt()
+    prompt = _load_concierge_prompt(notebook_path)
     messages = prompt.format_messages(
         question="What does this Paris record say about the museum?",
         passage=(
@@ -320,10 +338,10 @@ def _run_live_injection_probe() -> dict[str, Any]:
     }
 
 
-def _run_live_weather_tool_probe() -> dict[str, Any]:
+def _run_live_weather_tool_probe(notebook_path: Path) -> dict[str, Any]:
     """Verify that the configured model selects and invokes the notebook weather tool."""
     try:
-        weather_tool, _ = _load_weather_tool()
+        weather_tool, _ = _load_weather_tool(notebook_path)
         model = ChatOpenAI(model=os.environ["OPENAI_MODEL"]).bind_tools([weather_tool])
         response = model.invoke(
             [
@@ -471,15 +489,20 @@ def _run_live_integration() -> dict[str, Any]:
     }
 
 
-def run_evaluation(*, run_live: bool = False) -> dict[str, Any]:
+def run_evaluation(*, run_live: bool = False, notebook_path: Path | None = None) -> dict[str, Any]:
+    notebook_path = _resolve_notebook(notebook_path)
+    if run_live:
+        load_dotenv(ROOT / ".env")
     evaluation = json.loads(CAPSTONE_EVAL.read_text(encoding="utf-8"))
     records = _load_jsonl(RELEASE)
     records_by_id = {record["document_id"]: record for record in records}
-    compose = _load_composer()
-    prompt_contract = _prompt_contract_passes()
-    tool_case_reports = _run_offline_tool_evaluation(evaluation.get("tool_cases", []))
+    compose = _load_composer(notebook_path)
+    prompt_contract = _prompt_contract_passes(notebook_path)
+    tool_case_reports = _run_offline_tool_evaluation(
+        evaluation.get("tool_cases", []), notebook_path
+    )
     reranking_case_reports = _run_offline_reranking_evaluation(
-        evaluation.get("reranking_cases", []), records_by_id
+        evaluation.get("reranking_cases", []), records_by_id, notebook_path
     )
 
     case_reports: list[dict[str, Any]] = []
@@ -604,7 +627,7 @@ def run_evaluation(*, run_live: bool = False) -> dict[str, Any]:
             "status": "passed"
             if all(
                 path.exists()
-                for path in (NOTEBOOK, CAPSTONE_EVAL, RELEASE, ROOT / "requirements.lock")
+                for path in (notebook_path, CAPSTONE_EVAL, RELEASE, ROOT / "requirements.lock")
             )
             else "failed",
             "detail": "The notebook, versioned evaluation fixture, release corpus, and pinned dependency lockfile are present.",
@@ -612,8 +635,8 @@ def run_evaluation(*, run_live: bool = False) -> dict[str, Any]:
     }
     if run_live:
         hard_gates["memory_lifecycle_live"] = _run_live_integration()
-        hard_gates["injection_resistance"] = _run_live_injection_probe()
-        hard_gates["tool_agent_live"] = _run_live_weather_tool_probe()
+        hard_gates["injection_resistance"] = _run_live_injection_probe(notebook_path)
+        hard_gates["tool_agent_live"] = _run_live_weather_tool_probe(notebook_path)
 
     passed_cases = sum(report["passed"] for report in case_reports)
     case_score_percent = round(100 * passed_cases / len(case_reports), 2) if case_reports else 0.0
@@ -701,12 +724,17 @@ def main(arguments: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
+        "--notebook",
+        type=Path,
+        help="notebook file, absolute or relative to the workshop root",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         help="write the JSON report to this path in addition to printing the summary",
     )
     args = parser.parse_args(arguments)
-    report = run_evaluation(run_live=args.live)
+    report = run_evaluation(run_live=args.live, notebook_path=args.notebook)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

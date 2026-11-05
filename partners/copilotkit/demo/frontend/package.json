@@ -22,10 +22,10 @@
     "@copilotkit/runtime-client-gql": "1.61.2",
     "@copilotkit/shared": "1.61.2",
     "hono": "^4.13.7",
-    "next": "16.3.6",
+    "next": "16.4.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "zod": "^3.25.75"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.0",

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="470" viewBox="0 0 1000 470" role="img" aria-labelledby="title desc">
+  <title id="title">Tool-using concierge flow</title>
+  <desc id="desc">A user question enters an agent harness. The harness can use the shared corpus, a current weather tool, and scoped user memory. Their outputs are kept separate at an answer policy that produces an answer, citations, live tool sources, and uncertainty.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4b5563"/>
+    </marker>
+    <style>
+      .title { font: 700 22px Arial, sans-serif; fill: #172033; }
+      .label { font: 700 16px Arial, sans-serif; fill: #172033; }
+      .detail { font: 14px Arial, sans-serif; fill: #374151; }
+      .arrow-label { font: 13px Arial, sans-serif; fill: #4b5563; }
+      .box { stroke-width: 2; rx: 14; }
+    </style>
+  </defs>
+
+  <text x="500" y="34" text-anchor="middle" class="title">Live tool evidence stays separate from corpus evidence</text>
+
+  <!-- Connectors are drawn before nodes; each branch has a clear lane. -->
+  <g fill="none" stroke="#4b5563" stroke-width="2.5" marker-end="url(#arrow)">
+    <line x1="500" y1="90" x2="500" y2="125"/>
+    <line x1="430" y1="205" x2="180" y2="270"/>
+    <line x1="500" y1="205" x2="500" y2="270"/>
+    <line x1="570" y1="205" x2="820" y2="270"/>
+    <line x1="180" y1="350" x2="430" y2="390"/>
+    <line x1="500" y1="350" x2="500" y2="390"/>
+    <line x1="820" y1="350" x2="570" y2="390"/>
+  </g>
+  <text x="340" y="242" text-anchor="middle" class="arrow-label">retrieved Documents</text>
+  <text x="520" y="242" text-anchor="start" class="arrow-label">typed result</text>
+  <text x="660" y="242" text-anchor="middle" class="arrow-label">scoped memory</text>
+
+  <g>
+    <rect x="350" y="50" width="300" height="40" class="box" fill="#e7f0ff" stroke="#4d78b8"/>
+    <text x="500" y="76" text-anchor="middle" class="label">User question</text>
+
+    <rect x="350" y="125" width="300" height="80" class="box" fill="#f0eaff" stroke="#7c5ab8"/>
+    <text x="500" y="158" text-anchor="middle" class="label">Agent harness</text>
+    <text x="500" y="181" text-anchor="middle" class="detail">model + system prompt + typed tools</text>
+
+    <rect x="55" y="270" width="250" height="80" class="box" fill="#fff4df" stroke="#c38a2e"/>
+    <text x="180" y="302" text-anchor="middle" class="label">Shared corpus</text>
+    <text x="180" y="326" text-anchor="middle" class="detail">RAG evidence + citation URL</text>
+
+    <rect x="375" y="270" width="250" height="80" class="box" fill="#e9f7ef" stroke="#4e9b6d"/>
+    <text x="500" y="302" text-anchor="middle" class="label">Weather tool</text>
+    <text x="500" y="326" text-anchor="middle" class="detail">current result + timestamp</text>
+
+    <rect x="695" y="270" width="250" height="80" class="box" fill="#e7f0ff" stroke="#4d78b8"/>
+    <text x="820" y="302" text-anchor="middle" class="label">User memory</text>
+    <text x="820" y="326" text-anchor="middle" class="detail">personalization, not proof</text>
+
+    <rect x="350" y="390" width="300" height="44" class="box" fill="#f0eaff" stroke="#7c5ab8"/>
+    <text x="500" y="418" text-anchor="middle" class="label">Answer policy</text>
+  </g>
+
+  <text x="500" y="460" text-anchor="middle" class="detail">answer · corpus citations · live tool sources · personalization · uncertainty</text>
+</svg>

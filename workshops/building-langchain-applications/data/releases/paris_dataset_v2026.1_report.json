@@ -1,0 +1,11 @@
+{
+  "corpus_name": "Paris Dataset",
+  "corpus_version": "2026.1",
+  "record_count": 40,
+  "dataset_hash": "sha256:6a24cbf99ba2fd9c1d4ef3258ebb27c61173ce66505fb327bcad3c5c1f91b339",
+  "source_count": 5,
+  "fixture_hash": "sha256:ae02bec05385c8fbefc50cc96ed54510a1d3829b96ffce1b8764cef5d71ad01d",
+  "failed_sources": [],
+  "excluded_sources": [],
+  "built_at": "2026-08-15T18:20:39.376311+00:00"
+}

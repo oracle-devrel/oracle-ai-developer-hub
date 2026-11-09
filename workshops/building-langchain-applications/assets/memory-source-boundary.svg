@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="400" viewBox="0 0 1000 400" role="img" aria-labelledby="title desc">
+  <title id="title">Corpus and user memory source boundary</title>
+  <desc id="desc">A shared Paris corpus and scoped user memory enter the answer policy through separate paths. The policy emits corpus citations for shared facts and personalization labels for user preferences; memory never becomes a corpus citation.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4b5563"/>
+    </marker>
+    <style>
+      .title { font: 700 22px Arial, sans-serif; fill: #172033; }
+      .label { font: 700 16px Arial, sans-serif; fill: #172033; }
+      .detail { font: 14px Arial, sans-serif; fill: #374151; }
+      .arrow-label { font: 13px Arial, sans-serif; fill: #4b5563; }
+      .box { stroke-width: 2; rx: 14; }
+    </style>
+  </defs>
+
+  <text x="500" y="34" text-anchor="middle" class="title">Evidence and personalization have different authority</text>
+
+  <!-- Connectors are drawn first so they remain behind the boxes. -->
+  <g fill="none" stroke="#4b5563" stroke-width="2.5" marker-end="url(#arrow)">
+    <line x1="275" y1="135" x2="390" y2="135"/>
+    <line x1="275" y1="285" x2="390" y2="285"/>
+    <line x1="610" y1="135" x2="725" y2="135"/>
+    <line x1="610" y1="285" x2="725" y2="285"/>
+  </g>
+  <text x="332" y="116" text-anchor="middle" class="arrow-label">supports facts</text>
+  <text x="332" y="266" text-anchor="middle" class="arrow-label">personalizes</text>
+  <text x="668" y="116" text-anchor="middle" class="arrow-label">citation</text>
+  <text x="668" y="266" text-anchor="middle" class="arrow-label">labelled context</text>
+
+  <g>
+    <rect x="45" y="85" width="230" height="100" class="box" fill="#fff4df" stroke="#c38a2e"/>
+    <text x="160" y="118" text-anchor="middle" class="label">Shared Paris corpus</text>
+    <text x="160" y="143" text-anchor="middle" class="detail">reviewed record + URL</text>
+    <text x="160" y="165" text-anchor="middle" class="detail">shared factual evidence</text>
+
+    <rect x="45" y="235" width="230" height="100" class="box" fill="#e7f0ff" stroke="#4d78b8"/>
+    <text x="160" y="268" text-anchor="middle" class="label">Scoped user memory</text>
+    <text x="160" y="293" text-anchor="middle" class="detail">preference + user ID</text>
+    <text x="160" y="315" text-anchor="middle" class="detail">personalization only</text>
+
+    <rect x="390" y="105" width="220" height="210" class="box" fill="#f0eaff" stroke="#7c5ab8"/>
+    <text x="500" y="165" text-anchor="middle" class="label">Answer policy</text>
+    <text x="500" y="193" text-anchor="middle" class="detail">validate grounding</text>
+    <text x="500" y="217" text-anchor="middle" class="detail">keep sources separate</text>
+    <text x="500" y="241" text-anchor="middle" class="detail">abstain when needed</text>
+
+    <rect x="725" y="85" width="230" height="100" class="box" fill="#e9f7ef" stroke="#4e9b6d"/>
+    <text x="840" y="118" text-anchor="middle" class="label">corpus_citations</text>
+    <text x="840" y="143" text-anchor="middle" class="detail">title + URL + chunk ID</text>
+    <text x="840" y="165" text-anchor="middle" class="detail">supports shared claims</text>
+
+    <rect x="725" y="235" width="230" height="100" class="box" fill="#e7f0ff" stroke="#4d78b8"/>
+    <text x="840" y="268" text-anchor="middle" class="label">personalization_used</text>
+    <text x="840" y="293" text-anchor="middle" class="detail">user preference label</text>
+    <text x="840" y="315" text-anchor="middle" class="detail">never a corpus citation</text>
+  </g>
+</svg>

@@ -1,0 +1,43 @@
+corpus_name: Paris Dataset
+corpus_version: "2026.1"
+fixture_path: data/fixtures/paris_dataset_v2026.1.jsonl
+fixture_sha256: sha256:ae02bec05385c8fbefc50cc96ed54510a1d3829b96ffce1b8764cef5d71ad01d
+release_path: data/releases/paris_dataset_v2026.1.jsonl
+release_sha256: sha256:6a24cbf99ba2fd9c1d4ef3258ebb27c61173ce66505fb327bcad3c5c1f91b339
+sources:
+  - source_id: paris-municipal-places
+    publisher: Ville de Paris
+    source_url: https://opendata.paris.fr/explore/dataset/lieux-municipaux/
+    license_basis: ODbL-1.0
+    license_url: https://opendatacommons.org/licenses/odbl/1-0/
+    attribution: "Ville de Paris — Lieux municipaux"
+    retrieved_at: "2026-08-15"
+  - source_id: paris-accessibility-routes
+    publisher: Ville de Paris
+    source_url: https://opendata.paris.fr/explore/dataset/parcoursqaa/
+    license_basis: ODbL-1.0
+    license_url: https://opendatacommons.org/licenses/odbl/1-0/
+    attribution: "Ville de Paris — Parcours prioritaire des Quartiers d’Accessibilité Augmentée"
+    retrieved_at: "2026-08-15"
+  - source_id: paris-accessibility-extension
+    publisher: Ville de Paris
+    source_url: https://opendata.paris.fr/explore/dataset/parcoursqaa_extension_et_nouveau/
+    license_basis: Etalab-2.0
+    license_url: https://www.etalab.gouv.fr/licence-ouverte-open-licence/
+    attribution: "Ville de Paris — Élargissement des Quartiers d’Accessibilité Augmentée"
+    retrieved_at: "2026-08-15"
+  - source_id: idfm-licensing
+    publisher: Île-de-France Mobilités
+    source_url: https://data.iledefrance-mobilites.fr/pages/licences/
+    license_basis: ODbL-1.0
+    license_url: https://opendatacommons.org/licenses/odbl/1-0/
+    attribution: "Île-de-France Mobilités — licences des données ouvertes"
+    retrieved_at: "2026-08-15"
+  - source_id: wikipedia-paris-reference
+    publisher: Wikimedia contributors
+    source_url: https://en.wikipedia.org/wiki/Wikipedia:Copyrights
+    source_url_prefix: https://en.wikipedia.org/wiki/
+    license_basis: CC-BY-SA-4.0
+    license_url: https://creativecommons.org/licenses/by-sa/4.0/
+    attribution: "Wikipedia contributors, CC BY-SA 4.0"
+    retrieved_at: "2026-08-15"

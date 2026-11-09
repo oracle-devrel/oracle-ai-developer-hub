@@ -1,6 +1,6 @@
 # Oracle AI Database + LangChain.js RAG Assistant
 
-Companion TypeScript application for the article [link](BLOG_URL).
+Companion TypeScript application for the article [link](https://blogs.oracle.com/developers/building-a-rag-application-with-langchain-js-and-oracle-ai-database).
 
 This sample shows JavaScript and TypeScript developers how to use LangChain.js with Oracle AI Database as the vector store. It is intentionally a runnable Node.js app, not a notebook: a React frontend calls a Hono API, the API runs a LangChain.js RAG workflow, and `@oracle/langchain-oracledb` stores and searches vectors in Oracle AI Database through `OracleVS`.
 

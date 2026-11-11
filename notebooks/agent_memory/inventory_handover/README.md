@@ -8,7 +8,7 @@ The same question comes back in every Part: a bare model, a transient tool-using
 finally an agent that recalls the decision from Oracle. You can see exactly which building block
 changes the evidence the model gets.
 
-It is a guided lab with 17 TODOs (this is the complete edition, with the worked code). It uses
+It is a guided lab with 17 TODOs, in two editions: the student edition leaves the TODOs for you, with expandable hints, and the complete edition has the worked code. It uses
 Oracle AI Agent Memory (OAMP) 26.8, Oracle AI Database 26ai with in-database ONNX embeddings,
 LangChain, and Grok (`xai.grok-4.3`) on OCI Generative AI. Allow 150–180 minutes.
 
@@ -29,13 +29,14 @@ every model call's prompt and reply, and the review gate asks you to approve the
 
 ## Files
 
-| Path                                        | What it is                                                 |
-| ------------------------------------------- | ---------------------------------------------------------- |
-| `inventory_handover_agent_memory_oci.ipynb` | the notebook, saved with the outputs of a full run         |
-| `inventory_data.json`                       | the case                                                   |
-| `diagrams/`                                 | the notebook's diagrams (SVG)                              |
-| `requirements.txt`                          | OAMP 26.8.0 and the versions the lab pins                  |
-| `.env.example`                              | settings; copy to `.env` (the appbook reads the same file) |
+| Path                                                | What it is                                                            |
+| --------------------------------------------------- | --------------------------------------------------------------------- |
+| `inventory_handover_agent_memory_oci.ipynb`         | the complete notebook, saved with the outputs of a full run           |
+| `inventory_handover_agent_memory_oci_student.ipynb` | the student edition: the 17 TODOs left for you, with expandable hints |
+| `inventory_data.json`                               | the case                                                              |
+| `diagrams/`                                         | the notebook's diagrams (SVG)                                         |
+| `requirements.txt`                                  | OAMP 26.8.0 and the versions the lab pins                             |
+| `.env.example`                                      | settings; copy to `.env` (the appbook reads the same file)            |
 
 ## Run
 
@@ -49,7 +50,7 @@ cd notebooks/agent_memory/inventory_handover
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt jupyterlab pandas oci-openai
 cp .env.example .env               # then set DBPASSWORD and OCI_GENAI_API_KEY (or COMPARTMENT_OCID)
-jupyter lab inventory_handover_agent_memory_oci.ipynb
+jupyter lab inventory_handover_agent_memory_oci_student.ipynb   # or the complete notebook
 ```
 
 `oci-openai` is only needed for OCI config-file signing; an API key works without it.

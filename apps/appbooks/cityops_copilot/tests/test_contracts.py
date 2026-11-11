@@ -64,6 +64,12 @@ def test_notebook_and_appbook_link_each_other():
     )
     assert config.NOTEBOOK_URL in (APPBOOK / "frontend/app.js").read_text()
     assert config.NOTEBOOK_FILE in (APPBOOK / "README.md").read_text()
+    student = config.NOTEBOOK_DIR / config.NOTEBOOK_FILE.replace(".ipynb", "_student.ipynb")
+    assert student.name in notebook  # the complete edition links to the student edition, and back
+    assert (
+        config.NOTEBOOK_FILE in student.read_text()
+        and "apps/appbooks/cityops_copilot" in student.read_text()
+    )
 
 
 def test_defaults_match_the_notebook(monkeypatch):

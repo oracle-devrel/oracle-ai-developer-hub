@@ -25,13 +25,14 @@ explorer for every row it writes.
 
 ## Files
 
-| Path                                        | What it is                                                 |
-| ------------------------------------------- | ---------------------------------------------------------- |
-| `cityops_copilot_agent_memory_ollama.ipynb` | the notebook, saved with the outputs of a full run         |
-| `data/`                                     | `maintenance_logs.json` and `inspection_reports.json`      |
-| `diagrams/`                                 | the notebook's diagrams (SVG, with their Mermaid source)   |
-| `requirements.txt`                          | the package versions the notebook was run with             |
-| `.env.example`                              | settings; copy to `.env` (the appbook reads the same file) |
+| Path                                                | What it is                                                                   |
+| --------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `cityops_copilot_agent_memory_ollama.ipynb`         | the complete notebook, saved with the outputs of a full run                  |
+| `cityops_copilot_agent_memory_ollama_student.ipynb` | the student edition: the six TODOs left for you, each with a checkpoint cell |
+| `data/`                                             | `maintenance_logs.json` and `inspection_reports.json`                        |
+| `diagrams/`                                         | the notebook's diagrams (SVG, with their Mermaid source)                     |
+| `requirements.txt`                                  | the package versions the notebook was run with                               |
+| `.env.example`                                      | settings; copy to `.env` (the appbook reads the same file)                   |
 
 ## Run
 
@@ -41,7 +42,7 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env               # then set DBPASSWORD
 ollama pull llama3.2
-jupyter lab cityops_copilot_agent_memory_ollama.ipynb
+jupyter lab cityops_copilot_agent_memory_ollama_student.ipynb   # or the complete notebook
 ```
 
 ### Oracle AI Database

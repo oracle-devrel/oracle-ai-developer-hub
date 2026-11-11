@@ -1,0 +1,20 @@
+{
+  "name": "@oracle-mem0-ts-memory/scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@oracle-mem0-ts-memory/core": "workspace:*",
+    "@oracle-mem0-ts-memory/db": "workspace:*",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.6"
+  }
+}

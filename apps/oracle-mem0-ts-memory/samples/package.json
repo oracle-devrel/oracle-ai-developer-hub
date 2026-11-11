@@ -1,0 +1,9 @@
+{
+  "name": "@oracle-mem0-ts-memory/samples",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./demo-users.ts"
+  }
+}

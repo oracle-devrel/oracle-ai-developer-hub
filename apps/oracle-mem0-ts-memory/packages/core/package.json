@@ -1,0 +1,22 @@
+{
+  "name": "@oracle-mem0-ts-memory/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@oracle-mem0-ts-memory/db": "workspace:*",
+    "@oracle-mem0-ts-memory/samples": "workspace:*",
+    "@oracle-mem0-ts-memory/shared": "workspace:*",
+    "better-sqlite3": "^12.6.2",
+    "mem0ai": "^3.3.1",
+    "openai": "^4.93.0",
+    "oracledb": "^7.0.0"
+  },
+  "devDependencies": { "@types/better-sqlite3": "^7.6.13", "@types/node": "^22.10.2", "typescript": "^5.9.3", "vitest": "^3.2.6" }
+}

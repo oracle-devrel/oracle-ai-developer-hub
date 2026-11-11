@@ -9,7 +9,7 @@
     "preview": "remotion preview"
   },
   "dependencies": {
-    "@remotion/cli": "4.0.503",
+    "@remotion/cli": "4.0.540",
     "@remotion/google-fonts": "4.0.486",
     "@remotion/transitions": "4.0.486",
     "react": "^19.0.0",

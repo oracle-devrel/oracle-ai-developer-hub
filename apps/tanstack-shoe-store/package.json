@@ -30,7 +30,7 @@
     "react-dom": "^19.2.0",
     "streamdown": "^2.3.0",
     "tailwindcss": "^4.1.18",
-    "zod": "^4.3.6"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
@@ -42,7 +42,7 @@
     "@vitejs/plugin-react": "^5.1.4",
     "jsdom": "^28.1.0",
     "typescript": "^5.7.2",
-    "vite": "^7.3.2",
+    "vite": "^7.3.7",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.1.11"
   },

@@ -1,10 +1,31 @@
 # Oracle AI Database + LangChain.js RAG Assistant
 
-Companion TypeScript application for the article [_Build a LangChain.js RAG Assistant with Oracle AI Database_](./docs/article.md).
+Companion TypeScript application for the article [link](https://blogs.oracle.com/developers/building-a-rag-application-with-langchain-js-and-oracle-ai-database).
 
 This sample shows JavaScript and TypeScript developers how to use LangChain.js with Oracle AI Database as the vector store. It is intentionally a runnable Node.js app, not a notebook: a React frontend calls a Hono API, the API runs a LangChain.js RAG workflow, and `@oracle/langchain-oracledb` stores and searches vectors in Oracle AI Database through `OracleVS`.
 
 The sample answers developer questions about Oracle AI Database, OracleVS, metadata filters, MMR retrieval, vector indexes, and common Oracle connection errors from a seeded markdown knowledge base.
+
+## Application screenshots
+
+The application makes the retrieval workflow visible: developers can choose a retrieval mode, inspect the execution trace and grounded evidence, and examine the OracleVS table and vector index used by Oracle AI Database.
+
+<p align="center">
+  <img src="docs/screenshots/live-assistant-controls.png" alt="LangChain.js RAG assistant with retrieval controls, metadata filtering, and execution trace" width="720" />
+</p>
+<p align="center"><em>Live Assistant view with retrieval controls, a metadata filter, and the RAG execution trace.</em></p>
+<br />
+
+<p align="center">
+  <img src="docs/screenshots/grounded-answer-evidence.png" alt="Grounded answer with retrieved evidence, source citations, and distance scores" width="720" />
+</p>
+<p align="center"><em>Grounded answer alongside the retrieved evidence and source citations used to produce it.</em></p>
+<br />
+
+<p align="center">
+  <img src="docs/screenshots/oracle-table.png" alt="OracleVS table, vector index, columns, and query vector preview in Oracle AI Database" width="720" />
+</p>
+<p align="center"><em>Oracle Table view showing the OracleVS table, vector index, stored columns, and query-vector preview.</em></p>
 
 ## Pipeline
 
@@ -155,7 +176,7 @@ docs/           Long-form article, local development guide, diagrams, and screen
 
 ## Docs
 
-- [Article: Build a LangChain.js RAG Assistant with Oracle AI Database](./docs/article.md)
+- [Article source and detailed implementation notes](./docs/article.md)
 - [Local development](./docs/local-development.md)
 
 ## What Is Intentionally Not Here

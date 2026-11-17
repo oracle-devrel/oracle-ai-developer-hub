@@ -1,5 +1,4 @@
 import type { DocType } from "@idp/shared";
-import { zodToJsonSchema } from "zod-to-json-schema";
 import { z } from "zod";
 import { invoiceFields } from "./invoice.js";
 import { purchaseOrderFields } from "./purchase-order.js";
@@ -26,10 +25,7 @@ export function getFieldsSchema<T extends ExtractableDocType>(
 }
 
 export function getJsonSchemaForType(docType: ExtractableDocType): object {
-  return zodToJsonSchema(fieldsSchemaByType[docType], {
-    target: "jsonSchema7",
-    $refStrategy: "none",
-  });
+  return z.toJSONSchema(fieldsSchemaByType[docType], { target: "draft-7" });
 }
 
 export function isExtractable(docType: DocType): docType is ExtractableDocType {

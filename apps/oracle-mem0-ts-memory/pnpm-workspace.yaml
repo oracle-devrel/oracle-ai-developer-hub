@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - packages/*
+  - services/*
+  - scripts
+  - samples
+autoInstallPeers: false
+allowBuilds:
+  better-sqlite3: true
+  esbuild: true
+  oracledb: true

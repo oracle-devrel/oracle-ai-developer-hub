@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+<title id="title">Current manual inventory replenishment process</title>
+<desc id="desc">A planner checks low stock and drafts a reorder request. A purchasing manager approves or asks for a revision. The planner records the approved quantity in a spreadsheet or message. At shift change another planner must find those notes and verify the latest decision before a buyer can submit an order. The flow contains only existing human work, not agents or AI.</desc>
+<defs>
+<marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto-start-reverse"><path d="M0 0 L9 4.5 L0 9Z" fill="#536a80"/></marker>
+<g id="person" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="16" cy="8" r="6"/><path d="M3 32v-5c0-12 26-12 26 0v5M10 32v-8m12 8v-8"/></g>
+<g id="screen" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="1" y="2" width="31" height="22" rx="3"/><path d="M8 31h18m-10-7v7M6 9h20M6 15h12"/></g>
+<g id="box" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M2 9 17 2 32 9v19l-15 7-15-7Z M2 9l15 7 15-7M17 16v19M10 5l15 7v9"/></g>
+<g id="document" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 1h18l8 8v25H5ZM23 1v9h8M11 16h14M11 22h14M11 28h9"/></g>
+<g id="check" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M17 1 31 7v11c0 9-14 16-14 16S3 27 3 18V7Z"/><path d="m9 17 5 5 11-12"/></g>
+<g id="database" fill="none" stroke="currentColor" stroke-width="2.4"><ellipse cx="17" cy="6" rx="15" ry="5"/><path d="M2 6v23c0 7 30 7 30 0V6M2 17c0 7 30 7 30 0"/></g>
+<g id="chip" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="7" y="7" width="22" height="22" rx="3"/><path d="M12 0v7m12-7v7M12 29v7m12-7v7M0 12h7m-7 12h7m22-12h7m-7 12h7"/><rect x="13" y="13" width="10" height="10" rx="1"/></g>
+<g id="chat" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 3h30v23H15l-9 8v-8H3Z"/><path d="M9 10h18M9 17h12"/></g>
+<g id="stack" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m2 9 16-8 16 8-16 8ZM2 18l16 8 16-8M2 27l16 8 16-8"/></g>
+</defs>
+<rect width="1200" height="760" rx="18" fill="#f5f8fc"/>
+<g font-family="Arial,Helvetica,sans-serif" fill="#183247">
+<text x="35" y="45" font-size="27" font-weight="700">Today: a restock decision travels across people and documents</text>
+<text x="35" y="78" font-size="17" fill="#4c6478">Everyday Goods · ceramic mugs · SKU-MUG-01 · a normal shift handover</text>
+<g stroke="#536a80" stroke-width="2.2" fill="none" marker-end="url(#arrow)">
+<path d="M255 200H320"/><path d="M540 200H590"/>
+<path d="M770 200H930"/>
+<path d="M680 260V350H430V266"/>
+<path d="M1040 266V428"/>
+<path d="M930 490H835"/><path d="M605 490H510"/>
+</g>
+<g font-size="15" fill="#4c6478">
+<text x="790" y="183">Yes · approved</text>
+<text x="447" y="338">No · revise quantity</text>
+<text x="1058" y="355">shift changes</text>
+<text x="847" y="475">find notes</text>
+<text x="520" y="475">verify first</text>
+</g>
+<rect x="35" y="135" width="220" height="131" rx="12" fill="#fff" stroke="#adbdcb"/>
+<use href="#box" x="53" y="151" color="#536a80"/>
+<text x="99" y="176" font-size="20" font-weight="700">1. Check stock</text>
+<text x="54" y="213" font-size="16">Planner checks stock</text>
+<text x="54" y="239" font-size="16">Mugs are selling quickly</text>
+<rect x="320" y="135" width="220" height="131" rx="12" fill="#fff" stroke="#adbdcb"/>
+<use href="#document" x="337" y="151" color="#536a80"/>
+<text x="382" y="176" font-size="20" font-weight="700">2. Draft request</text>
+<text x="339" y="213" font-size="16">Propose 80 more mugs</text>
+<text x="339" y="239" font-size="16">Request ID: PO-1048</text>
+<path d="m680 135 90 65-90 65-90-65Z" fill="#fff3db" stroke="#c39942" stroke-width="2"/>
+<text x="680" y="187" text-anchor="middle" font-size="17" font-weight="700">3. Manager</text>
+<text x="680" y="212" text-anchor="middle" font-size="17" font-weight="700">approves?</text>
+<rect x="930" y="135" width="235" height="131" rx="12" fill="#eef7f3" stroke="#79a493"/>
+<use href="#check" x="947" y="151" color="#327567"/>
+<text x="992" y="176" font-size="20" font-weight="700">4. Log approval</text>
+<text x="949" y="213" font-size="16">Approved: 120, not 80</text>
+<text x="949" y="239" font-size="16">Update sheet / email / chat</text>
+<rect x="930" y="428" width="235" height="136" rx="12" fill="#fff" stroke="#adbdcb"/>
+<use href="#person" x="947" y="445" color="#536a80"/>
+<text x="992" y="471" font-size="20" font-weight="700">5. Shift change</text>
+<text x="949" y="508" font-size="16">“How many were approved?”</text>
+<text x="949" y="535" font-size="16">“Has the order been sent?”</text>
+<rect x="605" y="428" width="230" height="136" rx="12" fill="#fff" stroke="#adbdcb"/>
+<use href="#screen" x="622" y="445" color="#536a80"/>
+<text x="667" y="471" font-size="20" font-weight="700">6. Reconstruct</text>
+<text x="624" y="508" font-size="16">Read updates and approval</text>
+<text x="624" y="535" font-size="16">Find the next action owner</text>
+<rect x="280" y="428" width="230" height="136" rx="12" fill="#eef7f3" stroke="#79a493"/>
+<use href="#person" x="297" y="445" color="#327567"/>
+<text x="342" y="471" font-size="20" font-weight="700">7. Future action</text>
+<text x="299" y="508" font-size="16">Buyer submits order</text>
+<text x="299" y="535" font-size="16">Not done in this story</text>
+<rect x="35" y="612" width="1130" height="104" rx="12" fill="#fff3db" stroke="#d7bb80"/>
+<text x="57" y="644" font-size="20" font-weight="700">Where work gets repeated</text>
+<text x="57" y="675" font-size="17">The old 80-mug proposal and later 120-mug approval live in different notes.</text>
+<text x="57" y="699" font-size="16">The next planner must find both, confirm what is current, and check whether anyone actually sent an order.</text>
+</g></svg>

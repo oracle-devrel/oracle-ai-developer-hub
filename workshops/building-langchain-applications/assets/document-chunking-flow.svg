@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="300" viewBox="0 0 1100 300" role="img" aria-labelledby="title desc">
+  <title id="title">Document chunking flow</title>
+  <desc id="desc">A reviewed Paris record becomes a LangChain Document, a text splitter divides it into chunks, and each chunk keeps provenance metadata before embedding and storage.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4b5563"/>
+    </marker>
+    <style>
+      .title { font: 700 22px Arial, sans-serif; fill: #172033; }
+      .label { font: 700 16px Arial, sans-serif; fill: #172033; }
+      .detail { font: 14px Arial, sans-serif; fill: #374151; }
+      .arrow-label { font: 13px Arial, sans-serif; fill: #4b5563; }
+      .box { stroke-width: 2; rx: 14; }
+    </style>
+  </defs>
+
+  <text x="550" y="34" text-anchor="middle" class="title">Chunking keeps text searchable without losing its source</text>
+
+  <!-- Draw connectors before boxes so arrowheads remain behind node borders. -->
+  <g fill="none" stroke="#4b5563" stroke-width="2.5" marker-end="url(#arrow)">
+    <line x1="195" y1="145" x2="245" y2="145"/>
+    <line x1="440" y1="145" x2="490" y2="145"/>
+    <line x1="685" y1="145" x2="735" y2="145"/>
+  </g>
+  <text x="220" y="126" text-anchor="middle" class="arrow-label">wrap</text>
+  <text x="465" y="126" text-anchor="middle" class="arrow-label">split</text>
+  <text x="710" y="126" text-anchor="middle" class="arrow-label">embed</text>
+
+  <g>
+    <rect x="35" y="95" width="160" height="100" class="box" fill="#fff4df" stroke="#c38a2e"/>
+    <text x="115" y="128" text-anchor="middle" class="label">Release record</text>
+    <text x="115" y="153" text-anchor="middle" class="detail">body + source URL</text>
+    <text x="115" y="174" text-anchor="middle" class="detail">reviewed metadata</text>
+
+    <rect x="245" y="95" width="195" height="100" class="box" fill="#e7f0ff" stroke="#4d78b8"/>
+    <text x="342" y="128" text-anchor="middle" class="label">LangChain Document</text>
+    <text x="342" y="153" text-anchor="middle" class="detail">page_content + metadata</text>
+    <text x="342" y="174" text-anchor="middle" class="detail">one retrieval unit</text>
+
+    <rect x="490" y="95" width="195" height="100" class="box" fill="#f0eaff" stroke="#7c5ab8"/>
+    <text x="587" y="128" text-anchor="middle" class="label">Text splitter</text>
+    <text x="587" y="153" text-anchor="middle" class="detail">chunk_size + overlap</text>
+    <text x="587" y="174" text-anchor="middle" class="detail">stable chunk_id added</text>
+
+    <rect x="735" y="95" width="195" height="100" class="box" fill="#e9f7ef" stroke="#4e9b6d"/>
+    <text x="832" y="128" text-anchor="middle" class="label">Searchable chunk</text>
+    <text x="832" y="153" text-anchor="middle" class="detail">same provenance</text>
+    <text x="832" y="174" text-anchor="middle" class="detail">ready for embeddings</text>
+  </g>
+
+  <rect x="275" y="235" width="550" height="38" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="550" y="259" text-anchor="middle" class="detail">Overlap gives nearby chunks a little shared context; it does not replace good metadata.</text>
+</svg>

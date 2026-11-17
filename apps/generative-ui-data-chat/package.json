@@ -21,7 +21,7 @@
     "react-dom": "^19.0.0",
     "recharts": "^2.15.0",
     "server-only": "^0.0.1",
-    "zod": "^3.24.1"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",

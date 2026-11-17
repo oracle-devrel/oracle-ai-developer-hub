@@ -28,7 +28,7 @@ export const DataChatPlanSchema = z.object({
   componentTypes: z.array(UiComponentTypeSchema).min(1).max(6)
 });
 
-const ChartDatumSchema = z.record(z.union([z.string(), z.number()]));
+const ChartDatumSchema = z.record(z.string(), z.union([z.string(), z.number()]));
 
 const LineChartSchema = z.object({
   type: z.literal("lineChart"),
@@ -85,7 +85,7 @@ const ComparisonTableSchema = z.object({
       align: z.enum(["left", "right"]).optional()
     })
   ),
-  rows: z.array(z.record(z.union([z.string(), z.number(), z.null()])))
+  rows: z.array(z.record(z.string(), z.union([z.string(), z.number(), z.null()])))
 });
 
 const KpiCardSchema = z.object({

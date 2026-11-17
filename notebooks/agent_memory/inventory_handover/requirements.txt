@@ -9,7 +9,7 @@
 # OAMP 26.8.0 needs litellm>=1.95.1, aiohttp>=3.14.1 and cryptography>=50,
 # and cryptography>=50 needs oci>=2.188. The lab adds the oracledb, LangChain
 # and python-dotenv pins.
-aiohttp==3.14.4
+aiohttp==3.14.5
 asn1crypto==1.5.1
 crc32c==2.8
 cryptography==50.0.2
@@ -18,7 +18,7 @@ langchain-core==1.6.10
 langchain-openai==1.7.2
 langgraph==1.2.14
 langgraph-sdk==0.4.9
-litellm==1.100.4
+litellm==1.109.1
 oci==2.188.0
 openai==2.54.0
 oracleagentmemory==26.8.0

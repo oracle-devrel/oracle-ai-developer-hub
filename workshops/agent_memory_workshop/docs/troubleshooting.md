@@ -146,6 +146,27 @@ Do not commit this to git.
 
 ---
 
+### OCI GenAI returns `Authorization failed or requested resource not found`
+
+**Symptom:** A model call fails with:
+
+```text
+Error code: 404 - {'code': '404', 'message': 'Authorization failed or requested resource not found.'}
+```
+
+**Cause:** The OCI Generative AI API key cannot access the requested model in the configured region, or `OCI_GENAI_ENDPOINT` points at the service root instead of the OpenAI-compatible path.
+
+**Fix:** Confirm the endpoint and model access:
+
+```bash
+export OCI_GENAI_ENDPOINT=https://inference.generativeai.us-phoenix-1.oci.oraclecloud.com/openai/v1
+export OCI_GENAI_API_KEY=<your GenAI API key secret>
+```
+
+If your endpoint omits `/openai/v1`, the notebook appends it automatically. If the error remains, check that the API key was created in the same region, the key has an IAM policy that allows Generative AI use, and the selected model is available to your tenancy.
+
+---
+
 ### `ipywidgets` rendering error in output cell
 
 **Symptom:** A cell output shows `Error rendering output item using jupyter-ipywidget-renderer`.
@@ -204,6 +225,62 @@ If it shows `NOT SET`, set it manually for this session:
 ```python
 os.environ["TAVILY_API_KEY"] = "tvly-..."
 ```
+
+---
+
+## Observability and LangSmith Issues
+
+### LangSmith project does not open
+
+**Symptom:** You cannot find the `agent-memory-workshop` project in LangSmith.
+
+**Cause:** The notebook has not sent a trace yet, or it is using a different `LANGSMITH_PROJECT` value.
+
+**Fix:**
+
+```python
+import os
+
+print(os.environ.get("LANGSMITH_PROJECT", "agent-memory-workshop"))
+```
+
+Rerun the Part 7 LangSmith configuration cell and one observed agent call. Then open `https://smith.langchain.com` and select the same project name.
+
+---
+
+### No traces appear in LangSmith
+
+**Symptom:** Part 7 runs, but LangSmith has no new `agent.run` trace.
+
+**Cause:** `LANGSMITH_API_KEY` is missing, `LANGSMITH_TRACING` is not enabled, or the notebook is using a different LangSmith workspace/project than expected.
+
+**Fix:** Confirm the LangSmith environment variables, then rerun the Part 7 configuration cell and observed agent call:
+
+```python
+import os
+
+print("LANGSMITH_API_KEY:", "SET" if os.environ.get("LANGSMITH_API_KEY") else "NOT SET")
+print("LANGSMITH_TRACING:", os.environ.get("LANGSMITH_TRACING", "NOT SET"))
+print("LANGSMITH_PROJECT:", os.environ.get("LANGSMITH_PROJECT", "agent-memory-workshop"))
+```
+
+If the key is missing, set it in your shell before launching Jupyter:
+
+```bash
+export LANGSMITH_API_KEY="lsv2_..."
+export LANGSMITH_TRACING=true
+export LANGSMITH_PROJECT=agent-memory-workshop
+```
+
+---
+
+### Traces contain too much information
+
+**Symptom:** You see prompt text, tool output, or document text in trace inputs, outputs, or metadata.
+
+**Cause:** A custom trace run captured raw content.
+
+**Fix:** Use lengths and counts instead of content. For example, record `query.length`, `response.length`, `memory.result_count`, and `tool.result_length`. Do not record API keys, raw prompts, retrieved documents, full Tavily output, or database connection strings.
 
 ---
 

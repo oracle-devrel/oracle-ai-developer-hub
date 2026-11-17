@@ -1,0 +1,27 @@
+# Access-control seed — the identities, group grants, and MCP tokens for the
+# security demo. Mock data, real enforcement. This mirrors the whiteboard from
+# the AI Exploration Hour: three domain verticals (ops / marketing / sales),
+# and people whose personal agents connect to the team brain over MCP with a
+# token that resolves to exactly the domains they're allowed to see.
+#
+# Seed it:   team-brain access seed        (prints the tokens for .mcp.json)
+# Tokens are stored HASHED; the plaintext below is only so the demo can wire a
+# token into a client. Rotate/replace for anything real.
+
+groups:
+  ops: { domains: [ops] }
+  marketing: { domains: [marketing] }
+  sales: { domains: [sales] }
+  leadership: { all_domains: true } # sees every domain, including new ones
+
+principals:
+  jeff: { display_name: "Jeff — Ops", groups: [ops] }
+  julia: { display_name: "Julia — Marketing", groups: [marketing, ops] } # cross-domain grant
+  sam: { display_name: "Sam — Sales", groups: [sales] }
+  brian: { display_name: "Brian — CEO", groups: [leadership] }
+
+tokens:
+  jeff: "tb_ops_jeff_7f3a9c21"
+  julia: "tb_mkt_julia_5b8e0d44"
+  sam: "tb_sales_sam_1a6f2e90"
+  brian: "tb_exec_brian_9d4c7b13"

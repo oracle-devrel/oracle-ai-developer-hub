@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OraViz MCP — compact Oracle answers, charts included</title>
+  <meta name="description" content="A minimal, visualization-first MCP server for Oracle AI Database: bounded results, honest truncation, charts as image content, and 53.3% fewer workflow tokens than the official SQLcl MCP server.">
+  <link rel="icon" type="image/svg+xml" href="assets/oraviz.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <img src="assets/oraviz.svg" alt="" width="30" height="30">
+      <span class="brand-name">OraViz</span>
+      <span class="brand-tag">MCP</span>
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#query">Query demo</a>
+      <a href="#benchmarks">Benchmarks</a>
+      <a href="#tools">Tools</a>
+      <a href="#start">Quick start</a>
+    </nav>
+    <a class="nav-cta" href="https://github.com/jasperan/oraviz-mcp" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" id="top">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow reveal"><span class="dot" aria-hidden="true"></span> MCP server for Oracle AI Database 26ai</p>
+        <h1 class="reveal" style="--i:1">Ask your Oracle data.<br>Get a compact table, a chart, <em>and a token bill you can plan for.</em></h1>
+        <p class="lede reveal" style="--i:2">
+          OraViz is a minimal, visualization-first MCP server: seven read-oriented tools and a
+          context contract on every result — preview caps with honest truncation markers, cells
+          bounded at 500 characters, and charts rendered as MCP image content. Benchmarked against
+          the official SQLcl MCP server on the same Oracle 26ai Free container before security hardening.
+        </p>
+        <p class="start-note">Measurements and charts are historical snapshots. Current deployment boundaries,
+          authentication requirements, and limits are documented in
+          <a href="https://github.com/jasperan/oraviz-mcp/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+        <div class="cta-row reveal" style="--i:3">
+          <a class="btn primary" href="#query">See the query, end to end</a>
+          <a class="btn ghost" href="#benchmarks">Benchmarks</a>
+        </div>
+        <dl class="hero-stats reveal" style="--i:4">
+          <div>
+            <dt>53.3%</dt>
+            <dd>fewer tokens for the five-question workflow, schemas included</dd>
+          </div>
+          <div>
+            <dt>862 <span class="unit">vs 2,139</span></dt>
+            <dd>tokens of tool schemas, read once per session</dd>
+          </div>
+          <div>
+            <dt>123 <span class="unit">tok + PNG</span></dt>
+            <dd>text cost of answering the comparison question with a chart</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="hero-panel">
+        <div class="window reveal" style="--i:2">
+          <div class="window-bar" aria-hidden="true">
+            <span></span><span></span><span></span>
+            <span class="window-title">oraviz-mcp · stdio</span>
+          </div>
+          <pre class="code code-dark"><code>4 row(s) | columns: REGION, REVENUE
+
+<span class="hr">| REGION | REVENUE  |</span>
+<span class="hr">|--------|----------|</span>
+| East   | 573932   |
+| North  | 502897   |
+| South  | 432190   |
+| West   | 360759   |</code></pre>
+          <div class="window-foot"><span class="pulse" aria-hidden="true"></span> context contract active · preview cap 25 rows · cells ≤ 500 chars</div>
+        </div>
+        <figure class="hero-fig reveal" style="--i:3">
+          <img src="images/example-bar.png" width="1280" height="640"
+               alt="Bar chart titled 'Total revenue by region (12 months)' rendered by the create_chart tool from live Oracle data, East leading with 573,932.">
+          <figcaption>Rendered by <code>create_chart</code> from the query below — returned as an image content block plus a short text preview.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= QUERY DEMO ================= -->
+  <section class="section" id="query">
+    <div class="section-head reveal">
+      <p class="kicker">01 — The demo</p>
+      <h2>One query, end to end</h2>
+      <p class="section-lede">
+        Every step below is a real exchange between an MCP client and OraViz against an Oracle AI
+        Database 26ai Free container: the SQL the agent wrote, the result it received, and the chart
+        it rendered.
+      </p>
+    </div>
+
+    <article class="step reveal">
+      <div class="step-meta">
+        <span class="step-num">01</span>
+        <h3>Ask in SQL</h3>
+        <p>The agent composes one <code>SELECT</code>/<code>WITH</code>. A conservative allowlist rejects unreviewed function calls with parentheses, but bare parameterless routines and routines inside views/synonyms can evade it. Use a dedicated account with object-level <code>READ</code> grants and review inherited/<code>PUBLIC</code> execution privileges. The default timeout is 60 seconds per database round trip, not per statement or tool call.</p>
+      </div>
+      <div class="step-body">
+        <pre class="code code-dark"><code>SELECT region, SUM(revenue) AS total_revenue
+FROM oraviz.sales_demo
+GROUP BY region
+ORDER BY total_revenue DESC;</code></pre>
+      </div>
+    </article>
+
+    <article class="step reveal">
+      <div class="step-meta">
+        <span class="step-num">02</span>
+        <h3>Read a bounded result</h3>
+        <p>One metadata line, one header, four rows. The preview cap and cell limit mean the cost of this result is the same whether the table holds 96 rows or 96 million.</p>
+      </div>
+      <div class="step-body">
+        <pre class="code"><code>4 row(s) | columns: REGION, REVENUE
+
+| REGION | REVENUE |
+|--------|---------|
+| East   | 573932  |
+| North  | 502897  |
+| South  | 432190  |
+| West   | 360759  |</code></pre>
+      </div>
+    </article>
+
+    <article class="step reveal">
+      <div class="step-meta">
+        <span class="step-num">03</span>
+        <h3>See the answer</h3>
+        <p><code>create_chart</code> runs the same query and returns the PNG as image content together with a five-row preview, so text-only clients still receive the essentials.</p>
+      </div>
+      <div class="step-body">
+        <img class="demo-chart" src="images/example-bar.png" width="1280" height="640"
+             alt="The same revenue query rendered as a bar chart: East 573,932; North 502,897; South 432,190; West 360,759.">
+      </div>
+    </article>
+
+    <article class="step reveal">
+      <div class="step-meta">
+        <span class="step-num">04</span>
+        <h3>Project embeddings</h3>
+        <p>A <code>vector</code> chart sends the first VECTOR column through PCA and returns a 2D scatter, so 26ai embeddings can be explored without leaving SQL.</p>
+      </div>
+      <div class="step-body">
+        <img class="demo-chart" src="images/example-vector.png" width="1247" height="687"
+             alt="Six product embeddings projected to two PCA dimensions: footwear clusters left, outerwear at the bottom, camping at the right.">
+      </div>
+    </article>
+  </section>
+
+  <!-- ================= BENCHMARKS ================= -->
+  <section class="section section-alt" id="benchmarks">
+    <div class="section-head reveal">
+      <p class="kicker">02 — The measurements</p>
+      <h2>53.3% fewer tokens than the official MCP server</h2>
+      <p class="section-lede">
+        Identical questions to OraViz and to the official Oracle SQLcl 26.1 MCP server
+        (<code>sql -mcp</code>), same database, same data. Counted with <code>tiktoken</code>:
+        tool schemas read once per session, plus every tool result needed to answer.
+      </p>
+      <p class="start-note">Historical results, unchanged since the original experiment. Current schemas,
+        limits, and LOB behavior differ; these values have not been recomputed for the hardened server.</p>
+    </div>
+
+    <div class="bench-grid">
+      <div class="bench-hero reveal">
+        <span class="bench-big">−53.3%</span>
+        <p>workflow tokens, schemas included — 2,337 vs 5,006. The savings concentrate where context
+          would otherwise grow: tool schemas (−59.7%), schema discovery (−80.5%), and an
+          unaggregated 96-row dump (−61.4%).</p>
+      </div>
+      <ul class="bench-list reveal" style="--i:1">
+        <li><span class="mono">−80.5%</span> listing schema objects: 69 vs 354 tokens</li>
+        <li><span class="mono">−61.4%</span> full 96-row dump: 825 vs 2,136 tokens</li>
+        <li><span class="mono">−59.7%</span> tool schemas: 862 vs 2,139 tokens</li>
+        <li><span class="mono">+55%</span> ten-row sample framing — bounded by design, not by data</li>
+        <li><span class="mono">123 tok</span> chart path: aggregate rendered to PNG, no SQLcl equivalent</li>
+      </ul>
+    </div>
+
+    <div class="fig-grid">
+      <figure class="reveal">
+        <img src="images/fig_benchmark_steps.png" width="1440" height="680"
+             alt="Horizontal bar chart comparing tokens per question: OraViz wins list objects, loses describe, aggregate and sample slightly, and wins the 96-row dump by a wide margin.">
+        <figcaption>Per-question tokens. Small result sets pay a bounded markdown framing premium; wide results and discovery win by large margins.</figcaption>
+      </figure>
+      <figure class="reveal" style="--i:1">
+        <img src="images/fig_benchmark_totals.png" width="1440" height="580"
+             alt="Grouped bar chart of the workflow budget: tool schemas 862 vs 2,139 tokens, tool results 2,337 vs 5,004, total 2,337 vs 5,006.">
+        <figcaption>The workflow budget by stage. The full methodology, per-step numbers, and the harness live in <a href="https://github.com/jasperan/oraviz-mcp/tree/main/benchmarks" rel="noopener">benchmarks/</a>.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= TOOLS ================= -->
+  <section class="section" id="tools">
+    <div class="section-head reveal">
+      <p class="kicker">03 — The surface</p>
+      <h2>Seven tools, each with one job</h2>
+      <p class="section-lede">
+        Small schemas are a per-session cost every agent pays. OraViz keeps them short and pushes
+        the aggregation to SQL, where the database already operates.
+      </p>
+    </div>
+    <ul class="tool-list">
+      <li class="reveal"><code>execute_query</code><p>One bounded <code>SELECT</code>/<code>WITH</code> statement, returned as a compact markdown table with truncation metadata.</p><span class="tag">markdown</span></li>
+      <li class="reveal"><code>profile_table</code><p>Per-column counts, distinct values, min/max and averages — enough to choose a chart without fetching rows.</p><span class="tag">dict</span></li>
+      <li class="reveal"><code>create_chart</code><p>Bar, line, area, scatter, pie, histogram, and vector (PCA) renderings returned as a PNG plus a short preview.</p><span class="tag tag-accent">image</span></li>
+      <li class="reveal"><code>list_tables</code><p>Tables and views in the current schema, capped with an explicit truncation marker.</p><span class="tag">markdown</span></li>
+      <li class="reveal"><code>get_table_schema</code><p>Columns, types, nullability, and primary-key flags, escaped for safe markdown.</p><span class="tag">markdown</span></li>
+      <li class="reveal"><code>sample_table_data</code><p>The first rows of a table with a sample note — useful before writing an aggregate.</p><span class="tag">markdown</span></li>
+      <li class="reveal"><code>get_table_details</code><p>Tablespace and optimizer statistics, optionally with an exact row count.</p><span class="tag">dict</span></li>
+    </ul>
+  </section>
+
+  <!-- ================= QUICK START ================= -->
+  <section class="section section-alt" id="start">
+    <div class="section-head reveal">
+      <p class="kicker">04 — Run it</p>
+      <h2>Point any MCP client at it</h2>
+      <p class="section-lede">
+        Thin-mode <code>python-oracledb</code> means no Oracle client libraries to install. Works with
+        Claude Code, Crush, Cursor, or any compliant client over stdio or HTTP.
+      </p>
+    </div>
+    <div class="start-grid">
+      <div class="start-block reveal">
+        <div class="start-head">
+          <h3>Run the server</h3>
+          <button class="copy" type="button" data-copy="run">Copy</button>
+        </div>
+        <pre class="code code-dark" id="run"><code>uvx --from git+https://github.com/jasperan/oraviz-mcp@REVIEWED_COMMIT_SHA oraviz-mcp</code></pre>
+        <p class="start-note">Replace the commit placeholder with a reviewed revision. Use a dedicated reader
+          account; inject <code>ORACLE_PASSWORD</code> into the MCP host's protected runtime environment.
+          Stdio uses local OS trust. All HTTP/SSE entry paths require configured JWT authentication,
+          including loopback; deployments also need TLS and private networking.</p>
+      </div>
+      <div class="start-block reveal" style="--i:1">
+        <div class="start-head">
+          <h3>Register it with your client</h3>
+          <button class="copy" type="button" data-copy="config">Copy</button>
+        </div>
+        <pre class="code code-dark" id="config"><code>{
+  "mcpServers": {
+    "oraviz": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/jasperan/oraviz-mcp@REVIEWED_COMMIT_SHA", "oraviz-mcp"],
+      "env": {
+        "ORACLE_USER": "oraviz_reader",
+        "ORACLE_DSN": "localhost:1530/FREEPDB1"
+      }
+    }
+  }
+}</code></pre>
+      </div>
+    </div>
+    <p class="start-more reveal">
+      Docker image, demo schema, and the full environment reference live in the
+      <a href="https://github.com/jasperan/oraviz-mcp#quick-start" rel="noopener">README</a>.
+      Current security controls and operator responsibilities are in
+      <a href="https://github.com/jasperan/oraviz-mcp/blob/main/SECURITY.md">SECURITY.md</a>.
+    </p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="assets/oraviz.svg" alt="" width="26" height="26">
+      <div>
+        <strong>OraViz MCP</strong>
+        <p>MIT licensed · built with FastMCP, python-oracledb, and matplotlib</p>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/jasperan/oraviz-mcp" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/jasperan/" rel="noopener">LinkedIn</a>
+      <a href="https://www.oracle.com/database/free/" rel="noopener">Oracle AI Database Free</a>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

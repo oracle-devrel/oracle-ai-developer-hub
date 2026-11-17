@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${PLUGIN_ROOT}/memory_hook.py\"",
+            "timeout": 30,
+            "statusMessage": "Capture user message in Memory"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${PLUGIN_ROOT}/memory_hook.py\"",
+            "timeout": 30,
+            "statusMessage": "Capture assistant message in Memory"
+          }
+        ]
+      }
+    ]
+  }
+}

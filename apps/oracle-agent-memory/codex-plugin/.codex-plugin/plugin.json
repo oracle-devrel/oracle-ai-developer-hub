@@ -1,0 +1,29 @@
+{
+  "name": "oracle-ai-agent-memory",
+  "version": "26.8.0",
+  "description": "Persistent tool-based memory for architecture notes, prior decisions, conventions, and reusable project knowledge.",
+  "keywords": [
+    "memory",
+    "oracle",
+    "mcp",
+    "agent-memory"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "Memory",
+    "shortDescription": "Search and update persistent agent memory.",
+    "longDescription": "Oracle AI Agent Memory exposes durable, searchable memory to Codex through MCP tools.",
+    "developerName": "Oracle",
+    "category": "Productivity",
+    "capabilities": [
+      "Search",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Search Memory for relevant project context",
+      "Add this durable decision to Memory"
+    ]
+  }
+}

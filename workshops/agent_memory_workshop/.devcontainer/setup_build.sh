@@ -27,7 +27,8 @@ pip install -q --no-cache-dir \
   ipywidgets \
   matplotlib \
   tiktoken \
-  pydantic
+  pydantic \
+  langsmith
 
 echo ""
 echo "[2/2] Registering Jupyter kernel..."

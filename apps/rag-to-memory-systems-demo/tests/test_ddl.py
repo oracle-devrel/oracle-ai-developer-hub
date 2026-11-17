@@ -15,5 +15,7 @@ def test_ddl_create_and_drop():
         )
         rows = sorted(r[0] for r in cur)
         assert rows == sorted(TABLES)
+        # Re-running setup against an existing schema keeps it instead of failing.
+        assert create_all(conn) > 0
     finally:
         conn.close()

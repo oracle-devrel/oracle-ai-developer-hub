@@ -1,0 +1,1874 @@
+[
+  {
+    "asset_name": "Harbor Bridge",
+    "inspector": "Evelyn H. Mercer",
+    "overall_grade": "B",
+    "summary": "The Harbor Bridge is in sub-optimal condition with moderate localized deterioration. Routine maintenance items and targeted remediation of coating and drainage systems are recommended to prevent escalation. No immediate restrictions to traffic are required at this time.",
+    "days_ago": 47,
+    "findings": [
+      {
+        "category": "corrosion",
+        "severity": "medium",
+        "description": "Surface corrosion and pitting observed on steel bearing assemblies at Pier 2 (south side), with estimated section loss up to 25% on bearing plate edges and local rust bleeding onto the concrete pedestal. Corrosion deposits extend approximately 1.5 m longitudinally along the bearing line.",
+        "recommendation": "Remove loose corrosion products, apply a corrosion-inhibiting primer and finish coat to the affected bearing assemblies within 60 days; re-inspect annually and monitor section loss with caliper measurements every 12 months."
+      },
+      {
+        "category": "structural",
+        "severity": "low",
+        "description": "Hairline transverse cracks in the concrete wearing surface observed along lane 2 between chainages 120 m and 140 m on the northbound carriageway; maximum measured crack width 0.6 mm. No active spalling or rebar exposure noted.",
+        "recommendation": "Seal cracks with epoxy injection or flexible sealant within 90 days and monitor quarterly for propagation; schedule resurfacing of the wearing surface at the next major maintenance cycle (within 24 months)."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Localized scupper blockages and debris accumulation at the east curb drains near span 3 causing shallow ponding up to 15 mm depth across a 4 m length of the deck. Ponding observed after moderate rainfall events.",
+        "recommendation": "Clear scuppers and deck drains and install debris screens within 30 days; implement a deck drainage inspection and cleaning program every 6 months."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Bridge",
+    "inspector": "Mateo R. Alvarez",
+    "overall_grade": "C",
+    "summary": "The inspection identified multiple moderate deficiencies requiring scheduled repairs. Structural and mechanical elements show signs of deterioration that, if unaddressed, could progress to more severe conditions. Recommend executing prioritized repair activities within the next 1\u20133 months and increasing monitoring frequency.",
+    "days_ago": 192,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Delamination and spalled concrete at the south approach slab near the expansion joint (location: approach slab 1, east side), with an approximate delaminated area of 1.2 m^2 and exposed aggregate. No through-depth reinforcement exposure was measured beyond minor rust staining.",
+        "recommendation": "Remove unsound concrete, patch-repair with structural-grade concrete and apply corrosion inhibitor to exposed rebar within 90 days; re-evaluate approach slab settlement after repair."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Expansion joint at Span 2 exhibits significant deterioration: elastomeric seal missing in a 0.9 m length and a measured vertical displacement (seat differential) of 30 mm across the joint causing water infiltration onto substructure elements.",
+        "recommendation": "Replace the damaged expansion joint assembly and re-establish proper bearing/seating within 60 days; implement joint inspection as part of semi-annual maintenance."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Corrosion-induced section loss on secondary steel stiffeners beneath the composite deck at midspan: localized section loss up to 40% over areas totaling ~3.5 m^2, with surface pitting and early section discontinuities.",
+        "recommendation": "Evaluate affected stiffeners for structural adequacy and, where section loss exceeds 25%, remove and replace the damaged stiffeners within 60 days; institute a biannual ultrasonic thickness monitoring program."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Minor deformation of the roadside barrier on the northbound lane near chainage 210 m (approx. 0.4 m lateral offset), likely from previous vehicle impact. Anchor bolts are intact but show superficial corrosion.",
+        "recommendation": "Straighten or replace the damaged barrier section and tighten/replace corroded anchors within 30 days; document repairs and monitor for further impact events."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Bridge",
+    "inspector": "Dr. Samuel T. Okoye",
+    "overall_grade": "D",
+    "summary": "Significant structural and corrosion deficiencies were identified that pose an elevated risk to the continued unfettered operation of the bridge. Immediate load management, targeted closures, and emergency remediation are recommended to mitigate safety risks. A full structural assessment and prioritized repair plan should be implemented without delay.",
+    "days_ago": 12,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "critical",
+        "description": "Measured vertical deflection at midspan under static dead load is 85 mm (measured at center of the 485 m span), exceeding the recommended limit of 40 mm for similar steel-concrete composite spans per accepted practice (approx. L/600). The midspan soffit exhibits visible sagging and increased dynamic movement under light traffic.",
+        "recommendation": "Immediately impose lane-specific load restrictions and reduced speed limits and schedule a full structural analysis within 7 days; implement emergency shoring and temporary load redistribution (install propping) within 14 days pending definitive repairs."
+      },
+      {
+        "category": "corrosion",
+        "severity": "critical",
+        "description": "Through-corrosion observed on the lower flange and bearing assemblies at Pier 3 (sea-facing side) with estimated section loss up to 70% in localized areas and visible perforation at elevation -3.2 m. Environmental exposure (saline spray) evident and corrosion has reached primary load-carrying elements.",
+        "recommendation": "Close the adjacent southbound lane immediately to traffic and schedule replacement of the affected bearing assemblies and degraded members within 30 days; consider temporary load redistribution prior to replacement and install cathodic protection after repair."
+      },
+      {
+        "category": "drainage",
+        "severity": "high",
+        "description": "Complete blockage of multiple scuppers on the west side resulting in deck ponding up to 60 mm depth in lane 4 over an approximate 10 m longitudinal extent during recent rainfall. Water is tracking toward substructure bearings and has led to staining on pier caps.",
+        "recommendation": "Clear all blocked scuppers and install improved debris traps within 14 days; inspect underside for water ingress and repair any affected concrete or bearing surfaces within 30 days."
+      },
+      {
+        "category": "electrical",
+        "severity": "high",
+        "description": "Roadway lighting along the southbound carriageway is nonfunctional at approximately 60% of fixtures (spanning spans 1\u20134), reducing nighttime visibility and increasing safety risk. Several pole bases show moisture ingress at electrical junctions.",
+        "recommendation": "Restore 100% lighting functionality within 14 days by replacing failed fixtures and repairing junctions; perform electrical insulation and waterproofing on pole bases during the same intervention."
+      },
+      {
+        "category": "coating",
+        "severity": "high",
+        "description": "Extensive coating delamination and blistering on the underside of the steel girders over approximately 200 m^2 near midspan, exposing bare steel to a marine atmosphere. Areas exhibit active rust staining and flaking.",
+        "recommendation": "Perform abrasive cleaning to near-white metal (SSPC-SP 10/NACE 2) and recoat the affected underside areas within 90 days; include a corrosion monitoring plan and evaluate application of a high-performance marine-grade coating system thereafter."
+      }
+    ]
+  },
+  {
+    "asset_name": "Meridian Overpass",
+    "inspector": "Eleanor M. Blake",
+    "overall_grade": "B",
+    "summary": "The Meridian Overpass is in generally good condition with only localized, low- to medium-severity issues that do not currently affect load-carrying capacity. Routine maintenance items and targeted repairs are recommended to prevent progression. No structural distress requiring immediate load restriction was observed during this inspection.",
+    "days_ago": 74,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "low",
+        "description": "Hairline longitudinal cracks observed on the northbound deck surface at chainage 0+060 to 0+075 (total length ~15 m), with measured maximum crack width of 0.20 mm, which is below common serviceability limit of 0.30 mm for pre-stressed concrete.",
+        "recommendation": "Seal cracks with approved epoxy injection and monitor quarterly for width growth; re-inspect in 12 months unless progressive widening is observed."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Scuppers and deck drains at the southeast abutment are partially clogged with accumulated silt and vegetation causing localized ponding up to 20 mm depth within a 1.2 m2 area adjacent to the expansion joint.",
+        "recommendation": "Clean all scuppers and deck drains and remove debris within 30 days; institute a biannual cleaning schedule and confirm positive drainage after the next heavy rainfall."
+      },
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Localized delamination of waterproof membrane and wearing surface approximately 4 m2 on the western lane near mid-span; no through-depth concrete exposure noted beneath the delaminated area.",
+        "recommendation": "Perform localized removal and replacement of membrane and wearing surface within 90 days and monitor repaired area during next routine inspection."
+      }
+    ]
+  },
+  {
+    "asset_name": "Meridian Overpass",
+    "inspector": "Carlos J. Mendez",
+    "overall_grade": "C",
+    "summary": "The Meridian Overpass exhibits moderate deterioration in several systems that warrant timely maintenance to avoid escalation. Notable concrete spalling, chloride contamination, and safety component degradation were observed; targeted repairs and a follow-up structural assessment are recommended. Repairs should be scheduled within the next 30\u201390 days depending on severity.",
+    "days_ago": 312,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Concrete spalling on the underside of the southbound beam at mid-span (chainage 0+100) exposes prestressing sheath over an area of approximately 0.9 m2; visible hairline corrosion staining and one location with 0.3 m of exposed tendon sheath observed.",
+        "recommendation": "Remove loose concrete, perform localized patch repair with corrosion-inhibiting mortar, and conduct non-destructive testing of tendons within 60 days to verify prestress integrity."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Chloride ion concentration measured in deck concrete cores adjacent to spalled areas averaged 1.1% by mass of cement (threshold for active corrosion commonly cited as 0.3\u20130.5%), indicating an elevated risk of ongoing reinforcement/tendon corrosion.",
+        "recommendation": "Implement targeted chloride mitigation measures, including localized concrete removal and patching and installation of corrosion protection (e.g., coatings or localized cathodic protection) within 90 days; increase monitoring frequency to quarterly."
+      },
+      {
+        "category": "safety",
+        "severity": "medium",
+        "description": "Parapet and roadside barrier on the northbound lane have a 1.5 m section with missing anchor bolts and deformation from previous impacts, reducing containment capacity at that location.",
+        "recommendation": "Install temporary crash attenuator or barrier protection immediately and schedule repair/replacement of parapet anchors and rail section within 30 days."
+      },
+      {
+        "category": "electrical",
+        "severity": "low",
+        "description": "Two of four luminaires mounted on the overpass are inoperative, resulting in measured illuminance of 6 lux at the deck surface beneath the dark fixtures, below the recommended minimum for arterial overpass lighting.",
+        "recommendation": "Replace failed luminaires and inspect conduit/controls within 30 days; verify post-repair photometric levels meet applicable roadway lighting standards."
+      }
+    ]
+  },
+  {
+    "asset_name": "Meridian Overpass",
+    "inspector": "Dr. Marcus L. Nguyen",
+    "overall_grade": "D",
+    "summary": "Significant deterioration of the Meridian Overpass was observed, including prestressing element exposure and safety system failures that represent an elevated risk under current operating conditions. Immediate load management and emergency repairs are advised, followed by a comprehensive structural analysis. Closure to heavy vehicles should be considered until mitigation is completed.",
+    "days_ago": 19,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "critical",
+        "description": "Full-depth spalling on the north soffit at mid-span (chainage 0+105 to 0+110) exposes prestressing strands over an area of 3.2 m2; visual inspection identified extensive corrosion of strand sheathing and two strands with visible fracture at the exposed location.",
+        "recommendation": "Immediately impose a temporary load restriction to exclude heavy vehicles and schedule emergency shoring and detailed structural evaluation within 7 days; perform urgent repairs (strand replacement/strengthening and concrete restoration) following analysis."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "The parapet on the west edge has a continuous 6.0 m section missing due to impact and fastener failure, leaving an unprotected edge with no intermediate barrier and a 5.2 m vertical clearance directly above a high-speed lane below.",
+        "recommendation": "Install temporary barrier protection (type approved crash attenuator) within 24 hours and complete permanent parapet replacement with certified anchorage within 30 days."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Deck core samples show chloride content averaging 2.3% by mass of cement at 25 mm depth, and corrosion-induced section loss of exposed prestressing elements estimated at up to 0.8 mm thickness loss in sampled locations.",
+        "recommendation": "Initiate dechlorination and corrosion remediation program, including localized concrete removal, application of corrosion-inhibiting treatments, and consideration of cathodic protection; schedule implementation within 60\u201390 days depending on engineering priority."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Expansion joint at the west abutment is clogged with compacted debris and has a torn seal; standing water 12 mm deep observed adjacent to the joint, providing a pathway for chloride-laden runoff into the structure.",
+        "recommendation": "Remove debris, replace expansion joint seal, and restore proper drainage within 30 days; inspect adjacent embedded components for water ingress during repair."
+      }
+    ]
+  },
+  {
+    "asset_name": "Riverside Pedestrian Bridge",
+    "inspector": "Mariana E. Alvarez",
+    "overall_grade": "B",
+    "summary": "The Riverside Pedestrian Bridge is generally in good condition with routine wear consistent with a steel cable-stayed structure of 165 m span. Minor corrosion and localized coating deterioration were observed on stay cables and at pylon interfaces, but no immediate structural capacity loss was detected. Recommended maintenance actions will mitigate progression and restore protective systems.",
+    "days_ago": 42,
+    "findings": [
+      {
+        "category": "corrosion",
+        "severity": "low",
+        "description": "Localized paint degradation observed on lower stays at the south pylon (station 45 m to 60 m) with coating thickness measured 70\u201390 \u00b5m versus original specification ~120 \u00b5m; surface rust (light orange discoloration) and hairline pitting up to 0.4 mm depth noted on exposed wire bundles.",
+        "recommendation": "Perform spot abrasive cleaning and apply a two-coat inorganic zinc/aliphatic polyurethane system to affected stay bundles within 180 days; re-measure coating thickness after application and schedule biannual visual inspections."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Expansion bearing at pier 2 (north approach) exhibits restricted longitudinal movement with observed lateral binding; measured transverse movement under live pedestrian load was <3 mm while design allowance is 25\u201330 mm, indicating partial seizure of sliding surfaces and accumulation of debris.",
+        "recommendation": "Disassemble and service the bearing assembly within 60 days, replace degraded PTFE sliding pads if wear exceeds 2 mm, and re-lubricate per manufacturer procedure. Monitor movement during the next three routine inspections."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Handrail fasteners along deck edge between midspan and east approach (deck station 70\u2013120 m) show minor loosening; measured gap between handrail and stanchion base plates up to 4 mm, but no detachment observed.",
+        "recommendation": "Torque-check and tighten all handrail fixings and replace any corroded fasteners within 90 days. Implement quarterly checks of handrail anchorage points."
+      }
+    ]
+  },
+  {
+    "asset_name": "Riverside Pedestrian Bridge",
+    "inspector": "Thomas J. Reed",
+    "overall_grade": "C",
+    "summary": "The bridge exhibits fair condition with multiple areas requiring maintenance to prevent reduction in serviceability. Cracking in the deck surfacing, partial bearing restraint, and moderate corrosion at anchorages were observed; corrective actions should be scheduled in the short term. Continued monitoring and targeted repairs will be necessary to avoid accelerated deterioration.",
+    "days_ago": 211,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Longitudinal cracking in the concrete wearing surface at midspan (approx. 82 m) with crack widths measured between 0.4 and 0.9 mm; several transverse hairline cracks at the deck-to-tower transition suggest minor fatigue-related distress in the surfacing layer.",
+        "recommendation": "Grind and seal cracks and apply a bonded overlay to the wearing surface within 90 days to restore traffic-walking serviceability; schedule a structural assessment of the deck and wearing course during the next 12 months to verify no underlying substrate loss."
+      },
+      {
+        "category": "bearing",
+        "severity": "medium",
+        "description": "Fixed bearing at pylon base (south tower) shows corrosion and partial loss of free rotation; measured rotational play is <0.5\u00b0 compared with expected service range up to 1.5\u00b0, indicating restriction that may transfer unintended loads to the tower.",
+        "recommendation": "Replace the affected bearing assembly within 60 days and inspect adjacent bearing seats for corrosion or grout voids. Implement annual bearing movement verification thereafter."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Deck scuppers and drains at the east approach are partially blocked with leaf debris and sediment, resulting in localized ponding up to 35 mm depth on the deck near station 10\u201318 m during the last rainfall event.",
+        "recommendation": "Clear and flush all scuppers within 30 days and install coarse debris screens where appropriate. Establish a quarterly debris-removal program during wet seasons."
+      },
+      {
+        "category": "corrosion",
+        "severity": "medium",
+        "description": "Lower anchorage pockets at the north pylon show moderate corrosion with localized section loss estimated at 5\u201312% on anchor plate edges and visible rust staining extending up to 200 mm from the plate faces.",
+        "recommendation": "Remove and recoat affected anchorage hardware and effected surrounding steel within 120 days; if measured section loss exceeds 15% upon close inspection, replace the affected anchorage components and perform a non-destructive test to confirm integrity."
+      }
+    ]
+  },
+  {
+    "asset_name": "Riverside Pedestrian Bridge",
+    "inspector": "Aisha K. Mensah",
+    "overall_grade": "F",
+    "summary": "Severe, critical deficiencies were identified that compromise the structural integrity and public safety of the bridge. Significant stay-cable deterioration and pylon base corrosion with evidence of member distress require immediate remedial actions. Close the structure to pedestrian traffic and initiate emergency repairs and a full structural reassessment without delay.",
+    "days_ago": 7,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "critical",
+        "description": "One group of stay cables on the west side (near station 105\u2013115 m) exhibits multiple broken wires with visible wire ends and local cohesion loss; non-contact ultrasonic spot checks and visual inspection estimate effective cross-sectional loss up to 35\u201345% in the most affected cable, compromising load-carrying capacity.",
+        "recommendation": "Immediately close the bridge to pedestrian traffic and install temporary shoring/support to the main span within 24 hours. Replace the affected stay cables and associated anchorages within 14 days and conduct a full load-rating analysis by a qualified cable-stayed bridge specialist."
+      },
+      {
+        "category": "corrosion",
+        "severity": "critical",
+        "description": "Severe corrosion and section undermining observed at the base of the south pylon inside the splash zone; pitting depths measured up to 10\u201314 mm on the pylon bottom flange and bolted connections show partial thread loss on multiple anchor bolts.",
+        "recommendation": "Perform emergency stabilization and reduce applied loads to the pylon (structure closure) immediately. Within 7 days, undertake detailed metallurgical assessment and replace compromised pylon base plates and anchor bolts as required; follow with cathodic protection installation."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Continuous deck sagging detected at midspan with permanent deflection measured at 120 mm relative to adjacent spans (measured using laser leveling), exceeding common serviceability limits and producing a perceptible dip that may cause tripping hazards and uneven loading.",
+        "recommendation": "Maintain closure and emergency bracing until corrective works are completed. Conduct a structural rehabilitation program to restore geometry \u2014 including deck jacking and replacement of ill-performing elements \u2014 within 21 days following the emergency assessment."
+      },
+      {
+        "category": "electrical",
+        "severity": "high",
+        "description": "Lighting circuits along the deck are inoperative in several segments (stations 30\u201350 m, 130\u2013150 m) with exposed wiring at two junction boxes showing moisture ingress. Emergency signage illumination is intermittent.",
+        "recommendation": "Isolate affected circuits and perform electrical repairs within 7 days; replace compromised junction boxes with IP67-rated enclosures and restore emergency lighting to code-compliant levels prior to re-opening the facility to the public."
+      }
+    ]
+  },
+  {
+    "asset_name": "Substation Gamma",
+    "inspector": "Daniela M. Ortega",
+    "overall_grade": "B",
+    "summary": "Substation Gamma is generally well maintained with all three 132 kV transformers operating within expected parameters. Minor mechanical and coating issues were observed that do not currently affect reliability but warrant scheduled maintenance. Recommendations focus on targeted repairs and routine monitoring to prevent escalation.",
+    "days_ago": 47,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "A slow oil seep was observed at Transformer #2 radiator flange on the north face, measured approximately 2 liters per day accumulation in the drip tray during a 24-hour observation. The leak appears confined to a gasket seating surface with no evidence of oil in nearby drainage channels.",
+        "recommendation": "Replace the radiator flange gasket and retorque to manufacturer specification within 30 days and re-inspect for leakage weekly for one month after repair."
+      },
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Exterior paint and protective coating on the control building west elevation show localized blistering and light flaking over an area of approximately 1.2 m2, likely due to UV exposure and previous minor water ingress.",
+        "recommendation": "Prepare and recoat the affected area using the original specification coating system within 90 days and schedule coating condition reviews annually."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Vegetation encroachment at the south perimeter fence has produced a clearance of 2.2 m to energized equipment conduits, which is below the operator's recommended 2.5\u20133.0 m working clearance for 132 kV yard operations.",
+        "recommendation": "Trim and remove vegetation to restore a minimum 2.5 m clearance within 14 days and implement quarterly perimeter vegetation control."
+      }
+    ]
+  },
+  {
+    "asset_name": "Substation Gamma",
+    "inspector": "Ethan R. Caldwell",
+    "overall_grade": "C",
+    "summary": "Substation Gamma shows signs of moderate degradation affecting both electrical and structural components. Several observed conditions have potential to reduce reliability if not addressed; planned maintenance is recommended to restore expected performance. Prioritize cooling and electrical connection issues to avoid progressive deterioration.",
+    "days_ago": 198,
+    "findings": [
+      {
+        "category": "electrical",
+        "severity": "high",
+        "description": "Infrared thermography identified a persistent hotspot at the upper bushing connector of Transformer #3 with sustained surface temperatures of 82\u00b0C during nominal load, approximately 22\u00b0C above comparable bushings and exceeding typical operating differentials for 132 kV bushings.",
+        "recommendation": "De-energize and perform torque verification and contact surface inspection on the bushing connection within 14 days; if abnormal contact wear or tracking is found, replace the bushing and re-test."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Cooling fan motors on Transformer #1 (ONAF mode) exhibited decreased airflow and an average vibration amplitude 40% above baseline on the east radiator bank; photographic inspection shows accumulated debris and bearing wear indicators.",
+        "recommendation": "Service or replace affected fan motors and clean radiator fins within 30 days and institute quarterly fan performance checks."
+      },
+      {
+        "category": "corrosion",
+        "severity": "medium",
+        "description": "Mild to moderate corrosion noted on busbar supports and nearby structural angles in the indoor switchgear bay, with paint loss areas totaling approximately 0.6 m2 and surface rust depth up to 0.8 mm locally.",
+        "recommendation": "Remove rust, apply corrosion-inhibiting primer and touch-up coating within 60 days, and schedule semi-annual inspections of indoor structural elements."
+      },
+      {
+        "category": "drainage",
+        "severity": "low",
+        "description": "Stormwater drainage near the substation north runoff channel shows partial blockages from sediment accumulation, reducing flow capacity by estimated 25% during inspection.",
+        "recommendation": "Clear sediment from the north runoff channel and implement a biannual sediment removal program within 90 days."
+      }
+    ]
+  },
+  {
+    "asset_name": "Substation Gamma",
+    "inspector": "Marcus L. Chen",
+    "overall_grade": "D",
+    "summary": "Substation Gamma is experiencing significant operational and safety deficiencies that pose immediate reliability and environmental risks. Critical electrical protection and oil containment failures were identified and require urgent intervention. Recommend immediate isolation of affected equipment and execution of emergency repairs to avoid an outage or environmental incident.",
+    "days_ago": 13,
+    "findings": [
+      {
+        "category": "electrical",
+        "severity": "critical",
+        "description": "Protection relay functionality for Transformer #2 is degraded: secondary injection tests show trip time 2.5\u00d7 the manufacturer's specification and intermittent communication failures to the SCADA system. This compromises fault clearing capability for a 132 kV transformer.",
+        "recommendation": "Remove Transformer #2 from service and replace or fully repair the protection relay and associated communications within 7 days; verify correct operation with secondary injection testing before returning to service."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Extensive corrosion observed on the transformer tank base and lower lugs of Transformer #1 with localized metal loss and perforation estimated at up to 2 mm depth over a 0.5 m2 area, increasing risk of tank integrity failure and oil leaks.",
+        "recommendation": "Immediately schedule a detailed tank integrity assessment and plan for tank repair or transformer replacement within 30 days; if oil containment is compromised, enact spill containment procedures now."
+      },
+      {
+        "category": "mechanical",
+        "severity": "critical",
+        "description": "Large oil pool (approx. 50 liters) detected at the transformer yard adjacent to Transformer #2 on the southeast side, with visible sheen entering the perimeter gravel and a failed secondary containment drain valve that remained open.",
+        "recommendation": "Initiate emergency oil containment and recovery immediately, close and repair the secondary containment drain valve within 24 hours, and conduct environmental remediation within 7 days."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Earthing system measurement at the main ground mat access point shows resistance of 4.6 ohms, exceeding the operator target of \u22641.0 ohm and reducing personnel safety margins during fault conditions.",
+        "recommendation": "Perform ground enhancement and/or grid augmentation to reduce earth resistance to \u22641.0 ohm within 14 days and verify with post-work earth resistance testing."
+      }
+    ]
+  },
+  {
+    "asset_name": "Substation Delta",
+    "inspector": "Evelyn R. Mendoza",
+    "overall_grade": "B",
+    "summary": "Substation Delta in Northgate Industrial is generally well maintained with all major systems operational and both 66 kV transformers online. Minor to moderate issues were observed in the cooling and sealing systems that do not currently compromise station reliability but require timely attention. Routine electrical and mechanical maintenance is recommended to prevent escalation.",
+    "days_ago": 46,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Vibration readings on Transformer 1 ONAF cooling fan assembly (bay 1, north side) measured 2.5 mm peak-to-peak at 1,800 rpm, exceeding manufacturer recommended limit of 1.5 mm. Increased vibration is causing accelerated bearing wear and elevated noise levels.",
+        "recommendation": "Balance and align the fan assembly and replace bearings showing wear; schedule repair within 14 days and re-measure vibration after repair. Institute quarterly vibration monitoring thereafter."
+      },
+      {
+        "category": "electrical",
+        "severity": "low",
+        "description": "Small oil seep observed at Transformer 1 conservator valve (east face) estimated at ~0.5 L/day; oil level remains within normal operating range per on-site gauge. No evidence of electrical tracking or immediate dielectric compromise was observed.",
+        "recommendation": "Replace conservator valve gasket and tighten associated fittings within 30 days. Monitor oil level weekly for 3 months and sample oil for dielectric strength per IEEE C57.106 if seep persists."
+      },
+      {
+        "category": "corrosion",
+        "severity": "low",
+        "description": "Surface rust and minor pitting on bus support brackets in bay 2 (south corridor) covering approximately 3% of support area; coating delamination observed in localized patches. Structural integrity is not currently affected.",
+        "recommendation": "Remove loose rust, apply rust-inhibiting primer and recoat affected brackets within 90 days. Add annual coating inspection to preventive maintenance schedule."
+      }
+    ]
+  },
+  {
+    "asset_name": "Substation Delta",
+    "inspector": "Michael T. O'Connor",
+    "overall_grade": "C",
+    "summary": "Substation Delta exhibits fair condition but multiple maintenance deficiencies were identified that could reduce reliability if unaddressed. Issues include partial discharge on an outgoing feeder, erosion at the site perimeter, and oil containment deficiencies. Prioritization of electrical diagnostics and site drainage repairs is advised to prevent escalation to outages.",
+    "days_ago": 312,
+    "findings": [
+      {
+        "category": "electrical",
+        "severity": "high",
+        "description": "Partial discharge activity measured on outgoing 66 kV feeder breaker B3 (west switchyard) with peak pulses averaging 240 pC during off-load testing, exceeding typical alarm threshold of 100 pC. The PD pattern suggests degradation in insulation or corona inception on the breaker or associated CT/insulator.",
+        "recommendation": "Schedule an outage within 14 days for detailed PD mapping and infrared inspection; replace or repair the affected breaker/insulator assemblies based on diagnostic results within 30 days."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Erosion and rutting observed along the service road and perimeter fence (north gate) with a maximum scour depth of 0.30 m, causing partial undermining of the chain-link posts. Continued erosion risks perimeter security and access.",
+        "recommendation": "Backfill eroded sections, reinstall and anchor fence posts, and re-grade the service road within 30 days. Implement a geotextile and improved surface drainage to prevent recurrence before the next rainy season."
+      },
+      {
+        "category": "safety",
+        "severity": "medium",
+        "description": "Oil containment berm in transformer yard has accumulated standing water up to 150 mm deep with a 20% visible oil sheen on the surface in the south berm section; freeboard below recommended containment height by ~50 mm. This condition reduces available secondary containment volume and increases environmental risk.",
+        "recommendation": "Pump out standing water, remove oil sheen, and restore berm freeboard by regrading within 30 days. Inspect and repair berm lining as needed and institute monthly containment inspections."
+      },
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Paint blistering and surface corrosion affecting approximately 5% of the surface area on both transformer tanks (transformers 1 and 2). The coating degradation is localized to the tank upper flanges and near lift points.",
+        "recommendation": "Perform spot blast cleaning and recoat affected areas within 180 days. Add transformer tank coating to the 3-year maintenance repaint schedule."
+      }
+    ]
+  },
+  {
+    "asset_name": "Substation Delta",
+    "inspector": "Sunita K. Rao",
+    "overall_grade": "F",
+    "summary": "Substation Delta is in critical condition with multiple immediate safety and reliability failures that present high risk of sustained outage or equipment damage. Emergency actions are required on transformer thermal excursions, fire detection, and grounding deficiencies. Operations should consider temporary shutdown and emergency repairs until corrective measures are completed.",
+    "days_ago": 7,
+    "findings": [
+      {
+        "category": "electrical",
+        "severity": "critical",
+        "description": "Top-oil temperature on Transformer 2 reached 120\u00b0C during steady-state loading (measured at the top oil sensor in bay 3), exceeding the typical maximum continuous operating temperature of ~95\u00b0C per IEEE/IEC transformer limits. Temperature rise indicates cooling failure or internal fault.",
+        "recommendation": "Immediately de-energize Transformer 2 and isolate from the network; arrange emergency inspection and oil quality testing within 24 hours. Do not return to service until thermography, dissolved gas analysis (DGA), and internal inspection confirm safe condition."
+      },
+      {
+        "category": "safety",
+        "severity": "critical",
+        "description": "Fire detection and alarm circuits for bays 1 and 2 were non-functional at time of inspection; panel fault indicated 'no response' and remote annunciation to control room was inactive. Lack of fire detection increases risk of undetected fire spread in transformer yard.",
+        "recommendation": "Restore fire detection and alarm functionality immediately and maintain an on-site fire watch until repairs are complete. Replace faulty detectors and repair wiring/annunciation within 24\u201348 hours and test to confirm operation."
+      },
+      {
+        "category": "structural",
+        "severity": "high",
+        "description": "Grounding grid resistance measured at 7.8 ohms using three-point test, significantly above the recommended substation benchmark of \u22641.0 ohm and IEEE Std. 80 guidelines. Elevated resistance compromises fault clearing and personal safety during ground faults.",
+        "recommendation": "Perform immediate remediation to lower grid resistance: drive additional ground rods, improve grid interconnections, and install chemical electrodes as required; complete corrective work within 7 days. Re-test grounding resistance after repairs and document results."
+      },
+      {
+        "category": "mechanical",
+        "severity": "high",
+        "description": "On-load tap changer (OLTC) on Transformer 2 exhibits seized linkage and visible corrosion on gear teeth (inspection hatch bay 3). OLTC movement attempts produced abnormal noise and incomplete tap operations during functional test.",
+        "recommendation": "Do not operate OLTC. Replace or fully refurbish the OLTC assembly and associated linkage within 14 days following transformer de-energization. Verify proper operation and perform oil filtration and DGA prior to return to service."
+      }
+    ]
+  },
+  {
+    "asset_name": "Substation Epsilon",
+    "inspector": "Cassandra M. Ortega",
+    "overall_grade": "B",
+    "summary": "Substation Epsilon is in generally good condition with most systems operating within expected parameters for a 33 kV ONAN-cooled site housing four transformers. Minor issues were observed that reduce redundancy and could accelerate degradation if not addressed; recommended corrective actions are prioritized to prevent escalation. Routine monitoring and targeted repairs will restore full operational margins.",
+    "days_ago": 87,
+    "findings": [
+      {
+        "category": "electrical",
+        "severity": "medium",
+        "description": "Thermal scan of Transformer 2 high-voltage bushing showed an external surface temperature of 78\u00b0C, approximately 18\u00b0C above the site baseline (60\u00b0C) and above typical manufacturer recommended operating surface temperature for 33 kV bushings. There are no visible tracking marks but elevated temperature indicates a loose connection or aging insulation at the bushing terminal (top cable clamp area).",
+        "recommendation": "Retorque and inspect the bushing cable clamp and connector at Transformer 2 within 14 days; perform a follow-up thermographic scan and contact resistance measurement. If temperature remains >70\u00b0C after tightening, schedule bushing replacement within 30 days."
+      },
+      {
+        "category": "structural",
+        "severity": "low",
+        "description": "Control building interior concrete floor exhibits hairline cracks along the north wall slab; longest crack 0.5 m with average width ~0.5 mm. Cracking appears non-structural and likely due to thermal shrinkage rather than load-bearing failure.",
+        "recommendation": "Seal identified cracks with epoxy injection or suitable floor sealant within 90 days and monitor quarterly for propagation; document crack widths and lengths at each inspection."
+      },
+      {
+        "category": "corrosion",
+        "severity": "medium",
+        "description": "Exposed grounding clamp assemblies at the southeast fence transformer grounding riser show surface corrosion and pitting with measured pit depth up to 1.5 mm on galvanized clamps. Some protective galvanization has flaked, exposing base metal to accelerated corrosion compared to acceptable intact galvanizing per site standard.",
+        "recommendation": "Replace corroded clamps and connectors and re-establish continuous grounding continuity within 60 days. After replacement, apply corrosion inhibitor and install stainless-steel or appropriately coated clamps to meet grounding corrosion resistance standards."
+      }
+    ]
+  },
+  {
+    "asset_name": "Substation Epsilon",
+    "inspector": "Ethan R. Malik",
+    "overall_grade": "C",
+    "summary": "Substation Epsilon presents fair condition with several maintenance deficiencies that reduce reliability margins. Key electrical and mechanical issues affecting cooling and insulation integrity require prioritized corrective action to avoid progressive failure. Implementing the recommended repairs and increased monitoring will return the substation to acceptable operating standards.",
+    "days_ago": 412,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "high",
+        "description": "Transformer 3 oil temperature under nominal loading measured 90\u00b0C during operational checks, approximately 20\u00b0C above the expected operating range for an ONAN-cooled 33 kV transformer at this load (typical steady-state 65\u201370\u00b0C). Radiator fins on Transformer 3 are partially obstructed by debris, reducing effective convective surface area by an estimated 35%.",
+        "recommendation": "Schedule immediate cleaning of radiator fins and removal of debris within 7 days; perform oil top-up and circulation check and monitor oil temperature daily until stabilized. If temperature does not fall below 75\u00b0C after cleaning, arrange detailed transformer inspection and consider taking the unit offline for further diagnostics within 14 days."
+      },
+      {
+        "category": "coating",
+        "severity": "medium",
+        "description": "Exterior paint on outdoor bus supports and porcelain insulator pedestals has peeled over an area of approximately 3.0 m\u00b2 on the west bus; underlying steel shows beginning stages of surface rust. Coating failure exposes metal to accelerated corrosion consistent with coastal-influenced atmospheric conditions.",
+        "recommendation": "Perform spot abrasive preparation and recoat the affected 3.0 m\u00b2 area with manufacturer-specified protective coating within 30 days. Schedule full coating survey and touch-up program annually."
+      },
+      {
+        "category": "safety",
+        "severity": "medium",
+        "description": "Vegetation growth was observed encroaching within 3 meters of the perimeter fence on the south side, with some branches overhanging the overhead conductors outside the yard. This violates site clearance guidance and increases risk during storm events.",
+        "recommendation": "Clear vegetation to maintain a minimum 6-meter clearance from live equipment and remove overhanging branches within 14 days. Implement a quarterly vegetation management schedule and document clearance distances after each maintenance cycle."
+      },
+      {
+        "category": "electrical",
+        "severity": "high",
+        "description": "Partial discharge (PD) testing at Transformer 1 bushing recorded PD amplitude peaks of 250 pC during offline diagnostic testing, exceeding the conservative alert threshold of 100 pC used by the utility. Elevated PD suggests incipient insulation degradation or contamination at the bushing interface (north-side HV bushing).",
+        "recommendation": "Perform dielectric and insulation power factor testing and dissolved gas analysis (DGA) for Transformer 1 within 7 days. If PD activity persists or DGA indicates accelerating fault gases, plan bushing replacement or transformer outage within 30 days."
+      }
+    ]
+  },
+  {
+    "asset_name": "Substation Epsilon",
+    "inspector": "Aaliyah J. Fern\u00e1ndez",
+    "overall_grade": "D",
+    "summary": "Substation Epsilon exhibits significant deficiencies that present immediate reliability and safety risks. Multiple critical electrical and mechanical failures, combined with compromised grounding and structural corrosion, require prompt emergency intervention. Immediate shutdown of affected equipment and expedited repairs are recommended to prevent asset loss or hazardous release.",
+    "days_ago": 23,
+    "findings": [
+      {
+        "category": "electrical",
+        "severity": "critical",
+        "description": "Active oil leak observed at Transformer 4 conservator flange on the southwest side with an estimated leak rate of ~2 liters/day; transformer oil level fell approximately 12% over a 48-hour period. Leak location is adjacent to HV bushings and poses elevated fire and environmental contamination risk as well as imminent loss of dielectric strength.",
+        "recommendation": "Isolate and de-energize Transformer 4 immediately and schedule emergency shutdown and oil containment within 24 hours. Arrange for leak repair or transformer replacement and perform DGA and full oil testing prior to return to service."
+      },
+      {
+        "category": "mechanical",
+        "severity": "critical",
+        "description": "Radiator bank 2 is heavily fouled with dust and debris, reducing convective surface area by an estimated 40% and preventing adequate ONAN cooling. Cooling impairment is likely contributing to elevated winding and oil temperatures across adjacent transformers.",
+        "recommendation": "Clean and degrease radiator fins and replace any deformed fins within 48 hours to restore convective cooling. After cleaning, monitor oil and winding temperatures continuously for 72 hours; if temperatures remain elevated, schedule further cooling system remediation or load reduction."
+      },
+      {
+        "category": "structural",
+        "severity": "high",
+        "description": "Steel bus support member at phase A (north yard, span 3) exhibits advanced section loss with measured remaining thickness 6 mm from original 10 mm (approximate 40% loss). Corrosion is active and localized perforation risk exists under sustained loading.",
+        "recommendation": "Schedule replacement of the affected support member within 30 days; until replacement, reduce mechanical loading and perform interim shoring. Inspect adjacent members for similar deterioration during the replacement operation."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Earthing pit 2 grounding conductor is disconnected at the clamp (southwest yard) and measured earth resistance at that pit is 15 ohms, exceeding the utility target of <1 ohm for effective station grounding. Missing safety signage at the control building entrance was also observed.",
+        "recommendation": "Repair and reconnect earthing conductor and re-establish ground resistance <1 ohm within 7 days. Replace missing safety signage and perform a site-wide grounding verification within 14 days."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "South yard has poor drainage with standing water observed up to 30 mm deep adjacent to the control building entrance following recent rainfall. Prolonged pooling increases corrosion potential and creates slip hazards for personnel.",
+        "recommendation": "Regrade the south yard surface and install a grated drainage channel to eliminate standing water; complete work within 60 days. Monitor the area during subsequent rain events to confirm effectiveness."
+      }
+    ]
+  },
+  {
+    "asset_name": "Pipeline North-7",
+    "inspector": "Elena M. Torres",
+    "overall_grade": "B",
+    "summary": "Pipeline North-7 is in generally good condition with only minor localized defects primarily related to coating abrasion and aging ancillary components. No evidence of through-wall corrosion was observed during this inspection, and operational pressures were within the asset rating. Routine maintenance and targeted repairs are recommended to prevent progression. Monitor affected areas quarterly and verify repairs within 90 days.",
+    "days_ago": 87,
+    "findings": [
+      {
+        "category": "coating",
+        "severity": "medium",
+        "description": "External coating abrasion observed at approximately 2.1 km (northbound side) exposing ductile iron over a 1.2 m2 area; substrate shows surface rust but no deep pitting. The affected area exceeds typical touch-up thresholds for 600 mm ductile iron pipelines per municipal standard CP-201 (threshold 0.5 m2).",
+        "recommendation": "Perform localized abrasive cleaning and re-apply factory-equivalent coating within 60 days and document coating adhesion test results post-repair."
+      },
+      {
+        "category": "mechanical",
+        "severity": "low",
+        "description": "Gate valve at 4.8 km exhibits increased operating torque and minor packing seepage of approximately 0.02 L/hr. Valve nut torque measured 18 N\u00b7m above baseline maintenance spec but remains operable.",
+        "recommendation": "Replace valve packing and perform lubrication and torque adjustment during the next scheduled outage within 90 days; re-test valve operation after maintenance."
+      },
+      {
+        "category": "corrosion",
+        "severity": "low",
+        "description": "Cathodic protection potential measured -0.62 V (CSE) at test station 7 (7.0 km) which is marginally less negative than the recommended -0.85 V benchmark for ductile iron pipelines. No active pitting observed in the vicinity.",
+        "recommendation": "Increase CP rectifier output and re-survey potentials quarterly until values stabilize at or below -0.85 V (CSE); log adjustments and verify isolation/anode functionality within 30 days."
+      }
+    ]
+  },
+  {
+    "asset_name": "Pipeline North-7",
+    "inspector": "Marcus J. Lee",
+    "overall_grade": "C",
+    "summary": "Inspection identified moderate corrosion and coating deterioration at multiple locations along Pipeline North-7 that require intervention to prevent further degradation. Several localized areas show metal loss approaching acceptable limits for continued operation at 1200 kPa rating. Prioritize internal inspection (pigging) and repair campaigns; schedule corrective actions within 90 days.",
+    "days_ago": 412,
+    "findings": [
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Localized external pitting located at 4.2 km (12 o'clock position) with maximum measured metal loss up to 25% of nominal wall thickness based on ultrasonic thickness readings (baseline t_nom estimated for 600 mm ductile iron). Pits are clustered over a 0.6 m length and associated with coating delamination.",
+        "recommendation": "Cut out and replace the affected pipe spool or apply welded sleeve repair within 90 days and perform post-repair UT thickness survey to confirm restoration of required wall thickness."
+      },
+      {
+        "category": "coating",
+        "severity": "medium",
+        "description": "Longitudinal coating disbondment observed along a 12 m stretch at 9.6\u20139.612 km with under-film corrosion initiation; estimated coating loss area 3.6 m2. The defect is adjacent to a drainage crossing where splash and moist conditions are present.",
+        "recommendation": "Remove delaminated coating, clean substrate, and recoat with approved protective system within 60 days; install additional drainage protection or splash guards to mitigate recurrence."
+      },
+      {
+        "category": "safety",
+        "severity": "medium",
+        "description": "Vegetation encroachment and unsecured access gates were noted at right-of-way markers near 1.5 km, impeding inspection access and increasing risk of accidental third-party damage. No evidence of recent third-party strikes, but clearance is below the 3 m guideline in areas.",
+        "recommendation": "Conduct right-of-way clearing to achieve at least 3 m lateral clearance and replace/lock access gates within 45 days; schedule quarterly patrols until permanent clearance is maintained."
+      }
+    ]
+  },
+  {
+    "asset_name": "Pipeline North-7",
+    "inspector": "Priya K. Raman",
+    "overall_grade": "D",
+    "summary": "Pipeline North-7 exhibits significant degradation in multiple segments, including extensive coating failure, deep corrosion, and ground instability near the pipeline alignment. One active leak was detected and isolated; several locations show metal loss approaching critical levels considering the 1200 kPa pressure rating. Immediate mitigation and an accelerated repair program are required to restore operational integrity.",
+    "days_ago": 21,
+    "findings": [
+      {
+        "category": "corrosion",
+        "severity": "critical",
+        "description": "Active through-wall leak identified at 3.58 km (south side) with fluid plume observed and leakage rate estimated at 0.15 L/min; UT indicates localized wall loss exceeding 70% of nominal thickness adjacent to the leak. The defect is within a 0.4 m length and demonstrates advanced pitting consistent with prolonged coating failure.",
+        "recommendation": "Isolate the pipeline segment and execute emergency repair or spool replacement within 48 hours; if isolation is not possible, reduce operating pressure and deploy temporary clamp until permanent repair can be completed."
+      },
+      {
+        "category": "coating",
+        "severity": "high",
+        "description": "Extensive coating breakdown and bare metal exposed across multiple spans, most notably between 5.2 km and 5.35 km where 15 m of pipeline shows complete coating loss and surface scale. The condition exceeds allowable limits for continued unmitigated operation per CityPulse Asset Standard CP-201.",
+        "recommendation": "Schedule removal of loose coating and full recoat of the affected 15 m length with approved anti-corrosion system within 14 days and perform post-coating holiday testing prior to returning to service."
+      },
+      {
+        "category": "drainage",
+        "severity": "high",
+        "description": "Evidence of recent soil erosion and minor subsidence at 6.0 km near a culvert crossing; burial depth reduced by an estimated 0.25 m exposing the pipeline crown and increasing mechanical loading risk. Continued erosion observed upslope could further reduce cover.",
+        "recommendation": "Stabilize the embankment and restore minimum cover to design depth within 14 days, and install erosion control measures; inspect adjacent pipeline sections for mechanical damage after restoration."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Flange bolting at a sleeve joint near 10.9 km shows heavy corrosion with two bolts exhibiting reduced torque retention; leak history log indicates intermittent seepage at this joint. Visual inspection indicates degraded nut/bolt threads and partial galvanic corrosion.",
+        "recommendation": "Replace corroded bolts with corrosion-resistant fasteners and apply appropriate anti-seize compound within 30 days and pressure-test the joint after maintenance."
+      }
+    ]
+  },
+  {
+    "asset_name": "Pipeline South-3",
+    "inspector": "Marina E. Delgado",
+    "overall_grade": "B",
+    "summary": "Pipeline South-3 is in generally good condition with only minor degradation and localized exposure of the HDPE jacket. Routine monitoring and small targeted repairs will maintain safe operation within design pressure limits. No active leaks were detected during this inspection, but shallow cover and abrasion at specific locations should be addressed within the next 90 days.",
+    "days_ago": 142,
+    "findings": [
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "At 2.30 km (northbound verge) the trench cover measured 0.45 m of soil cover over the 400 mm HDPE pipeline, below the recommended minimum cover of 0.60 m specified in Greenfield Park Utility Code GP-PIPE-2017. Surface runoff has created a 5.0 m long section of exposed bedding material and reduced cover.",
+        "recommendation": "Re-establish a minimum 0.60 m cover and recompact the trench over the 5.0 m exposed length within 90 days; monitor quarterly thereafter for renewed erosion."
+      },
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "UV weathering (surface crazing) observed on the exposed HDPE outer surface at chainage 2.30\u20132.35 km with superficial micro-cracking up to 0.5 mm depth. No through-wall damage observed and material remains ductile under manual assessment.",
+        "recommendation": "Apply a UV-protective sleeve or geotextile wrap to the exposed area within 180 days and log condition in next quarterly inspection."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "External abrasion and scraping noted at 4.70 km where the pipeline traverses a maintenance access track; scrapes penetrate up to 2\u20133 mm into the outer surface over a 0.8 m length, consistent with localized mechanical contact. No leakage detected; pressure test remains within 5% of baseline.",
+        "recommendation": "Install a 1.5 m long protective HDPE sleeve and bollards at the track crossing within 60 days to prevent repeat contact and re-inspect after installation."
+      }
+    ]
+  },
+  {
+    "asset_name": "Pipeline South-3",
+    "inspector": "Thomas J. Harrow",
+    "overall_grade": "C",
+    "summary": "The pipeline shows moderate deterioration in several locations that require scheduled maintenance. Observed anomalies include localized deformation, joint misalignment, and intermittent pressure excursions recorded by SCADA. Repairs and closer monitoring are recommended to prevent escalation to critical failure.",
+    "days_ago": 37,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "high",
+        "description": "At 6.80 km under the secondary road crossing, a 1.2 m long sag was noted with pipeline mid-span deflection reducing internal diameter by approximately 10% (measured internal deformation equivalent to ~360 mm effective diameter). The sag is associated with an undermined bedding and a 0.3 m void beneath the pipe.",
+        "recommendation": "Excavate and support the affected span, re-bed with approved granular material and restore correct alignment within 30 days; re-pressure-test the repaired span per ISO 4427 procedures before return to service."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Electrofusion joint at 3.12 km exhibits misalignment of approximately 8 mm and visual non-uniform fusion bead, likely from poor joint preparation. No leak detected but the joint shows increased local stiffness and small surface cracking at the bead.",
+        "recommendation": "Schedule excavation and detailed NDT (visual and thermal imaging) of the joint within 30 days; if full fusion is not confirmed, replace the joint segment and document welding parameters."
+      },
+      {
+        "category": "safety",
+        "severity": "medium",
+        "description": "SCADA log review shows intermittent pressure excursions reaching 920 kPa (peak) at 3.10 km during transient pump events, exceeding the pipeline pressure rating of 800 kPa. Excursions are short duration but repeated over the last 6 months.",
+        "recommendation": "Coordinate with operations to implement transient suppression (surge vessel or pressure relief) and adjust pump start sequences within 14 days; conduct a surge analysis and monitor pressure continuously until normalized."
+      }
+    ]
+  },
+  {
+    "asset_name": "Pipeline South-3",
+    "inspector": "Liang Chen",
+    "overall_grade": "D",
+    "summary": "Significant integrity issues were identified requiring immediate intervention. A confirmed active leak and multiple mechanical damages compromise the pipeline's safe operation; emergency shutdown and replacement of the damaged segment are recommended. Remaining defects indicate unacceptable risk if the line remains in service without repair.",
+    "days_ago": 9,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "critical",
+        "description": "Active leak confirmed at 5.42 km with measured discharge approximately 12 L/min and saturated soil footprint of 4.0 m\u00b2. SCADA shows a concurrent pressure drop of 150 kPa and localized soil heave, indicating loss of containment.",
+        "recommendation": "Immediate shutdown of the affected pipeline section and isolation of 5.30\u20135.55 km; excavate and replace the damaged segment within 24 hours and restore pressure test to baseline before restart."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Severe mechanical gouging observed at 5.40\u20135.45 km with through-thickness abrasion estimated to reduce cross-sectional thickness by ~60% over a 0.6 m length. Although HDPE does not corrode in the traditional sense, the mechanical loss materially reduces strength.",
+        "recommendation": "Cut out and replace the gouged 0.6 m section and inspect adjacent 1.0 m of pipe for sub-surface damage; schedule replacement immediately during the emergency repair."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Third-party excavation marks and a recent backhoe track were observed adjacent to the leak location at 5.40 km, indicating probable strike. No evidence of prior notification to utility locate services was found on site records.",
+        "recommendation": "Report the strike to Greenfield Park utility authority and implement a community safety advisory; enforce immediate site controls and require contractor remediation work within 48 hours."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Longitudinal drainage failure along 7.90\u20138.10 km near the terminus has led to standing water adjacent to the pipeline and saturated bedding conditions reaching 0.5 m depth in localized areas. Saturation increases the risk of pipeline flotation and bedding migration.",
+        "recommendation": "Improve site drainage and install French drains along the affected 200 m length within 30 days; re-grade surface to prevent standing water and recompact bedding following repair of the primary leak."
+      },
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Contaminant staining and oil residue detected on the pipe exterior at 5.45\u20135.50 km possibly from the leak or surface runoff. Surface contamination may accelerate localized degradation and hinder future inspections.",
+        "recommendation": "Clean the affected exterior areas during repair and apply protective sleeve or coating to the replaced segment within the repair window."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Outfall Main",
+    "inspector": "Marina L. Ortega",
+    "overall_grade": "B",
+    "summary": "The Harbor Outfall Main shows generally good structural integrity with localized deterioration consistent with age and marine exposure. Minor cracking and sediment accumulation were observed at discrete locations but do not currently compromise pipeline function. Recommended actions are scheduled maintenance and targeted repairs to prevent escalation.",
+    "days_ago": 42,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Longitudinal hairline cracks were observed in the crown at the 1.2 km mark, measured at approximately 0.2 mm width over a 0.8 m length (CCTV observation). These cracks are limited to the inner face and do not presently show full-depth spalling.",
+        "recommendation": "Perform epoxy injection sealing for identified cracks and re-inspect the sealed areas within 90 days to confirm efficacy."
+      },
+      {
+        "category": "drainage",
+        "severity": "low",
+        "description": "Sediment accumulation noted at interior invert between 2.3\u20132.4 km with maximum depth of 8 cm, reducing effective hydraulic diameter by approximately 3%. Flow tests show no significant headloss at normal operating pressures (observed operating pressure 310 kPa, rated 400 kPa).",
+        "recommendation": "Schedule mechanical desludging of the affected 100 m reach within 120 days and include sediment checks in the quarterly inspection program."
+      },
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Coating delamination patches detected at the east riser entrance near the shoreline outfall affecting ~5% of the inspected surface; no active leaks detected and no exposed aggregate deeper than 1 mm.",
+        "recommendation": "Repair delaminated coating areas with approved cementitious repair mortar and recoating within 180 days, and monitor coating condition during biannual inspections."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Outfall Main",
+    "inspector": "Daniel R. Hargrove",
+    "overall_grade": "C",
+    "summary": "The inspection identified moderate deterioration consistent with marine environment exposure requiring planned maintenance. Several locations exhibit active corrosion of reinforcement, localized spalling, and increased infiltration that warrant repairs to prevent further degradation. A maintenance program with prioritized corrective actions should be implemented within the next 60\u2013180 days.",
+    "days_ago": 217,
+    "findings": [
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Active corrosion of reinforcement detected at manhole MH-07 (approx. 0.8 km) with half-cell potentials measured at -360 mV (ASTM C876 baseline) and exposed rebar showing surface loss estimated at 10\u201315% over a 0.5 m2 area. Concrete cover in the affected patch has reduced by approximately 10 mm relative to adjacent sections.",
+        "recommendation": "Cut out spalled concrete, clean and treat exposed reinforcement, apply corrosion-inhibiting repair mortar and restore cover; implement cathodic protection design study and install within 180 days based on findings."
+      },
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Localized spalling observed at 1.9 km on the invert with maximum spall depth of 12 mm and crack widths up to 0.6 mm extending circumferentially over 0.6 m length. Structural continuity is currently maintained but deterioration is progressing.",
+        "recommendation": "Perform localized patch repairs using approved structural repair materials within 60 days and schedule follow-up CCTV inspection in 12 months."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Infiltration measured at access point MH-07 is approximately 2.0 L/min (during low tide) indicating joint deterioration in the 0.75\u20130.85 km reach. Sediment accumulation downstream at 2.0 km measured 15 cm depth, increasing hydraulic restriction.",
+        "recommendation": "Inject joint sealant for the implicated 10 m section and perform sediment removal from the downstream reach within 30 days; reinspect infiltration quarterly."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Access ladder at shore breakwater riser shows corrosion of fasteners but remains serviceable; slip hazard due to marine growth observed on ladder rungs (average 3 mm biofilm thickness).",
+        "recommendation": "Replace corroded fasteners and apply anti-slip treatment to rungs during the next maintenance window (within 90 days) and include access hardware in annual safety checks."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Outfall Main",
+    "inspector": "Priya S. Menon",
+    "overall_grade": "F",
+    "summary": "Critical structural failure was identified in the Harbor Outfall Main requiring immediate shutdown and emergency repair. Significant deformation, active leakage, and severe reinforcement loss present imminent risk of collapse and environmental release. Immediate isolation and emergency replacement of the affected segment are recommended.",
+    "days_ago": 7,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "critical",
+        "description": "A bellied section was identified at 0.9 km with a 120 mm local vertical sag and circumferential deformation reducing internal diameter by approximately 15% (confirmed by sonar and CCTV). A 1.2 m longitudinal split of the crown is visible with progressive widening under load.",
+        "recommendation": "Isolate and take the affected pipeline segment out of service within 24 hours; install emergency bypass pumping and replace the damaged 12 m segment with new pipe within 7 days."
+      },
+      {
+        "category": "corrosion",
+        "severity": "critical",
+        "description": "Extensive reinforcement corrosion at the failed section with measured section loss of rebar up to 40% and concrete cover loss exceeding 25 mm in multiple locations; half-cell potentials exceed -400 mV in adjacent zones, indicating widespread active corrosion.",
+        "recommendation": "Do not attempt repair in-place; remove and replace the corroded segment. Conduct a full cathodic protection assessment for the entire 3.2 km outfall and implement system within 90 days post-replacement."
+      },
+      {
+        "category": "mechanical",
+        "severity": "high",
+        "description": "Rapid pressure fluctuation observed during failure event: nominal operating pressure 320 kPa dropped to 180 kPa concurrently with leakage at 0.9 km, indicating loss of hydraulic integrity and potential for additional structural compromise upstream.",
+        "recommendation": "Perform hydraulic isolation tests and confirm integrity of upstream valves before re-commissioning any portion of the system; maintain bypass pumping until full replacement and testing are complete."
+      },
+      {
+        "category": "safety",
+        "severity": "critical",
+        "description": "Active leakage into adjacent intertidal zone observed with estimated discharge >25 L/min and evidence of contaminant staining on shoreline substrate. Proximity to public access points increases environmental and public health risk.",
+        "recommendation": "Initiate immediate containment and environmental protection measures, cordon off public access within 50 m, and notify environmental response teams. Complete emergency repairs and contaminant remediation within 7 days and report to regulatory authorities within 24 hours."
+      }
+    ]
+  },
+  {
+    "asset_name": "Central Gas Distribution",
+    "inspector": "Gabriel M. Rutherford",
+    "overall_grade": "B",
+    "summary": "The Central Gas Distribution pipeline is in generally good condition with only minor defects observed that do not currently compromise safe operation. Routine maintenance and localized remediation are recommended to prevent progressive deterioration. No active leaks were detected during this inspection and operational pressures were within rated limits.",
+    "days_ago": 78,
+    "findings": [
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Localized abrasion of the external protective coating observed at approximately 2.2 km from the western access, spanning a 0.8 m length. Coating loss exposes bare steel but no significant pitting was detected at the time of inspection.",
+        "recommendation": "Perform spot surface preparation and touch-up with compatible coating within 90 days and re-inspect the repaired area during the next quarterly inspection."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Valve actuators at the midline manifold (chainage 3.1 km) exhibited increased torque during manual operation; measured operating torque was 35% above manufacturer nominal. This may impede rapid isolation under emergency conditions.",
+        "recommendation": "Schedule actuator lubrication and calibration within 30 days and replace worn actuator components within 180 days if torque does not return to nominal values."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Two pipeline marker signs at access points (0.0 km and 6.8 km ends) are faded and partially obscured by vegetation, reducing visibility for emergency responders. Current signage does not meet legibility recommendations in local guidance.",
+        "recommendation": "Replace both marker signs and clear surrounding vegetation within 60 days and include sign condition in quarterly site checks."
+      }
+    ]
+  },
+  {
+    "asset_name": "Central Gas Distribution",
+    "inspector": "Priya K. Malhotra",
+    "overall_grade": "C",
+    "summary": "Inspection identified multiple mid-level maintenance items including corrosion, cathodic protection underperformance, and minor pressure irregularities that warrant corrective action. These conditions are not immediately catastrophic but require scheduled repairs and closer monitoring to maintain safe service. Prioritization of cathodic protection repairs and targeted pipe section remediation is recommended.",
+    "days_ago": 312,
+    "findings": [
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "In-line inspection anomalies at chainage 4.5 km indicate localized wall loss with ultrasonic thickness readings averaging 3.2 mm compared to the nominal wall thickness (documented design thickness 5.0\u20136.0 mm), representing approximately 35\u201340% loss in affected spots of a 0.6 m length. Pitting morphology and depth exceed the 25% loss threshold used by the operator for remedial action.",
+        "recommendation": "Excavate, clean and perform detailed NDE of the affected 1.0 m pipe segment within 30 days and replace the damaged section if confirmed wall loss exceeds 30%; if replacement is not immediately possible, install a structural repair clamp and schedule full replacement within 90 days."
+      },
+      {
+        "category": "coating",
+        "severity": "medium",
+        "description": "Areas of coating delamination were observed near welded joints at chainage 4.48\u20134.52 km with underlying corrosion initiation. The delamination extent is approximately 1.2 m total length across two joints.",
+        "recommendation": "Remove loose coating, prepare the surface, and reapply approved pipeline coating to the affected joints within 60 days and re-evaluate adjacent areas during the next CP survey."
+      },
+      {
+        "category": "electrical",
+        "severity": "high",
+        "description": "Cathodic protection (CP) potential survey across multiple test points returned potentials averaging -0.60 V CSE, which is insufficient relative to the commonly applied protection criterion of -0.85 V CSE for buried steel pipelines. This underperformance is consistent with the observed external corrosion marks.",
+        "recommendation": "Inspect and repair CP rectifier and anode bed within 30 days, adjust CP system to achieve target potential of at least -0.85 V CSE, and conduct follow-up survey monthly until stable readings are achieved."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Pressure log from operational monitoring shows intermittent drops to 640\u2013645 kPa during peak demand periods, below the nominal 700 kPa rating but above minimum safe operating threshold. Fluctuations correlate with valve cycling at distribution nodes.",
+        "recommendation": "Investigate flow balancing at distribution nodes and program hydraulic modeling within 60 days; consider installation of pressure regulators or surge dampeners where fluctuations exceed acceptable operational variance."
+      }
+    ]
+  },
+  {
+    "asset_name": "Central Gas Distribution",
+    "inspector": "Elena V. Korolenko",
+    "overall_grade": "D",
+    "summary": "Significant defects were found on the Central Gas Distribution pipeline requiring immediate intervention. Active leakage and evidence of through-wall corrosion at a specific location present a safety and environmental hazard. Emergency isolation and repair are recommended without delay.",
+    "days_ago": 9,
+    "findings": [
+      {
+        "category": "corrosion",
+        "severity": "critical",
+        "description": "Active leak identified at chainage 1.6 km with audible gas release and visual frost on the soil surface; hand-held ultrasonics and visual inspection confirmed through-wall breach across a 0.25 m length. Local wall loss measured exceeded 70% of nominal thickness and is consistent with long-term corrosion and CP failure.",
+        "recommendation": "Immediately isolate and depressurize the affected pipeline segment, notify emergency response, and perform emergency excavation and replacement of a minimum 2.0 m section within 24 hours. Do not return the segment to service until full pressure testing and NDE confirm integrity."
+      },
+      {
+        "category": "electrical",
+        "severity": "critical",
+        "description": "Cathodic protection system at the eastern rectifier station (feed 02) has failed; rectifier output is zero and anode bed continuity loss was recorded. CP test points adjacent to the leak showed potentials of -0.10 V CSE, indicating no effective protection.",
+        "recommendation": "Repair or replace rectifier and restore cathodic protection immediately; verify anode continuity and performance and restore potentials to at least -0.85 V CSE prior to reinstating pipeline pressure. Re-survey CP weekly until stable."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Emergency isolation procedures were observed to be unclear at the local control kiosk; signage describing shutdown sequence and emergency contact numbers were missing or illegible. This delays response time in critical events.",
+        "recommendation": "Post clear shutdown protocols and emergency contact information at all control kiosks within 48 hours and conduct an emergency shutdown drill with operations staff within 14 days."
+      }
+    ]
+  },
+  {
+    "asset_name": "Comms Tower Alpha",
+    "inspector": "Daniel R. Hayes",
+    "overall_grade": "B",
+    "summary": "Comms Tower Alpha is in generally good condition with minor maintenance items observed that do not currently compromise structural integrity or service. Routine corrective actions are recommended to prevent progressive deterioration and to maintain compliance with industry standards. Continued monitoring of electrical continuity and finish condition is advised to preserve asset longevity.",
+    "days_ago": 27,
+    "findings": [
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Paint blistering and localized flaking observed between 10\u201318 m on the windward face of the tower; affected area approximates 0.8 m^2. The underlying steel shows surface rust but no section loss at this location.",
+        "recommendation": "Remove loose coating, treat surface rust, and apply touch-up coating in accordance with manufacturer's specifications; schedule repainting of the affected zone within 120 days."
+      },
+      {
+        "category": "electrical",
+        "severity": "medium",
+        "description": "Grounding electrode resistance measured at 12.4 ohms at the ground rod test point near the tower base, exceeding the recommended industry practice of <5 ohms for reliable lightning dissipation. Ground conductor continuity between base and platform is intact but shows increased resistance compared to prior records.",
+        "recommendation": "Conduct supplemental grounding improvements (add parallel ground rods or chemical electrodes) and retest to achieve <5 ohms; complete corrective work within 60 days and retest immediately after implementation."
+      },
+      {
+        "category": "mechanical",
+        "severity": "low",
+        "description": "Antenna mounting clamps at the 60\u201365 m level show minor loosening (torque measurements 10\u201315% below specification) on two of twelve mounting points. No visible deformation or fatigue cracks were observed on the mounting brackets.",
+        "recommendation": "Re-torque affected antenna clamp fasteners to specified values and inspect torque on all antenna mounts; perform this action during the next scheduled maintenance window within 30 days."
+      }
+    ]
+  },
+  {
+    "asset_name": "Comms Tower Alpha",
+    "inspector": "Marisol K. Ortega",
+    "overall_grade": "C",
+    "summary": "The tower exhibits fair condition but multiple maintenance items require attention to avoid service degradation. Corrosion at the base and deterioration of safety components are the primary concerns. Remediation of structural and safety-related items should be scheduled promptly to restore acceptable serviceability.",
+    "days_ago": 213,
+    "findings": [
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Significant corrosion and pitting observed on the base plate and lower leg sections within 0\u20132 m of the foundation; maximum measured pit depth approximately 3.2 mm affecting an estimated 0.6 m^2 area. Surface loss approaches 15% of original thickness in localized spots compared to original structural members.",
+        "recommendation": "Schedule structural assessment and repair within 30 days; remove affected material, apply corrosion mitigation (grinding, weld repairs as required), and recoat per specification. If section loss exceeds allowable limits per EIA/TIA-222 criteria, replace affected members immediately."
+      },
+      {
+        "category": "safety",
+        "severity": "medium",
+        "description": "Fall-protection ladder cage is partially missing between 12\u201318 m; access platform at 18 m lacks functional safety latches. This compromises safe climb procedures for maintenance personnel.",
+        "recommendation": "Replace missing ladder cage segments and repair platform latches within 14 days prior to any planned climbs; restrict access until repairs are complete and verify compliance with OSHA fall protection requirements."
+      },
+      {
+        "category": "drainage",
+        "severity": "low",
+        "description": "Accumulation of standing water and debris within the concrete foundation perimeter drain was observed, reducing drainage efficiency and promoting accelerated corrosion at the base.",
+        "recommendation": "Clear drain debris, re-profile drainage channel, and install mosquito-proofing grates; perform remedial cleaning within 30 days and inspect quarterly thereafter."
+      },
+      {
+        "category": "electrical",
+        "severity": "medium",
+        "description": "Lightning protection bonding conductor shows evidence of thermal discoloration at the 22 m bonding clamp; bond continuity measured but local resistance elevated relative to baseline. Surge arrestor housings on two feed lines exhibit weathering.",
+        "recommendation": "Replace the heat-affected bonding clamp and degraded surge arrestor housings within 45 days and verify low-resistance continuity per NFPA recommendations after replacement."
+      }
+    ]
+  },
+  {
+    "asset_name": "Comms Tower Alpha",
+    "inspector": "Ethan L. Park",
+    "overall_grade": "D",
+    "summary": "Comms Tower Alpha presents poor condition with critical deficiencies that pose immediate safety and service reliability risks. Structural corrosion at anchorage, compromised lightning protection, and damaged climbing infrastructure were observed. Immediate remedial action and restricted access are required to mitigate hazard and restore functionality.",
+    "days_ago": 601,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "critical",
+        "description": "Anchor bolt assemblies at the northeast foundation exhibit advanced corrosion and visible thread loss; two of six anchor bolts show circumferential cracking at the nut interface and a measurable reduction in cross-section exceeding 30%. Tower plumbness measured at the top indicates a lateral deviation of 45 mm from vertical, exceeding tolerance for a 65 m structure.",
+        "recommendation": "Cease non-essential tower access immediately and schedule emergency structural stabilization within 7 days. Replace corroded anchor bolts and perform structural realignment or temporary shoring; follow with full structural re-certification per EIA/TIA-222 before returning to service."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Primary ladder between 6\u201330 m is severely corroded with multiple ladder rungs exhibiting section loss and two rungs fractured; fall-arrest system is non-functional and safety signage is missing at the base entry.",
+        "recommendation": "Restrict climbing access and post hazard notifications immediately. Replace the ladder segment and install compliant fall-arrest equipment and signage within 14 days prior to any access by maintenance personnel."
+      },
+      {
+        "category": "electrical",
+        "severity": "critical",
+        "description": "Grounding system continuity is interrupted: bonding conductor from top platform to base is detached at 58 m, and lightning dissipation path is compromised. No functional surge protection was detected on the primary feed, increasing risk of equipment loss during lightning events.",
+        "recommendation": "Perform immediate restoration of the bonding conductor and install temporary bonding to restore continuity within 24\u201348 hours. Replace surge protection devices and re-establish certified grounding (target <5 ohms) within 7 days."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Widespread advanced corrosion on mid-span lattice members between 30\u201350 m with through-thickness pitting observed at brace connections; one diagonal brace exhibited a hairline fracture propagating from a corroded weld toe.",
+        "recommendation": "Conduct detailed non-destructive evaluation and engineering assessment within 7 days. Replace compromised brace members and repair weld defects within 30 days, and perform load testing after repairs to verify structural adequacy."
+      }
+    ]
+  },
+  {
+    "asset_name": "Comms Tower Beta",
+    "inspector": "Daniela R. Hayes",
+    "overall_grade": "B",
+    "summary": "Comms Tower Beta in Northgate Industrial is in generally good condition with intact primary structural members and functional communications equipment. Minor coating degradation and small fastener torque deficiencies were observed and should be addressed to prevent escalation. Routine monitoring and targeted repairs will maintain serviceability for the tower's 45 m height and eight-antenna configuration.",
+    "days_ago": 78,
+    "findings": [
+      {
+        "category": "coating",
+        "severity": "medium",
+        "description": "Localized paint loss and surface rust observed on leg 3 between 0.5 m and 2.0 m above grade, affecting approximately 12% of the circumference at that band. Areas show adhesion failure consistent with UV/weathering; underlying steel exhibits light surface pitting up to 0.5 mm deep.",
+        "recommendation": "Perform spot blast cleaning to SSPC-SP6 in the affected band and apply a compatible zinc-rich primer and topcoat within 45 days; schedule a full coating condition review within 24 months."
+      },
+      {
+        "category": "electrical",
+        "severity": "low",
+        "description": "Grounding resistance measured at the tower base grounding ring is 4.5 ohms, taken with clamp-on tester under dry conditions, which is within the common acceptance threshold of <5 ohms for communications towers. Bond continuity to the 8 antenna mounts is present with no open circuits detected.",
+        "recommendation": "Retest ground resistance annually and after any major lightning event; document readings and maintain bonding connections, tightening as required during routine inspections."
+      },
+      {
+        "category": "mechanical",
+        "severity": "low",
+        "description": "Several antenna mount bolts on the top platform (elevation ~45 m) present torque values averaging 65 Nm, below the installation specification of 90 Nm. No immediate structural movement observed, but reduced preload increases risk of fretting over time.",
+        "recommendation": "Inspect and retorque all antenna mount fasteners to specification within 30 days; replace any bolts showing thread damage or deformation during that intervention."
+      }
+    ]
+  },
+  {
+    "asset_name": "Comms Tower Beta",
+    "inspector": "Marcus L. Chen",
+    "overall_grade": "C",
+    "summary": "Comms Tower Beta exhibits fair condition with several maintenance issues that require attention to ensure continued safe operation. Mid-height corrosion, degraded fall-protection components, and under-torqued antenna fasteners were observed and should be corrected within specified short-term intervals. Continued operations are permissible if immediate high-risk issues are mitigated and repairs scheduled promptly.",
+    "days_ago": 301,
+    "findings": [
+      {
+        "category": "corrosion",
+        "severity": "medium",
+        "description": "Moderate corrosion and pitting detected on leg 2 between 20 m and 30 m elevation, with maximum measured pitting depth of 1.8 mm representing an estimated 7% reduction in local cross-section at one probe location. Corrosion extends circumferentially ~30 cm and has progressed beyond superficial surface rust.",
+        "recommendation": "Arrange a structural assessment of the affected leg within 14 days and schedule localized plate repair or reinforcement within 90 days if cross-section loss exceeds 5% upon detailed measurement."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Ladder safety cage and fall-arrest anchor points from 6 m to 10 m show corrosion and several missing cage rungs; two anchor studs exhibited visible thread corrosion and reduced engagement. This creates elevated fall risk for climbing technicians.",
+        "recommendation": "Restrict climbing access to the structure until repairs are completed; replace the affected ladder cage section and all compromised fall-arrest anchors within 30 days and verify to fall-protection standards prior to resuming access."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Top-platform antenna mounts show multiple bolts with measured torque values averaging 45 Nm compared to the installation requirement of 90 Nm. Small gap movement under manual loading indicates potential for loosening under wind-loading cycles.",
+        "recommendation": "Retorque antenna mount fasteners to the manufacturer-specified 90 Nm and replace any bolts with thread damage within 14 days; verify antenna alignment post-retorque."
+      },
+      {
+        "category": "electrical",
+        "severity": "low",
+        "description": "Bonding strap between the tower and service grounding rod exhibits surface oxidation but maintains electrical continuity. No arcing or open circuits were observed during tests.",
+        "recommendation": "Clean and apply corrosion-inhibiting compound to the bonding strap within 60 days and retest continuity; include bonding inspection in quarterly maintenance checks."
+      }
+    ]
+  },
+  {
+    "asset_name": "Comms Tower Beta",
+    "inspector": "Evelyn J. Ortiz",
+    "overall_grade": "D",
+    "summary": "Comms Tower Beta presents significant deficiencies that compromise structural integrity and personnel safety and require immediate remediation. Evidence of anchor bolt failure and severe base-plate cracking was observed, and access should be restricted until emergency repairs are completed. Continued operation without prompt action risks tower collapse and equipment loss.",
+    "days_ago": 12,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "critical",
+        "description": "Fracture observed at the north base plate weld with a crack length of approximately 120 mm and through-thickness separation at one corner; two of the eight anchor bolts show thread separation and reduced embedment, measured pull-out depth reduction of ~30%. Visual displacement of base plate is approximately 8 mm relative to undisturbed corners.",
+        "recommendation": "Initiate emergency shutdown of tower operations and restrict vicinity access immediately. Engage structural engineer and schedule emergency shoring and base-plate / anchor bolt replacement within 48 hours; complete permanent repair and NDT verification within 7 days."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Severe galvanic corrosion present at the leg-to-base-plate interface, with coating loss exceeding 60% in the affected area and corrosion pits measuring up to 3.5 mm depth. Corrosion progression appears advanced and likely contributed to the observed base plate and anchor deterioration.",
+        "recommendation": "Remove corrosion products and cut out/replace compromised sections during the emergency repair; perform cathodic protection assessment and recoat per SSPC standards within the immediate repair scope."
+      },
+      {
+        "category": "electrical",
+        "severity": "critical",
+        "description": "Exposed live conductor observed in the equipment cabinet at the base with evidence of arcing and melting of cable insulation; the grounding conductor at the cabinet is loose and measured continuity is >10 ohms. This condition presents an immediate fire and electrocution hazard.",
+        "recommendation": "Isolate and de-energize electrical supply to the cabinet immediately. Replace damaged conductors, secure grounding conductor, and perform full electrical inspection and insulation resistance testing before re-energizing; complete repairs within 24 hours of shutdown."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Fall-protection anchors near the base show detachment and cannot be relied upon; signage and perimeter barriers at the base are damaged or missing, providing inadequate hazard notification to personnel. Climbing equipment on site was unsecured and exposed to adverse conditions.",
+        "recommendation": "Erect a secure exclusion zone around the tower and post hazard signs immediately. Do not permit climbing until certified fall-protection anchors are installed and verified, and missing signage and barriers are replaced within 24 hours."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Relay Station",
+    "inspector": "Marina L. Ortega",
+    "overall_grade": "B",
+    "summary": "The Harbor Relay Station is generally in good functional condition with all six antennas operational and the tower remaining plumb within acceptable tolerances. Several minor maintenance issues were observed that do not currently compromise structural integrity or communications coverage. Recommended actions are routine maintenance and targeted repairs to restore full compliance with manufacturer and TIA-222 guidance.",
+    "days_ago": 48,
+    "findings": [
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Localized paint flaking and surface oxidation observed on the north leg between 25 and 30 m elevation, affecting approximately 8% of that leg's exposed surface. Average coating thickness measured 80 \u00b5m versus the recommended 100 \u00b5m for exterior corrosive environments.",
+        "recommendation": "Perform targeted surface preparation and touch-up coating in affected areas within 180 days and schedule a full exterior repaint of the tower within 12 months; monitor coating condition annually."
+      },
+      {
+        "category": "electrical",
+        "severity": "medium",
+        "description": "Grounding conductor resistance measured at 7.5 \u03a9 between the main bond and the grounding grid, exceeding the preferred threshold of <5 \u03a9 for reliable lightning protection. Bonding connections at the baseplate show light surface corrosion but maintain physical continuity.",
+        "recommendation": "Repair/replace corroded bonding conductors and connections and re-test to achieve <5 \u03a9 within 30 days; include grounding check in annual lightning protection maintenance."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Fixed ladder and fall-protection cage are present and serviceable, though rungs 12\u201314 show moderate wear and one ladder rung cover is split. Personal-arrest anchor points are intact and certified sticker is current.",
+        "recommendation": "Replace worn rungs (12\u201314) and split covers within 90 days and perform quarterly inspections of climbway components."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Relay Station",
+    "inspector": "Thomas J. Reilly",
+    "overall_grade": "C",
+    "summary": "The Harbor Relay Station shows fair condition with several maintenance deficiencies that could progress to service-impairing failures if not addressed. Corrosion and mechanical loosening are the primary concerns and have produced measurable degradation at the base and select antenna mounts. Prioritized repairs are required to restore reliable operation and structural resiliency.",
+    "days_ago": 211,
+    "findings": [
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Moderate to advanced corrosion noted at the base plate underside of the east leg and adjacent concrete interface; corrosion products and staining present. Measured thread section loss on two anchor bolts is approximately 18\u201320%, reducing effective thread engagement.",
+        "recommendation": "Schedule remediation within 30 days: remove corrosion, clean and apply approved corrosion inhibitor and protective coating to the base area, and replace anchor bolts with new bolts where section loss exceeds 15%."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Antenna mount fasteners for antenna #4 (north face, 28 m elevation) show two bolts with torque readings of 30 Nm versus the specified 60 Nm, and slight movement detected under manual load. Adjacent mounts show no immediate looseness but should be verified.",
+        "recommendation": "Re-torque all antenna mount fasteners to specification and replace the two undersized/stripped bolts with grade 8.8 bolts within 14 days; inspect all antenna mounts quarterly thereafter."
+      },
+      {
+        "category": "electrical",
+        "severity": "medium",
+        "description": "RF feed-through at the 32 m cable penetration exhibits dielectric degradation with elevated VSWR measured at 1.8:1 (acceptable target <1.5:1) and visible weathering of the feedline jacket. Signal loss remains within operational limits but is trending upward.",
+        "recommendation": "Replace the affected feed-through assembly and feedline segment within 30 days and perform a full RF sweep and VSWR verification post-repair."
+      },
+      {
+        "category": "drainage",
+        "severity": "low",
+        "description": "Surface water pooling approximately 10 mm deep observed around the base perimeter following recent precipitation, caused by partially clogged perimeter drainage channel. No standing water was observed inside the shelter.",
+        "recommendation": "Clear drainage channels and remove debris within 60 days; consider installing a perimeter gravel sump to improve drainage and review after next significant rainfall event."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Relay Station",
+    "inspector": "Aisha N. Patel",
+    "overall_grade": "D",
+    "summary": "Significant deterioration at the Harbor Relay Station poses an immediate risk to structural integrity and safe operations. Measured foundation settlement, severe corrosion of lower members, and a failed grounding system require urgent action to prevent collapse or catastrophic failure. Recommend immediate access restrictions and emergency structural stabilization followed by comprehensive repairs.",
+    "days_ago": 9,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "critical",
+        "description": "Observed lateral displacement at the tower apex of approximately 0.60 m (measured by tape and plumb reference), corresponding to an angular lean of ~1.0\u20131.7 degrees. Differential settlement of the east anchor point measured 35 mm relative to the west anchor; cracks and spalling noted in the east footing concrete.",
+        "recommendation": "Immediately restrict access to the tower and cease non-essential operations within 24 hours. Engage a licensed structural engineer for emergency stabilization within 72 hours and implement underpinning or shoring as directed; consider temporary removal of antenna payload during stabilization."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Lower leg members between 2\u20136 m elevation (south-east leg) exhibit advanced section loss with localized perforation and gusset plate thinning up to 40%. Fasteners in this area are heavily corroded and several show loss of head integrity.",
+        "recommendation": "Do not resume climbing activity; replace the affected lower leg members and gusset plates per engineered repair drawings within 30 days or sooner as determined by the structural engineer. Isolate and brace the corroded members immediately to limit further degradation."
+      },
+      {
+        "category": "electrical",
+        "severity": "critical",
+        "description": "Ground system failure: measured ground resistance of the station is 15 \u03a9 (target <5 \u03a9) and the primary bonding conductor is severed approximately 0.5 m below grade. Lightning arrestor device for antenna #2 is missing and evidence of a prior strike is present on the feedline connector.",
+        "recommendation": "Perform emergency grounding repairs within 48 hours: install new driven ground rods, replace bonding conductor, and re-establish continuity to achieve <5 \u03a9. Install missing lightning arrestor on antenna #2 and retest the system immediately after repairs."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Permanent fall-protection anchor points on the top working platform are corroded and do not meet pull-test requirements; top-platform handrails show significant corrosion and two sections are loose. No current restricted-area signage is posted at the perimeter gate.",
+        "recommendation": "Prohibit climbing and platform access immediately and post restricted-area signage within 24 hours. Install temporary certified anchor points and replace corroded handrail sections within 14 days; perform certified fall-protection inspections prior to restoring access."
+      }
+    ]
+  },
+  {
+    "asset_name": "Ironworks Water Treatment Plant",
+    "inspector": "Mariana T. Alvarez",
+    "overall_grade": "B",
+    "summary": "The Ironworks Water Treatment Plant is operating reliably with tertiary treatment processes meeting most performance criteria. Minor mechanical wear and isolated electrical concerns were observed that do not currently compromise effluent quality but warrant prompt maintenance to prevent degradation.",
+    "days_ago": 27,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Vibration readings on clarifier #2 drive bearing at the north edge measured 6.2 mm/s (overall velocity) which exceeds the facility guideline of 4.5 mm/s and indicates imbalance or bearing wear. Observed audible noise and lateral shaft play of ~1.5 mm during startup.",
+        "recommendation": "Schedule balancing and bearing inspection within 30 days and replace worn bearings if wear exceeds manufacturer tolerance; re-measure vibration after repair to verify reduction below 4.5 mm/s."
+      },
+      {
+        "category": "corrosion",
+        "severity": "low",
+        "description": "Minor surface corrosion present on the sludge recirculation piping cluster (east mezzanine) with localized pitting up to 0.8 mm depth and flaking of the protective coating. Corrosion is currently superficial and not causing leakage.",
+        "recommendation": "Clean and recoat affected pipe sections during the next planned outage (within 90 days) and implement quarterly visual monitoring for progression."
+      },
+      {
+        "category": "electrical",
+        "severity": "medium",
+        "description": "Battery bank for the on-site backup generator (generator B, control room A) showed a mean cell voltage of 1.95 V/cell under float, a 6% reduction from baseline commissioning values, indicating aging capacity. Start-up test showed generator transfer time within acceptable limit but reduced runtime in battery-backed controls.",
+        "recommendation": "Replace the battery bank within 180 days or sooner if load-testing demonstrates inability to sustain control systems for required transfer period; maintain monthly capacity tests until replacement."
+      }
+    ]
+  },
+  {
+    "asset_name": "Ironworks Water Treatment Plant",
+    "inspector": "Daniel S. Okoye",
+    "overall_grade": "C",
+    "summary": "Operational performance is acceptable but several process and structural maintenance items require attention to maintain tertiary effluent standards. Recommended corrective actions should be scheduled in the near term to avoid further decline in treatment reliability.",
+    "days_ago": 412,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Concrete hairline cracking observed along the southwest wall of secondary clarifier #1, with crack widths ranging 0.2\u20130.6 mm and delamination pockets up to 25 mm diameter. Cracks are located at the waterline and extend vertically up to 1.2 m.",
+        "recommendation": "Perform epoxy injection sealing and localized patch repair within 180 days and schedule a follow-up structural survey in 12 months to monitor crack propagation."
+      },
+      {
+        "category": "mechanical",
+        "severity": "high",
+        "description": "UV disinfection unit #3 exhibits reduced delivered UV dose; measured UV intensity at the effluent sleeve surface is 22 mW/cm2 compared with new-lamp baseline of 38 mW/cm2 and target minimum of 30 mW/cm2 for design flow at current UVT. Quartz sleeves show moderate fouling and 30% lamp aging (hours logged ~8,400).",
+        "recommendation": "Replace 50% of UV lamps and clean quartz sleeves within 30 days, then re-measure delivered dose; if intensity remains below 30 mW/cm2, schedule full bank replacement within 90 days."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Mixed liquor suspended solids (MLSS) in aerobic basins measured 2,200 mg/L, below the optimal operational range of 3,000\u20134,500 mg/L for the activated sludge design at 120 MLD. SRT appears shortened based on observed effluent TSS spikes during peak flow events.",
+        "recommendation": "Adjust wasting strategy and increase aeration setpoints to raise MLSS into the 3,000\u20134,000 mg/L range over the next 60 days; perform weekly MLSS monitoring until stable."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Effluent turbidity was measured at 0.65 NTU during inspection, marginally above the facility target of 0.5 NTU for tertiary filtration under normal load. Filtrate backwash frequency on filter train B appears reduced compared to design.",
+        "recommendation": "Review filtration backwash scheduling and increase backwash frequency for filter train B within 30 days; monitor effluent turbidity daily for two weeks after adjustments."
+      }
+    ]
+  },
+  {
+    "asset_name": "Ironworks Water Treatment Plant",
+    "inspector": "Ethan M. Brooks",
+    "overall_grade": "F",
+    "summary": "Critical failures were identified that significantly compromise treatment effectiveness and pose immediate public health risk. Immediate remedial actions are required to restore disinfection and contain solids overflows before returning to service.",
+    "days_ago": 14,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "critical",
+        "description": "UV disinfection bank A is non-operational; all lamps are dark and online UV intensity reads 0 mW/cm2 at the outlet for the entire channel. Control logs indicate an uncorrected ballast failure and absence of redundant bank initiation.",
+        "recommendation": "Bring an emergency portable disinfection system online and initiate emergency chlorination within 24 hours; repair or replace UV ballasts and lamps and verify delivered dose to meet 30 mW/cm2 minimum before resuming normal discharge."
+      },
+      {
+        "category": "corrosion",
+        "severity": "critical",
+        "description": "Severe pitting corrosion observed on the gate plate of outlet structure G4 (south outfall) with maximum pit depth measured at 12 mm and through-thickness loss at two localized areas. Gate stiffness is compromised and leakage past the seat measured at 15 L/min.",
+        "recommendation": "Take gate G4 out of service and replace the gate plate assembly within 7 days; conduct a full metal-loss survey of adjacent structures and apply cathodic protection where indicated."
+      },
+      {
+        "category": "structural",
+        "severity": "high",
+        "description": "Overflow of primary sludge into raw influent channel from conveyor failure at the primary sludge handling building (bay 1) resulting in spillage across floor drains and temporary release into containment sump. Observed sludge accumulation ~0.5 m depth in the local containment pit.",
+        "recommendation": "Shut down affected conveyor and complete mechanical replacement or major repair within 7 days; mobilize cleanup crew to remove accumulated sludge and disinfect affected drainage within 48 hours to prevent secondary contamination."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Emergency eyewash and shower station adjacent to the chemical dosing room are non-functional with blocked water supply and corroded nozzles. The chemical containment signage is faded and incomplete.",
+        "recommendation": "Restore eyewash/shower functionality within 24 hours and ensure full flow testing; replace signage and inspect all emergency safety stations facility-wide within 7 days."
+      }
+    ]
+  },
+  {
+    "asset_name": "Riverside Pump Station",
+    "inspector": "Elena M. Rosario",
+    "overall_grade": "B",
+    "summary": "The Riverside Pump Station is in generally good operational condition with all core systems functional. Observed deficiencies are predominantly minor maintenance items and do not currently compromise station capacity, but several components require near-term service to prevent escalation.",
+    "days_ago": 47,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Vibration survey at pump 2 coupling measured 5.6 mm/s RMS (bearing housing), exceeding typical ISO 10816 guidance for smooth operation and indicating early bearing wear. Bearing temperature at the same unit was 68\u00b0C, approximately 18\u00b0C above the adjacent pump baseline.",
+        "recommendation": "Schedule bearing inspection and coupling alignment within 30 days and replace worn bearings within 90 days if corrective alignment does not reduce vibration to <3.5 mm/s."
+      },
+      {
+        "category": "electrical",
+        "severity": "low",
+        "description": "Diesel generator startup test showed extended cranking and battery terminal corrosion at the generator battery bank; measured open-circuit voltage 11.8 V under no-load condition. Corrosion on terminals has a light white/green deposit localized to positive posts.",
+        "recommendation": "Clean battery terminals and apply corrosion inhibitor immediately and replace generator battery within 30 days; verify reliable auto-start during monthly tests."
+      },
+      {
+        "category": "corrosion",
+        "severity": "low",
+        "description": "Minor surface rust observed on the downstream face of the discharge manifold flanges and on sluice gate edges at the south intake, with coating delamination patches up to 40 mm in diameter. No through-wall loss detected on visual inspection.",
+        "recommendation": "Perform targeted abrasive cleaning and touch-up coating of affected flange faces and gate edges within 90 days and include these areas in the annual corrosion monitoring program."
+      },
+      {
+        "category": "drainage",
+        "severity": "low",
+        "description": "Measured combined pumping rate during normal operation was approximately 2,300 L/s (92% of rated 2,500 L/s capacity), with inlet screens free of major debris at time of inspection. Minor bypass flow observed during peak hours due to occasional screen clogging.",
+        "recommendation": "Maintain current debris-removal schedule and increase visual checks to weekly during high-flow seasons; schedule additional screen cleaning if combined output drops below 2,200 L/s."
+      }
+    ]
+  },
+  {
+    "asset_name": "Riverside Pump Station",
+    "inspector": "Marcus J. Patel",
+    "overall_grade": "C",
+    "summary": "The pump station is functionally serviceable but exhibits multiple maintenance and repair needs that could impact reliability if not addressed. Several components show signs of deterioration requiring prioritized corrective action within the next 30\u201390 days.",
+    "days_ago": 182,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Concrete slab adjacent to pump 3 sump exhibits transverse cracks up to 0.8 mm wide extending 1.2 m along the north edge; hairline cracking has begun to propagate toward the access walkway. Cracking exceeds common superficial crack width thresholds of 0.3\u20130.5 mm used for preventative monitoring.",
+        "recommendation": "Seal cracks and install a bonded epoxy injection repair within 60 days, and schedule a structural review if further propagation is observed; monitor quarterly for new cracking or widening."
+      },
+      {
+        "category": "mechanical",
+        "severity": "high",
+        "description": "Mechanical seal on pump 4 exhibiting steady leakage measured at approximately 0.5 L/min at the seal gland during operation, indicative of seal wear and potential shaft corrosion if allowed to continue. Leakage trails and minor fluid accumulation were observed at the pump base.",
+        "recommendation": "Replace the mechanical seal and inspect the shaft sleeve within 30 days and run a full operational test after replacement to confirm leak remediation."
+      },
+      {
+        "category": "electrical",
+        "severity": "medium",
+        "description": "Control panel A (east control room) contained pockets of condensation on the door interior and evidence of moisture ingress at the lower cable gland entries; enclosures are rated NEMA 4 but gasket compression is uneven. Component terminals show early oxidation but remain functional.",
+        "recommendation": "Dry and reseal control panel A, replace compromised gaskets, and install a low-power dehumidifier in the control room within 30 days; retest panel ingress protection after corrective action."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Sump level sensor calibration is inconsistent: manual verification showed the primary level transducer reads 40 mm lower than a calibrated reference float at the mid-sump elevation, causing delayed pump staging. Float-switch backup was observed to stick intermittently.",
+        "recommendation": "Recalibrate or replace the primary level transducer and service the float-switch assembly within 14 days, and perform operational verification of automatic staging immediately after service."
+      }
+    ]
+  },
+  {
+    "asset_name": "Riverside Pump Station",
+    "inspector": "Hannah R. Li",
+    "overall_grade": "D",
+    "summary": "The Riverside Pump Station exhibits significant operational deficiencies and safety risks that require immediate remediation. Critical systems, including backup power and multiple pumps, failed to meet operational standards during inspection and should be repaired or isolated without delay.",
+    "days_ago": 9,
+    "findings": [
+      {
+        "category": "electrical",
+        "severity": "critical",
+        "description": "Diesel generator failed to start during automatic and manual start attempts; starter engagement was absent and control panel displayed fault code indicating fuel lift pump failure. No reliable backup power is available, placing the station at risk during a mains outage.",
+        "recommendation": "Do not operate the station without corrective action; repair or replace the generator fuel lift pump and associated starter circuit within 7 days and perform a full functional load test before returning to service."
+      },
+      {
+        "category": "mechanical",
+        "severity": "high",
+        "description": "Two of four pumps (pump 1 and pump 3) were offline: pump 1 has a fractured shaft coupling with 4 mm axial misalignment at the coupling face, and pump 3 exhibits seized bearing motion. Pump outages reduce available capacity by 50% compared to the station rated 2,500 L/s.",
+        "recommendation": "Replace the fractured coupling and perform full shaft alignment for pump 1 within 7 days; disassemble pump 3, replace seized bearings and inspect the rotor for damage within 14 days to restore full capacity."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Severe localized corrosion and pitting observed on the discharge manifold at the northeast elbow, with measured pitting depth up to 6 mm and estimated local wall loss exceeding 30% of original wall thickness. Small through-wall leaks noted as weeping at flange seam under pressure test.",
+        "recommendation": "Isolate and replace the affected section of discharge manifold immediately; schedule replacement within 14 days and conduct pressure testing and non-destructive wall-thickness mapping on adjacent piping."
+      },
+      {
+        "category": "safety",
+        "severity": "medium",
+        "description": "Emergency stop buttons at the east and west pump bays were inoperable during functional test and the eyewash station in the control room lacked signage and had no water flow when activated. These deficiencies increase personnel risk during incidents.",
+        "recommendation": "Repair or replace emergency stop actuators and restore eyewash unit functionality within 7 days, and install appropriate signage; perform a site-wide safety equipment check after repairs."
+      }
+    ]
+  },
+  {
+    "asset_name": "Greenfield Booster Station",
+    "inspector": "Laura M. Hernandez",
+    "overall_grade": "B",
+    "summary": "The Greenfield Booster Station is in generally good condition with all three pumps operational and the diesel backup generator functional under test load. Observed issues are limited to elevated vibration on one pump, superficial corrosion on the discharge manifold, and intermittent alarm log entries in the control panel. These issues are not currently critical but require scheduled maintenance to prevent escalation.",
+    "days_ago": 221,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Vibration measurement at the bearing housing of Pump 2 (northwestern pump bay) recorded 5.6 mm/s RMS, exceeding the ISO 10816 guideline for this class (~4.5 mm/s) and indicating bearing wear or misalignment. No excessive noise was present during inspection but vibration is consistently above recommended threshold under normal load.",
+        "recommendation": "Perform shaft alignment and dynamic balancing within 30 days and replace the bearing if vibration does not reduce below 4.5 mm/s; schedule vibration monitoring quarterly thereafter."
+      },
+      {
+        "category": "corrosion",
+        "severity": "low",
+        "description": "Surface rust and localized pitting observed on the pump discharge manifold flange for Pump 1 (east discharge run), with pitting depths up to approximately 1.2 mm over a 150 mm length. Coating delamination is limited and no through-wall corrosion was detected.",
+        "recommendation": "Clean the affected area, remove loose rust, and apply an epoxy corrosion coating within 180 days; re-inspect coating adhesion and pitting annually."
+      },
+      {
+        "category": "electrical",
+        "severity": "low",
+        "description": "Control panel CP-1 (control room) operating temperature measured 38\u00b0C and within acceptable limits, but SCADA logs show intermittent non-critical alarm events with timestamps over the past 30 days. No fault codes preventing operation were present.",
+        "recommendation": "Update SCADA firmware and clear historical alarm logs within 60 days; implement monthly log reviews to verify alarms are resolved and to identify recurring faults."
+      }
+    ]
+  },
+  {
+    "asset_name": "Greenfield Booster Station",
+    "inspector": "David K. Patel",
+    "overall_grade": "C",
+    "summary": "The booster station is functioning but shows several items requiring maintenance to restore design performance and ensure safety. Notable issues include reduced flow from one pump, fuel contamination in the diesel generator tank, and missing safety guarding. Repairs and corrective actions are recommended within 7 to 60 days depending on severity.",
+    "days_ago": 487,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Pump 1 discharge flow measured 220 L/s at FM-1 with a suction pressure of 1.8 bar, which is approximately 17.7% below expected single-pump capacity (~267 L/s based on 800 L/s total capacity divided by 3). The reduced flow suggests impeller wear, partial blockage, or hydraulic imbalance.",
+        "recommendation": "Inspect Pump 1 impeller and suction strainer within 30 days; clean or replace damaged impeller components and perform a pump performance test within 60 days to restore flow to design capacity."
+      },
+      {
+        "category": "electrical",
+        "severity": "high",
+        "description": "Diesel generator fuel tank (east tank, external) fuel sample contained ~0.8% free water by volume and visible sediment, exceeding acceptable limits (<0.1% water). During weekly start, generator ran but with irregular fuel pressure fluctuations.",
+        "recommendation": "Drain and replace contaminated fuel, perform fuel polishing and tank cleaning within 15 days, and re-test the generator under full load before returning it to standby service."
+      },
+      {
+        "category": "safety",
+        "severity": "medium",
+        "description": "The coupling guard between Pump 3 and its motor in the southern pump bay is missing, leaving rotating elements exposed and creating a risk of entanglement. No temporary barrier or signage was present.",
+        "recommendation": "Install a compliant coupling guard that meets OSHA/EN safety requirements within 7 days and perform a safety audit of guards on all rotating equipment."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Floor drains in the pump bay are partially clogged; observed standing water up to 25 mm deep near Pump 2 after a 2-hour rainfall. Standing water increases slip risk and accelerates corrosion at baseplates.",
+        "recommendation": "Clear and flush floor drains and inspect sump pump operation within 30 days; implement quarterly maintenance checks of drainage during wet season."
+      }
+    ]
+  },
+  {
+    "asset_name": "Greenfield Booster Station",
+    "inspector": "Amir N. Rahman",
+    "overall_grade": "D",
+    "summary": "The Greenfield Booster Station exhibits multiple serious deficiencies that compromise reliability and safety of station operations. Active piping leaks, failed generator start and degraded structural anchors require immediate attention to prevent failure of pumping capability and potential environmental release. Immediate isolation of affected systems and expedited repairs are recommended.",
+    "days_ago": 12,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "critical",
+        "description": "Active through-wall crack detected on the suction manifold elbow (northwest run) with an observed leak rate of approximately 10 L/min and wet staining of 150 x 50 mm; suction pressure fluctuates \u00b10.4 bar causing cavitation indications on Pump 2. Crack appears associated with corrosion fatigue at a welded seam.",
+        "recommendation": "Shut down and isolate Pump 2 immediately and restrict station capacity until repair is complete; replace the affected suction manifold section and associated flange hardware within 48 hours and perform a full hydraulic test before return to service."
+      },
+      {
+        "category": "electrical",
+        "severity": "critical",
+        "description": "Backup diesel generator failed automatic start during test, achieving only ~60% of rated output and battery bank measured 40.0 V under load (nominal 48 V). Generator failed the manufacturer-specified automatic transfer test and did not sustain critical loads.",
+        "recommendation": "Do not rely on the generator for emergency power; replace or recharge starter battery bank and remediate generator starting/system faults within 24 hours and conduct a full load test before restoring to standby duty. Arrange temporary external power support if required."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Severe corrosion observed at baseplate anchor bolts in the northeast corner of the motor base, with two anchors fractured and baseplate settlement measured at 12 mm relative to the original benchmark (acceptable <5 mm). Corrosion has progressed to loss of preload on anchors.",
+        "recommendation": "Install temporary shims and mechanical restraints immediately to stabilize the baseplate, and schedule replacement of fractured anchors and remedial foundation repairs within 14 days; consider full baseplate replacement if further settlement is found within 90 days."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Fixed gas detector in control room CR-1 shows last calibration 28 months ago (exceeds the required annual calibration interval) and current readings are not certified. This presents a risk to personnel in the event of a gas release.",
+        "recommendation": "Calibrate or replace the gas detector within 7 days and establish a documented annual calibration schedule with verification logs."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Seawall Section A",
+    "inspector": "Marina K. Alvarez",
+    "overall_grade": "B",
+    "summary": "The inspected section of Harbor Seawall Section A is in generally good condition with localized deterioration at discrete locations. Minor concrete cracking and surface corrosion of sheet piling were observed, but no immediate structural failure indicators were present. Targeted repairs and routine monitoring are recommended to maintain serviceability in the marine environment.",
+    "days_ago": 87,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Longitudinal hairline cracks observed in the reinforced concrete facing between chainage 120 m and 180 m, with measured widths up to 1.2 mm and lengths of 2\u20136 m. Crack widths exceed the commonly accepted maximum of 1.0 mm for reinforced concrete in marine exposures and indicate early-stage chloride ingress risk.",
+        "recommendation": "Seal and epoxy-inject cracks in the affected zones and apply a surface moisture barrier; schedule repairs within 180 days and perform quarter\u2011ly monitoring of crack widths for 12 months."
+      },
+      {
+        "category": "corrosion",
+        "severity": "medium",
+        "description": "Steel sheet piling at chainage 200 m to 230 m shows surface corrosion concentrated at the tidal zone (approx. -0.5 m to +0.5 m elevation), with localized section loss up to approximately 8% based on caliper measurements. Corrosion rate is above expected background for coated piles but not yet compromising global capacity.",
+        "recommendation": "Mechanically clean affected areas, apply a marine-grade epoxy coating, and install sacrificial anodes if monitoring indicates progression; complete initial remediation within 120 days and re-inspect semi-annually."
+      },
+      {
+        "category": "drainage",
+        "severity": "low",
+        "description": "Several weep holes between chainage 50 m and 70 m are partially blocked by sediment and marine growth, resulting in shallow pooling (approx. 20 mm) behind the wall after tide cycles. Reduced drainage increases saturation of the retained material but is currently minor and localized.",
+        "recommendation": "Clear and flush the weep holes and verify flow restoration; perform monthly inspections for six months and, if clogging recurs, replace affected weep holes within 90 days."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Seawall Section A",
+    "inspector": "Thomas J. Reynolds",
+    "overall_grade": "C",
+    "summary": "Harbor Seawall Section A exhibits fair condition with multiple areas requiring maintenance to prevent progressive deterioration. Notable spalling, moderate sheet pile corrosion near mean sea level, and toe scour were observed and should be addressed to avoid escalation. A prioritized repair program and enhanced monitoring are advised.",
+    "days_ago": 342,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Top coping spalling observed between chainage 300 m and 320 m, exposing approximately 0.5 m\u00b2 of reinforcing steel with concrete cover loss on the order of 20 mm. Chloride staining present at the exposed reinforcement indicates ongoing corrosion risk compared to the design cover (\u224850 mm) recommended for marine structures.",
+        "recommendation": "Remove loose concrete, clean and treat exposed reinforcement, and patch with marine-grade repair mortar; schedule repairs within 90 days and monitor the patched area quarterly for re-corrosion."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Sheet piles at chainage 330 m to 360 m exhibit pitting and localized section loss up to 20% at mean sea level, with pits measured to a depth of approximately 12 mm. Pitting at this severity reduces fatigue life and may accelerate through\u2011thickness penetration if not mitigated.",
+        "recommendation": "Perform a cathodic protection feasibility study within 60 days and proceed with either CP installation or selective pile replacement for the worst-affected panels within 180 days."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Toe scour identified at the seaward base between chainage 210 m and 230 m with approximately 0.35 m of vertical exposure of sheet pile and partial undermining of the toe mattress. Scour extent exceeds normal allowable exposure for the toe protection system and threatens local stability.",
+        "recommendation": "Install rock armor or geotextile mattress at the toe to re-establish protection and prevent further undermining; implement this work within 90 days and inspect monthly until stabilized."
+      },
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Protective coating on the top-of-wall surfaces and handrails is flaking and peeling over roughly the northmost 50 m, exposing substrate to accelerated degradation. Remaining coating in adjacent areas shows diminished adhesion but no through\u2011section damage yet.",
+        "recommendation": "Recoat the exposed areas with a marine-grade coating system and schedule a full top-of-wall recoating within 12 months; inspect coatings annually thereafter."
+      }
+    ]
+  },
+  {
+    "asset_name": "Harbor Seawall Section A",
+    "inspector": "Priya S. Menon",
+    "overall_grade": "D",
+    "summary": "Significant deterioration and active damage were observed at a localized portion of Harbor Seawall Section A, posing an elevated risk to structural integrity and public safety. Advanced sheet pile corrosion, large vertical cracks with displacement, and active seepage require immediate intervention. Emergency stabilization and expedited replacement of affected components are recommended.",
+    "days_ago": 14,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "critical",
+        "description": "Multiple vertical cracks at construction joints between chainage 120 m and 140 m with measured widths up to 10 mm and observed horizontal displacement of 30\u201350 mm; adjacent backfill shows localized settlement of approximately 50 mm and wall rotation towards the water. These deformations exceed allowable serviceability limits and indicate loss of structural continuity.",
+        "recommendation": "Restrict public access adjacent to the affected section immediately and perform emergency stabilization (shoring or temporary bracing) within 7 days; retain a structural engineering firm to perform a detailed assessment and produce a remedial design within 30 days."
+      },
+      {
+        "category": "corrosion",
+        "severity": "critical",
+        "description": "Steel sheet piles in the same zone (chainage 125 m to 155 m) show advanced generalized corrosion with localized section loss exceeding 35% and multiple perforations at mean low water, permitting direct seawater ingress into the retained soil. Through\u2011thickness loss is evident on both faces of several interlocked sheets.",
+        "recommendation": "Execute emergency replacement of the severely affected sheet pile panels and install temporary bracing within 30 days; plan and budget for full replacement of the top 50 m of seawall in this zone within 6 months if structural analysis confirms loss of capacity."
+      },
+      {
+        "category": "drainage",
+        "severity": "high",
+        "description": "Active freshwater seepage and tidal leakage observed through vertical cracks and at the base of the wall in the 120 m\u2013160 m zone, with a measured discharge of approximately 3 L/min at one outlet. Sustained seepage has increased pore pressures in the retained soil and is contributing to the observed settlement.",
+        "recommendation": "Install temporary dewatering measures (sumps/sandbags) immediately and assess permanent drainage repairs (relief wells or new weeps) to be implemented within 60 days."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Top railing anchors between chainage 130 m and 132 m have lost fixation and the adjacent walkway exhibits a 40 mm displacement, creating an immediate trip and fall hazard for pedestrians. Handrail instability was confirmed by physical testing.",
+        "recommendation": "Cordon off and post hazard signage at the walkway within 24 hours and prohibit access until repairs are made; remove and replace railing anchors and repair the walkway surfacing within 30 days."
+      }
+    ]
+  },
+  {
+    "asset_name": "Meridian Cut Retaining Wall",
+    "inspector": "Eleanor J. Price",
+    "overall_grade": "B",
+    "summary": "The Meridian Cut Retaining Wall generally performs well with only localized, repairable deficiencies. Issues observed are typical for a mechanically stabilized earth wall of this age and do not threaten overall stability if addressed in a timely manner. Routine maintenance and monitoring are recommended to prevent progression.",
+    "days_ago": 42,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Localized facing separations and minor differential rotation were observed between chainage 120 m and 140 m, with measured horizontal offsets ranging from 15 mm to 30 mm (typical ~20 mm). These displacements exceed typical manufacturer installation tolerances (\u224825 mm) in isolated locations but do not indicate active global failure.",
+        "recommendation": "Seal and re-fasten facing panels and adjust anchors where required; schedule corrective work within 180 days and monitor the zone quarterly for progressive movement."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Weep holes and the toe discharge at chainage 60 m to 75 m are partially clogged with silt and organic debris, reducing observed discharge by an estimated 40% compared to adjacent clear sections. Reduced drainage increases hydrostatic loading risk behind the wall.",
+        "recommendation": "Clean all weep holes and the exposed toe outlet and install a geotextile filter at the discharge points; complete cleaning and verification within 60 days and re-inspect after the next significant rainfall event."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Volunteer vegetation (small shrubs and grasses) is present along the facing at several locations (notably 10 m\u201320 m intervals), with root intrusion beginning to contact facing joints. Vegetation is shallow-rooted and not currently compromising reinforcement.",
+        "recommendation": "Remove invasive vegetation and apply an approved herbicidal treatment; schedule removal within 90 days and implement annual vegetation control during routine inspections."
+      }
+    ]
+  },
+  {
+    "asset_name": "Meridian Cut Retaining Wall",
+    "inspector": "Marco A. Fernandez",
+    "overall_grade": "C",
+    "summary": "The wall exhibits several performance issues requiring planned maintenance and targeted repairs. Observed settlements, seepage, and localized corrosion indicate moderate degradation of components and drainage function. Repairs should be scheduled and prioritized to prevent escalation to structural distress.",
+    "days_ago": 178,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "high",
+        "description": "Differential settlement and outward bulging observed between chainage 200 m and 215 m with vertical settlement up to 50 mm and outward facing displacement measured at approximately 80 mm. The deformation pattern suggests localized loss of compaction or reinforcement pullout in the reinforced zone.",
+        "recommendation": "Perform geotechnical evaluation and remove/recompact selected backfill; replace or extend reinforcement (geogrid) in the affected 15 m segment and complete repairs within 30 days to restore design geometry."
+      },
+      {
+        "category": "drainage",
+        "severity": "high",
+        "description": "Active seepage with staining and efflorescence observed at chainage 45 m to 50 m. Measured seepage flow is approximately 0.4\u20130.6 L/min at the outlet during inspection, indicating a partially clogged subsurface drain and elevated pore pressures behind the wall.",
+        "recommendation": "Excavate to expose the drainage outlet, clean or replace the subdrain (perforated pipe and adjacent filter material), and install an improved outlet with inspection access; schedule work within 30 days and verify reduced seepage after repair."
+      },
+      {
+        "category": "corrosion",
+        "severity": "medium",
+        "description": "Exposed metallic reinforcement strips and anchor plates at chainage 210 m to 230 m show surface rust and areas of zinc coating loss; pitting corrosion observed at several anchor terminations with estimated coating loss of 20\u201330%.",
+        "recommendation": "Remove loose corrosion products, apply corrosion inhibitor and protective coating to minor-affected elements, and plan full replacement of heavily corroded anchors within 180 days. Inspect adjacent anchors systemically for similar deterioration."
+      },
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Hairline cracks (\u22643 mm) observed in the concrete coping along chainage 0 m to 10 m with minor water staining; cracking appears to be surface shrinkage without active movement.",
+        "recommendation": "Clean and seal coping cracks with low-modulus sealant to prevent ingress; complete sealing within 90 days and re-evaluate during the next annual inspection."
+      }
+    ]
+  },
+  {
+    "asset_name": "Meridian Cut Retaining Wall",
+    "inspector": "Priya K. Nair",
+    "overall_grade": "D",
+    "summary": "Significant performance deficiencies were observed that compromise the retaining wall's stability in multiple locations. Conditions include extensive facing deformation, active undermining at the toe, clogged drainage, and advanced corrosion of reinforcement. Immediate stabilization and prioritized repairs are required to mitigate risk to adjacent infrastructure and public safety.",
+    "days_ago": 640,
+    "findings": [
+      {
+        "category": "structural",
+        "severity": "critical",
+        "description": "Severe outward bulging and rotation of the wall facing detected between chainage 140 m and 170 m with maximum measured horizontal displacement of 250 mm and rotation of facing units up to 6\u00b0. Deformation is concentrated over a 30 m length and indicates loss of internal reinforcement capacity.",
+        "recommendation": "Implement emergency shoring and remove public access adjacent to the affected zone immediately (within 24\u201348 hours). Complete full replacement of the affected 30 m wall segment, including new reinforcement and facing, within 30 days."
+      },
+      {
+        "category": "drainage",
+        "severity": "high",
+        "description": "Primary subsurface drainage is fully clogged along a continuous run from 240 m to 280 m with standing water observed at the base and elevated pore pressures inferred. Clogging has resulted in pronounced hydrostatic pressure and active toe instability.",
+        "recommendation": "Excavate and replace the drainage blanket and perforated collector pipe with a geotextile-wrapped system; complete emergency drainage remediation within 14 days and install permanent inspection points."
+      },
+      {
+        "category": "structural",
+        "severity": "critical",
+        "description": "Undermining and scour at the toe were observed from chainage 250 m to 275 m, with a 25 m length showing 150\u2013200 mm loss of support and localized slump of the facing and toe fill. The undermining appears linked to surface runoff concentration and blocked outlets.",
+        "recommendation": "Conduct immediate emergency stabilization (temporary underpinning, toe backfill, and erosion control) within 7 days. Plan design-level reconstruction of toe and adjacent drainage within 30 days."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Anchor plates and exposed metallic reinforcement in the mid-wall zone (150 m\u2013175 m) show advanced corrosion with estimated cross-sectional loss exceeding 50% at several terminations and pitting consistent with prolonged water exposure. Several anchors have significant section loss impacting pullout capacity.",
+        "recommendation": "Replace corroded anchors and reinforcement in the affected 25 m zone; perform a full inventory of all anchors along the wall and schedule replacement of those exceeding 30% loss within 60 days. Consider cathodic or protective systems for future mitigation."
+      },
+      {
+        "category": "safety",
+        "severity": "high",
+        "description": "Top-of-wall barrier and pedestrian walkway adjacent to chainage 160 m exhibit failure of handrail anchorage and accumulated debris, creating immediate safety hazards for the public. There is no temporary barrier in place at the most deformed sections.",
+        "recommendation": "Install temporary barricades and signage to restrict access within 24 hours and repair/replace permanent handrails and walkway surface after structural stabilization; complete safety remediation within 7 days."
+      }
+    ]
+  },
+  {
+    "asset_name": "Northern Reservoir",
+    "inspector": "Mariana Alvarez",
+    "overall_grade": "B",
+    "summary": "Northern Reservoir is in generally good condition with the floating cover system intact and no evidence of significant structural settlement at the time of inspection. Minor coating deterioration and localized wear of cover anchor points were observed and should be addressed to prevent escalation. Routine monitoring and scheduled repairs will maintain serviceability and comply with standard maintenance intervals.",
+    "days_ago": 37,
+    "findings": [
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Epoxy topcoat on the interior access ladder at the west embankment shows 10-15% area with light blistering and chalking approximately 1.5 m above the waterline. The underlying metal remains sound with no pitting observed.",
+        "recommendation": "Remove blisters, perform spot-sanding and apply a full epoxy touch-up coating within 90 days to restore protective performance per AWWA guidance."
+      },
+      {
+        "category": "mechanical",
+        "severity": "medium",
+        "description": "Floating cover anchor assemblies in the northwest quadrant (stations 115-125) show wear with two anchors exhibiting elongated bolt holes (~4 mm elongation). Tensioning cables maintain cover position but exhibit increased free-play.",
+        "recommendation": "Replace elongated anchor bolts and retension cables within 30 days and inspect remaining anchors quarterly for progressive wear."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Perimeter safety signage along the north access road is faded and two sections of chain-link fence have loose top rails 6 m and 18 m from the spillway. Current signage does not meet legibility standards for emergency responders.",
+        "recommendation": "Replace faded signage and secure fence rails within 60 days and include signage verification in biannual safety inspections."
+      }
+    ]
+  },
+  {
+    "asset_name": "Northern Reservoir",
+    "inspector": "Ethan R. Caldwell",
+    "overall_grade": "C",
+    "summary": "The reservoir exhibits fair condition with multiple items requiring maintenance to prevent further deterioration. Notable issues include active seepage at the north abutment and vegetation encroachment on the west embankment compromising toe drainage. Targeted repairs and a maintenance program are recommended to restore reliability and prevent loss of capacity.",
+    "days_ago": 412,
+    "findings": [
+      {
+        "category": "drainage",
+        "severity": "high",
+        "description": "Active seepage observed at the north abutment (approx. 2.3 L/min estimated from visual staining and damp soil) emanating from a 0.5 m wide saturated zone 4 m below crest elevation. Seepage has created a soft spot in the perimeter walking path approximately 6 m from the reservoir wall.",
+        "recommendation": "Conduct detailed geotechnical evaluation within 14 days and implement seepage control measures (grouting or toe drain rehabilitation) within 60 days to prevent slope instability."
+      },
+      {
+        "category": "coating",
+        "severity": "medium",
+        "description": "Floating cover underside displays localized biofilm and algal buildup covering approximately 8% of the surface, concentrated near the inlet bay. The buildup is reducing drainage efficiency and could increase organic load in stored water.",
+        "recommendation": "Schedule mechanical cleaning of the cover underside and inlet bay within 30 days and institute quarterly cleanings during warm months to control regrowth."
+      },
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Minor settlement cracks (up to 12 mm wide) observed along the paved inspection road adjacent to the south crest; no vertical misalignment greater than 25 mm detected in wall panels. Cracks are allowing surface water ingress toward the embankment core.",
+        "recommendation": "Seal roadway cracks and perform monitoring of crack width monthly for six months; if widening exceeds 5 mm/month, schedule structural assessment within 30 days."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Emergency access gate at the east entrance is partially obstructed by overgrown vegetation, limiting vehicular access in an emergency. Fire department clearance of 3 m was not met in one location.",
+        "recommendation": "Trim vegetation to restore full access within 15 days and add vegetation control to the quarterly maintenance checklist."
+      }
+    ]
+  },
+  {
+    "asset_name": "Northern Reservoir",
+    "inspector": "Priya S. Menon",
+    "overall_grade": "D",
+    "summary": "Significant deficiencies were observed that compromise the reservoir's integrity and operational safety. A large breach in the floating cover and compromised anchor system have created uncontrolled leakage and increased risk of contamination; immediate remedial action is required to limit water loss and prevent further structural damage.",
+    "days_ago": 1022,
+    "findings": [
+      {
+        "category": "mechanical",
+        "severity": "critical",
+        "description": "A 2.2 m2 tear was measured in the floating cover in the southeast quadrant adjacent to the outlet bay, with cover material delaminated and water ingress evident through the breach. The tear corresponds with torn reinforcement stitching and two adjacent tension cables have failed.",
+        "recommendation": "Isolate the affected cover section and perform emergency patch or replace the damaged cover panel within 7 days; replace failed tension cables and inspect entire cable network immediately after repair."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Anchor pad plates and bolts around the perimeter (particularly between stations 40-60 on the east side) exhibit advanced galvanic corrosion with flange loss estimated at 30-40% cross-section and active rust staining. Several anchor bolts have reduced thread engagement.",
+        "recommendation": "Replace severely corroded anchor plates and bolts within 30 days and apply corrosion-inhibiting coatings; institute semiannual anchor inspections thereafter."
+      },
+      {
+        "category": "drainage",
+        "severity": "high",
+        "description": "Outlet chamber access hatch shows water infiltration and sand/grit accumulation reducing outlet gate operability; manual gate operation required force exceeding 250 N during test. Reduced gate function is increasing risk of uncontrolled discharge during high-demand events.",
+        "recommendation": "Clear inlet chamber debris, restore drainage to outlet gate, and perform gate maintenance or replacement within 14 days to ensure full operational control."
+      },
+      {
+        "category": "safety",
+        "severity": "medium",
+        "description": "Temporary floating debris and plastic sheeting trapped against the damaged cover present contamination and entrapment hazards near the operator walkway. Confined-space entry signage is absent at the outlet chamber access point.",
+        "recommendation": "Remove debris immediately and install compliant confined-space signage and temporary barriers within 3 days; conduct PPE briefing for maintenance crews prior to work on the cover."
+      }
+    ]
+  },
+  {
+    "asset_name": "Greenfield Solar Array",
+    "inspector": "Marissa L. Ortega",
+    "overall_grade": "B",
+    "summary": "The Greenfield Solar Array is performing well with only minor issues affecting long-term reliability. Most modules and racking remain in good condition, and inverters are operating within expected parameters. Targeted maintenance actions are recommended to prevent escalation of observed minor defects.",
+    "days_ago": 87,
+    "findings": [
+      {
+        "category": "electrical",
+        "severity": "medium",
+        "description": "String inverter #2 (pad 02, east equipment row) exhibited a 3.4% reduction in AC output compared to baseline performance records for the previous 12 months, likely related to elevated DC input ripple observed at 11:00 local time. Measured DC ripple and harmonics are within safe limits for immediate operation but indicate declining MPPT stability.",
+        "recommendation": "Schedule inverter firmware update and full string-level IV curve test within 30 days; if output does not recover within 14 days post-update, plan inverter servicing or replacement within 90 days."
+      },
+      {
+        "category": "coating",
+        "severity": "low",
+        "description": "Aluminum racking paint on rows R3\u2013R6 (northwest quadrant) shows localized UV degradation and chalking over approximately 2% of the surface area, with no current structural compromise. This is consistent with expected lifetime exposure but will reduce corrosion protection over time.",
+        "recommendation": "Apply touch-up coating to affected racking within 180 days and include coated sample panels for adhesion testing during next annual inspection to ensure long-term protection."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Two access gates (south perimeter) have self-closing mechanisms with reduced tension, allowing gates to remain open intermittently. This presents a minor unauthorized-access risk but no immediate electrical hazard.",
+        "recommendation": "Adjust or replace gate closers and confirm self-closing operation within 30 days; document repairs and verify perimeter security monthly for three months."
+      }
+    ]
+  },
+  {
+    "asset_name": "Greenfield Solar Array",
+    "inspector": "Alexander P. Nguyen",
+    "overall_grade": "C",
+    "summary": "The solar array exhibits signs of moderate degradation that require scheduled maintenance to restore performance and mitigate future failures. Several electrical and structural issues were observed that, if unaddressed, could lead to increased downtime and reduced energy yield. A prioritized maintenance program should be implemented within the next 90 days.",
+    "days_ago": 312,
+    "findings": [
+      {
+        "category": "electrical",
+        "severity": "high",
+        "description": "Random string-level insulation resistance tests across inverters 4\u20137 returned values between 0.5 and 0.9 M\u03a9 at 1000 VDC, which is below the manufacturer-recommended minimum of 1.0 M\u03a9 and below typical industry practice (>1.5 M\u03a9). This indicates moisture ingress or degradation of module junction box seals in the central array section (rows R20\u2013R28).",
+        "recommendation": "Perform immediate detailed IR thermography and wet/dry insulation testing within 14 days; schedule replacement of affected junction boxes and re-sealing of modules within 60 days to restore insulation resistance above 1.5 M\u03a9."
+      },
+      {
+        "category": "structural",
+        "severity": "medium",
+        "description": "Multiple mid-span racking bolts (rows R10 and R11, east side) were found with torque loss of 20\u201335% relative to design torque during manual verification, and one splice plate showed a hairline crack approximately 18 mm long. No gross displacement was observed but loss of clamping increases fatigue risk.",
+        "recommendation": "Retighten or replace torqued bolts and replace the cracked splice plate within 30 days; implement quarterly torque audits for the next year to ensure stability."
+      },
+      {
+        "category": "drainage",
+        "severity": "medium",
+        "description": "Surface water pooling observed along access aisle A between rows R14\u2013R16 after recent rains, with puddles up to 40 mm deep and localized detritus obstructing flow paths. Continued pooling increases soiling rates and raises corrosion risk at lower module frames.",
+        "recommendation": "Clear drainage channels and regrade the access aisle to eliminate pooling within 45 days; install additional gravel-filled swales if pooling reoccurs during the next storm season."
+      },
+      {
+        "category": "safety",
+        "severity": "low",
+        "description": "Warning labels on combiner boxes C-12 and C-13 are faded and partially illegible, reducing clarity of high-voltage hazard information for maintenance personnel.",
+        "recommendation": "Replace faded safety labels on affected combiner boxes within 30 days and include label condition checks in monthly maintenance rounds."
+      }
+    ]
+  },
+  {
+    "asset_name": "Greenfield Solar Array",
+    "inspector": "Helen M. Carter",
+    "overall_grade": "D",
+    "summary": "The Greenfield Solar Array is in poor condition with multiple critical deficiencies requiring immediate intervention. Significant electrical safety risks and structural corrosion were identified; continued operation without expedited remediation presents an unacceptable risk. Immediate shutdown of affected sections and emergency repairs are recommended.",
+    "days_ago": 45,
+    "findings": [
+      {
+        "category": "electrical",
+        "severity": "critical",
+        "description": "Exposed DC conductors found at five string junction boxes (rows R5\u2013R7, south cluster) with damaged insulation and visible copper strands; IR imaging shows hot spots up to 85\u00b0C at these locations under nominal load. Measured leakage current on one affected string was 12 mA with insulation resistance of 0.25 M\u03a9 at 1000 VDC.",
+        "recommendation": "Isolate and de-energize affected strings immediately; schedule emergency replacement of damaged conductors and junction boxes within 7 days and re-test insulation to confirm >1.5 M\u03a9 before re-commissioning."
+      },
+      {
+        "category": "corrosion",
+        "severity": "high",
+        "description": "Structural anchor bolts at the northwest perimeter (anchors A1\u2013A6) exhibit advanced galvanic corrosion with section loss up to 30% and pit depths measured up to 2.4 mm. Two anchors show measurable movement under load testing, compromising array anchorage.",
+        "recommendation": "Conduct immediate load-rated shoring of the affected racking and replace corroded anchors within 14 days; perform full anchor survey across the site within 30 days to identify any additional at-risk components."
+      },
+      {
+        "category": "mechanical",
+        "severity": "high",
+        "description": "Multiple module frames in rows R1\u2013R4 show evidence of delamination and microcracking (approx. 0.5\u20131.5 mm hairline cracks) at module edges, and three modules exhibited glass separation creating ingress paths. Mechanical stability of affected modules is compromised under wind loading.",
+        "recommendation": "Remove and replace all visibly delaminated or cracked modules within 21 days and inspect adjacent modules for propagation; retain replaced modules for manufacturer warranty claim processing."
+      },
+      {
+        "category": "safety",
+        "severity": "critical",
+        "description": "The inverter room ventilation fan 1 is non-functional, resulting in ambient temperatures exceeding the inverter safe operating limit by 12\u00b0C during midday peak, increasing risk of inverter failure and fire. Additionally, the AC distribution panel cover at inverter bay 3 is missing, exposing live connections.",
+        "recommendation": "Shut down inverter bay 3 immediately until the AC panel cover is reinstalled and secure ventilation is restored; replace fan and verify ventilation within 72 hours and repair or replace AC panel cover within 48 hours, then conduct safety re-certification before returning to service."
+      }
+    ]
+  }
+]

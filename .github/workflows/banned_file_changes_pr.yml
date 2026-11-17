@@ -1,79 +1,82 @@
 name: Banned file changes (PR)
+
+# Guards the repository against pull requests that modify protected files.
+#
+# Rewritten to use GitHub-owned tooling only. The previous revision called
+# oracle-devrel/action-git-num-commits, oracle-devrel/action-git-files-changed
+# and mshick/add-pr-comment, none of which are on the organization's
+# allowed-actions list, so every run failed at startup and no pull request was
+# ever actually checked.
+#
+# The changed-file list is read through the REST API, so untrusted pull request
+# code is never checked out with the write-scoped pull_request_target token.
+#
+# Maintainers (OWNER/MEMBER/COLLABORATOR) are exempt so CI itself stays
+# patchable through pull requests. Drop the author_association conditions on
+# the last two steps to make the rule absolute.
 on:
-  # pull_request:
-  #   branches: [ "**/*" ]
   pull_request_target:
-  
+
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   check_for_banned_file_changes:
     name: Look for unsupported (banned) file modifications on PRs
     runs-on: ubuntu-latest
     steps:
-      - name: 'Get number of git commits'
-        uses: oracle-devrel/action-git-num-commits@v0.1-alpha6
-        id: num_commits
-        with:
-          pull_url: ${{ github.event.pull_request.url }}
-      - name: 'Checkout repo'
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          fetch-depth: ${{ steps.num_commits.outputs.fetch_depth }}
-      - name: Get file changes
-        uses: oracle-devrel/action-git-files-changed@v0.1-alpha2
-        id: files
-        with:
-          pull_url: ${{ github.event.pull_request.url }}
-      - name: Look for changes to .github
-        if: contains(steps.files.outputs.all_files_changed, '.github')
+      - name: Collect changed files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          echo 'Changes to files in .github are not allowed.'
-      - name: Comment if .github changed
-        if: contains(steps.files.outputs.all_files_changed, '.github')
-        uses: mshick/add-pr-comment@v1
-        with:
-          message: |
-            :no_entry: **Banned Files Modified**
-            Changes to files in `.github` are not permitted.  Please revert your changes and re-submit a new PR.  Simply changing the file back to its original state and re-committing won't work (you must revert the changes made to it).
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Look for changes to license_policy.yml
-        if: contains(steps.files.outputs.all_files_changed, '"license_policy.yml"')
+          gh api "repos/${REPO}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename' | sort > changed_files.txt
+          echo "Changed files:"
+          sed 's/^/  /' changed_files.txt
+
+      - name: Detect banned file changes
+        id: detect
         run: |
-          echo 'Changes to license_policy.yml are not allowed.'
-      - name: Comment if license_policy.yml changed
-        if: contains(steps.files.outputs.all_files_changed, '"license_policy.yml"')
-        uses: mshick/add-pr-comment@v1
-        with:
-          message: |
-            :no_entry: **Banned Files Modified**
-            Changes to `license_policy.yml` are not permitted.  Please revert your changes and re-submit a new PR.  Simply changing the file back to its original state and re-committing won't work (you must revert the changes made to it).
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Look for changes to repolinter.json
-        if: contains(steps.files.outputs.all_files_changed, '"repolinter.json"')
-        uses: mshick/add-pr-comment@v1
-        with:
-          message: |
-            :no_entry: **Banned Files Modified**
-            Changes to `repolinter.json` are not permitted.  Please revert your changes and re-submit a new PR.  Simply changing the file back to its original state and re-committing won't work (you must revert the changes made to it).
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Comment if repolinter.json changed
-        if: contains(steps.files.outputs.all_files_changed, '"repolinter.json"')
+          : > banned_files.txt
+          while IFS= read -r file; do
+            case "$file" in
+              .github/*|license_policy.yml|repolinter.json|sonar-project.properties)
+                echo "$file" >> banned_files.txt
+                ;;
+            esac
+          done < changed_files.txt
+
+          if [ -s banned_files.txt ]; then
+            echo "banned=true" >> "$GITHUB_OUTPUT"
+            echo "Banned files modified:"
+            sed 's/^/  /' banned_files.txt
+          else
+            echo "banned=false" >> "$GITHUB_OUTPUT"
+            echo "No banned file changes."
+          fi
+
+      - name: Comment on banned file changes
+        if: steps.detect.outputs.banned == 'true' && !contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          echo 'Changes to repolinter.json are not allowed.'
-      - name: Look for changes to sonar-project.properties
-        if: contains(steps.files.outputs.all_files_changed, '"sonar-project.properties"')
-        uses: mshick/add-pr-comment@v1
-        with:
-          message: |
-            :no_entry: **Banned Files Modified**
-            Changes to `sonar-project.properties` are not permitted.  Please revert your changes and re-submit a new PR.  Simply changing the file back to its original state and re-committing won't work (you must revert the changes made to it).
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Comment if sonar-project.properties changed
-        if: contains(steps.files.outputs.all_files_changed, '"sonar-project.properties"')
+          {
+            echo ":no_entry: **Banned Files Modified**"
+            echo
+            echo "Changes to the following files are not permitted:"
+            echo
+            sed 's|^|- `|; s|$|`|' banned_files.txt
+            echo
+            echo "Please revert your changes and re-submit a new pull request. Simply changing the file back to its original state and re-committing won't work (you must revert the changes made to it)."
+          } > banned_files_comment.md
+          gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file banned_files_comment.md
+
+      - name: Halt pipeline on banned file changes
+        if: steps.detect.outputs.banned == 'true' && !contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association)
         run: |
-          echo 'Changes to sonar-project.properties are not allowed.'
-      - name: Fail on banned file changes
-        if: contains(steps.files.outputs.all_files_changed, '.github') || contains(steps.files.outputs.all_files_changed, '"license_policy.yml"') || contains(steps.files.outputs.all_files_changed, '"repolinter.json"') || contains(steps.files.outputs.all_files_changed, '"sonar-project.properties"')
-        run: |
+          echo "::error::Banned files were modified. See the pull request comment for details."
           exit 1

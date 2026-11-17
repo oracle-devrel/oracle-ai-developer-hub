@@ -42,17 +42,27 @@ def _strip_comments(segment: str) -> str:
     return "\n".join(non_comment).strip()
 
 
-def create_all(conn: oracledb.Connection) -> None:
+def create_all(conn: oracledb.Connection) -> int:
+    """Create every table and index in schemas.sql that doesn't exist yet.
+
+    Returns the number of statements skipped because the object already existed,
+    so re-running setup against an existing schema is a no-op rather than an error.
+    """
     sql = SCHEMAS_FILE.read_text()
     cur = conn.cursor()
     raw_segments = [s.strip() for s in sql.split(";") if s.strip()]
     statements = [_strip_comments(s) for s in raw_segments]
     statements = [s for s in statements if s and not s.startswith("--")]
+    existing = 0
     for stmt in statements:
         try:
             cur.execute(stmt)
         except oracledb.DatabaseError as e:
             (err,) = e.args
+            # ORA-00955: name is already used by an existing object
+            if err.code == 955:
+                existing += 1
+                continue
             # ORA-29855: error occurred in the execution of ODCIINDEXCREATE routine
             # This fires when CTXSYS.CONTEXT index can't be created without CTXAPP grant.
             # We log and continue — the cascade fallback in retrieval.py handles this.
@@ -61,6 +71,7 @@ def create_all(conn: oracledb.Connection) -> None:
                 continue
             raise
     conn.commit()
+    return existing
 
 
 def main() -> None:
@@ -68,8 +79,11 @@ def main() -> None:
     conn = connect_sync()
     try:
         if cmd == "setup":
-            create_all(conn)
-            print(f"Created {len(TABLES)} tables.")
+            existing = create_all(conn)
+            if existing:
+                print(f"Schema ready; left {existing} existing tables and indexes in place.")
+            else:
+                print(f"Created {len(TABLES)} tables.")
         elif cmd == "teardown":
             drop_all(conn)
             print("Dropped all tables.")

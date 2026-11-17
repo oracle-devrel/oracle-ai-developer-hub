@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OCI IAM Memory Access Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  </head>
+  <body>
+    <main class="error-page">
+      <div class="warning" role="alert">Learning example only. Not for production use.</div>
+      <h1>Request could not be completed</h1>
+      <p>{{ message }}</p>
+      <a class="button" href="{{ url_for('web.index') }}">Return to the application</a>
+    </main>
+  </body>
+</html>

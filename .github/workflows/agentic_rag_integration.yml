@@ -1,19 +1,12 @@
 name: agentic_rag integration tests
 
+# Manual-only. Every run since this workflow was added failed with
+# ORA-43853 ("JSON type cannot be used in non-automatic segment space
+# management tablespace \"SYSTEM\"") because the suite connects as SYSTEM
+# against the container's SYSTEM tablespace. Restore the push/schedule
+# triggers once the suite runs against a schema with an ASSM tablespace.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/agentic_rag/src/**'
-      - 'apps/agentic_rag/tests/conftest.py'
-      - 'apps/agentic_rag/tests/integration/**'
-      - 'apps/agentic_rag/requirements.txt'
-      - 'apps/agentic_rag/docker-compose.test.yml'
-      - '.github/workflows/agentic_rag_integration.yml'
   workflow_dispatch: {}
-  schedule:
-    # Nightly at 04:17 UTC. Odd minute to avoid the top-of-hour queue.
-    - cron: '17 4 * * *'
 
 concurrency:
   group: agentic-rag-integration-${{ github.ref }}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="OraViz MCP">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#D5533F"/>
+      <stop offset="1" stop-color="#A63527"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)"/>
+  <rect x="52" y="140" width="30" height="64" rx="6" fill="#FFFFFF" opacity="0.8"/>
+  <rect x="94" y="112" width="30" height="92" rx="6" fill="#FFFFFF" opacity="0.9"/>
+  <rect x="136" y="84" width="30" height="120" rx="6" fill="#FFFFFF"/>
+  <path d="M52 126 L109 96 L151 68 L204 44" stroke="#FFD9CF" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="204" cy="44" r="11" fill="#FFD9CF"/>
+</svg>

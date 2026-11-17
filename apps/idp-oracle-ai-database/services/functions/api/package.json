@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@hono/node-server": "^2.1.6",
+    "@hono/node-server": "^2.1.9",
     "@idp/core": "workspace:*",
     "@idp/logger": "workspace:*",
     "@idp/schemas": "workspace:*",

@@ -1,6 +1,6 @@
 # Oracle AI Database + Mem0 TypeScript Memory Assistant
 
-Companion TypeScript application for the article [_Building a long-term memory assistant with Mem0, TypeScript, and Oracle_](./docs/article.md).
+Companion TypeScript application for the article [_How to Build an AI Assistant That Remembers_](https://blogs.oracle.com/developers/how-to-build-an-ai-assistant-that-remembers). 
 
 This sample shows JavaScript and TypeScript developers how to use Mem0 OSS with Oracle AI Database as the vector store. It is intentionally a runnable Node.js app, not a notebook: a React frontend calls a Hono API, the API runs a Mem0 memory workflow, and the `mem0ai` Oracle provider stores and searches user-scoped vectors in Oracle AI Database.
 
@@ -164,7 +164,7 @@ docs/           Article, local development guide, architecture, API notes, and t
 
 ## Docs
 
-- [Article: Building a long-term memory assistant with Mem0, TypeScript, and Oracle](./docs/article.md)
+- [Blog Post: How to Build an AI Assistant That Remembers ](https://blogs.oracle.com/developers/how-to-build-an-ai-assistant-that-remembers)
 - [Architecture and request flow](./docs/architecture.md)
 - [API reference](./docs/api.md)
 - [Local development](./docs/local-development.md)

@@ -13,31 +13,31 @@ importers:
         version: 4.2.2(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
       '@tanstack/ai':
         specifier: latest
-        version: 1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6)
+        version: 1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7)
       '@tanstack/ai-anthropic':
         specifier: latest
-        version: 1.1.1(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))(zod@4.6.6)
+        version: 1.2.1(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))(zod@4.6.7)
       '@tanstack/ai-client':
         specifier: latest
-        version: 1.1.0(@opentelemetry/api@1.10.0)(zod@4.6.6)
+        version: 1.2.0(@opentelemetry/api@1.10.0)(zod@4.6.7)
       '@tanstack/ai-gemini':
         specifier: latest
-        version: 1.2.2(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.6))(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))
+        version: 1.2.3(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.7))(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))
       '@tanstack/ai-ollama':
         specifier: latest
-        version: 1.1.1(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))
+        version: 1.1.1(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))
       '@tanstack/ai-openai':
         specifier: latest
-        version: 1.1.1(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.6)
+        version: 1.2.0(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.7)
       '@tanstack/ai-react':
         specifier: latest
-        version: 1.0.2(@opentelemetry/api@1.10.0)(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.6.6)
+        version: 1.1.0(@opentelemetry/api@1.10.0)(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.6.7)
       '@tanstack/react-router':
         specifier: latest
         version: 1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/react-start':
         specifier: latest
-        version: 1.169.5(esbuild@0.27.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
+        version: 1.169.7(esbuild@0.27.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
       '@tanstack/router-plugin':
         specifier: ^1.132.0
         version: 1.167.12(@tanstack/react-router@1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
@@ -63,8 +63,8 @@ importers:
         specifier: ^4.1.18
         version: 4.2.2
       zod:
-        specifier: ^4.6.6
-        version: 4.6.6
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@tailwindcss/typography':
         specifier: ^0.5.16
@@ -889,41 +889,41 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
-  '@tanstack/ai-anthropic@1.1.1':
-    resolution: {integrity: sha512-pQvU543yZ+HoLvuInTqx9xe93hWu0nBYyPPkXtsUQOBF2yO+aAfTyJpBZE9zz6EO2t/s5uVVJFq1BBwiNYOFag==}
+  '@tanstack/ai-anthropic@1.2.1':
+    resolution: {integrity: sha512-IrdliaPfwaiKIMWq4iEJoKWqKPGY1zDSQlqGhJoeaLcHoyvRQF4se7B10x71Ll+ekhVWvmiYsoWxTKOzYY8kvw==}
     peerDependencies:
       '@anthropic-ai/vertex-sdk': ^0.19.0
-      '@tanstack/ai': ^1.2.0
+      '@tanstack/ai': ^1.7.0
     peerDependenciesMeta:
       '@anthropic-ai/vertex-sdk':
         optional: true
 
-  '@tanstack/ai-client@1.1.0':
-    resolution: {integrity: sha512-XMTdKzB9JG851Sztd/ywaL9D9Mw5DS87nV2i+5/Yq9dT+JKMcGoXCriztyO+djwxHu5ZGY32o9o29zbMMBo9VQ==}
+  '@tanstack/ai-client@1.2.0':
+    resolution: {integrity: sha512-fwDe6AijLgScdEDq6Cy15U6V1i2GPBtxSmUhNGytGxuW1IQIFvufYMqSmVtJ4pd/CrZXvm43BoBo6jLogl574w==}
 
-  '@tanstack/ai-event-client@1.0.1':
-    resolution: {integrity: sha512-IURnn4oRKJbtbAuC3GcXRcuKHi8DrPmwuACqaTq6ApSGlyJyHhq0NTksKEmzql2Z12+njFjsKSXG9c7UbSHTxg==}
+  '@tanstack/ai-event-client@1.1.0':
+    resolution: {integrity: sha512-g4ctAzbvC1CuAjjTnp8iH5hlnFzVPJybVhuRMItUb5ISC4bQsrhUyhrsZ4QHW1brEpaAhfdss+MpdWux+7glUw==}
 
-  '@tanstack/ai-gemini@1.2.2':
-    resolution: {integrity: sha512-TvPtHF2aajwgXIxsZKBIeQYT/X5Da3ZvTQgwpIX4blh/BCnC7N/4hs2Q3JG0r4IqIFToJSNfohoSVNBxpFTajg==}
+  '@tanstack/ai-gemini@1.2.3':
+    resolution: {integrity: sha512-CM6BWkFfg5yIsuDjtqr32gk68zZVpE9mTFcfW3qcxplQ1sysdFGM8DHEk1yyyqPUu6JsnOFS+9VodY77nFL36Q==}
     peerDependencies:
-      '@tanstack/ai': ^1.4.0
+      '@tanstack/ai': ^1.5.0
 
   '@tanstack/ai-ollama@1.1.1':
     resolution: {integrity: sha512-mxWIZp/1p2Q4+ctbjQVAq1fkExpLpOTT1TRsQcWJM1HObc/4W12SV2b3oQfmL8BoMq61LWrj+s6Sv0JVCwxBsw==}
     peerDependencies:
       '@tanstack/ai': ^1.3.0
 
-  '@tanstack/ai-openai@1.1.1':
-    resolution: {integrity: sha512-IzieUf8FmAaZOVV4ADM3PrL0W7GQ+SPB1BOLHU/EG+cVGcg+KuunlflNrjJJB7pcvJTZUoOhgBn2ljn8NH4mdw==}
+  '@tanstack/ai-openai@1.2.0':
+    resolution: {integrity: sha512-OLZ/w0m5J3Iu+8i0f78Jp+LOc2I3K8+yWTmDK+Rb5ft/LM+AqdM8krPKthvB//qPOSlmyK+qmrVeGShUYlcXVw==}
     peerDependencies:
-      '@tanstack/ai': ^1.2.0
+      '@tanstack/ai': ^1.7.0
 
-  '@tanstack/ai-react@1.0.2':
-    resolution: {integrity: sha512-c4khP6tKUVWUI0rehUuBSJTGJ2lH99qvdkxT6aBxmvhZVCps3icJYso0PCXJTCwEadML3k8j3+7o6159cu42/A==}
+  '@tanstack/ai-react@1.1.0':
+    resolution: {integrity: sha512-NxL09q+KoGz7pgbuCOlyKKR/GVA/JIQExim2H9UOI0WI6iN4yw0PFHWcmBEq43Y2wHfKM+ZK4rf/L51JQqMUiQ==}
     peerDependencies:
       '@mcp-ui/client': ^7
-      '@tanstack/ai': ^1.1.0
+      '@tanstack/ai': ^1.7.0
       '@types/react': '>=18.0.0'
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -936,8 +936,8 @@ packages:
   '@tanstack/ai-utils@1.1.0':
     resolution: {integrity: sha512-li47v/794azVLourgteS/+jjH/ZF+cIp/3RMVA1VybtKAFiMy3ZGxREU10OzfUghMzYLdfpK2l6ahvlWxNVHug==}
 
-  '@tanstack/ai@1.4.0':
-    resolution: {integrity: sha512-3f0D9gFCk8LUe9qAPCsRkjlXU2bqbIKKMGGo9P6Q6O0vR+5/0N/J3x1J2QWYY8L3LNvJliZBDnutudEIRzNU8w==}
+  '@tanstack/ai@1.7.0':
+    resolution: {integrity: sha512-aPk6DRAOF1+z6wxySyIw+5GdBJ/41qNLwVHr799WEiWcfW7b2pDP8VTMIsBzuHauMPOfCIn4nHCuP/paaWOL9w==}
     engines: {node: '>=18'}
     peerDependencies:
       '@opentelemetry/api': '>=1.9.0'
@@ -958,8 +958,8 @@ packages:
     resolution: {integrity: sha512-w1+YvwmTkwt5n8yUqEH3IWZ9DsmorCZW/EQ3KYHnqEgIkOZpH54NvW6/Epq3Dzb8H0ifIeYX8PExvrNLIH5FIA==}
     engines: {node: '>=20.19'}
 
-  '@tanstack/markdown@0.0.13':
-    resolution: {integrity: sha512-ZSQP2ulBvlPzdpZeRheBJnaELo7e4ET/D/XrfgweHyqhhLMN5vUJJAUl7ufSRd7GlfO/vwdzjKPh0E0JwqJkDA==}
+  '@tanstack/markdown@1.2.1':
+    resolution: {integrity: sha512-D/W8VHZe39mTGh74E5ZdmUPz9f/Gqso7ogKab3TRt3Mcto/IUGP94FTeI53hcNz1djwmo/s4hwU1og0rCPinOQ==}
     peerDependencies:
       octane: '>=0.1.12'
       react: '>=18'
@@ -969,10 +969,10 @@ packages:
       react:
         optional: true
 
-  '@tanstack/openai-base@1.0.4':
-    resolution: {integrity: sha512-PjWt6NJzFhnNfxPKJgigyuM1ADWMEMp+11MyA6UTVpc9EtoyGDeM156KMZ68gX2y3Vhmxkb4Gmw/+B6TQpblRQ==}
+  '@tanstack/openai-base@1.1.0':
+    resolution: {integrity: sha512-Ki3i39DgnkhgYNk+NK9ec94m/+8hUDbkVRaRj8Zwvdg+IoSpfaQa0XKH8oEw7BY188di4j3p8k1t5BcFjWR0Vg==}
     peerDependencies:
-      '@tanstack/ai': ^1.4.0
+      '@tanstack/ai': ^1.7.0
 
   '@tanstack/react-router@1.170.46':
     resolution: {integrity: sha512-ez1iNIhsPjGlaDHg3BXWs67EWVIYzB2tbopEHYDESdkO7owgkGb5de52+5Kv2v1fxdkggcNzo35bdk4arTVGQw==}
@@ -988,15 +988,15 @@ packages:
       react: '>=18.0.0 || >=19.0.0'
       react-dom: '>=18.0.0 || >=19.0.0'
 
-  '@tanstack/react-start-rsc@0.1.66':
-    resolution: {integrity: sha512-Utk9e3xJBZGvg0CcmiciW0m2dL45QOHFm/UGgQUcu1w32QvV6p5i8NmewwVcfr8utnexJXifDZZUWeO2NWiLpg==}
+  '@tanstack/react-start-rsc@0.1.68':
+    resolution: {integrity: sha512-vwJ41g2HMlxeF1ctnzORXBcpiXBij/IqENHKl1zOv8hsS0mslvqfio5SdCFo/4GKAOjcZWmxqG5GJoJWmryDbg==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       '@rspack/core': '>=2.0.0-0'
-      '@vitejs/plugin-rsc': '>=0.5.30'
+      '@vitejs/plugin-rsc': '>=0.5.38'
       react: '>=18.0.0 || >=19.0.0'
       react-dom: '>=18.0.0 || >=19.0.0'
-      react-server-dom-rspack: '>=0.0.2'
+      react-server-dom-rspack: '>=0.1.1'
     peerDependenciesMeta:
       '@rspack/core':
         optional: true
@@ -1012,8 +1012,8 @@ packages:
       react: '>=18.0.0 || >=19.0.0'
       react-dom: '>=18.0.0 || >=19.0.0'
 
-  '@tanstack/react-start@1.169.5':
-    resolution: {integrity: sha512-wbI+pitXm5J2uvFe9aLXVgIjY85ju4efsQ76reE19bZTkqyZzpSb+cBkNV5rZMSrsMzWUsbN5CRctHuWeMkRiA==}
+  '@tanstack/react-start@1.169.7':
+    resolution: {integrity: sha512-8/Qg9iVC2oTtAqSdLdML2K+MZ8eBZe00pe6k54CkWYA4nRmrNyN/n2zbMW+rtjDbLAPeQck/1hgS6QBlblPGnw==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       '@rsbuild/core': ^2.0.5
@@ -1111,8 +1111,8 @@ packages:
     resolution: {integrity: sha512-QWfUZ3Yo923tdQn38LyKMU8rcTw69zc+T4dAvgTWV4O56SqFRsGfS0lSWIMhJRwXIx/bvdi7nTUBDdZtTHtpTQ==}
     engines: {node: '>=22.12.0'}
 
-  '@tanstack/start-plugin-core@1.171.56':
-    resolution: {integrity: sha512-xTzXpxfuBsJjBq4xLbQ0Go0/87SReVukjevkqNR3k/rgeKHfjt8nHJDMaQByS97ko+jmSoVY8+TXtRLaCYvI0A==}
+  '@tanstack/start-plugin-core@1.172.0':
+    resolution: {integrity: sha512-8VbVDauTOvlersYJcJe/wlIQ3LqPV1oQnWiGwMKilA2Z9r1sDhts+7SCIHBHqr9BjK0Z8w1+X0CKvCygNeD/5g==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       '@rsbuild/core': ^2.0.5
@@ -3349,8 +3349,8 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zod@4.6.6:
-    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -3359,22 +3359,22 @@ snapshots:
 
   '@acemir/cssom@0.9.31': {}
 
-  '@ag-ui/core@1.0.0(zod@4.6.6)':
+  '@ag-ui/core@1.0.0(zod@4.6.7)':
     optionalDependencies:
-      zod: 4.6.6
+      zod: 4.6.7
 
   '@antfu/install-pkg@1.1.0':
     dependencies:
       package-manager-detector: 1.6.0
       tinyexec: 1.3.1
 
-  '@anthropic-ai/sdk@0.135.0(zod@4.6.6)':
+  '@anthropic-ai/sdk@0.135.0(zod@4.6.7)':
     dependencies:
       '@opentelemetry/api': 1.10.0
       json-schema-to-ts: 3.1.1
       standardwebhooks: 1.0.0
     optionalDependencies:
-      zod: 4.6.6
+      zod: 4.6.7
 
   '@asamuzakjp/css-color@5.1.4':
     dependencies:
@@ -3758,14 +3758,14 @@ snapshots:
 
   '@exodus/bytes@1.15.0': {}
 
-  '@google/genai@2.21.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.6))':
+  '@google/genai@2.21.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.7))':
     dependencies:
       google-auth-library: 10.6.2
       p-retry: 4.6.2
       protobufjs: 7.6.6
       ws: 8.20.0
     optionalDependencies:
-      '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.6)
+      '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.7)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -3807,7 +3807,7 @@ snapshots:
     dependencies:
       langium: 4.2.1
 
-  '@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.6)':
+  '@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.7)':
     dependencies:
       '@hono/node-server': 1.19.19(hono@4.13.19)
       ajv: 8.20.0
@@ -3824,8 +3824,8 @@ snapshots:
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
       raw-body: 3.0.2
-      zod: 4.6.6
-      zod-to-json-schema: 3.25.2(zod@4.6.6)
+      zod: 4.6.7
+      zod-to-json-schema: 3.25.2(zod@4.6.7)
     optionalDependencies:
       '@cfworker/json-schema': 4.1.6
     transitivePeerDependencies:
@@ -4027,32 +4027,32 @@ snapshots:
       tailwindcss: 4.2.2
       vite: 7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0)
 
-  '@tanstack/ai-anthropic@1.1.1(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))(zod@4.6.6)':
+  '@tanstack/ai-anthropic@1.2.1(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))(zod@4.6.7)':
     dependencies:
-      '@anthropic-ai/sdk': 0.135.0(zod@4.6.6)
-      '@tanstack/ai': 1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6)
+      '@anthropic-ai/sdk': 0.135.0(zod@4.6.7)
+      '@tanstack/ai': 1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7)
       '@tanstack/ai-utils': 1.1.0
     transitivePeerDependencies:
       - zod
 
-  '@tanstack/ai-client@1.1.0(@opentelemetry/api@1.10.0)(zod@4.6.6)':
+  '@tanstack/ai-client@1.2.0(@opentelemetry/api@1.10.0)(zod@4.6.7)':
     dependencies:
-      '@tanstack/ai': 1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6)
-      '@tanstack/ai-event-client': 1.0.1
+      '@tanstack/ai': 1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7)
+      '@tanstack/ai-event-client': 1.1.0
       '@tanstack/ai-utils': 1.1.0
       '@tanstack/store': 0.11.2
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - zod
 
-  '@tanstack/ai-event-client@1.0.1':
+  '@tanstack/ai-event-client@1.1.0':
     dependencies:
       '@tanstack/devtools-event-client': 0.4.3
 
-  '@tanstack/ai-gemini@1.2.2(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.6))(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))':
+  '@tanstack/ai-gemini@1.2.3(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.7))(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))':
     dependencies:
-      '@google/genai': 2.21.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.6))
-      '@tanstack/ai': 1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6)
+      '@google/genai': 2.21.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.6)(zod@4.6.7))
+      '@tanstack/ai': 1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7)
       '@tanstack/ai-utils': 1.1.0
       partial-json: 0.1.7
     transitivePeerDependencies:
@@ -4061,18 +4061,18 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@tanstack/ai-ollama@1.1.1(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))':
+  '@tanstack/ai-ollama@1.1.1(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))':
     dependencies:
-      '@tanstack/ai': 1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6)
+      '@tanstack/ai': 1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7)
       '@tanstack/ai-utils': 1.1.0
       ollama: 0.6.3
 
-  '@tanstack/ai-openai@1.1.1(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.6)':
+  '@tanstack/ai-openai@1.2.0(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.7)':
     dependencies:
-      '@tanstack/ai': 1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6)
+      '@tanstack/ai': 1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7)
       '@tanstack/ai-utils': 1.1.0
-      '@tanstack/openai-base': 1.0.4(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.6)
-      openai: 7.57.0(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.6)
+      '@tanstack/openai-base': 1.1.0(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.7)
+      openai: 7.57.0(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.7)
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
       - '@smithy/hash-node'
@@ -4082,11 +4082,11 @@ snapshots:
       - ws
       - zod
 
-  '@tanstack/ai-react@1.0.2(@opentelemetry/api@1.10.0)(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.6.6)':
+  '@tanstack/ai-react@1.1.0(@opentelemetry/api@1.10.0)(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.6.7)':
     dependencies:
-      '@tanstack/ai': 1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6)
-      '@tanstack/ai-client': 1.1.0(@opentelemetry/api@1.10.0)(zod@4.6.6)
-      '@tanstack/markdown': 0.0.13(react@19.2.4)
+      '@tanstack/ai': 1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7)
+      '@tanstack/ai-client': 1.2.0(@opentelemetry/api@1.10.0)(zod@4.6.7)
+      '@tanstack/markdown': 1.2.1(react@19.2.4)
       '@types/react': 19.2.14
       react: 19.2.4
     optionalDependencies:
@@ -4098,12 +4098,12 @@ snapshots:
 
   '@tanstack/ai-utils@1.1.0': {}
 
-  '@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6)':
+  '@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7)':
     dependencies:
-      '@ag-ui/core': 1.0.0(zod@4.6.6)
+      '@ag-ui/core': 1.0.0(zod@4.6.7)
       '@cfworker/json-schema': 4.1.6
       '@standard-schema/spec': 1.1.0
-      '@tanstack/ai-event-client': 1.0.1
+      '@tanstack/ai-event-client': 1.1.0
       '@tanstack/ai-utils': 1.1.0
       fast-json-patch: 3.1.1
       partial-json: 0.1.7
@@ -4118,15 +4118,15 @@ snapshots:
 
   '@tanstack/history@1.162.5': {}
 
-  '@tanstack/markdown@0.0.13(react@19.2.4)':
+  '@tanstack/markdown@1.2.1(react@19.2.4)':
     optionalDependencies:
       react: 19.2.4
 
-  '@tanstack/openai-base@1.0.4(@tanstack/ai@1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6))(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.6)':
+  '@tanstack/openai-base@1.1.0(@tanstack/ai@1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7))(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.7)':
     dependencies:
-      '@tanstack/ai': 1.4.0(@opentelemetry/api@1.10.0)(zod@4.6.6)
+      '@tanstack/ai': 1.7.0(@opentelemetry/api@1.10.0)(zod@4.6.7)
       '@tanstack/ai-utils': 1.1.0
-      openai: 7.57.0(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.6)
+      openai: 7.57.0(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.7)
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
       - '@smithy/hash-node'
@@ -4153,14 +4153,14 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@tanstack/react-start-rsc@0.1.66(esbuild@0.27.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))':
+  '@tanstack/react-start-rsc@0.1.68(esbuild@0.27.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))':
     dependencies:
       '@tanstack/react-router': 1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/router-core': 1.171.39
       '@tanstack/router-utils': 1.163.0
       '@tanstack/start-client-core': 1.170.39
       '@tanstack/start-fn-stubs': 1.162.0
-      '@tanstack/start-plugin-core': 1.171.56(@tanstack/react-router@1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(esbuild@0.27.7)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
+      '@tanstack/start-plugin-core': 1.172.0(@tanstack/react-router@1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(esbuild@0.27.7)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
       '@tanstack/start-storage-context': 1.167.41
       pathe: 2.0.3
       react: 19.2.4
@@ -4186,15 +4186,15 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@tanstack/react-start@1.169.5(esbuild@0.27.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))':
+  '@tanstack/react-start@1.169.7(esbuild@0.27.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))':
     dependencies:
       '@tanstack/react-router': 1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/react-start-client': 1.168.45(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@tanstack/react-start-rsc': 0.1.66(esbuild@0.27.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
+      '@tanstack/react-start-rsc': 0.1.68(esbuild@0.27.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
       '@tanstack/react-start-server': 1.167.52(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/router-utils': 1.163.0
       '@tanstack/start-client-core': 1.170.39
-      '@tanstack/start-plugin-core': 1.171.56(@tanstack/react-router@1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(esbuild@0.27.7)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
+      '@tanstack/start-plugin-core': 1.172.0(@tanstack/react-router@1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(esbuild@0.27.7)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
       '@tanstack/start-server-core': 1.169.45
       pathe: 2.0.3
       react: 19.2.4
@@ -4257,7 +4257,7 @@ snapshots:
       jiti: 2.7.0
       magic-string: 0.30.21
       prettier: 3.9.6
-      zod: 4.6.6
+      zod: 4.6.7
     transitivePeerDependencies:
       - supports-color
 
@@ -4292,7 +4292,7 @@ snapshots:
       '@tanstack/router-utils': 1.163.0
       chokidar: 5.0.0
       unplugin: 3.7.0(esbuild@0.27.7)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
-      zod: 4.6.6
+      zod: 4.6.7
     optionalDependencies:
       '@tanstack/react-router': 1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       vite: 7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0)
@@ -4342,7 +4342,7 @@ snapshots:
 
   '@tanstack/start-fn-stubs@1.162.0': {}
 
-  '@tanstack/start-plugin-core@1.171.56(@tanstack/react-router@1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(esbuild@0.27.7)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))':
+  '@tanstack/start-plugin-core@1.172.0(@tanstack/react-router@1.170.46(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(esbuild@0.27.7)(rollup@4.60.2)(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))':
     dependencies:
       '@babel/code-frame': 7.29.7
       '@babel/core': 7.29.7
@@ -4364,7 +4364,7 @@ snapshots:
       ufo: 1.6.4
       vitefu: 1.1.3(vite@7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0))
       xmlbuilder2: 4.0.3
-      zod: 4.6.6
+      zod: 4.6.7
     optionalDependencies:
       vite: 7.3.7(@types/node@22.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0)
     transitivePeerDependencies:
@@ -6226,11 +6226,11 @@ snapshots:
       wrappy: 1.0.2
     optional: true
 
-  openai@7.57.0(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.6):
+  openai@7.57.0(google-auth-library@10.6.2)(undici@7.30.2)(zod@4.6.7):
     optionalDependencies:
       google-auth-library: 10.6.2
       undici: 7.30.2
-      zod: 4.6.6
+      zod: 4.6.7
 
   oracledb@6.10.0: {}
 
@@ -6941,13 +6941,13 @@ snapshots:
 
   yallist@3.1.1: {}
 
-  zod-to-json-schema@3.25.2(zod@4.6.6):
+  zod-to-json-schema@3.25.2(zod@4.6.7):
     dependencies:
-      zod: 4.6.6
+      zod: 4.6.7
     optional: true
 
   zod@3.25.76: {}
 
-  zod@4.6.6: {}
+  zod@4.6.7: {}
 
   zwitch@2.0.4: {}

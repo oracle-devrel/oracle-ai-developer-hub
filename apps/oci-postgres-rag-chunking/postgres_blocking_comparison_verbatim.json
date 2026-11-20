@@ -1,0 +1,2845 @@
+{
+  "source": "OCI_PostgreSQL_Troubleshooting_Guide.docx",
+  "source_sha256": "bd61169c07557ff4962f2a4adf2e9dca14ffb6184b19e8962bcc755fd445fbc3",
+  "config": {
+    "size": 900,
+    "overlap": 180,
+    "top_k": 2,
+    "context_limit": 6000,
+    "max_output_tokens": 1200,
+    "runs": 3,
+    "answer_style": "verbatim"
+  },
+  "models": {
+    "embedding": "cohere.embed-v4.0",
+    "chat": "cohere.command-a-03-2025",
+    "judge": "xai.grok-4.7"
+  },
+  "question": "OCI PostgreSQL writes are blocked by a session that is idle inside an open transaction. How do I identify the root blocker, resolve it safely, and verify recovery?",
+  "required_evidence": {
+    "Identify blocker (complete SQL)": "SELECT a.pid AS waiting_pid,\n       b.pid AS blocking_pid,\n       b.usename, b.application_name, b.state,\n       clock_timestamp() - b.xact_start AS blocking_xact_age,\n       left(a.query, 100) AS waiting_sql,\n       left(b.query, 100) AS blocking_sql\nFROM pg_stat_activity a\nCROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\nJOIN pg_stat_activity b ON b.pid = x.pid\nWHERE a.datname = current_database()\nORDER BY b.xact_start NULLS LAST;",
+    "Explain why idle can still block": "Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work.",
+    "Ask owner to commit or roll back": "Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible.",
+    "Approval and fresh PID check": "If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting. A PID from an old snapshot can belong to a different session later.",
+    "Cancel vs terminate consequences": "Prefer canceling a running statement first. An idle transaction has no running statement to cancel. Terminating its session ends the connection and rolls back uncommitted work; the client must recover.",
+    "Verify blocking clears and writes resume": "Recovery check. Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete."
+  },
+  "rubric": {
+    "Identify blocker (complete SQL)": [
+      [
+        "Gives the query text itself (not only a reference to it), using pg_blocking_pids() on pg_stat_activity",
+        "unnest(pg_blocking_pids(a.pid))"
+      ],
+      [
+        "The query returns each waiting PID together with the PID that blocks it",
+        "b.pid AS blocking_pid"
+      ]
+    ],
+    "Explain why idle can still block": [
+      [
+        "Follow the blocking chain to the root blocker",
+        "Follow the chain to the root blocker"
+      ],
+      [
+        "The root blocker may be idle inside an open transaction, so its last statement can look harmless",
+        "Its last statement may appear harmless"
+      ],
+      [
+        "Locks taken earlier in that transaction still block other work",
+        "Locks acquired earlier in that transaction can still block other work"
+      ]
+    ],
+    "Ask owner to commit or roll back": [
+      [
+        "Identify the application owner or the transaction’s business purpose",
+        "Identify the application owner"
+      ],
+      [
+        "Ask the owning session to commit or roll back where possible",
+        "Ask the owning session to commit or roll back where possible"
+      ]
+    ],
+    "Approval and fresh PID check": [
+      [
+        "Intervene only if the intervention is approved",
+        "If intervention is approved"
+      ],
+      [
+        "Recheck the PID, user, application and transaction start immediately before acting",
+        "recheck the PID, user, application, and transaction start immediately before acting"
+      ],
+      [
+        "Reason: a PID from an old snapshot can belong to a different session later",
+        "A PID from an old snapshot can belong to a different session later"
+      ]
+    ],
+    "Cancel vs terminate consequences": [
+      [
+        "Canceling only stops a running statement; an idle transaction has no running statement to cancel",
+        "An idle transaction has no running statement to cancel"
+      ],
+      [
+        "Terminating the session ends the connection and rolls back uncommitted work",
+        "Terminating its session ends the connection and rolls back uncommitted work"
+      ],
+      [
+        "The client must recover after the session is terminated",
+        "the client must recover"
+      ],
+      [
+        "Terminate only when ending the session is required and authorized",
+        "If ending the entire session is required and authorized"
+      ]
+    ],
+    "Verify blocking clears and writes resume": [
+      [
+        "Re-run the blocked-sessions query and confirm the original waiting PIDs no longer appear",
+        "confirm that the original waiting PIDs no longer appear"
+      ],
+      [
+        "Confirm that the blocked writes complete",
+        "confirm that the blocked writes complete"
+      ]
+    ]
+  },
+  "results": [
+    {
+      "strategy": "fixed",
+      "run": 1,
+      "answer_style": "verbatim",
+      "facts_found": 3,
+      "facts_required": 6,
+      "checks": {
+        "Identify blocker (complete SQL)": true,
+        "Explain why idle can still block": true,
+        "Ask owner to commit or roll back": true,
+        "Approval and fresh PID check": false,
+        "Cancel vs terminate consequences": false,
+        "Verify blocking clears and writes resume": false
+      },
+      "missing_checks": [
+        "Approval and fresh PID check",
+        "Cancel vs terminate consequences",
+        "Verify blocking clears and writes resume"
+      ],
+      "input_tokens": 702,
+      "context_characters": 1894,
+      "generation_seconds": 18.492030625000552,
+      "answer": "1. **Identify blocked sessions and their blockers**  \n   Run the following query to find sessions that are blocked and their respective blockers:  \n   ```sql\n   SELECT a.pid AS waiting_pid,\n          b.pid AS blocking_pid,\n          b.usename, b.application_name, b.state,\n          clock_timestamp() - b.xact_start AS blocking_xact_age,\n          left(a.query, 100) AS waiting_sql,\n          left(b.query, 100) AS blocking_sql\n   FROM pg_stat_activity a\n   CROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\n   JOIN pg_stat_activity b ON b.pid = x.pid\n   WHERE a.datname = current_database()\n   ORDER BY b.xact_start NULLS LAST;\n   ```  \n   Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [f015]\n\n2. **Find transactions that remain open**  \n   Use the following query to identify long-running transactions:  \n   ```sql\n   SELECT pid, usename, application_name, state,\n          clock_timestamp() - xact_start AS xact_age,\n          wait_event_type, wait_event, left(query, 140) AS sql\n   FROM pg_stat_activity\n   WHERE datname = current_database() AND xact_start IS NOT NULL\n     AND pid <> pg_backend_pid()\n   ORDER BY xact_start\n   LIMIT 20;\n   ```  \n   [f016]\n\n3. **Release the cause in a controlled way**  \n   1. Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.  \n   2. If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting. [f016]\n\n4. **Verify recovery**  \n   Not in the supplied passages.",
+      "usage": {
+        "input_tokens": 702,
+        "output_tokens": 464,
+        "total_tokens": 1166
+      },
+      "generation_metadata": {
+        "model_id": "cohere.command-a-03-2025",
+        "model_version": "1.0",
+        "request_id": "A58B3CEB2EA94CAABB73B308B394669D/B5AEDA6328F8BABF3908B52DD86B7E21/BC5BF3B7B9EB460151BC6F84C5FF4611",
+        "content-length": "1755",
+        "finish_reason": "COMPLETE",
+        "documents": null,
+        "citations": null,
+        "search_queries": null,
+        "is_search_required": null,
+        "total_tokens": 1166,
+        "model_name": "cohere.command-a-03-2025"
+      },
+      "search_ids": [
+        "f015",
+        "f016"
+      ],
+      "supplied_ids": [
+        "f015",
+        "f016"
+      ],
+      "provided_context": "[f015]\nSection: 5 Locks and long transactions\n when queries hang, writes stop progressing, or SQLSTATE 40P01 reports a deadlock. PostgreSQL resolves a detected deadlock by aborting a participant; recurring deadlocks require application transaction changes. [6, 12]\n\nIdentify blocked sessions and their blockers\n\nSELECT a.pid AS waiting_pid,\n       b.pid AS blocking_pid,\n       b.usename, b.application_name, b.state,\n       clock_timestamp() - b.xact_start AS blocking_xact_age,\n       left(a.query, 100) AS waiting_sql,\n       left(b.query, 100) AS blocking_sql\nFROM pg_stat_activity a\nCROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\nJOIN pg_stat_activity b ON b.pid = x.pid\nWHERE a.datname = current_database()\nORDER BY b.xact_start NULLS LAST;\n\nFollow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still blo\n\n[f016]\nSection: 5 Locks and long transactions\now the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [12]\n\nFind transactions that remain open\n\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n\nRelease the cause in a controlled way\n\n1  Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.\n\n2  If intervention is approved, recheck the PID, user, application, and transaction start immediately before act",
+      "skipped_for_budget": 0,
+      "judgement": {
+        "points": {
+          "Identify blocker (complete SQL)": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Gives the query text itself (not only a reference to it), using pg_blocking_pids() on pg_stat_activity",
+                "status": "present",
+                "quote": "Run the following query to find sessions that are blocked and their respective blockers:\nFROM pg_stat_activity a\nCROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\nJOIN pg_stat_activity b ON b.pid = x.pid",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The query returns each waiting PID together with the PID that blocks it",
+                "status": "present",
+                "quote": "a.pid AS waiting_pid,\nb.pid AS blocking_pid,",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Explain why idle can still block": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Follow the blocking chain to the root blocker",
+                "status": "present",
+                "quote": "Follow the chain to the root blocker.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The root blocker may be idle inside an open transaction, so its last statement can look harmless",
+                "status": "present",
+                "quote": "Its last statement may appear harmless if the session is idle inside an open transaction.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Locks taken earlier in that transaction still block other work",
+                "status": "present",
+                "quote": "Locks acquired earlier in that transaction can still block other work.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Ask owner to commit or roll back": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Identify the application owner or the transaction’s business purpose",
+                "status": "present",
+                "quote": "Identify the application owner and the transaction’s business purpose.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Ask the owning session to commit or roll back where possible",
+                "status": "present",
+                "quote": "Ask the owning session to commit or roll back where possible.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Approval and fresh PID check": {
+            "status": "partial",
+            "elements": [
+              {
+                "element": "Intervene only if the intervention is approved",
+                "status": "present",
+                "quote": "If intervention is approved",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Recheck the PID, user, application and transaction start immediately before acting",
+                "status": "present",
+                "quote": "recheck the PID, user, application, and transaction start immediately before acting.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Reason: a PID from an old snapshot can belong to a different session later",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 2,
+            "of": 3,
+            "supplied": false,
+            "evidence": "part",
+            "evidence_share": 0.6,
+            "flagged_missing": false,
+            "outcome": "cut-off evidence"
+          },
+          "Cancel vs terminate consequences": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Canceling only stops a running statement; an idle transaction has no running statement to cancel",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminating the session ends the connection and rolls back uncommitted work",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "The client must recover after the session is terminated",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminate only when ending the session is required and authorized",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 4,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.06,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Verify blocking clears and writes resume": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Re-run the blocked-sessions query and confirm the original waiting PIDs no longer appear",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Confirm that the blocked writes complete",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 2,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.06,
+            "flagged_missing": true,
+            "outcome": "honest gap"
+          }
+        },
+        "from_evidence": 3,
+        "complete": 3,
+        "elements_kept": 7,
+        "elements_altered": 0,
+        "from_memory": 0,
+        "cut_off": 1,
+        "unused": 0,
+        "gaps": 2,
+        "silent_gaps": 1,
+        "invented_claims": [],
+        "altered_claims": [
+          {
+            "quote": "Use the following query to identify long-running transactions:",
+            "type": "altered",
+            "why": "The passage asks to find transactions that remain open (xact_start IS NOT NULL) and does not filter by duration; calling them long-running changes the scope."
+          }
+        ],
+        "unsafe": false,
+        "unsafe_reason": "",
+        "judge_usage": [
+          {
+            "input_tokens": 2340,
+            "output_tokens": 450,
+            "total_tokens": 9665,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 6875
+            }
+          },
+          {
+            "input_tokens": 2326,
+            "output_tokens": 63,
+            "total_tokens": 8527,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 6138
+            }
+          }
+        ]
+      }
+    },
+    {
+      "strategy": "fixed",
+      "run": 2,
+      "answer_style": "verbatim",
+      "facts_found": 3,
+      "facts_required": 6,
+      "checks": {
+        "Identify blocker (complete SQL)": true,
+        "Explain why idle can still block": true,
+        "Ask owner to commit or roll back": true,
+        "Approval and fresh PID check": false,
+        "Cancel vs terminate consequences": false,
+        "Verify blocking clears and writes resume": false
+      },
+      "missing_checks": [
+        "Approval and fresh PID check",
+        "Cancel vs terminate consequences",
+        "Verify blocking clears and writes resume"
+      ],
+      "input_tokens": 702,
+      "context_characters": 1894,
+      "generation_seconds": 21.421145166000315,
+      "answer": "Here is the step-by-step guide based on the supplied passages:\n\n1. **Identify blocked sessions and their blockers**  \n   Run the following query to find blocked sessions and their blockers:  \n   ```sql\n   SELECT a.pid AS waiting_pid,\n          b.pid AS blocking_pid,\n          b.usename, b.application_name, b.state,\n          clock_timestamp() - b.xact_start AS blocking_xact_age,\n          left(a.query, 100) AS waiting_sql,\n          left(b.query, 100) AS blocking_sql\n   FROM pg_stat_activity a\n   CROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\n   JOIN pg_stat_activity b ON b.pid = x.pid\n   WHERE a.datname = current_database()\n   ORDER BY b.xact_start NULLS LAST;\n   ```  \n   Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [f015]\n\n2. **Find transactions that remain open**  \n   Run the following query to identify long-running transactions:  \n   ```sql\n   SELECT pid, usename, application_name, state,\n          clock_timestamp() - xact_start AS xact_age,\n          wait_event_type, wait_event, left(query, 140) AS sql\n   FROM pg_stat_activity\n   WHERE datname = current_database() AND xact_start IS NOT NULL\n     AND pid <> pg_backend_pid()\n   ORDER BY xact_start\n   LIMIT 20;\n   ```  \n   [f016]\n\n3. **Release the cause in a controlled way**  \n   1. Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.  \n   2. If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting. [f016]\n\n**Verification of recovery**: Not in the supplied passages.",
+      "usage": {
+        "input_tokens": 702,
+        "output_tokens": 476,
+        "total_tokens": 1178
+      },
+      "generation_metadata": {
+        "model_id": "cohere.command-a-03-2025",
+        "model_version": "1.0",
+        "request_id": "D58902E60BA94C1D91721B23577CC537/4011CBC1D4B98FF5DA672296234A9F1A/E603E0B14904E4E5C11A3CA82390C9C1",
+        "content-length": "1769",
+        "finish_reason": "COMPLETE",
+        "documents": null,
+        "citations": null,
+        "search_queries": null,
+        "is_search_required": null,
+        "total_tokens": 1178,
+        "model_name": "cohere.command-a-03-2025"
+      },
+      "search_ids": [
+        "f015",
+        "f016"
+      ],
+      "supplied_ids": [
+        "f015",
+        "f016"
+      ],
+      "provided_context": "[f015]\nSection: 5 Locks and long transactions\n when queries hang, writes stop progressing, or SQLSTATE 40P01 reports a deadlock. PostgreSQL resolves a detected deadlock by aborting a participant; recurring deadlocks require application transaction changes. [6, 12]\n\nIdentify blocked sessions and their blockers\n\nSELECT a.pid AS waiting_pid,\n       b.pid AS blocking_pid,\n       b.usename, b.application_name, b.state,\n       clock_timestamp() - b.xact_start AS blocking_xact_age,\n       left(a.query, 100) AS waiting_sql,\n       left(b.query, 100) AS blocking_sql\nFROM pg_stat_activity a\nCROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\nJOIN pg_stat_activity b ON b.pid = x.pid\nWHERE a.datname = current_database()\nORDER BY b.xact_start NULLS LAST;\n\nFollow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still blo\n\n[f016]\nSection: 5 Locks and long transactions\now the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [12]\n\nFind transactions that remain open\n\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n\nRelease the cause in a controlled way\n\n1  Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.\n\n2  If intervention is approved, recheck the PID, user, application, and transaction start immediately before act",
+      "skipped_for_budget": 0,
+      "judgement": {
+        "points": {
+          "Identify blocker (complete SQL)": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Gives the query text itself (not only a reference to it), using pg_blocking_pids() on pg_stat_activity",
+                "status": "present",
+                "quote": "SELECT a.pid AS waiting_pid,\n          b.pid AS blocking_pid,\n          b.usename, b.application_name, b.state,\n          clock_timestamp() - b.xact_start AS blocking_xact_age,\n          left(a.query, 100) AS waiting_sql,\n          left(b.query, 100) AS blocking_sql\n   FROM pg_stat_activity a\n   CROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\n   JOIN pg_stat_activity b ON b.pid = x.pid\n   WHERE a.datname = current_database()\n   ORDER BY b.xact_start NULLS LAST;",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The query returns each waiting PID together with the PID that blocks it",
+                "status": "present",
+                "quote": "a.pid AS waiting_pid,\n          b.pid AS blocking_pid,",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Explain why idle can still block": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Follow the blocking chain to the root blocker",
+                "status": "present",
+                "quote": "Follow the chain to the root blocker.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The root blocker may be idle inside an open transaction, so its last statement can look harmless",
+                "status": "present",
+                "quote": "Its last statement may appear harmless if the session is idle inside an open transaction.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Locks taken earlier in that transaction still block other work",
+                "status": "present",
+                "quote": "Locks acquired earlier in that transaction can still block other work.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Ask owner to commit or roll back": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Identify the application owner or the transaction’s business purpose",
+                "status": "present",
+                "quote": "Identify the application owner and the transaction’s business purpose.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Ask the owning session to commit or roll back where possible",
+                "status": "present",
+                "quote": "Ask the owning session to commit or roll back where possible.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Approval and fresh PID check": {
+            "status": "partial",
+            "elements": [
+              {
+                "element": "Intervene only if the intervention is approved",
+                "status": "present",
+                "quote": "If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Recheck the PID, user, application and transaction start immediately before acting",
+                "status": "present",
+                "quote": "recheck the PID, user, application, and transaction start immediately before acting.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Reason: a PID from an old snapshot can belong to a different session later",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 2,
+            "of": 3,
+            "supplied": false,
+            "evidence": "part",
+            "evidence_share": 0.6,
+            "flagged_missing": false,
+            "outcome": "cut-off evidence"
+          },
+          "Cancel vs terminate consequences": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Canceling only stops a running statement; an idle transaction has no running statement to cancel",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminating the session ends the connection and rolls back uncommitted work",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "The client must recover after the session is terminated",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminate only when ending the session is required and authorized",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 4,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.06,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Verify blocking clears and writes resume": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Re-run the blocked-sessions query and confirm the original waiting PIDs no longer appear",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Confirm that the blocked writes complete",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 2,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.06,
+            "flagged_missing": true,
+            "outcome": "honest gap"
+          }
+        },
+        "from_evidence": 3,
+        "complete": 3,
+        "elements_kept": 7,
+        "elements_altered": 0,
+        "from_memory": 0,
+        "cut_off": 1,
+        "unused": 0,
+        "gaps": 2,
+        "silent_gaps": 1,
+        "invented_claims": [],
+        "altered_claims": [
+          {
+            "quote": "Run the following query to identify long-running transactions:",
+            "type": "altered",
+            "why": "The passages title this query \"Find transactions that remain open\" and the SQL only requires xact_start IS NOT NULL; it does not identify long-running transactions or apply any duration condition."
+          }
+        ],
+        "unsafe": false,
+        "unsafe_reason": "",
+        "judge_usage": [
+          {
+            "input_tokens": 2349,
+            "output_tokens": 569,
+            "total_tokens": 6696,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 3778
+            }
+          },
+          {
+            "input_tokens": 2335,
+            "output_tokens": 68,
+            "total_tokens": 9811,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 7408
+            }
+          }
+        ]
+      }
+    },
+    {
+      "strategy": "fixed",
+      "run": 3,
+      "answer_style": "verbatim",
+      "facts_found": 3,
+      "facts_required": 6,
+      "checks": {
+        "Identify blocker (complete SQL)": true,
+        "Explain why idle can still block": true,
+        "Ask owner to commit or roll back": true,
+        "Approval and fresh PID check": false,
+        "Cancel vs terminate consequences": false,
+        "Verify blocking clears and writes resume": false
+      },
+      "missing_checks": [
+        "Approval and fresh PID check",
+        "Cancel vs terminate consequences",
+        "Verify blocking clears and writes resume"
+      ],
+      "input_tokens": 702,
+      "context_characters": 1894,
+      "generation_seconds": 117.1029587919993,
+      "answer": "1. **Identify blocked sessions and their blockers**  \n   Run the following query to find sessions that are blocked and their respective blockers:  \n   ```sql\n   SELECT a.pid AS waiting_pid,\n          b.pid AS blocking_pid,\n          b.usename, b.application_name, b.state,\n          clock_timestamp() - b.xact_start AS blocking_xact_age,\n          left(a.query, 100) AS waiting_sql,\n          left(b.query, 100) AS blocking_sql\n   FROM pg_stat_activity a\n   CROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\n   JOIN pg_stat_activity b ON b.pid = x.pid\n   WHERE a.datname = current_database()\n   ORDER BY b.xact_start NULLS LAST;\n   ```  \n   Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [f015]\n\n2. **Find transactions that remain open**  \n   Use the following query to identify long-running transactions:  \n   ```sql\n   SELECT pid, usename, application_name, state,\n          clock_timestamp() - xact_start AS xact_age,\n          wait_event_type, wait_event, left(query, 140) AS sql\n   FROM pg_stat_activity\n   WHERE datname = current_database() AND xact_start IS NOT NULL\n     AND pid <> pg_backend_pid()\n   ORDER BY xact_start\n   LIMIT 20;\n   ```  \n   [f016]\n\n3. **Release the cause in a controlled way**  \n   1. Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.  \n   2. If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting. [f016]\n\n4. **Verify recovery**  \n   Not in the supplied passages.",
+      "usage": {
+        "input_tokens": 702,
+        "output_tokens": 464,
+        "total_tokens": 1166
+      },
+      "generation_metadata": {
+        "model_id": "cohere.command-a-03-2025",
+        "model_version": "1.0",
+        "request_id": "6BAC9B66AB18462EAA0B3B0AD5F22429/74749700137D7F1275DC1C4B23F51AFF/F0DB54C7706339BAACC0ABB555BC1394",
+        "content-length": "1755",
+        "finish_reason": "COMPLETE",
+        "documents": null,
+        "citations": null,
+        "search_queries": null,
+        "is_search_required": null,
+        "total_tokens": 1166,
+        "model_name": "cohere.command-a-03-2025"
+      },
+      "search_ids": [
+        "f015",
+        "f016"
+      ],
+      "supplied_ids": [
+        "f015",
+        "f016"
+      ],
+      "provided_context": "[f015]\nSection: 5 Locks and long transactions\n when queries hang, writes stop progressing, or SQLSTATE 40P01 reports a deadlock. PostgreSQL resolves a detected deadlock by aborting a participant; recurring deadlocks require application transaction changes. [6, 12]\n\nIdentify blocked sessions and their blockers\n\nSELECT a.pid AS waiting_pid,\n       b.pid AS blocking_pid,\n       b.usename, b.application_name, b.state,\n       clock_timestamp() - b.xact_start AS blocking_xact_age,\n       left(a.query, 100) AS waiting_sql,\n       left(b.query, 100) AS blocking_sql\nFROM pg_stat_activity a\nCROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\nJOIN pg_stat_activity b ON b.pid = x.pid\nWHERE a.datname = current_database()\nORDER BY b.xact_start NULLS LAST;\n\nFollow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still blo\n\n[f016]\nSection: 5 Locks and long transactions\now the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [12]\n\nFind transactions that remain open\n\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n\nRelease the cause in a controlled way\n\n1  Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.\n\n2  If intervention is approved, recheck the PID, user, application, and transaction start immediately before act",
+      "skipped_for_budget": 0,
+      "judgement": {
+        "points": {
+          "Identify blocker (complete SQL)": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Gives the query text itself (not only a reference to it), using pg_blocking_pids() on pg_stat_activity",
+                "status": "present",
+                "quote": "SELECT a.pid AS waiting_pid,\n          b.pid AS blocking_pid,\n          b.usename, b.application_name, b.state,\n          clock_timestamp() - b.xact_start AS blocking_xact_age,\n          left(a.query, 100) AS waiting_sql,\n          left(b.query, 100) AS blocking_sql\n   FROM pg_stat_activity a\n   CROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\n   JOIN pg_stat_activity b ON b.pid = x.pid",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The query returns each waiting PID together with the PID that blocks it",
+                "status": "present",
+                "quote": "a.pid AS waiting_pid,\n          b.pid AS blocking_pid",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Explain why idle can still block": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Follow the blocking chain to the root blocker",
+                "status": "present",
+                "quote": "Follow the chain to the root blocker.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The root blocker may be idle inside an open transaction, so its last statement can look harmless",
+                "status": "present",
+                "quote": "Its last statement may appear harmless if the session is idle inside an open transaction.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Locks taken earlier in that transaction still block other work",
+                "status": "present",
+                "quote": "Locks acquired earlier in that transaction can still block other work.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Ask owner to commit or roll back": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Identify the application owner or the transaction’s business purpose",
+                "status": "present",
+                "quote": "Identify the application owner and the transaction’s business purpose.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Ask the owning session to commit or roll back where possible",
+                "status": "present",
+                "quote": "Ask the owning session to commit or roll back where possible.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Approval and fresh PID check": {
+            "status": "partial",
+            "elements": [
+              {
+                "element": "Intervene only if the intervention is approved",
+                "status": "present",
+                "quote": "If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Recheck the PID, user, application and transaction start immediately before acting",
+                "status": "present",
+                "quote": "recheck the PID, user, application, and transaction start immediately before acting.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Reason: a PID from an old snapshot can belong to a different session later",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 2,
+            "of": 3,
+            "supplied": false,
+            "evidence": "part",
+            "evidence_share": 0.6,
+            "flagged_missing": false,
+            "outcome": "cut-off evidence"
+          },
+          "Cancel vs terminate consequences": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Canceling only stops a running statement; an idle transaction has no running statement to cancel",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminating the session ends the connection and rolls back uncommitted work",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "The client must recover after the session is terminated",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminate only when ending the session is required and authorized",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 4,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.06,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Verify blocking clears and writes resume": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Re-run the blocked-sessions query and confirm the original waiting PIDs no longer appear",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Confirm that the blocked writes complete",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 2,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.06,
+            "flagged_missing": true,
+            "outcome": "honest gap"
+          }
+        },
+        "from_evidence": 3,
+        "complete": 3,
+        "elements_kept": 7,
+        "elements_altered": 0,
+        "from_memory": 0,
+        "cut_off": 1,
+        "unused": 0,
+        "gaps": 2,
+        "silent_gaps": 1,
+        "invented_claims": [],
+        "altered_claims": [
+          {
+            "quote": "Use the following query to identify long-running transactions:",
+            "type": "altered",
+            "why": "The passage presents this query under “Find transactions that remain open” (xact_start IS NOT NULL, no age predicate). Calling the results long-running changes the scope."
+          }
+        ],
+        "unsafe": false,
+        "unsafe_reason": "",
+        "judge_usage": [
+          {
+            "input_tokens": 2340,
+            "output_tokens": 541,
+            "total_tokens": 10717,
+            "input_token_details": {
+              "cached_tokens": 2304
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 7836
+            }
+          },
+          {
+            "input_tokens": 2326,
+            "output_tokens": 65,
+            "total_tokens": 6692,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 4301
+            }
+          }
+        ]
+      }
+    },
+    {
+      "strategy": "recursive",
+      "run": 1,
+      "answer_style": "verbatim",
+      "facts_found": 3,
+      "facts_required": 6,
+      "checks": {
+        "Identify blocker (complete SQL)": false,
+        "Explain why idle can still block": true,
+        "Ask owner to commit or roll back": true,
+        "Approval and fresh PID check": false,
+        "Cancel vs terminate consequences": false,
+        "Verify blocking clears and writes resume": true
+      },
+      "missing_checks": [
+        "Identify blocker (complete SQL)",
+        "Approval and fresh PID check",
+        "Cancel vs terminate consequences"
+      ],
+      "input_tokens": 532,
+      "context_characters": 1435,
+      "generation_seconds": 15.691544917000101,
+      "answer": "1. Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [r016]\n\n2. Find transactions that remain open:\n\n```sql\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n```\n[r016]\n\n3. Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source. [r016]\n\n4. Recovery check. Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. [r018]\n\n5. To stop a forgotten transaction from holding locks again, set `idle_in_transaction_session_timeout` for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit. [r018]",
+      "usage": {
+        "input_tokens": 532,
+        "output_tokens": 331,
+        "total_tokens": 863
+      },
+      "generation_metadata": {
+        "model_id": "cohere.command-a-03-2025",
+        "model_version": "1.0",
+        "request_id": "ADCB0DF2329045ED9AA433FCC0DE4768/EB5C64418CB49D80EAE54AE576F4D68E/6F7C49646A6CD2873EDEBC015E115A1B",
+        "content-length": "1506",
+        "finish_reason": "COMPLETE",
+        "documents": null,
+        "citations": null,
+        "search_queries": null,
+        "is_search_required": null,
+        "total_tokens": 863,
+        "model_name": "cohere.command-a-03-2025"
+      },
+      "search_ids": [
+        "r016",
+        "r018"
+      ],
+      "supplied_ids": [
+        "r016",
+        "r018"
+      ],
+      "provided_context": "[r016]\nSection: 5 Locks and long transactions\nFollow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [12]\n\nFind transactions that remain open\n\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n\nRelease the cause in a controlled way\n\n1  Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.\n\n[r018]\nSection: 5 Locks and long transactions\nRecovery check. Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. [12] To stop a forgotten transaction from holding locks again, set idle_in_transaction_session_timeout for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit.",
+      "skipped_for_budget": 0,
+      "judgement": {
+        "points": {
+          "Identify blocker (complete SQL)": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Gives the query text itself (not only a reference to it), using pg_blocking_pids() on pg_stat_activity",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "The query returns each waiting PID together with the PID that blocks it",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 2,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.07,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Explain why idle can still block": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Follow the blocking chain to the root blocker",
+                "status": "present",
+                "quote": "Follow the chain to the root blocker.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The root blocker may be idle inside an open transaction, so its last statement can look harmless",
+                "status": "present",
+                "quote": "Its last statement may appear harmless if the session is idle inside an open transaction.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Locks taken earlier in that transaction still block other work",
+                "status": "present",
+                "quote": "Locks acquired earlier in that transaction can still block other work.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Ask owner to commit or roll back": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Identify the application owner or the transaction’s business purpose",
+                "status": "present",
+                "quote": "Identify the application owner and the transaction’s business purpose.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Ask the owning session to commit or roll back where possible",
+                "status": "present",
+                "quote": "Ask the owning session to commit or roll back where possible.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Approval and fresh PID check": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Intervene only if the intervention is approved",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Recheck the PID, user, application and transaction start immediately before acting",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Reason: a PID from an old snapshot can belong to a different session later",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 3,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.08,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Cancel vs terminate consequences": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Canceling only stops a running statement; an idle transaction has no running statement to cancel",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminating the session ends the connection and rolls back uncommitted work",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "The client must recover after the session is terminated",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminate only when ending the session is required and authorized",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 4,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.06,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Verify blocking clears and writes resume": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Re-run the blocked-sessions query and confirm the original waiting PIDs no longer appear",
+                "status": "present",
+                "quote": "Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Confirm that the blocked writes complete",
+                "status": "present",
+                "quote": "confirm that the blocked writes complete.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          }
+        },
+        "from_evidence": 3,
+        "complete": 3,
+        "elements_kept": 7,
+        "elements_altered": 0,
+        "from_memory": 0,
+        "cut_off": 0,
+        "unused": 0,
+        "gaps": 3,
+        "silent_gaps": 3,
+        "invented_claims": [],
+        "altered_claims": [],
+        "unsafe": false,
+        "unsafe_reason": "",
+        "judge_usage": [
+          {
+            "input_tokens": 2191,
+            "output_tokens": 411,
+            "total_tokens": 5390,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 2788
+            }
+          },
+          {
+            "input_tokens": 2024,
+            "output_tokens": 4,
+            "total_tokens": 3546,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 1518
+            }
+          }
+        ]
+      }
+    },
+    {
+      "strategy": "recursive",
+      "run": 2,
+      "answer_style": "verbatim",
+      "facts_found": 3,
+      "facts_required": 6,
+      "checks": {
+        "Identify blocker (complete SQL)": false,
+        "Explain why idle can still block": true,
+        "Ask owner to commit or roll back": true,
+        "Approval and fresh PID check": false,
+        "Cancel vs terminate consequences": false,
+        "Verify blocking clears and writes resume": true
+      },
+      "missing_checks": [
+        "Identify blocker (complete SQL)",
+        "Approval and fresh PID check",
+        "Cancel vs terminate consequences"
+      ],
+      "input_tokens": 532,
+      "context_characters": 1435,
+      "generation_seconds": 14.685144332999698,
+      "answer": "1. Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [r016]\n\n2. Find transactions that remain open:\n\n```sql\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n```\n\n[r016]\n\n3. Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source. [r016]\n\n4. Recovery check. Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. [r018]\n\n5. To stop a forgotten transaction from holding locks again, set `idle_in_transaction_session_timeout` for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit. [r018]",
+      "usage": {
+        "input_tokens": 532,
+        "output_tokens": 332,
+        "total_tokens": 864
+      },
+      "generation_metadata": {
+        "model_id": "cohere.command-a-03-2025",
+        "model_version": "1.0",
+        "request_id": "554FD005F5D1467AB8EFBE6E9842569E/6B8FC766F16BD883D2A68B9169A2DEB1/B993C3EB1F5324F0D7E0F29E845496B1",
+        "content-length": "1505",
+        "finish_reason": "COMPLETE",
+        "documents": null,
+        "citations": null,
+        "search_queries": null,
+        "is_search_required": null,
+        "total_tokens": 864,
+        "model_name": "cohere.command-a-03-2025"
+      },
+      "search_ids": [
+        "r016",
+        "r018"
+      ],
+      "supplied_ids": [
+        "r016",
+        "r018"
+      ],
+      "provided_context": "[r016]\nSection: 5 Locks and long transactions\nFollow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [12]\n\nFind transactions that remain open\n\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n\nRelease the cause in a controlled way\n\n1  Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.\n\n[r018]\nSection: 5 Locks and long transactions\nRecovery check. Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. [12] To stop a forgotten transaction from holding locks again, set idle_in_transaction_session_timeout for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit.",
+      "skipped_for_budget": 0,
+      "judgement": {
+        "points": {
+          "Identify blocker (complete SQL)": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Gives the query text itself (not only a reference to it), using pg_blocking_pids() on pg_stat_activity",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "The query returns each waiting PID together with the PID that blocks it",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 2,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.07,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Explain why idle can still block": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Follow the blocking chain to the root blocker",
+                "status": "present",
+                "quote": "Follow the chain to the root blocker.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The root blocker may be idle inside an open transaction, so its last statement can look harmless",
+                "status": "present",
+                "quote": "Its last statement may appear harmless if the session is idle inside an open transaction.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Locks taken earlier in that transaction still block other work",
+                "status": "present",
+                "quote": "Locks acquired earlier in that transaction can still block other work.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Ask owner to commit or roll back": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Identify the application owner or the transaction’s business purpose",
+                "status": "present",
+                "quote": "Identify the application owner and the transaction’s business purpose.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Ask the owning session to commit or roll back where possible",
+                "status": "present",
+                "quote": "Ask the owning session to commit or roll back where possible.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Approval and fresh PID check": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Intervene only if the intervention is approved",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Recheck the PID, user, application and transaction start immediately before acting",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Reason: a PID from an old snapshot can belong to a different session later",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 3,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.08,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Cancel vs terminate consequences": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Canceling only stops a running statement; an idle transaction has no running statement to cancel",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminating the session ends the connection and rolls back uncommitted work",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "The client must recover after the session is terminated",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminate only when ending the session is required and authorized",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 4,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.06,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Verify blocking clears and writes resume": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Re-run the blocked-sessions query and confirm the original waiting PIDs no longer appear",
+                "status": "present",
+                "quote": "Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Confirm that the blocked writes complete",
+                "status": "present",
+                "quote": "confirm that the blocked writes complete.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          }
+        },
+        "from_evidence": 3,
+        "complete": 3,
+        "elements_kept": 7,
+        "elements_altered": 0,
+        "from_memory": 0,
+        "cut_off": 0,
+        "unused": 0,
+        "gaps": 3,
+        "silent_gaps": 3,
+        "invented_claims": [],
+        "altered_claims": [],
+        "unsafe": false,
+        "unsafe_reason": "",
+        "judge_usage": [
+          {
+            "input_tokens": 2191,
+            "output_tokens": 366,
+            "total_tokens": 5705,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 3148
+            }
+          },
+          {
+            "input_tokens": 2024,
+            "output_tokens": 4,
+            "total_tokens": 3592,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 1564
+            }
+          }
+        ]
+      }
+    },
+    {
+      "strategy": "recursive",
+      "run": 3,
+      "answer_style": "verbatim",
+      "facts_found": 3,
+      "facts_required": 6,
+      "checks": {
+        "Identify blocker (complete SQL)": false,
+        "Explain why idle can still block": true,
+        "Ask owner to commit or roll back": true,
+        "Approval and fresh PID check": false,
+        "Cancel vs terminate consequences": false,
+        "Verify blocking clears and writes resume": true
+      },
+      "missing_checks": [
+        "Identify blocker (complete SQL)",
+        "Approval and fresh PID check",
+        "Cancel vs terminate consequences"
+      ],
+      "input_tokens": 532,
+      "context_characters": 1435,
+      "generation_seconds": 27.756003458000123,
+      "answer": "1. Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [r016]\n\n2. Find transactions that remain open:\n\n```sql\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n```\n[r016]\n\n3. Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source. [r016]\n\n4. Recovery check. Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. [r018]\n\n5. To stop a forgotten transaction from holding locks again, set idle_in_transaction_session_timeout for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit. [r018]",
+      "usage": {
+        "input_tokens": 532,
+        "output_tokens": 329,
+        "total_tokens": 861
+      },
+      "generation_metadata": {
+        "model_id": "cohere.command-a-03-2025",
+        "model_version": "1.0",
+        "request_id": "FC06193912C3407DAA302026535B73C1/AD02E8CAC687B907C1A7CB61714224EE/CAFF94BA3DA3CA7087BFA5A02B02FEB9",
+        "content-length": "1496",
+        "finish_reason": "COMPLETE",
+        "documents": null,
+        "citations": null,
+        "search_queries": null,
+        "is_search_required": null,
+        "total_tokens": 861,
+        "model_name": "cohere.command-a-03-2025"
+      },
+      "search_ids": [
+        "r016",
+        "r018"
+      ],
+      "supplied_ids": [
+        "r016",
+        "r018"
+      ],
+      "provided_context": "[r016]\nSection: 5 Locks and long transactions\nFollow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [12]\n\nFind transactions that remain open\n\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n\nRelease the cause in a controlled way\n\n1  Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.\n\n[r018]\nSection: 5 Locks and long transactions\nRecovery check. Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. [12] To stop a forgotten transaction from holding locks again, set idle_in_transaction_session_timeout for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit.",
+      "skipped_for_budget": 0,
+      "judgement": {
+        "points": {
+          "Identify blocker (complete SQL)": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Gives the query text itself (not only a reference to it), using pg_blocking_pids() on pg_stat_activity",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "The query returns each waiting PID together with the PID that blocks it",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 2,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.07,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Explain why idle can still block": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Follow the blocking chain to the root blocker",
+                "status": "present",
+                "quote": "Follow the chain to the root blocker.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The root blocker may be idle inside an open transaction, so its last statement can look harmless",
+                "status": "present",
+                "quote": "Its last statement may appear harmless if the session is idle inside an open transaction.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Locks taken earlier in that transaction still block other work",
+                "status": "present",
+                "quote": "Locks acquired earlier in that transaction can still block other work.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Ask owner to commit or roll back": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Identify the application owner or the transaction’s business purpose",
+                "status": "present",
+                "quote": "Identify the application owner and the transaction’s business purpose.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Ask the owning session to commit or roll back where possible",
+                "status": "present",
+                "quote": "Ask the owning session to commit or roll back where possible.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Approval and fresh PID check": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Intervene only if the intervention is approved",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Recheck the PID, user, application and transaction start immediately before acting",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Reason: a PID from an old snapshot can belong to a different session later",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 3,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.08,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Cancel vs terminate consequences": {
+            "status": "missing",
+            "elements": [
+              {
+                "element": "Canceling only stops a running statement; an idle transaction has no running statement to cancel",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminating the session ends the connection and rolls back uncommitted work",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "The client must recover after the session is terminated",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              },
+              {
+                "element": "Terminate only when ending the session is required and authorized",
+                "status": "absent",
+                "quote": "",
+                "quote_found": false,
+                "judge_status": "absent"
+              }
+            ],
+            "kept": 0,
+            "of": 4,
+            "supplied": false,
+            "evidence": "none",
+            "evidence_share": 0.06,
+            "flagged_missing": false,
+            "outcome": "silent gap"
+          },
+          "Verify blocking clears and writes resume": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Re-run the blocked-sessions query and confirm the original waiting PIDs no longer appear",
+                "status": "present",
+                "quote": "Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Confirm that the blocked writes complete",
+                "status": "present",
+                "quote": "confirm that the blocked writes complete",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          }
+        },
+        "from_evidence": 3,
+        "complete": 3,
+        "elements_kept": 7,
+        "elements_altered": 0,
+        "from_memory": 0,
+        "cut_off": 0,
+        "unused": 0,
+        "gaps": 3,
+        "silent_gaps": 3,
+        "invented_claims": [],
+        "altered_claims": [],
+        "unsafe": false,
+        "unsafe_reason": "",
+        "judge_usage": [
+          {
+            "input_tokens": 2189,
+            "output_tokens": 365,
+            "total_tokens": 4663,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 2109
+            }
+          },
+          {
+            "input_tokens": 2022,
+            "output_tokens": 4,
+            "total_tokens": 3462,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 1436
+            }
+          }
+        ]
+      }
+    },
+    {
+      "strategy": "parent_child",
+      "run": 1,
+      "answer_style": "verbatim",
+      "facts_found": 6,
+      "facts_required": 6,
+      "checks": {
+        "Identify blocker (complete SQL)": true,
+        "Explain why idle can still block": true,
+        "Ask owner to commit or roll back": true,
+        "Approval and fresh PID check": true,
+        "Cancel vs terminate consequences": true,
+        "Verify blocking clears and writes resume": true
+      },
+      "missing_checks": [],
+      "input_tokens": 880,
+      "context_characters": 2787,
+      "generation_seconds": 32.31410891699943,
+      "answer": "1. **Identify blocked sessions and their blockers**  \n   ```sql\n   SELECT a.pid AS waiting_pid,\n          b.pid AS blocking_pid,\n          b.usename, b.application_name, b.state,\n          clock_timestamp() - b.xact_start AS blocking_xact_age,\n          left(a.query, 100) AS waiting_sql,\n          left(b.query, 100) AS blocking_sql\n   FROM pg_stat_activity a\n   CROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\n   JOIN pg_stat_activity b ON b.pid = x.pid\n   WHERE a.datname = current_database()\n   ORDER BY b.xact_start NULLS LAST;\n   ```  \n   Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [p004]\n\n2. **Find transactions that remain open**  \n   ```sql\n   SELECT pid, usename, application_name, state,\n          clock_timestamp() - xact_start AS xact_age,\n          wait_event_type, wait_event, left(query, 140) AS sql\n   FROM pg_stat_activity\n   WHERE datname = current_database() AND xact_start IS NOT NULL\n     AND pid <> pg_backend_pid()\n   ORDER BY xact_start\n   LIMIT 20;\n   ``` [p004]\n\n3. **Release the cause in a controlled way**  \n   1. Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.  \n   2. If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting. A PID from an old snapshot can belong to a different session later.  \n   3. Prefer canceling a running statement first. An idle transaction has no running statement to cancel. Terminating its session ends the connection and rolls back uncommitted work; the client must recover. Signaling depends on database permissions. [p004]  \n   ```sql\n   SELECT pg_cancel_backend(<verified_pid>);\n   -- If ending the entire session is required and authorized:\n   SELECT pg_terminate_backend(<verified_pid>);\n   ``` [p004]\n\n4. **Recovery check**  \n   Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. To stop a forgotten transaction from holding locks again, set `idle_in_transaction_session_timeout` for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit. [p004]",
+      "usage": {
+        "input_tokens": 880,
+        "output_tokens": 642,
+        "total_tokens": 1522
+      },
+      "generation_metadata": {
+        "model_id": "cohere.command-a-03-2025",
+        "model_version": "1.0",
+        "request_id": "9AA8337FB6D749F5B309A8B43620A554/4585D1D07E442CD284A7E17F97D106B5/F9BB83714F102ED26ED66BC52BDB8F36",
+        "content-length": "2187",
+        "finish_reason": "COMPLETE",
+        "documents": null,
+        "citations": null,
+        "search_queries": null,
+        "is_search_required": null,
+        "total_tokens": 1522,
+        "model_name": "cohere.command-a-03-2025"
+      },
+      "search_ids": [
+        "r016",
+        "r018"
+      ],
+      "supplied_ids": [
+        "p004"
+      ],
+      "provided_context": "[p004]\nSection: 5 Locks and long transactions\n5 Locks and long transactions\n\nUse when queries hang, writes stop progressing, or SQLSTATE 40P01 reports a deadlock. PostgreSQL resolves a detected deadlock by aborting a participant; recurring deadlocks require application transaction changes. [6, 12]\n\nIdentify blocked sessions and their blockers\n\nSELECT a.pid AS waiting_pid,\n       b.pid AS blocking_pid,\n       b.usename, b.application_name, b.state,\n       clock_timestamp() - b.xact_start AS blocking_xact_age,\n       left(a.query, 100) AS waiting_sql,\n       left(b.query, 100) AS blocking_sql\nFROM pg_stat_activity a\nCROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\nJOIN pg_stat_activity b ON b.pid = x.pid\nWHERE a.datname = current_database()\nORDER BY b.xact_start NULLS LAST;\n\nFollow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [12]\n\nFind transactions that remain open\n\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n\nRelease the cause in a controlled way\n\n1  Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.\n\n2  If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting. A PID from an old snapshot can belong to a different session later.\n\n3  Prefer canceling a running statement first. An idle transaction has no running statement to cancel. Terminating its session ends the connection and rolls back uncommitted work; the client must recover. Signaling depends on database permissions. [13]\n\n-- Intervention examples only; replace with a verified PID.\nSELECT pg_cancel_backend(<verified_pid>);\n-- If ending the entire session is required and authorized:\nSELECT pg_terminate_backend(<verified_pid>);\n\nRecovery check. Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. [12] To stop a forgotten transaction from holding locks again, set idle_in_transaction_session_timeout for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit.",
+      "skipped_for_budget": 0,
+      "judgement": {
+        "points": {
+          "Identify blocker (complete SQL)": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Gives the query text itself (not only a reference to it), using pg_blocking_pids() on pg_stat_activity",
+                "status": "present",
+                "quote": "FROM pg_stat_activity a\n   CROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\n   JOIN pg_stat_activity b ON b.pid = x.pid",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The query returns each waiting PID together with the PID that blocks it",
+                "status": "present",
+                "quote": "a.pid AS waiting_pid,\n          b.pid AS blocking_pid",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Explain why idle can still block": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Follow the blocking chain to the root blocker",
+                "status": "present",
+                "quote": "Follow the chain to the root blocker.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The root blocker may be idle inside an open transaction, so its last statement can look harmless",
+                "status": "present",
+                "quote": "Its last statement may appear harmless if the session is idle inside an open transaction.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Locks taken earlier in that transaction still block other work",
+                "status": "present",
+                "quote": "Locks acquired earlier in that transaction can still block other work.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Ask owner to commit or roll back": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Identify the application owner or the transaction’s business purpose",
+                "status": "present",
+                "quote": "Identify the application owner and the transaction’s business purpose.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Ask the owning session to commit or roll back where possible",
+                "status": "present",
+                "quote": "Ask the owning session to commit or roll back where possible.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Approval and fresh PID check": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Intervene only if the intervention is approved",
+                "status": "present",
+                "quote": "If intervention is approved",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Recheck the PID, user, application and transaction start immediately before acting",
+                "status": "present",
+                "quote": "recheck the PID, user, application, and transaction start immediately before acting.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Reason: a PID from an old snapshot can belong to a different session later",
+                "status": "present",
+                "quote": "A PID from an old snapshot can belong to a different session later.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Cancel vs terminate consequences": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Canceling only stops a running statement; an idle transaction has no running statement to cancel",
+                "status": "present",
+                "quote": "Prefer canceling a running statement first. An idle transaction has no running statement to cancel.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Terminating the session ends the connection and rolls back uncommitted work",
+                "status": "present",
+                "quote": "Terminating its session ends the connection and rolls back uncommitted work",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The client must recover after the session is terminated",
+                "status": "present",
+                "quote": "the client must recover",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Terminate only when ending the session is required and authorized",
+                "status": "present",
+                "quote": "If ending the entire session is required and authorized:",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 4,
+            "of": 4,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Verify blocking clears and writes resume": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Re-run the blocked-sessions query and confirm the original waiting PIDs no longer appear",
+                "status": "present",
+                "quote": "Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Confirm that the blocked writes complete",
+                "status": "present",
+                "quote": "confirm that the blocked writes complete",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          }
+        },
+        "from_evidence": 6,
+        "complete": 6,
+        "elements_kept": 16,
+        "elements_altered": 0,
+        "from_memory": 0,
+        "cut_off": 0,
+        "unused": 0,
+        "gaps": 0,
+        "silent_gaps": 0,
+        "invented_claims": [],
+        "altered_claims": [],
+        "unsafe": false,
+        "unsafe_reason": "",
+        "judge_usage": [
+          {
+            "input_tokens": 2519,
+            "output_tokens": 555,
+            "total_tokens": 10068,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 6994
+            }
+          },
+          {
+            "input_tokens": 2678,
+            "output_tokens": 4,
+            "total_tokens": 4083,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 1401
+            }
+          }
+        ]
+      }
+    },
+    {
+      "strategy": "parent_child",
+      "run": 2,
+      "answer_style": "verbatim",
+      "facts_found": 6,
+      "facts_required": 6,
+      "checks": {
+        "Identify blocker (complete SQL)": true,
+        "Explain why idle can still block": true,
+        "Ask owner to commit or roll back": true,
+        "Approval and fresh PID check": true,
+        "Cancel vs terminate consequences": true,
+        "Verify blocking clears and writes resume": true
+      },
+      "missing_checks": [],
+      "input_tokens": 880,
+      "context_characters": 2787,
+      "generation_seconds": 124.09862837499986,
+      "answer": "1. **Identify blocked sessions and their blockers**  \n   Run the following query to find blocked sessions and their blockers:  \n   ```sql\n   SELECT a.pid AS waiting_pid,\n          b.pid AS blocking_pid,\n          b.usename, b.application_name, b.state,\n          clock_timestamp() - b.xact_start AS blocking_xact_age,\n          left(a.query, 100) AS waiting_sql,\n          left(b.query, 100) AS blocking_sql\n   FROM pg_stat_activity a\n   CROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\n   JOIN pg_stat_activity b ON b.pid = x.pid\n   WHERE a.datname = current_database()\n   ORDER BY b.xact_start NULLS LAST;\n   ```  \n   Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [p004]\n\n2. **Find transactions that remain open**  \n   Run the following query to identify long-running transactions:  \n   ```sql\n   SELECT pid, usename, application_name, state,\n          clock_timestamp() - xact_start AS xact_age,\n          wait_event_type, wait_event, left(query, 140) AS sql\n   FROM pg_stat_activity\n   WHERE datname = current_database() AND xact_start IS NOT NULL\n     AND pid <> pg_backend_pid()\n   ORDER BY xact_start\n   LIMIT 20;\n   ``` [p004]\n\n3. **Release the cause in a controlled way**  \n   1. Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.  \n   2. If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting. A PID from an old snapshot can belong to a different session later.  \n   3. Prefer canceling a running statement first. An idle transaction has no running statement to cancel. Terminating its session ends the connection and rolls back uncommitted work; the client must recover. Signaling depends on database permissions. [p004]  \n   ```sql\n   SELECT pg_cancel_backend(<verified_pid>);\n   -- If ending the entire session is required and authorized:\n   SELECT pg_terminate_backend(<verified_pid>);\n   ``` [p004]\n\n4. **Recovery check**  \n   Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. To stop a forgotten transaction from holding locks again, set `idle_in_transaction_session_timeout` for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit. [p004]",
+      "usage": {
+        "input_tokens": 880,
+        "output_tokens": 667,
+        "total_tokens": 1547
+      },
+      "generation_metadata": {
+        "model_id": "cohere.command-a-03-2025",
+        "model_version": "1.0",
+        "request_id": "41F1F8443B8D4F1DB6431D5567380DA6/814A3E81001D72D0368EB23355AA2A43/B36B9C1B556975361111D1B2E3AD74BC",
+        "content-length": "2222",
+        "finish_reason": "COMPLETE",
+        "documents": null,
+        "citations": null,
+        "search_queries": null,
+        "is_search_required": null,
+        "total_tokens": 1547,
+        "model_name": "cohere.command-a-03-2025"
+      },
+      "search_ids": [
+        "r016",
+        "r018"
+      ],
+      "supplied_ids": [
+        "p004"
+      ],
+      "provided_context": "[p004]\nSection: 5 Locks and long transactions\n5 Locks and long transactions\n\nUse when queries hang, writes stop progressing, or SQLSTATE 40P01 reports a deadlock. PostgreSQL resolves a detected deadlock by aborting a participant; recurring deadlocks require application transaction changes. [6, 12]\n\nIdentify blocked sessions and their blockers\n\nSELECT a.pid AS waiting_pid,\n       b.pid AS blocking_pid,\n       b.usename, b.application_name, b.state,\n       clock_timestamp() - b.xact_start AS blocking_xact_age,\n       left(a.query, 100) AS waiting_sql,\n       left(b.query, 100) AS blocking_sql\nFROM pg_stat_activity a\nCROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\nJOIN pg_stat_activity b ON b.pid = x.pid\nWHERE a.datname = current_database()\nORDER BY b.xact_start NULLS LAST;\n\nFollow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [12]\n\nFind transactions that remain open\n\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n\nRelease the cause in a controlled way\n\n1  Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.\n\n2  If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting. A PID from an old snapshot can belong to a different session later.\n\n3  Prefer canceling a running statement first. An idle transaction has no running statement to cancel. Terminating its session ends the connection and rolls back uncommitted work; the client must recover. Signaling depends on database permissions. [13]\n\n-- Intervention examples only; replace with a verified PID.\nSELECT pg_cancel_backend(<verified_pid>);\n-- If ending the entire session is required and authorized:\nSELECT pg_terminate_backend(<verified_pid>);\n\nRecovery check. Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. [12] To stop a forgotten transaction from holding locks again, set idle_in_transaction_session_timeout for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit.",
+      "skipped_for_budget": 0,
+      "judgement": {
+        "points": {
+          "Identify blocker (complete SQL)": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Gives the query text itself (not only a reference to it), using pg_blocking_pids() on pg_stat_activity",
+                "status": "present",
+                "quote": "SELECT a.pid AS waiting_pid,\nFROM pg_stat_activity a\nCROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\nJOIN pg_stat_activity b ON b.pid = x.pid",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The query returns each waiting PID together with the PID that blocks it",
+                "status": "present",
+                "quote": "a.pid AS waiting_pid,\n          b.pid AS blocking_pid,",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Explain why idle can still block": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Follow the blocking chain to the root blocker",
+                "status": "present",
+                "quote": "Follow the chain to the root blocker.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The root blocker may be idle inside an open transaction, so its last statement can look harmless",
+                "status": "present",
+                "quote": "Its last statement may appear harmless if the session is idle inside an open transaction.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Locks taken earlier in that transaction still block other work",
+                "status": "present",
+                "quote": "Locks acquired earlier in that transaction can still block other work.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Ask owner to commit or roll back": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Identify the application owner or the transaction’s business purpose",
+                "status": "present",
+                "quote": "Identify the application owner and the transaction’s business purpose.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Ask the owning session to commit or roll back where possible",
+                "status": "present",
+                "quote": "Ask the owning session to commit or roll back where possible.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Approval and fresh PID check": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Intervene only if the intervention is approved",
+                "status": "present",
+                "quote": "If intervention is approved",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Recheck the PID, user, application and transaction start immediately before acting",
+                "status": "present",
+                "quote": "recheck the PID, user, application, and transaction start immediately before acting.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Reason: a PID from an old snapshot can belong to a different session later",
+                "status": "present",
+                "quote": "A PID from an old snapshot can belong to a different session later.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Cancel vs terminate consequences": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Canceling only stops a running statement; an idle transaction has no running statement to cancel",
+                "status": "present",
+                "quote": "Prefer canceling a running statement first.\nAn idle transaction has no running statement to cancel.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Terminating the session ends the connection and rolls back uncommitted work",
+                "status": "present",
+                "quote": "Terminating its session ends the connection and rolls back uncommitted work",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The client must recover after the session is terminated",
+                "status": "present",
+                "quote": "the client must recover",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Terminate only when ending the session is required and authorized",
+                "status": "present",
+                "quote": "If ending the entire session is required and authorized:",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 4,
+            "of": 4,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Verify blocking clears and writes resume": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Re-run the blocked-sessions query and confirm the original waiting PIDs no longer appear",
+                "status": "present",
+                "quote": "Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Confirm that the blocked writes complete",
+                "status": "present",
+                "quote": "confirm that the blocked writes complete",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          }
+        },
+        "from_evidence": 6,
+        "complete": 6,
+        "elements_kept": 16,
+        "elements_altered": 0,
+        "from_memory": 0,
+        "cut_off": 0,
+        "unused": 0,
+        "gaps": 0,
+        "silent_gaps": 0,
+        "invented_claims": [],
+        "altered_claims": [
+          {
+            "quote": "Run the following query to identify long-running transactions:",
+            "type": "altered",
+            "why": "The passage presents this query under finding transactions that remain open (xact_start IS NOT NULL). It has no duration filter, so calling the results long-running changes the scope."
+          }
+        ],
+        "unsafe": false,
+        "unsafe_reason": "",
+        "judge_usage": [
+          {
+            "input_tokens": 2546,
+            "output_tokens": 565,
+            "total_tokens": 11584,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 8473
+            }
+          },
+          {
+            "input_tokens": 2705,
+            "output_tokens": 66,
+            "total_tokens": 6430,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 3659
+            }
+          }
+        ]
+      }
+    },
+    {
+      "strategy": "parent_child",
+      "run": 3,
+      "answer_style": "verbatim",
+      "facts_found": 6,
+      "facts_required": 6,
+      "checks": {
+        "Identify blocker (complete SQL)": true,
+        "Explain why idle can still block": true,
+        "Ask owner to commit or roll back": true,
+        "Approval and fresh PID check": true,
+        "Cancel vs terminate consequences": true,
+        "Verify blocking clears and writes resume": true
+      },
+      "missing_checks": [],
+      "input_tokens": 880,
+      "context_characters": 2787,
+      "generation_seconds": 30.933752583999194,
+      "answer": "1. **Identify blocked sessions and their blockers**  \n   Run the following query to identify blocked sessions and their blockers:  \n   ```sql\n   SELECT a.pid AS waiting_pid,\n          b.pid AS blocking_pid,\n          b.usename, b.application_name, b.state,\n          clock_timestamp() - b.xact_start AS blocking_xact_age,\n          left(a.query, 100) AS waiting_sql,\n          left(b.query, 100) AS blocking_sql\n   FROM pg_stat_activity a\n   CROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\n   JOIN pg_stat_activity b ON b.pid = x.pid\n   WHERE a.datname = current_database()\n   ORDER BY b.xact_start NULLS LAST;\n   ```  \n   Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [p004]\n\n2. **Find transactions that remain open**  \n   Run the following query to find open transactions:  \n   ```sql\n   SELECT pid, usename, application_name, state,\n          clock_timestamp() - xact_start AS xact_age,\n          wait_event_type, wait_event, left(query, 140) AS sql\n   FROM pg_stat_activity\n   WHERE datname = current_database() AND xact_start IS NOT NULL\n     AND pid <> pg_backend_pid()\n   ORDER BY xact_start\n   LIMIT 20;\n   ``` [p004]\n\n3. **Release the cause in a controlled way**  \n   1. Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.  \n   2. If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting. A PID from an old snapshot can belong to a different session later.  \n   3. Prefer canceling a running statement first. An idle transaction has no running statement to cancel. Terminating its session ends the connection and rolls back uncommitted work; the client must recover. Signaling depends on database permissions. [p004]  \n   Intervention examples (replace with a verified PID):  \n   ```sql\n   SELECT pg_cancel_backend(<verified_pid>);\n   -- If ending the entire session is required and authorized:\n   SELECT pg_terminate_backend(<verified_pid>);\n   ``` [p004]\n\n4. **Recovery check**  \n   Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. To stop a forgotten transaction from holding locks again, set `idle_in_transaction_session_timeout` for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit. [p004]",
+      "usage": {
+        "input_tokens": 880,
+        "output_tokens": 675,
+        "total_tokens": 1555
+      },
+      "generation_metadata": {
+        "model_id": "cohere.command-a-03-2025",
+        "model_version": "1.0",
+        "request_id": "8F44ABB259DA4755961F13C200A37D22/0458C883A59368F95B5E562268825F16/AC35CBB56274C8E5FA754CE413D62A9A",
+        "content-length": "2228",
+        "finish_reason": "COMPLETE",
+        "documents": null,
+        "citations": null,
+        "search_queries": null,
+        "is_search_required": null,
+        "total_tokens": 1555,
+        "model_name": "cohere.command-a-03-2025"
+      },
+      "search_ids": [
+        "r016",
+        "r018"
+      ],
+      "supplied_ids": [
+        "p004"
+      ],
+      "provided_context": "[p004]\nSection: 5 Locks and long transactions\n5 Locks and long transactions\n\nUse when queries hang, writes stop progressing, or SQLSTATE 40P01 reports a deadlock. PostgreSQL resolves a detected deadlock by aborting a participant; recurring deadlocks require application transaction changes. [6, 12]\n\nIdentify blocked sessions and their blockers\n\nSELECT a.pid AS waiting_pid,\n       b.pid AS blocking_pid,\n       b.usename, b.application_name, b.state,\n       clock_timestamp() - b.xact_start AS blocking_xact_age,\n       left(a.query, 100) AS waiting_sql,\n       left(b.query, 100) AS blocking_sql\nFROM pg_stat_activity a\nCROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\nJOIN pg_stat_activity b ON b.pid = x.pid\nWHERE a.datname = current_database()\nORDER BY b.xact_start NULLS LAST;\n\nFollow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction. Locks acquired earlier in that transaction can still block other work. [12]\n\nFind transactions that remain open\n\nSELECT pid, usename, application_name, state,\n       clock_timestamp() - xact_start AS xact_age,\n       wait_event_type, wait_event, left(query, 140) AS sql\nFROM pg_stat_activity\nWHERE datname = current_database() AND xact_start IS NOT NULL\n  AND pid <> pg_backend_pid()\nORDER BY xact_start\nLIMIT 20;\n\nRelease the cause in a controlled way\n\n1  Identify the application owner and the transaction’s business purpose. Ask the owning session to commit or roll back where possible. Pause a conflicting deployment or batch operation if that is the source.\n\n2  If intervention is approved, recheck the PID, user, application, and transaction start immediately before acting. A PID from an old snapshot can belong to a different session later.\n\n3  Prefer canceling a running statement first. An idle transaction has no running statement to cancel. Terminating its session ends the connection and rolls back uncommitted work; the client must recover. Signaling depends on database permissions. [13]\n\n-- Intervention examples only; replace with a verified PID.\nSELECT pg_cancel_backend(<verified_pid>);\n-- If ending the entire session is required and authorized:\nSELECT pg_terminate_backend(<verified_pid>);\n\nRecovery check. Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear, then confirm that the blocked writes complete. For repeated deadlocks, make transactions shorter, acquire objects in a consistent order, and use bounded retries of the whole failed transaction where business semantics permit. [12] To stop a forgotten transaction from holding locks again, set idle_in_transaction_session_timeout for the application role; PostgreSQL then ends sessions that stay idle in a transaction longer than that limit.",
+      "skipped_for_budget": 0,
+      "judgement": {
+        "points": {
+          "Identify blocker (complete SQL)": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Gives the query text itself (not only a reference to it), using pg_blocking_pids() on pg_stat_activity",
+                "status": "present",
+                "quote": "SELECT a.pid AS waiting_pid,\n          b.pid AS blocking_pid,\n          b.usename, b.application_name, b.state,\n          clock_timestamp() - b.xact_start AS blocking_xact_age,\n          left(a.query, 100) AS waiting_sql,\n          left(b.query, 100) AS blocking_sql\n   FROM pg_stat_activity a\n   CROSS JOIN LATERAL unnest(pg_blocking_pids(a.pid)) AS x(pid)\n   JOIN pg_stat_activity b ON b.pid = x.pid\n   WHERE a.datname = current_database()\n   ORDER BY b.xact_start NULLS LAST;",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The query returns each waiting PID together with the PID that blocks it",
+                "status": "present",
+                "quote": "a.pid AS waiting_pid,\n          b.pid AS blocking_pid,",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Explain why idle can still block": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Follow the blocking chain to the root blocker",
+                "status": "present",
+                "quote": "Follow the chain to the root blocker.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The root blocker may be idle inside an open transaction, so its last statement can look harmless",
+                "status": "present",
+                "quote": "Follow the chain to the root blocker. Its last statement may appear harmless if the session is idle inside an open transaction.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Locks taken earlier in that transaction still block other work",
+                "status": "present",
+                "quote": "Locks acquired earlier in that transaction can still block other work.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Ask owner to commit or roll back": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Identify the application owner or the transaction’s business purpose",
+                "status": "present",
+                "quote": "Identify the application owner and the transaction’s business purpose.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Ask the owning session to commit or roll back where possible",
+                "status": "present",
+                "quote": "Ask the owning session to commit or roll back where possible.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Approval and fresh PID check": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Intervene only if the intervention is approved",
+                "status": "present",
+                "quote": "If intervention is approved",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Recheck the PID, user, application and transaction start immediately before acting",
+                "status": "present",
+                "quote": "recheck the PID, user, application, and transaction start immediately before acting.",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Reason: a PID from an old snapshot can belong to a different session later",
+                "status": "present",
+                "quote": "A PID from an old snapshot can belong to a different session later.",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 3,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          },
+          "Cancel vs terminate consequences": {
+            "status": "partial",
+            "elements": [
+              {
+                "element": "Canceling only stops a running statement; an idle transaction has no running statement to cancel",
+                "status": "altered",
+                "quote": "Prefer canceling a running statement first. An idle transaction has no running statement to cancel.",
+                "quote_found": true,
+                "judge_status": "altered"
+              },
+              {
+                "element": "Terminating the session ends the connection and rolls back uncommitted work",
+                "status": "present",
+                "quote": "Terminating its session ends the connection and rolls back uncommitted work",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "The client must recover after the session is terminated",
+                "status": "present",
+                "quote": "the client must recover",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Terminate only when ending the session is required and authorized",
+                "status": "present",
+                "quote": "If ending the entire session is required and authorized:",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 3,
+            "of": 4,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "partial"
+          },
+          "Verify blocking clears and writes resume": {
+            "status": "complete",
+            "elements": [
+              {
+                "element": "Re-run the blocked-sessions query and confirm the original waiting PIDs no longer appear",
+                "status": "present",
+                "quote": "Re-run the blocked-sessions query and confirm that the original waiting PIDs no longer appear",
+                "quote_found": true,
+                "judge_status": "present"
+              },
+              {
+                "element": "Confirm that the blocked writes complete",
+                "status": "present",
+                "quote": "confirm that the blocked writes complete",
+                "quote_found": true,
+                "judge_status": "present"
+              }
+            ],
+            "kept": 2,
+            "of": 2,
+            "supplied": true,
+            "evidence": "full",
+            "evidence_share": 1.0,
+            "flagged_missing": false,
+            "outcome": "grounded"
+          }
+        },
+        "from_evidence": 6,
+        "complete": 5,
+        "elements_kept": 15,
+        "elements_altered": 1,
+        "from_memory": 0,
+        "cut_off": 0,
+        "unused": 0,
+        "gaps": 0,
+        "silent_gaps": 0,
+        "invented_claims": [],
+        "altered_claims": [],
+        "unsafe": false,
+        "unsafe_reason": "",
+        "judge_usage": [
+          {
+            "input_tokens": 2555,
+            "output_tokens": 678,
+            "total_tokens": 9031,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 5798
+            }
+          },
+          {
+            "input_tokens": 2714,
+            "output_tokens": 4,
+            "total_tokens": 4029,
+            "input_token_details": {
+              "cached_tokens": 1152
+            },
+            "output_token_details": {
+              "accepted_prediction_tokens": 0,
+              "reasoning_tokens": 1311
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "fixed": {
+      "facts_found": 3,
+      "facts_required": 6,
+      "runs": 3,
+      "input_tokens": [
+        702,
+        702,
+        702
+      ],
+      "correctness": {
+        "from_evidence": [
+          3,
+          3,
+          3
+        ],
+        "complete": [
+          3,
+          3,
+          3
+        ],
+        "elements_kept": [
+          7,
+          7,
+          7
+        ],
+        "elements_altered": [
+          0,
+          0,
+          0
+        ],
+        "from_memory": [
+          0,
+          0,
+          0
+        ],
+        "cut_off": [
+          1,
+          1,
+          1
+        ],
+        "unused": [
+          0,
+          0,
+          0
+        ],
+        "gaps": [
+          2,
+          2,
+          2
+        ],
+        "silent_gaps": [
+          1,
+          1,
+          1
+        ],
+        "invented": [
+          0,
+          0,
+          0
+        ],
+        "altered": [
+          1,
+          1,
+          1
+        ],
+        "unsafe": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "recursive": {
+      "facts_found": 3,
+      "facts_required": 6,
+      "runs": 3,
+      "input_tokens": [
+        532,
+        532,
+        532
+      ],
+      "correctness": {
+        "from_evidence": [
+          3,
+          3,
+          3
+        ],
+        "complete": [
+          3,
+          3,
+          3
+        ],
+        "elements_kept": [
+          7,
+          7,
+          7
+        ],
+        "elements_altered": [
+          0,
+          0,
+          0
+        ],
+        "from_memory": [
+          0,
+          0,
+          0
+        ],
+        "cut_off": [
+          0,
+          0,
+          0
+        ],
+        "unused": [
+          0,
+          0,
+          0
+        ],
+        "gaps": [
+          3,
+          3,
+          3
+        ],
+        "silent_gaps": [
+          3,
+          3,
+          3
+        ],
+        "invented": [
+          0,
+          0,
+          0
+        ],
+        "altered": [
+          0,
+          0,
+          0
+        ],
+        "unsafe": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "parent_child": {
+      "facts_found": 6,
+      "facts_required": 6,
+      "runs": 3,
+      "input_tokens": [
+        880,
+        880,
+        880
+      ],
+      "correctness": {
+        "from_evidence": [
+          6,
+          6,
+          6
+        ],
+        "complete": [
+          6,
+          6,
+          5
+        ],
+        "elements_kept": [
+          16,
+          16,
+          15
+        ],
+        "elements_altered": [
+          0,
+          0,
+          1
+        ],
+        "from_memory": [
+          0,
+          0,
+          0
+        ],
+        "cut_off": [
+          0,
+          0,
+          0
+        ],
+        "unused": [
+          0,
+          0,
+          0
+        ],
+        "gaps": [
+          0,
+          0,
+          0
+        ],
+        "silent_gaps": [
+          0,
+          0,
+          0
+        ],
+        "invented": [
+          0,
+          0,
+          0
+        ],
+        "altered": [
+          0,
+          1,
+          0
+        ],
+        "unsafe": [
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  }
+}

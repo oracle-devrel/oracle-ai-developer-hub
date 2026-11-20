@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+postgres_blocking_comparison_*.json
+!postgres_blocking_comparison_verbatim.json

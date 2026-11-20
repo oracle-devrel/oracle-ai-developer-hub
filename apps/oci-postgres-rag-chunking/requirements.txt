@@ -1,0 +1,8 @@
+# Use Python 3.11 or newer. This is not a fully locked environment.
+python-docx>=1.2,<2
+langchain-text-splitters>=1.1,<2
+langchain-oci
+oci
+psycopg[binary]
+pgvector
+python-dotenv

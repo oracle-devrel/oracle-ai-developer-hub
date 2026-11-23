@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CityOps Copilot · Agent Memory</title>
+  <meta name="description" content="An interactive companion to the CityOps Copilot notebook: what agent memory is, why a field copilot needs it, and how Oracle AI Database and the oracleagentmemory SDK provide it." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2311151c'/%3E%3Cpath d='M5 22h22M8 22V13l4-3 4 3v9M16 22v-6l5-4 5 4v6' fill='none' stroke='%2325b3a3' stroke-width='2.2' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <script>
+    // Set the theme before paint to avoid a flash.
+    (function () {
+      try {
+        var t = localStorage.getItem("cityops-theme");
+        if (!t) t = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar" aria-label="Pages"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="stage" id="stage" tabindex="-1"></main>
+    </div>
+  </div>
+  <section class="drawer" id="drawer" aria-label="Data Explorer" data-open="false"></section>
+  <div class="toast" id="toast" hidden></div>
+  <div class="modal" id="modal" hidden></div>
+  <script src="app.js"></script>
+  <script src="figures.js"></script>
+  <script src="pages_intro.js"></script>
+  <script src="pages_memory.js"></script>
+  <script src="pages_copilot.js"></script>
+  <script>App.boot();</script>
+</body>
+</html>

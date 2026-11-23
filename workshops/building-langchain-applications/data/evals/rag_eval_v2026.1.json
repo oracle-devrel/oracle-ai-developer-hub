@@ -1,0 +1,44 @@
+{
+  "corpus_name": "Paris Dataset",
+  "corpus_version": "2026.1",
+  "cases": [
+    {
+      "case_id": "museum-picasso-grounded",
+      "question": "Which museum is devoted to Pablo Picasso's work?",
+      "filter": { "topic": "museum" },
+      "expected_document_ids": ["musee-picasso-paris"],
+      "expected_behavior": "grounded"
+    },
+    {
+      "case_id": "food-filter-grounded",
+      "question": "Which corpus records describe French food?",
+      "filter": { "topic": "food" },
+      "expected_document_ids": [
+        "baguette",
+        "crepe",
+        "croissant",
+        "croque-monsieur",
+        "french-cuisine",
+        "french-onion-soup",
+        "macaron",
+        "ratatouille"
+      ],
+      "expected_behavior": "grounded"
+    },
+    {
+      "case_id": "empty-filter-abstains",
+      "question": "Which Paris record matches this unsupported topic?",
+      "filter": { "topic": "not-a-topic" },
+      "expected_document_ids": [],
+      "expected_behavior": "abstain"
+    },
+    {
+      "case_id": "current-exhibition-abstains",
+      "question": "Which museum has an exhibition this weekend?",
+      "filter": { "topic": "museum" },
+      "expected_document_ids": [],
+      "expected_behavior": "abstain_or_uncertainty",
+      "reason": "The checked-in corpus does not provide current exhibition information."
+    }
+  ]
+}

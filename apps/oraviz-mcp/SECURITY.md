@@ -133,7 +133,8 @@ database credentials and IdP keys under a tested procedure.
 Each MCP tool call produces JSON audit records on stderr before and after execution,
 including a generated request ID, known tool name, verified token identity or local
 OS identity, configured database user, outcome, and elapsed time. Oracle sessions
-set `module=oraviz-mcp` and `client_identifier` to the request ID for correlation.
+set `program=devrel-developerhub-oraviz-mcp`, `module=oraviz-mcp`, and `client_identifier` to
+the request ID for correlation.
 SQL, bind values, result data, credentials, tokens, DSNs, and raw database error
 messages are excluded from application audit records. Tool errors use sanitized
 messages with a request ID. Identity metadata may itself be sensitive.

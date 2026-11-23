@@ -141,7 +141,50 @@ create_chart(sql=..., chart_type="vector", title="Product embeddings")
 
 ## Quick Start
 
-### 1. Start Oracle AI Database 26ai Free
+### 1. Choose an Oracle AI Database
+
+OraViz connects with python-oracledb thin mode, so it runs against a hosted FreeSQL schema or a local
+Oracle AI Database 26ai Free container. Pick either path; steps 3 and 4 are the same for both.
+
+#### Option A -- FreeSQL (hosted, no Docker)
+
+[FreeSQL](https://freesql.com) gives you a hosted Oracle AI Database 26ai schema at no cost, with the
+worksheet and the connection details in one place. It is the fastest path to real data for the charts.
+Sessions keep the Developer Hub program identifier (`devrel-developerhub-oraviz-mcp`), and no wallet
+files are needed: python-oracledb thin mode connects over TCPS directly.
+
+**Step 1: Open FreeSQL.** The worksheet interface is where you browse schema objects, run SQL, and
+reach the connection details.
+
+<p align="center">
+  <img src="docs/images/freesql/freesql-interface.png" alt="FreeSQL worksheet interface" width="760">
+</p>
+
+**Step 2: Sign in.** Use your Oracle account, or create one from the same page.
+
+<p align="center">
+  <img src="docs/images/freesql/freesql-sign-in.png" alt="Oracle sign-in page for FreeSQL" width="460">
+</p>
+
+**Step 3: Copy the Python connection details.** Open **Connect to the Database** and choose the
+**Python** tab. FreeSQL shows the host, port, service name, and generated password for your schema:
+
+<p align="center">
+  <img src="docs/images/freesql/freesql-python-connection.png" alt="FreeSQL Python connection details" width="760">
+</p>
+
+Put those values in the server environment, or in a private `.env` file (see [Configuration](#configuration)):
+
+```env
+ORACLE_USER=<freesql-user>
+ORACLE_PASSWORD=<freesql-password>
+ORACLE_DSN=tcps://db.freesql.com:2484/<freesql-service-name>
+```
+
+The MCP server signs in as the FreeSQL schema user directly; the owner/reader split in Option B is
+Docker-only.
+
+#### Option B -- Local Oracle AI Database 26ai Free (Docker)
 
 ```bash
 # Disposable local development database; the admin password is NOT the MCP password.
@@ -157,7 +200,13 @@ The floating database image is for this demo; pin a reviewed digest for controll
 
 ### 2. (Optional) Load the demo schema
 
-Create an owner only for setup, then give a separate reader access to the two demo tables.
+[`examples/demo-sales.sql`](examples/demo-sales.sql) creates the 96-row `SALES_DEMO` table and the
+six-row `PRODUCT_VECTORS` table with an 8-dimension `VECTOR` column.
+
+**FreeSQL:** open the worksheet, paste the script, and run it. The tables land in the schema you signed
+in with -- the same schema the MCP server reads -- so no extra grants are needed.
+
+**Docker:** create an owner only for setup, then give a separate reader access to the two demo tables.
 The SQL below uses password placeholders: replace them privately with separate generated passwords.
 Do not reuse the legacy passwords or broad grants in the demo script's historical header.
 
@@ -176,8 +225,8 @@ GRANT CREATE SESSION TO oraviz_reader;
 EXIT;
 ```
 
-Load the deterministic 96-row `SALES_DEMO` and six-row `PRODUCT_VECTORS` tables as the owner.
-The script drops and recreates these tables; use it only in this disposable schema.
+Load the demo tables as the owner. The script drops and recreates these tables; use it only in this
+disposable schema.
 
 ```bash
 docker cp examples/demo-sales.sql oraviz-oracle:/tmp/oraviz-demo-sales.sql
@@ -193,11 +242,14 @@ GRANT READ ON oraviz.product_vectors TO oraviz_reader;
 EXIT;
 ```
 
-The initial `DROP TABLE` statements can report missing tables on a fresh schema.
-Only `ORAVIZ_READER` is used by the MCP server. For production, grant `READ` on
-approved tables or reviewed views and audit inherited permissions; never use a schema owner or admin.
+The initial `DROP TABLE` statements can report missing tables on a fresh schema. In the Docker setup,
+only `ORAVIZ_READER` is used by the MCP server. For production, grant `READ` on approved tables or
+reviewed views and audit inherited permissions; never use a schema owner or admin.
 
 ### 3. Point your MCP client at the server
+
+Take `ORACLE_USER` and `ORACLE_DSN` from the option you chose (the Docker defaults are shown below)
+and inject `ORACLE_PASSWORD` at runtime.
 
 <details>
 <summary><strong>Claude Desktop / Cursor</strong> (uvx from a reviewed commit)</summary>
@@ -283,7 +335,7 @@ The model will call `profile_table`, pick a chart type, run `create_chart`, and 
 | `ORACLE_HOST` | Database hostname | `localhost` |
 | `ORACLE_PORT` | Listener port | `1521` |
 | `ORACLE_SERVICE` | Service name | `FREEPDB1` |
-| `ORACLE_DSN` | Full EZConnect descriptor; overrides host/port/service | -- |
+| `ORACLE_DSN` | Full EZConnect descriptor or connect string (FreeSQL: `tcps://db.freesql.com:2484/<service>`); overrides host/port/service | -- |
 | `ORACLE_CONFIG_DIR` | Wallet config directory (Autonomous Database / mTLS) | -- |
 | `ORACLE_WALLET_LOCATION` | Wallet location | -- |
 | `ORACLE_WALLET_PASSWORD` | Wallet password | -- |
@@ -394,6 +446,7 @@ showcase with the end-to-end query demo is at [jasperan.github.io/oraviz-mcp](ht
 
 - [`pab1it0/adx-mcp-server`](https://github.com/pab1it0/adx-mcp-server) -- the project this mirrors, tool for tool, for Oracle
 - [Oracle AI Database 26ai Free](https://www.oracle.com/database/free/) -- the database and its container image
+- [FreeSQL](https://freesql.com) -- hosted Oracle AI Database schema for the Docker-free path
 - [python-oracledb](https://github.com/oracle/python-oracledb) -- thin-mode driver, no client libraries required
 - [FastMCP](https://github.com/jlowin/fastmcp) and the [Model Context Protocol](https://modelcontextprotocol.io)
 

@@ -1,0 +1,26 @@
+{
+  "name": "@oracle-mem0-ts-memory/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.cjs --external:mem0ai/* --external:oracledb --external:better-sqlite3",
+    "start": "node dist/index.cjs"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "@oracle-mem0-ts-memory/core": "workspace:*",
+    "@oracle-mem0-ts-memory/db": "workspace:*",
+    "@oracle-mem0-ts-memory/shared": "workspace:*",
+    "dotenv": "^17.2.3",
+    "hono": "^4.6.14",
+    "better-sqlite3": "^12.6.2",
+    "mem0ai": "^3.3.1",
+    "oracledb": "^7.0.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": { "@types/node": "^22.10.2", "esbuild": "^0.25.0", "tsx": "^4.20.6", "typescript": "^5.9.3", "vitest": "^3.2.6" }
+}

@@ -1,0 +1,10 @@
+# CityOps Copilot appbook. OAMP 26.4.0 and its companions: the notebook's own pins.
+-r ../../../notebooks/agent_memory/cityops_copilot/requirements.txt
+requests>=2.31
+fastapi>=0.110
+uvicorn>=0.27
+
+# Tests (offline contracts, live checks, browser checks)
+pytest>=8.0
+httpx>=0.27
+playwright>=1.48

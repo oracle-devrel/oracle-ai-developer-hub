@@ -33,6 +33,10 @@ from oraviz_mcp.query_policy import MAX_SQL_CHARS, validate_query
 from oraviz_mcp.transport_security import build_auth
 from oraviz_mcp.tool_policy import ToolPolicyMiddleware, load_allowed_tools, request_id
 
+# Identify this app's Oracle sessions in V$SESSION, following the Developer Hub
+# program identifier convention.
+oracledb.defaults.program = "devrel-developerhub-oraviz-mcp"
+
 # ---------------------------------------------------------------------------
 # Logging (stderr only: stdout belongs to the stdio MCP transport)
 # ---------------------------------------------------------------------------

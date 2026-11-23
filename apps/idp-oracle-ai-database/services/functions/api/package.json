@@ -9,12 +9,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@hono/node-server": "^1.13.7",
+    "@hono/node-server": "^2.1.6",
     "@idp/core": "workspace:*",
     "@idp/logger": "workspace:*",
     "@idp/schemas": "workspace:*",
     "@idp/shared": "workspace:*",
-    "hono": "^4.13.5",
+    "hono": "^4.13.19",
     "oracledb": "^6.7.0"
   },
   "devDependencies": {

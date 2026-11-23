@@ -68,6 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with PCA (dense and sparse vectors, any dimension) and rendered as a labeled scatter, so 26ai embedding
   columns can be explored without leaving SQL. Chart rendering now imports `numpy` directly (previously
   only a matplotlib dependency) for the projection.
+- Oracle sessions set the Developer Hub program identifier `devrel-developerhub-oraviz-mcp`,
+  visible in `V$SESSION.PROGRAM`.
 
 ### Changed
 

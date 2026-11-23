@@ -123,6 +123,9 @@ class TestGetOracleConnection:
         assert fake.return_value.module == "oraviz-mcp"
         assert fake.return_value.call_timeout == 60000
 
+    def test_developer_hub_program_identifier(self):
+        assert oracledb.defaults.program == "devrel-developerhub-oraviz-mcp"
+
     def test_call_timeout_cannot_be_disabled(self, monkeypatch):
         configure(monkeypatch, call_timeout=0)
 

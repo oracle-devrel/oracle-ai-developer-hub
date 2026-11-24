@@ -1,0 +1,14 @@
+{
+  "kind": "sdk-extraction",
+  "sdk_version": "26.8.0",
+  "model": "gpt-4.1-mini",
+  "captured_at": "2026-11-20T18:30:35.182958+00:00",
+  "message": "When you explain database queries, include the SQL first, then explain it.",
+  "instructions": "Extract only explicit lasting user preferences as preference records. Ignore temporary location and small talk. Preserve the user's meaning.",
+  "records": [
+    {
+      "content": "The user prefers explanations of database queries to present the SQL query first, then the explanation.",
+      "memory_type": "preference"
+    }
+  ]
+}

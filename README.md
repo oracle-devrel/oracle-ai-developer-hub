@@ -10,6 +10,69 @@ The examples show how to build retrieval-augmented generation (RAG), AI agents, 
 
 It is for developers and AI engineers who want working code to start from. If you are looking for a library rather than examples, see [python-oracledb](https://github.com/oracle/python-oracledb), [langchain-oracledb](https://github.com/oracle/langchain-oracle), or [Oracle AI Agent Memory](https://www.oracle.com/database/ai-agent-memory/).
 
+## Quick start
+
+Run vector search, hybrid search, RAG, and agent memory on a local Oracle AI Database. You need Docker and Python 3.11 or newer. There is no sign-up and no API key: an ONNX model inside the database creates the embeddings.
+
+1. Start the database. The first start downloads about 0.9 GB.
+
+   ```bash
+   export ORACLE_PWD=Quickstart2026
+   docker run -d --name oracle-free -p 127.0.0.1:1521:1521 -e ORACLE_PWD=$ORACLE_PWD \
+     container-registry.oracle.com/database/free:latest-lite
+   ```
+
+2. Install the packages, prepare the database, and run the first example.
+
+   ```bash
+   git clone https://github.com/oracle-devrel/oracle-ai-developer-hub.git
+   cd oracle-ai-developer-hub/quickstart
+   python3 -m venv venv && source venv/bin/activate
+   pip install -r requirements.txt
+   python setup_database.py
+   python vector_and_hybrid_search.py
+   ```
+
+The example loads six sentences and searches them for "money back". The sentence about refunds comes first, although it shares no word with the query. A hybrid search then puts the sentence with an exact error code first.
+
+A vector search with LangChain takes a few lines. Save this as `snippet.py` in the same folder and run `python snippet.py`; it prints the refund sentence.
+
+```python
+import os
+
+import oracledb
+from langchain_core.embeddings import Embeddings
+from langchain_oracledb.vectorstores import DistanceStrategy, OracleVS
+
+conn = oracledb.connect(
+    user="quickstart", password=os.environ["ORACLE_PWD"], dsn="localhost:1521/FREEPDB1"
+)
+
+
+class InDatabaseEmbeddings(Embeddings):
+    """Embeds text with the ONNX model that setup_database.py loaded into the database."""
+
+    def embed_documents(self, texts):
+        sql = "select vector_embedding(ALL_MINILM_L12_V2 using :text as data) from dual"
+        with conn.cursor() as cur:
+            return [list(cur.execute(sql, text=text).fetchone()[0]) for text in texts]
+
+    def embed_query(self, text):
+        return self.embed_documents([text])[0]
+
+
+store = OracleVS.from_texts(
+    ["Premium customers can request a full refund within 30 days.", "Support is available 24/7."],
+    InDatabaseEmbeddings(),
+    client=conn,
+    table_name="QS_SNIPPET",
+    distance_strategy=DistanceStrategy.COSINE,
+)
+print(store.similarity_search("money back", k=1)[0].page_content)
+```
+
+The [quick start walkthrough](./quickstart/README.md) shows the expected output of every step and continues with RAG, a LangGraph agent that keeps its state in the database, and Oracle AI Agent Memory.
+
 ## Start here
 
 | I want to                              | Start with                                                                                                                        | Then                                                                       |
@@ -66,6 +129,8 @@ Oracle AI Database backs several kinds of agent memory, each through its own pac
 | The Mem0 API with Oracle AI Database as the store                                                                          | Mem0                               | `mem0ai`             | [TypeScript memory assistant with Mem0](./apps/oracle-mem0-ts-memory)                                                          |
 
 Oracle AI Agent Memory is not a LangGraph checkpointer or store. In a LangGraph workflow, call it from nodes or tools, as the [Mortgage Approval Workflow notebook](./notebooks/agent_memory/03_mortgage_workflow_langgraph.ipynb) does.
+
+For a minimal script that runs without an API key, see [`agent_memory_langgraph.py`](./quickstart/agent_memory_langgraph.py) (`OracleSaver` and `OracleStore`) and [`agent_memory_sdk.py`](./quickstart/agent_memory_sdk.py) (Oracle AI Agent Memory) in the quick start.
 
 Notebooks for the `oracleagentmemory` package (`/notebooks/agent_memory`):
 

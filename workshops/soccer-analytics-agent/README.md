@@ -154,7 +154,12 @@ The skill walks through Docker startup, schema creation, dataset load, model art
 <details><summary>Or run the steps manually</summary>
 
 ```bash
-docker compose -f docker/docker-compose.yml up -d
+docker compose -f docker/docker-compose.yml up -d --wait
+# Reserve vector memory for the OracleVS vector index. Set it in the CDB root
+# (service FREE, not FREEPDB1) and restart, or the index is skipped with ORA-51962.
+docker exec -i soccer-oracle sqlplus -s "system/SoccerAdmin2026#@//localhost:1521/FREE" <<< "ALTER SYSTEM SET vector_memory_size=512M SCOPE=SPFILE;"
+docker restart soccer-oracle
+docker compose -f docker/docker-compose.yml up -d --wait   # wait until healthy again
 uv run python scripts/setup_db.py
 uv run python scripts/prepare_artifacts.py   # validates included artifacts or trains them
 uv run python scripts/init_memory.py
@@ -236,6 +241,8 @@ For the full feature-family list and Elo formulas, see [ML Feature Pipeline Note
 | `.claude/skills/` | Two Claude Code skills: `soccer-workshop-setup`, `soccer-agent-toolbelt` |
 | `tests/` | 42 tests including 10 integration tests against the real Oracle dataset |
 | `workshop/` | Attendee workshop notes, OCI setup, hackathon guide, and screenshots |
+
+The `notebooks/` are the hackathon ML track and are independent of the `soccer-oracle` container above: they connect as `worldcup` to an Autonomous Database (or a local ADB-Free container) through the wallet in `notebooks/wallet/` (DSN `myatp_low`, settings in [workshop/HACKATHON_GUIDE_ADB.md](workshop/HACKATHON_GUIDE_ADB.md)) and read `MATCH_RESULTS` from it; `world_cup_enhanced.ipynb` also reads `goalscorers.csv` and `shootouts.csv` from `data/`. Install the `notebooks` dependency group (`uv sync --all-groups`) and run them from the `notebooks/` directory.
 
 ## Workshop Materials
 

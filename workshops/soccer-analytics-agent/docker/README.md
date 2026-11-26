@@ -15,6 +15,19 @@ Watch progress with:
 
     docker logs -f soccer-oracle
 
+### Vector memory (required for the vector index)
+
+The Free image starts with `vector_memory_size=0`. Without it the LangChain
+`OracleVS` vector index created by `scripts/load_langchain_vectors.py` is skipped
+with `ORA-51962`. The setup launcher (`01_start_oracle.sh`) sets it for you; to do
+it by hand, set the static parameter in the CDB root (service `FREE`, **not**
+`FREEPDB1`) and restart the container:
+
+    docker exec -i soccer-oracle sqlplus -s "system/SoccerAdmin2026#@//localhost:1521/FREE" <<< "ALTER SYSTEM SET vector_memory_size=512M SCOPE=SPFILE;"
+    docker restart soccer-oracle
+
+Use your own `ORACLE_ADMIN_PASSWORD` in place of the default if you changed it.
+
 ### Docker or Podman, Intel or Apple Silicon
 
 The setup launcher (`01_start_oracle.sh`) auto-detects your engine and arch:

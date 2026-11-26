@@ -154,7 +154,7 @@ The skill is **not allowed to declare done** until verify is green. This is the 
 
 **The beginner's 5-line sermon.** Every project idea below collapses to:
 ```python
-from langchain_oracledb import OracleVS
+from langchain_oracledb.vectorstores import DistanceStrategy, OracleVS
 from langchain_ollama import OllamaEmbeddings
 
 vs = OracleVS.from_texts(
@@ -205,7 +205,7 @@ The skill teaches that pattern first, then layers on `add_texts()` (insert more 
 
 **LangChain features the intermediate skill explicitly teaches.**
 - `OracleVS` with **multiple collections** (e.g. `PDF_DOCS`, `WEB_DOCS`, `CHAT_LOGS`) sharing one DB — pattern lifted from `apps/agentic_rag/src/OraDBVectorStore.py`.
-- `OracleVS.as_retriever(search_type="similarity", search_kwargs={"k": 5, "filter": {...}})` — feeds straight into `RetrievalQA` and LCEL chains.
+- `OracleVS.as_retriever(search_type="similarity", search_kwargs={"k": 5, "filter": {...}})` — returns a standard LangChain retriever that plugs into LCEL chains.
 - **Metadata filtering** at retrieval time (`filter={"source": "manual.pdf"}`) — and the JSON-parse fix-up because Oracle returns metadata as VARCHAR2 string.
 - **Hybrid search via the retriever interface.** `EnsembleRetriever([vector_retriever, bm25_retriever])` from LangChain layered on top of `OracleVS` — keeps SQL out of the user's face but gives them RRF behavior.
 - **Persistent chat history.** Use `langchain-oracledb`'s message history class so conversations survive restarts; users see "stop the script, restart, the bot remembers."

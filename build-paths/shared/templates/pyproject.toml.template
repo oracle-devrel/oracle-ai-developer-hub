@@ -16,7 +16,7 @@ authors = [
 # Leaving them all uncommented is wrong — pick the user's chosen backend.
 dependencies = [
     "oracledb>=2.5",
-    "langchain-oracledb>=0.1",
+    "langchain-oracledb>=1.5",
     "langchain>=0.3",
     "langchain-core>=0.3",
     "python-dotenv>=1.0",

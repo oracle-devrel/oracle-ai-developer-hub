@@ -4,7 +4,7 @@ flask-cors>=4.0
 python-socketio>=5.10
 eventlet>=0.35
 
-oracledb>=2.4
+oracledb>=2.4,<26
 oracleagentmemory>=26.4
 openai>=1.50
 

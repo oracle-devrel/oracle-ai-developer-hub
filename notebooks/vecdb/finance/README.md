@@ -19,6 +19,7 @@ This directory contains two complementary oracle-vecdb notebook walkthroughs for
 ### Prerequisites
 - `.env` file populated with `VECDB_REST_URL` and credentials.
 - Python 3.9+ virtual environment with the `oracle-vecdb` SDK installed.
+- The `all_MiniLM_L12_v2` embedding model loaded in the database under that name (both notebooks use it as `MODEL_NAME`). The [quickstart](../start_here/quickstart.ipynb) shows how to load it.
 - Register the notebook kernel using the project virtual environment (e.g. `python -m ipykernel install --user --name vecdb-finance --display-name "Python (.venv finance)"`).
 
 Each notebook includes cleanup steps to drop the demo tables; run them after experimenting to keep your environment tidy.

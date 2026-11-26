@@ -64,4 +64,4 @@ Copy `.env.example` to `.env` and replace values:
 - `find_dotenv()` is used, so the notebook resolves the nearest `.env` by default.
 - BYOV tables are created with manual indexing—schedule indexing jobs after large upserts.
 ## Network / Proxy
-If you need proxy to access `docs.oracle.com`. Set `HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY` in `.env` and the notebook will normalize them for requests.
+The proxy settings are optional and are commented out in `.env.example`. Only if you need a proxy to reach `docs.oracle.com`, uncomment `HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY` in `.env` and set real values; the notebook will normalize them for requests. Leaving the placeholder `http://your-proxy:80` in place breaks the documentation fetch.

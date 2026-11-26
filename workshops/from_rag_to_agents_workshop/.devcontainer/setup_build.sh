@@ -13,7 +13,7 @@ pip install -q --no-cache-dir \
   sentence-transformers \
   datasets \
   einops \
-  "numpy<2.0" \
+  "transformers<5" \
   openai \
   openai-agents \
   tqdm \

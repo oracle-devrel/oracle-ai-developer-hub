@@ -1,11 +1,13 @@
 """Seed MongoDB with a synthetic product reviews corpus.
 
 500 products, 5-15 reviews each. Categories, prices, ratings, verified flags
-are tuned so the demo aggregation question returns a meaningful chart.
+are tuned so the demo aggregation question returns a meaningful chart. Review
+and release dates are generated relative to today, so the "last 90 days"
+aggregation always has data.
 """
 
 import random
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta
 
 from data_migration_harness.environment import mongo_db
 
@@ -34,7 +36,7 @@ REVIEW_TEMPLATES = [
 def generate():
     random.seed(42)
     products = []
-    now = datetime(2026, 5, 1)
+    now = datetime.combine(date.today(), time.min)
     for _ in range(500):
         cat = random.choice(CATEGORIES)
         noun = random.choice(NOUNS[cat])

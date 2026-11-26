@@ -38,7 +38,7 @@ make install            # python venv + npm install
 cp .env.example .env    # fill in OCI_COMPARTMENT_ID and optional OCI_MODEL_ID
 podman pull docker.io/gvenzl/oracle-free:latest        # ~3 GB
 podman pull mongo:7
-podman run -d --name oracle-free -p 1521:1521 -e ORACLE_PWD=migration_agent docker.io/gvenzl/oracle-free:latest
+podman run -d --name oracle-free -p 1521:1521 -e ORACLE_PASSWORD=migration_agent docker.io/gvenzl/oracle-free:latest
 podman run -d --name mongo-demo -p 27017:27017 mongo:7
 
 # Wait for Oracle to finish starting (look for "DATABASE IS READY TO USE!"):

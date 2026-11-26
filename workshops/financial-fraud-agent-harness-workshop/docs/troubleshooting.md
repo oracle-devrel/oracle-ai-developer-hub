@@ -19,8 +19,10 @@ import oracledb
 conn = oracledb.connect(user="sys", password="OraclePwd_2025",
                         dsn="localhost:1521/FREEPDB1",
                         mode=oracledb.AUTH_MODE_SYSDBA)
-conn.cursor().execute("ALTER SYSTEM SET vector_memory_size = 512M SCOPE=SPFILE CONTAINER=ALL")
-conn.commit(); conn.close()
+cur = conn.cursor()
+cur.execute("ALTER SESSION SET CONTAINER = CDB$ROOT")   # from the PDB, CONTAINER=ALL raises ORA-02065
+cur.execute("ALTER SYSTEM SET vector_memory_size = 512M SCOPE=SPFILE")
+conn.close()
 ```
 
 Then bounce the database:

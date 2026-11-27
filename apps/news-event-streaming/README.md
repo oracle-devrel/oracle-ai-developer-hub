@@ -49,7 +49,7 @@ You'll need to set the following environment variables where your application is
 - `OJDBC_PATH`: Path to the directory containing your `ojdbc.properties` file. I use the ojdbc.properties file in [src/test/resources](./src/test/resources).
 - `OCI_COMPARTMENT_ID`: OCI Compartment OCID where your GenAI models are found. You can find this on the OCI console.
 - `OCI_CHAT_MODEL_ID`: OCI Chat Model OCID. You can find this on the OCI GenAI console.
-- `OCI_EMBEDDING_MODEL_ID`: OCI Embedding Model OCID. You can find this on the OCI GenAI console.
+- `OCI_EMBEDDING_MODEL_ID`: OCI Embedding Model ID. You can find this on the OCI GenAI console. The default [news-schema.sql](./src/test/resources/news-schema.sql) uses 1536-dimension vectors, which matches `cohere.embed-v4.0`. If you use a model with a different vector size, change the `embedding vector(...)` dimension in the schema to match.
 
 Once these values are configured, start the application like so:
 
@@ -84,7 +84,7 @@ Ingest a subset of the news dataset.
 ```bash
 curl -X POST "http://localhost:8080/news" \
   -H "Content-Type: application/json" \
-  -d "@src/test/resources/input-small.json"
+  -d "@src/test/resources/intput-small.json"
 ```
 
 ## Try out Similarity Search

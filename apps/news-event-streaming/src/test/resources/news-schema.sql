@@ -9,8 +9,8 @@ create table if not exists news_vector (
     id        varchar2(36) default sys_guid() primary key,
     news_id   varchar2(36) ,
     chunk     varchar2(2500),
-    -- you may need to change the dimensions used depending on your embedding model
-    embedding vector(384, FLOAT64) annotations(Distance 'COSINE', IndexType 'IVF'),
+    -- you may need to change the dimensions used depending on your embedding model (1536 for cohere.embed-v4.0)
+    embedding vector(1536, FLOAT64) annotations(Distance 'COSINE', IndexType 'IVF'),
     constraint fk_news_vector foreign key (news_id)
     references news(news_id) on delete cascade
 );
@@ -27,8 +27,7 @@ create or replace force editionable json relational duality view news_dv
 news @insert @update @delete {
     _id : news_id
     article
-    news_vector @insert @update @delete
-             @link (to : [NEWS_ID]) {
+    news_vector @insert @update @delete @link (to : [NEWS_ID]) {
         id
         chunk
         embedding

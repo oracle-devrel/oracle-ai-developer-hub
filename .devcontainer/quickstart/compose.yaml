@@ -1,0 +1,13 @@
+# Adds the workspace container for the Codespaces quick start. The database service comes from
+# quickstart/compose.yaml. Relative paths here resolve against the quickstart folder.
+services:
+  workspace:
+    image: mcr.microsoft.com/devcontainers/python:3.12
+    command: sleep infinity
+    volumes:
+      - ../..:/workspaces:cached
+    environment:
+      ORACLE_PWD: ${ORACLE_PWD:-Quickstart2026}
+      ORACLE_DSN: database:1521/FREEPDB1
+    depends_on:
+      - database

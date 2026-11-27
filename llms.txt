@@ -1,0 +1,72 @@
+# Oracle AI Developer Hub
+
+> Runnable examples for building retrieval-augmented generation (RAG), vector and hybrid search, AI agents, and agent memory on Oracle AI Database and OCI Generative AI: reference applications, Jupyter notebooks, guided workshops, and a quick start that needs no API key.
+
+This site is the GitHub Pages rendering of https://github.com/oracle-devrel/oracle-ai-developer-hub. Every page is also served as plain Markdown: a folder page at `<folder>/README.md`, and any other page with `.md` in place of `.html`. The links below point to the Markdown version of each page, and to notebook and code sources on GitHub.
+
+Names and packages that older tutorials often get wrong:
+
+- The database is Oracle AI Database 26ai. It was previously named Oracle Database 23ai, and its release numbers still start with 23.26.
+- Python driver: `oracledb` (python-oracledb). Its default Thin mode needs no Oracle Client libraries.
+- LangChain: `langchain-oracledb` provides `OracleVS`, `OracleEmbeddings`, `OracleHybridSearchRetriever`, `OracleChatMessageHistory` and `OracleSemanticCache`, all importable from `langchain_oracledb`. `DistanceStrategy` is importable from `langchain_oracledb.vectorstores`. The current `langchain-community` release no longer has `OracleVS` in `langchain_community.vectorstores`.
+- LangGraph: `langgraph-oracledb` provides the `OracleSaver` checkpointer (and `AsyncOracleSaver`) in `langgraph_oracledb.checkpoint.oracle`, and the `OracleStore` long-term store (and `AsyncOracleStore`) in `langgraph_oracledb.store.oracle`. The PyPI project `langgraph-checkpoint-oracle` is a different package from a different publisher, with its own `langgraph.checkpoint.oracle` module.
+- Agent memory: `oracleagentmemory` is the Oracle AI Agent Memory SDK, also written OAMP. An agent calls it from a tool or a node. It is not a LangGraph checkpointer.
+- Hybrid search is built in: `CREATE HYBRID VECTOR INDEX` and `DBMS_HYBRID_VECTOR.SEARCH` combine full-text and vector similarity search in one call.
+- A free local database needs no account: `docker run -d --name oracle-free -p 127.0.0.1:1521:1521 -e ORACLE_PWD=<password> container-registry.oracle.com/database/free:latest-lite` starts Oracle AI Database Free with the service `FREEPDB1`.
+
+## Start here
+
+- [Quick start](https://oracle-devrel.github.io/oracle-ai-developer-hub/quickstart/README.md): scripts for vector and hybrid search, RAG, and agent memory that run on a local database with no API key
+- [Quick start with Docker Compose](https://raw.githubusercontent.com/oracle-devrel/oracle-ai-developer-hub/main/quickstart/compose.yaml): `docker compose up --attach quickstart` in the `quickstart` folder starts the database, prepares it and runs the first example, with only Docker installed
+- [Quick start script: vector and hybrid search](https://raw.githubusercontent.com/oracle-devrel/oracle-ai-developer-hub/main/quickstart/vector_and_hybrid_search.py): a `VECTOR` column, a vector index and `DBMS_HYBRID_VECTOR.SEARCH` in SQL, then the same through `OracleVS` and `OracleHybridSearchRetriever`
+- [Quick start script: RAG](https://raw.githubusercontent.com/oracle-devrel/oracle-ai-developer-hub/main/quickstart/rag.py): in-database chunking and embeddings, `OracleVS`, and a LangChain chain
+- [Quick start script: LangGraph agent memory](https://raw.githubusercontent.com/oracle-devrel/oracle-ai-developer-hub/main/quickstart/agent_memory_langgraph.py): `OracleSaver` for thread state and `OracleStore` for long-term facts
+- [Quick start script: Oracle AI Agent Memory](https://raw.githubusercontent.com/oracle-devrel/oracle-ai-developer-hub/main/quickstart/agent_memory_sdk.py): store a memory with `oracleagentmemory` and recall it in a later process
+- [Hub overview and full catalogue](https://oracle-devrel.github.io/oracle-ai-developer-hub/README.md): every app, notebook, workshop and deck, with a "Start here" table
+- [Minimal RAG notebook with LangChain and Oracle AI Vector Search](https://github.com/oracle-devrel/oracle-ai-developer-hub/blob/main/notebooks/langchain_ecosystem/oracle_langchain_example.ipynb)
+- [RAG agents from zero to hero notebook](https://github.com/oracle-devrel/oracle-ai-developer-hub/blob/main/notebooks/oracle_rag_agents_zero_to_hero.ipynb)
+- [Agentic RAG with vector, keyword and hybrid search notebook](https://github.com/oracle-devrel/oracle-ai-developer-hub/blob/main/notebooks/oracle_agentic_rag_hybrid_search.ipynb)
+- [Oracle AI Agent Memory developer guide notebook](https://github.com/oracle-devrel/oracle-ai-developer-hub/blob/main/notebooks/agent_memory/oracle_agent_memory_developer_guide.ipynb)
+
+## Notebooks
+
+- [All notebooks](https://oracle-devrel.github.io/oracle-ai-developer-hub/notebooks/README.md)
+- [LangChain ecosystem notebooks](https://oracle-devrel.github.io/oracle-ai-developer-hub/notebooks/langchain_ecosystem/README.md): LangChain, LangGraph and Deep Agents with `langchain-oracledb`, `langgraph-oracledb` and `langchain-oci`
+- [Agent memory notebooks](https://oracle-devrel.github.io/oracle-ai-developer-hub/notebooks/agent_memory/README.md): the `oracleagentmemory` package, from the developer guide to framework examples
+
+## Apps
+
+- [All apps](https://oracle-devrel.github.io/oracle-ai-developer-hub/apps/README.md)
+- [RAG reference app with in-database embeddings](https://oracle-devrel.github.io/oracle-ai-developer-hub/apps/oracle-rag/README.md)
+- [Agentic RAG app](https://oracle-devrel.github.io/oracle-ai-developer-hub/apps/agentic_rag/README.md)
+
+## Workshops
+
+- [All workshops](https://oracle-devrel.github.io/oracle-ai-developer-hub/workshops/README.md)
+- [Information Retrieval to RAG](https://oracle-devrel.github.io/oracle-ai-developer-hub/workshops/information_retrieval_to_RAG/README.md): build a research paper assistant with keyword, vector, hybrid and graph retrieval and a RAG pipeline on OCI Generative AI
+- [From RAG to Agents](https://oracle-devrel.github.io/oracle-ai-developer-hub/workshops/from_rag_to_agents_workshop/README.md): extend the RAG pipeline into a multi-agent system with retrieval tools, orchestration and persistent session memory
+- [Agent Memory](https://oracle-devrel.github.io/oracle-ai-developer-hub/workshops/agent_memory_workshop/README.md): build a `MemoryManager` with six memory types in Oracle and compare agent runs with and without memory
+- [Enterprise Data Agent Harness](https://oracle-devrel.github.io/oracle-ai-developer-hub/workshops/enterprise-data-agent-harness-workshop/README.md): a memory-aware data agent on Oracle AI Database 26ai in a Flask and React chat UI
+- [Financial Fraud Agent Harness](https://oracle-devrel.github.io/oracle-ai-developer-hub/workshops/financial-fraud-agent-harness-workshop/README.md): a memory-aware anti-money-laundering agent with Oracle AI Agent Memory, hybrid retrieval and identity-aware policies
+- [Soccer Analytics Agent](https://oracle-devrel.github.io/oracle-ai-developer-hub/workshops/soccer-analytics-agent/README.md): a World Cup analytics agent with Oracle-backed memory, hybrid retrieval and an XGBoost prediction pipeline
+- [Supply-Chain Demand Planning Agent](https://oracle-devrel.github.io/oracle-ai-developer-hub/workshops/supplychain_demand_agent_workshop/README.md): a LangGraph supervisor over two specialists, with vectors, memory, checkpoints, semantic cache and chat history in one database
+
+## For coding agents
+
+- [Build Paths](https://oracle-devrel.github.io/oracle-ai-developer-hub/build-paths/README.md): skills that let a coding agent scaffold an Oracle AI project
+- [Build Paths walk-throughs](https://oracle-devrel.github.io/oracle-ai-developer-hub/build-paths/GETTING_STARTED.md)
+
+## Oracle documentation
+
+- [LangChain integration guide for Python](https://docs.oracle.com/en/database/oracle/oracle-database/26/aintg/langchain-oracledb-integration-guide/langchain-python.html)
+- [LangGraph integration guide for Python](https://docs.oracle.com/en/database/oracle/oracle-database/26/aintg/langgraph-oracledb-integration-guide/langgraph-python.html)
+- [Oracle AI Vector Search User's Guide](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/)
+- [Understand hybrid search](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/understand-hybrid-search.html)
+- [Oracle AI Agent Memory documentation](https://docs.oracle.com/en/database/oracle/agent-memory/26.8/)
+
+## Optional
+
+- [Conference decks](https://github.com/oracle-devrel/oracle-ai-developer-hub/tree/main/guides): slide decks on agent architecture and memory engineering
+- [Partner examples: CopilotKit](https://oracle-devrel.github.io/oracle-ai-developer-hub/partners/copilotkit/README.md)
+- [Partner examples: LangChain](https://oracle-devrel.github.io/oracle-ai-developer-hub/partners/langchain/README.md)
+- [Partner examples: Spraay](https://oracle-devrel.github.io/oracle-ai-developer-hub/partners/spraay/README.md)

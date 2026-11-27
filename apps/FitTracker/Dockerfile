@@ -13,22 +13,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    libaio1 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
 WORKDIR /app
 
-# Copy dependency files
-COPY pyproject.toml ./
-
-# Install Python dependencies
+# Copy files the build backend needs, then install Python dependencies
+COPY pyproject.toml README.md ./
+COPY src/ ./src/
 RUN pip install --upgrade pip && \
     pip install -e ".[dev]"
 
-# Copy source code
-COPY src/ ./src/
 COPY tests/ ./tests/
 
 # Create non-root user

@@ -6,7 +6,8 @@ pandas
 sentence-transformers
 datasets
 einops
-numpy<2.0
+# nomic-embed-text-v1.5 remote code does not load on transformers 5
+transformers<5
 openai
 tqdm
 jupyter

@@ -167,7 +167,7 @@ filesystem and then run the lost-update race that shows why "a row in the databa
 
 ## Provisioning the database
 
-If you are pointing the app at a database that has **not** been set up for this project yet, it needs two
+If you are pointing the app at a database that has **not** been set up for this project yet, it needs three
 things before the harness can warm:
 
 1. **An `AGENT` user** with privileges to create tables, vector indexes, mining models, and `DBMS_SCHEDULER`
@@ -178,6 +178,17 @@ things before the harness can warm:
    app's `VECTOR_EMBEDDING(...)` calls resolve. The reranker (`RERANK_XENC`) is **optional**: load a
    cross-encoder under that name to light up the rerank rung, or leave it out and the ladder falls back to
    hybrid (RRF) order.
+
+3. **Vector memory for the HNSW indexes.** On Oracle AI Database Free the in-memory vector pool is off by
+   default, and creating a vector index fails with `ORA-51962` until it is set. As `SYSDBA` in the root
+   container (for the Docker image, `docker exec -it <container> sqlplus / as sysdba`), run:
+
+   ```sql
+   ALTER SYSTEM SET vector_memory_size = 512M SCOPE=SPFILE;
+   ```
+
+   then restart the database (for the Docker image, `docker restart <container>`) and wait until it is
+   ready again before you start the app.
 
 Everything else (the commerce schema, the vector store, the registries, the semantic catalog) is created by
 the app on first launch — you do not need to set those up by hand.

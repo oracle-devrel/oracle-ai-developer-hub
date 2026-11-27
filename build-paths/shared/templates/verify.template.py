@@ -49,8 +49,7 @@ def check_vector() -> str:
     The skill replaces {{embedder_init}} with the concrete embedder and
     {{embedding_dim}} with the integer dim of that embedder.
     """
-    from langchain_oracledb.vectorstores.oraclevs import OracleVS
-    from langchain_community.vectorstores.utils import DistanceStrategy
+    from langchain_oracledb.vectorstores import DistanceStrategy, OracleVS
 
     embedder = {{embedder_init}}
 

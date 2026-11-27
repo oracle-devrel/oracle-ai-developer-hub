@@ -80,11 +80,10 @@ from . import _monkeypatch  # noqa: F401  -- must be first
 
 import os
 import oracledb
-from langchain_oracledb.vectorstores.oraclevs import OracleVS
 
-# DistanceStrategy lives in langchain_community — `langchain-oracledb` does
-# NOT re-export it. Friction P1-1.
-from langchain_community.vectorstores.utils import DistanceStrategy
+# DistanceStrategy is exported from langchain_oracledb.vectorstores since
+# langchain-oracledb 1.5.0. Older code imported it from langchain_community.
+from langchain_oracledb.vectorstores import DistanceStrategy, OracleVS
 
 # ... embedder import per choice ...
 
@@ -197,7 +196,7 @@ If dim mismatches: drop the offending tables (`DROP TABLE <PREFIX>_<KIND> CASCAD
 
 ## Stop conditions
 
-- `langchain-oracledb` not in `pyproject.toml`. Tell the user to add `langchain-oracledb>=0.1` and stop.
+- `langchain-oracledb` not in `pyproject.toml`. Tell the user to add `langchain-oracledb>=1.5` and stop.
 - Embedder choice doesn't match what the project already uses (existing tables have a different dim). Surface mismatch, don't silently re-bootstrap.
 - `has_chat_history=True` but no `chat_history` table after migration. Stop — the migration didn't run.
 

@@ -13,7 +13,7 @@ if not p.exists():
         "OLLAMA_URL=http://127.0.0.1:11434",
         "PRIVATE_AI_URL=https://127.0.0.1:8443",
     ]
-    for name in ["OWNER", "CREDIT", "MARKETS"]:
+    for name in ["OWNER", "CREDIT", "MARKETS", "REFERENCE"]:
         lines.append(f"HF_{name}_PASSWORD=Hf{secrets.token_hex(18)}")
     p.write_text("\n".join(lines) + "\n")
     p.chmod(0o600)

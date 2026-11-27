@@ -105,6 +105,9 @@ make setup
 # Start all services (Oracle, Redis, API, Workers)
 make dev
 
+# Create the schema and duality views (wait until `docker compose ps` shows oracle as healthy)
+make db-migrate
+
 # Run tests
 make test
 
@@ -116,7 +119,7 @@ make db-seed
 
 | Endpoint                  | Purpose                   |
 | ------------------------- | ------------------------- |
-| `GET /api/v1/health`      | Liveness/readiness checks |
+| `GET /health`             | Liveness/readiness checks |
 | `POST /api/v1/users`      | User registration         |
 | `GET /api/v1/users/{id}`  | User profile              |
 | `POST /api/v1/activities` | Log fitness activity      |

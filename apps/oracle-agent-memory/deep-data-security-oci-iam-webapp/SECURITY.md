@@ -180,7 +180,7 @@ evidence, and notify data owners after an incident.
 
 ## Official Oracle documentation
 
-- [Oracle AI Agent Memory security considerations](https://docs.oracle.com/en/database/oracle/agent-memory/26.6/guide/security.html)
+- [Oracle AI Agent Memory security considerations](https://docs.oracle.com/en/database/oracle/agent-memory/26.8/guide/security.html)
 - [Oracle Deep Data Security: IAM, database, and application configuration](https://docs.oracle.com/en/database/oracle/oracle-database/26/ddscg/iam-database-and-application-configuration.html)
 - [About the end-user security context](https://docs.oracle.com/en/database/oracle/oracle-database/26/ddscg/end-user-security-context1.html)
 - [Understand the application-mediated authentication flow](https://docs.oracle.com/en/database/oracle/oracle-database/26/ddscg/understand-authentication-flow-and-prerequisites.html)

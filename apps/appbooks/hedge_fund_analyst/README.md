@@ -138,6 +138,7 @@ before running `./start.sh`.
 | `HF_REASONING_EFFORT`                                      | Reasoning effort used by both agents.                                          |
 | `HF_RERANK_MODEL`                                          | Optional in-database cross-encoder.                                            |
 | `HF_DSN`, `HF_DB_CONTAINER`                                | Database connection and container name.                                        |
+| `HF_REFERENCE_PASSWORD`                                    | Password of the `HF_REFERENCE` database user; `setup.sh` generates it.         |
 
 ---
 

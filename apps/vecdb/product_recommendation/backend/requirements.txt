@@ -6,3 +6,4 @@ sentence-transformers
 python-dotenv
 datasets
 oracle-vecdb
+requests

@@ -36,8 +36,7 @@ from typing import Any, Optional
 
 import oracledb
 from langchain_core.embeddings import Embeddings
-from langchain_oracledb import OracleVS
-from langchain_oracledb.utils.distance_strategy import DistanceStrategy
+from langchain_oracledb.vectorstores import DistanceStrategy, OracleVS
 
 
 @dataclass

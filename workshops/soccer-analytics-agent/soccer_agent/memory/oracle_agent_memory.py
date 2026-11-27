@@ -33,6 +33,10 @@ class OracleDatabaseEmbedder:
     """
 
     model = os.environ.get("ORACLE_EMBED_MODEL", "ALL_MINILM_L6_V2")
+    # oracleagentmemory 26.6 reads these from the embedder. The workshop schema is fixed at
+    # 384 dimensions (ALL_MINILM_L6_V2, whose input window is 256 tokens).
+    embedding_dimension = 384
+    max_input_tokens = 256
 
     def embed(self, texts: str | Iterable[str], *, is_query: bool = False) -> np.ndarray:
         del is_query

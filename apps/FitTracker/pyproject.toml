@@ -20,12 +20,10 @@ dependencies = [
     "httpx>=0.26.0",
     "email-validator>=2.1.0",
     "python-multipart>=0.0.6",
+    "oracledb>=2.0.0",
 ]
 
 [project.optional-dependencies]
-oracle = [
-    "python-oracledb>=2.0.0",
-]
 dev = [
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",

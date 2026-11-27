@@ -1,0 +1,8 @@
+# Tested on 2026-11-26 with Python 3.12.3 (Linux x86-64) against Oracle AI Database 26ai Free 23.26.4.
+# Direct dependencies only; pip chooses the rest.
+oracledb==26.2.0
+langchain-core==1.8.5
+langchain-oracledb==1.7.0
+langgraph==1.2.24
+langgraph-oracledb==1.0.2
+oracleagentmemory==26.8.1

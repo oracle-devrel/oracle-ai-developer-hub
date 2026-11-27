@@ -1,0 +1,10 @@
+# GitHub Pages settings for https://oracle-devrel.github.io/oracle-ai-developer-hub/
+# The site is built by Jekyll from the repository root; README.md files become the pages.
+title: Oracle AI Developer Hub
+tagline: RAG, AI agent, and agent memory examples for Oracle AI Database
+description: >-
+  Reference applications, notebooks, and hands-on workshops for building RAG applications, AI
+  agents, and agent memory systems on Oracle AI Database and OCI Generative AI.
+# Publishes sitemap.xml so search engines can find every page.
+plugins:
+  - jekyll-sitemap

@@ -111,7 +111,9 @@ CREATE TABLE activities (
 CREATE INDEX activities_user_idx ON activities(user_id);
 CREATE INDEX activities_start_time_idx ON activities(start_time);
 CREATE INDEX activities_user_date_idx ON activities(user_id, start_time);
-CREATE INDEX activities_processed_idx ON activities(processed) WHERE processed = 0;
+-- Oracle has no partial indexes. This function-based index is NULL for processed rows, so it holds only the
+-- unprocessed ones. A query uses it when it filters on the same CASE expression.
+CREATE INDEX activities_processed_idx ON activities(CASE WHEN processed = 0 THEN 0 END);
 CREATE INDEX activities_external_idx ON activities(external_id);
 
 -- =====================================================
@@ -238,7 +240,8 @@ CREATE TABLE tickets (
 CREATE INDEX tickets_drawing_idx ON tickets(drawing_id);
 CREATE INDEX tickets_user_idx ON tickets(user_id);
 CREATE INDEX tickets_drawing_user_idx ON tickets(drawing_id, user_id);
-CREATE INDEX tickets_winner_idx ON tickets(is_winner) WHERE is_winner = 1;
+-- Same approach: only winning tickets are indexed.
+CREATE INDEX tickets_winner_idx ON tickets(CASE WHEN is_winner = 1 THEN 1 END);
 
 -- =====================================================
 -- PRIZE_FULFILLMENTS TABLE

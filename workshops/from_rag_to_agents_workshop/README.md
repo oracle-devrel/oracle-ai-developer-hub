@@ -50,7 +50,13 @@ pip install -r requirements.txt
 jupyter lab workshop/notebook_student.ipynb
 ```
 
-Wait approximately 2 minutes for Oracle to initialise before running notebook cells.
+Wait approximately 2 minutes for Oracle to initialise, then restart the container once so the vector memory pool configured on first start (`vector_memory_size`) takes effect. Without it, creating the HNSW vector index fails with `ORA-51962`:
+
+```bash
+docker restart oracle-free
+```
+
+Wait about a minute for the database to come back before running notebook cells.
 
 > **Updating later:** `git pull` from inside `oracle-ai-developer-hub` refreshes only the paths you've selected with sparse-checkout.
 

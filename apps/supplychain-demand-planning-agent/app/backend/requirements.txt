@@ -1,6 +1,6 @@
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
-oracledb>=4.0.0
+oracledb>=4.0.0,<26  # 26.x raises DPY-3013 (str to CLOB) in langchain-oracledb's OracleEmbeddings
 langgraph>=1.0.0
 langgraph-supervisor>=0.0.27
 langgraph-oracledb>=1.0.1
@@ -11,3 +11,4 @@ langchain-community>=0.3.0
 langchain-core>=1.0.0
 pydantic>=2.9.0
 python-dotenv>=1.0.0
+datasets>=2.0.0

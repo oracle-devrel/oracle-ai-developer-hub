@@ -43,8 +43,8 @@ ONNX_DIMS = int(os.environ.get("ONNX_EMBED_DIM", "384"))
 def _connect_sync():
     """Open a sync Oracle connection from env."""
     return oracledb.connect(
-        user=os.environ["ORACLE_USER"],
-        password=os.environ["ORACLE_PASSWORD"],
+        user=os.environ.get("ORACLE_USER", "AGENT"),
+        password=os.environ.get("ORACLE_PASSWORD", "AgentPwd_2025"),
         dsn=os.environ.get("ORACLE_DSN", "localhost:1521/FREEPDB1"),
     )
 
@@ -52,8 +52,8 @@ def _connect_sync():
 async def _connect_async():
     """Open an async Oracle connection from env."""
     return await oracledb.connect_async(
-        user=os.environ["ORACLE_USER"],
-        password=os.environ["ORACLE_PASSWORD"],
+        user=os.environ.get("ORACLE_USER", "AGENT"),
+        password=os.environ.get("ORACLE_PASSWORD", "AgentPwd_2025"),
         dsn=os.environ.get("ORACLE_DSN", "localhost:1521/FREEPDB1"),
     )
 

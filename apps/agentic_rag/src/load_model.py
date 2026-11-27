@@ -7,7 +7,7 @@ import io
 import sys
 
 # Configuration
-ZIP_URL = "https://adwc4pm.objectstorage.us-ashburn-1.oci.customer-oci.com/p/VBRD9P8ZFWkKvnfhrWxkpPe8K03-JIoM5h_8EJyJcpE80c108fuUjg7R5L5O7mMZ/n/adwc4pm/b/OML-Resources/o/all_MiniLM_L12_v2_augmented.zip"
+ZIP_URL = "https://adwc4pm.objectstorage.us-ashburn-1.oci.customer-oci.com/p/TtH6hL2y25EypZ0-rrczRZ1aXp7v1ONbRBfCiT-BDBN8WLKQ3lgyW6RxCfIFLdA6/n/adwc4pm/b/OML-ai-models/o/all_MiniLM_L12_v2_augmented.zip"
 ONNX_FILENAME = "all_MiniLM_L12_v2.onnx"
 MODEL_NAME = "ALL_MINILM_L12_V2"
 DIRECTORY_NAME = "DATA_PUMP_DIR"

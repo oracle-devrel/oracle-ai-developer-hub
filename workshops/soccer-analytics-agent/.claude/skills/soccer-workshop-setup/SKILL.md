@@ -44,6 +44,7 @@ If the user says they will provide these on the day of the workshop, leave place
 3. **Start the Oracle container**
    - Run: `bash .claude/skills/soccer-workshop-setup/scripts/01_start_oracle.sh`
    - The script auto-detects Docker or Podman, picks an Apple-Silicon-native image on arm64 Macs (and the official amd64 image everywhere else), then polls until the container is healthy (up to 7.5 min).
+   - It then sets `vector_memory_size=512M` on the CDB root (service `FREE`, not the `FREEPDB1` PDB) and restarts the container, because the Free image ships with `vector_memory_size=0` and `load_langchain_vectors.py` otherwise skips the OracleVS vector index with `ORA-51962`. Skipped when the value is already 256 MB or more.
    - **If it fails on port `1525`:** another container is bound to host port `1525`. Check `docker ps` (or `podman ps`). The compose file deliberately picks `1525` because `1521`-`1524` are commonly taken; if `1525` is also taken you need to edit `docker-compose.yml` and `ORACLE_DSN`.
    - **If it fails on an Apple Silicon Mac with an image/platform error:** the launcher should have selected `gvenzl/oracle-free:latest`. Confirm `uname -m` reports `arm64`; if you are forcing the official image via `ORACLE_IMAGE`, unset it and re-run.
 

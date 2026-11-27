@@ -10,8 +10,7 @@ Every beginner project collapses to this shape. The skill teaches it before anyt
 
 ```python
 import oracledb
-from langchain_oracledb import OracleVS
-from langchain_oracledb.utils.distance_strategy import DistanceStrategy
+from langchain_oracledb.vectorstores import DistanceStrategy, OracleVS
 from langchain_ollama import OllamaEmbeddings
 
 conn = oracledb.connect(user="SYSTEM", password=PWD, dsn="localhost:1521/FREEPDB1")

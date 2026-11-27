@@ -71,7 +71,7 @@ ok "Oracle AI Database is ready"
 # ── step 2: create database user (fallback for pre-existing containers) ──────
 section "Step 2/6: Database user"
 info "Creating user 'picooraclaw' in FREEPDB1..."
-docker exec "$CONTAINER_NAME" sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL 2>&1 | grep -v "^$" | sed 's/^/  /' || true
+docker exec -i "$CONTAINER_NAME" sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL 2>&1 | grep -v "^$" | sed 's/^/  /' || true
 WHENEVER SQLERROR CONTINUE
 CREATE USER picooraclaw IDENTIFIED BY "${ORACLE_PWD}"
   DEFAULT TABLESPACE users QUOTA UNLIMITED ON users;
@@ -109,7 +109,7 @@ ok "Config updated"
 # ── step 4: grant mining model privilege ──────────────────────────────────────
 section "Step 4/6: Mining model privilege"
 info "Granting CREATE MINING MODEL to picooraclaw..."
-docker exec "$CONTAINER_NAME" sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL 2>&1 | grep -v "^$" | sed 's/^/  /' || true
+docker exec -i "$CONTAINER_NAME" sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL 2>&1 | grep -v "^$" | sed 's/^/  /' || true
 WHENEVER SQLERROR CONTINUE
 GRANT CREATE MINING MODEL TO picooraclaw;
 EXIT;
@@ -126,10 +126,10 @@ curl -fsSL "${ONNX_URL:-https://adwc4pm.objectstorage.us-ashburn-1.oci.customer-
 cd "$ONNX_WORK" && unzip -o model.zip && cd -
 ONNX_FILE=$(find "$ONNX_WORK" -name "*.onnx" -type f | head -1)
 if [ -n "$ONNX_FILE" ]; then
-  docker exec "$CONTAINER_NAME" mkdir -p /opt/oracle/oradata/models
+  docker exec -u root "$CONTAINER_NAME" mkdir -p /opt/oracle/oradata/models
   docker cp "$ONNX_FILE" "$CONTAINER_NAME":/opt/oracle/oradata/models/all_MiniLM_L12_v2.onnx
-  docker exec "$CONTAINER_NAME" chown oracle /opt/oracle/oradata/models/all_MiniLM_L12_v2.onnx
-  docker exec "$CONTAINER_NAME" sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL
+  docker exec -u root "$CONTAINER_NAME" chown oracle /opt/oracle/oradata/models/all_MiniLM_L12_v2.onnx
+  docker exec -i "$CONTAINER_NAME" sqlplus -S "sys/${ORACLE_PWD}@localhost:1521/FREEPDB1 as sysdba" <<SQL
 CREATE OR REPLACE DIRECTORY PICO_ONNX_DIR AS '/opt/oracle/oradata/models';
 GRANT READ ON DIRECTORY PICO_ONNX_DIR TO picooraclaw;
 EXIT;

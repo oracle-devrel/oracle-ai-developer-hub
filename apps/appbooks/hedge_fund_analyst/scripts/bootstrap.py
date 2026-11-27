@@ -31,7 +31,12 @@ def sys_sql(sql):
         capture_output=True,
     )
     out = r.stdout + r.stderr
-    for key in ["HF_OWNER_PASSWORD", "HF_CREDIT_PASSWORD", "HF_MARKETS_PASSWORD"]:
+    for key in [
+        "HF_OWNER_PASSWORD",
+        "HF_CREDIT_PASSWORD",
+        "HF_MARKETS_PASSWORD",
+        "HF_REFERENCE_PASSWORD",
+    ]:
         out = out.replace(env(key), "[redacted]") if env(key) else out
     if r.returncode:
         raise RuntimeError(out)
@@ -64,6 +69,12 @@ def main():
         sys_sql(
             f"GRANT CREATE SESSION,CREATE TABLE,CREATE VIEW,CREATE PROCEDURE,CREATE TRIGGER,CREATE PROPERTY GRAPH,CREATE MINING MODEL,CREATE SEQUENCE TO {name};"
         )
+    # Reference reader: ontology and metric-catalog reads only (see backend/db.py). It gets no tables and no desk data.
+    reference_password = env("HF_REFERENCE_PASSWORD")
+    if not re.fullmatch(r"[A-Za-z0-9]{16,80}", reference_password):
+        raise ValueError("Demo passwords must be alphanumeric, 16+ characters")
+    optional(f'CREATE USER HF_REFERENCE IDENTIFIED BY "{reference_password}";')
+    sys_sql("GRANT CREATE SESSION TO HF_REFERENCE;")
     sys_sql(
         "GRANT SELECT ON SYS.V_$SQL TO HF_OWNER;\nGRANT SELECT ON AUDSYS.UNIFIED_AUDIT_TRAIL TO HF_OWNER;\nCREATE OR REPLACE DIRECTORY HF_MODEL_DIR AS '/opt/oracle/oradata/hf_models';\nGRANT READ,WRITE ON DIRECTORY HF_MODEL_DIR TO HF_OWNER;"
     )
@@ -193,6 +204,10 @@ def main():
             "GRANT SELECT ON MINING MODEL HF_OWNER.HF_EMBED TO HF_CONNECT;\nGRANT READ ON PROPERTY GRAPH HF_OWNER.HF_GRAPH TO HF_CONNECT;"
         )
         sys_sql(f'GRANT SELECT ON MINING MODEL HF_OWNER.HF_EMBED TO {p["memory_user"]};')
+    # The schema step above recreates HF_GRAPH, so the reference reader's grants are issued after it every run.
+    sys_sql(
+        "GRANT READ ON PROPERTY GRAPH HF_OWNER.HF_GRAPH TO HF_REFERENCE;\nGRANT SELECT ON HF_OWNER.HF_RELATIONSHIPS TO HF_REFERENCE;\nGRANT SELECT ON HF_OWNER.HF_SEMANTICS TO HF_REFERENCE;\nGRANT SELECT ON HF_OWNER.HF_ISSUERS TO HF_REFERENCE;"
+    )
     if RERANK:
         sys_sql(f"GRANT SELECT ON MINING MODEL {RERANK} TO HF_CONNECT;")
     # Read-only lineage and audit surfaces scope themselves in Oracle; no inspector admin connection in the app.
@@ -232,6 +247,8 @@ GRANT SELECT ON HF_OWNER.HF_AUDIT TO HF_CONNECT;"""
                 "CREATE TABLE HF_HISTORY(thread_id VARCHAR2(80),agent VARCHAR2(20),seq NUMBER GENERATED ALWAYS AS IDENTITY,role VARCHAR2(20),content CLOB)",
                 "CREATE TABLE HF_RESULTS(run_id VARCHAR2(80) PRIMARY KEY,thread_id VARCHAR2(80),payload CLOB CHECK(payload IS JSON))",
                 "CREATE TABLE HF_SEMCACHE(cache_id VARCHAR2(36) PRIMARY KEY,question VARCHAR2(2000),embedding VECTOR(384,FLOAT32),action VARCHAR2(30),metric VARCHAR2(60),group_name VARCHAR2(100),model VARCHAR2(100),plan CLOB CHECK(plan IS JSON),answer CLOB CHECK(answer IS JSON),created_at TIMESTAMP DEFAULT SYSTIMESTAMP,hits NUMBER DEFAULT 0,last_hit TIMESTAMP)",
+                "CREATE TABLE HF_EMBED_CACHE(cache_key VARCHAR2(64) PRIMARY KEY,model VARCHAR2(100),text_sha256 VARCHAR2(64),embedding VECTOR(384,FLOAT32),created_at TIMESTAMP DEFAULT SYSTIMESTAMP)",
+                "CREATE TABLE HF_RESPONSE_CACHE(cache_key VARCHAR2(64) PRIMARY KEY,namespace VARCHAR2(100),question VARCHAR2(2000),model VARCHAR2(100),response JSON,expires_at TIMESTAMP WITH TIME ZONE NOT NULL,hits NUMBER DEFAULT 0,created_at TIMESTAMP DEFAULT SYSTIMESTAMP)",
             ]:
                 try:
                     c.cursor().execute(ddl)

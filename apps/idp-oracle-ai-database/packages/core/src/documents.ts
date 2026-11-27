@@ -85,6 +85,7 @@ export const documents = {
     originalFilename: string;
     mimeType: string;
     bytes: Buffer;
+    docType?: DocType;
   }): Promise<DocumentSummary> {
     const id = await DocumentsRepo.insert(input);
     logger.info("document received", {

@@ -33,11 +33,16 @@ export function createApp() {
     if (file.size > MAX_UPLOAD_BYTES) {
       return jsonError(c, 413, "file_too_large", `File exceeds ${MAX_UPLOAD_BYTES} bytes`);
     }
+    const docTypeParam = c.req.query("docType");
+    if (docTypeParam && !DOC_TYPES.includes(docTypeParam as DocType)) {
+      return jsonError(c, 400, "invalid_doc_type", `unknown docType: ${docTypeParam}`);
+    }
     const bytes = Buffer.from(await file.arrayBuffer());
     const summary = await documents.uploadAndIngest({
       originalFilename: file.name,
       mimeType: file.type || "application/pdf",
       bytes,
+      docType: docTypeParam as DocType | undefined,
     });
     return c.json(summary, 201);
   });

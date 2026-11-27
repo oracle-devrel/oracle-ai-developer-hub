@@ -27,14 +27,16 @@ export const DocumentsRepo = {
     originalFilename: string;
     mimeType: string;
     bytes: Buffer;
+    docType?: DocType;
   }): Promise<string> {
     const id = uuidHex();
     await withConnection(async (conn) => {
       await conn.execute(
-        `INSERT INTO documents (id, original_filename, mime_type, byte_size, file_blob)
-         VALUES (HEXTORAW(:id), :filename, :mimeType, :byteSize, :blob)`,
+        `INSERT INTO documents (id, doc_type, original_filename, mime_type, byte_size, file_blob)
+         VALUES (HEXTORAW(:id), :docType, :filename, :mimeType, :byteSize, :blob)`,
         {
           id,
+          docType: input.docType ?? "unknown",
           filename: input.originalFilename,
           mimeType: input.mimeType,
           byteSize: input.bytes.length,

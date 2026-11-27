@@ -51,7 +51,7 @@ pnpm db:setup-onnx                        # downloads via DBMS_CLOUD.GET_OBJECT 
 pnpm dev:api   # in one terminal, Hono on :8787
 pnpm dev       # in another, Vite on :5173
 
-# 8. Seed the demo with the committed sample PDFs
+# 8. Seed the demo with the committed sample PDFs (five per type go in as labeled examples, the rest are classified by k-NN)
 pnpm seed
 ```
 
@@ -120,7 +120,7 @@ docs/                   — Provisioning guides and the long-form article
 | `pnpm db:setup`                | Run migrations against the configured DB                                              |
 | `pnpm db:setup-oci-credential` | Grant privileges to idp, open network ACL, register OCI Gen AI credential, smoke-test |
 | `pnpm db:setup-onnx`           | Download and register the ONNX embedding model (`doc_embedder`)                       |
-| `pnpm seed`                    | Upload every sample PDF to the API and wait for ingest                                |
+| `pnpm seed`                    | Upload the sample PDFs: five labeled examples per type, then k-NN for the rest        |
 | `pnpm dev`                     | Run the SPA locally on :5173                                                          |
 | `pnpm dev:api`                 | Run the Hono API locally on :8787                                                     |
 | `pnpm cdk:deploy`              | Deploy the Lambda + S3 + CloudFront stack                                             |

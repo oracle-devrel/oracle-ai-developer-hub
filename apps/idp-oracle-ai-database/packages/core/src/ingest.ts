@@ -40,18 +40,22 @@ export async function ingestDocument(documentId: string): Promise<DocStatus> {
     }
 
     if (doc.status === "embedded") {
-      log.info(`classifying via k-NN vector search (k=${KNN_K})`);
-      const result = await DocumentsRepo.classifyByVector(documentId, KNN_K);
-      log.info("classified", {
-        docType: result.docType,
-        confidence: result.confidence,
-        neighbors: result.neighbors.map((n) => ({
-          docType: n.docType,
-          distance: Number(n.distance.toFixed(4)),
-          filename: n.filename,
-        })),
-      });
-      await DocumentsRepo.updateDocType(documentId, result.docType);
+      if (doc.docType !== "unknown") {
+        log.info("uploaded with a label; skipping k-NN classification", { docType: doc.docType });
+      } else {
+        log.info(`classifying via k-NN vector search (k=${KNN_K})`);
+        const result = await DocumentsRepo.classifyByVector(documentId, KNN_K);
+        log.info("classified", {
+          docType: result.docType,
+          confidence: result.confidence,
+          neighbors: result.neighbors.map((n) => ({
+            docType: n.docType,
+            distance: Number(n.distance.toFixed(4)),
+            filename: n.filename,
+          })),
+        });
+        await DocumentsRepo.updateDocType(documentId, result.docType);
+      }
       await DocumentsRepo.updateStatus(documentId, "classified");
       doc = (await DocumentsRepo.findById(documentId))!;
     }

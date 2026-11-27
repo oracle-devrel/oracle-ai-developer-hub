@@ -1,10 +1,18 @@
 import "dotenv/config";
 import { readFile, readdir } from "node:fs/promises";
-import { join, dirname } from "node:path";
+import { join, dirname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SAMPLES_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "samples");
 const CONCURRENCY = 4;
+// The sample folders are the labels. The first few PDFs of each folder are uploaded with their type so the
+// database holds labeled examples; every other PDF is then classified by k-NN against those examples.
+const LABELED_PER_TYPE = 5;
+const TYPE_BY_DIR: Record<string, string> = {
+  invoices: "invoice",
+  "purchase-orders": "purchase_order",
+  "delivery-notes": "delivery_note",
+};
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 120_000;
 
@@ -17,14 +25,15 @@ interface DocResult {
   durationMs: number;
 }
 
-async function uploadAndWait(filePath: string, base: string): Promise<DocResult> {
+async function uploadAndWait(filePath: string, base: string, docType?: string): Promise<DocResult> {
   const start = Date.now();
   const bytes = await readFile(filePath);
   const filename = filePath.split("/").pop()!;
   const form = new FormData();
   form.append("file", new Blob([bytes], { type: "application/pdf" }), filename);
 
-  const res = await fetch(`${base}/documents`, { method: "POST", body: form });
+  const query = docType ? `?docType=${encodeURIComponent(docType)}` : "";
+  const res = await fetch(`${base}/documents${query}`, { method: "POST", body: form });
   if (!res.ok) {
     throw new Error(`upload failed (${res.status}): ${await res.text()}`);
   }
@@ -49,7 +58,7 @@ async function uploadAndWait(filePath: string, base: string): Promise<DocResult>
 
 async function listFiles(): Promise<string[]> {
   const out: string[] = [];
-  for (const subdir of ["invoices", "purchase-orders", "delivery-notes"]) {
+  for (const subdir of Object.keys(TYPE_BY_DIR)) {
     const full = join(SAMPLES_DIR, subdir);
     try {
       for (const f of await readdir(full)) {
@@ -88,10 +97,20 @@ async function main() {
     console.log(`No sample files found in ${SAMPLES_DIR}. Run "pnpm samples" first.`);
     return;
   }
+  const examples = Object.keys(TYPE_BY_DIR).flatMap((dir) =>
+    files.filter((f) => basename(dirname(f)) === dir).slice(0, LABELED_PER_TYPE)
+  );
+  const rest = files.filter((f) => !examples.includes(f));
   console.log(`Uploading ${files.length} files to ${base} (concurrency ${CONCURRENCY})`);
+  console.log(`  1/2 ${examples.length} labeled examples (type taken from the sample folder)`);
 
   const start = Date.now();
-  const results = await runPool(files, CONCURRENCY, (f) => uploadAndWait(f, base));
+  const labeled = await runPool(examples, CONCURRENCY, (f) =>
+    uploadAndWait(f, base, TYPE_BY_DIR[basename(dirname(f))])
+  );
+  console.log(`  2/2 ${rest.length} documents classified by k-NN against the examples`);
+  const classified = await runPool(rest, CONCURRENCY, (f) => uploadAndWait(f, base));
+  const results = [...labeled, ...classified];
   const totalMs = Date.now() - start;
 
   const byType: Record<string, number> = {};

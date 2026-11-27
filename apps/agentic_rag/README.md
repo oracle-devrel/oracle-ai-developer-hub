@@ -67,6 +67,28 @@ Here you can find a result of using Chain of Thought (CoT) reasoning:
     ollama pull <model> # see ollama.com/models
     ```
 
+4. Connect an Oracle AI Database. Copy `config_example.yaml` to `config.yaml` and set `ORACLE_DB_USERNAME`,
+   `ORACLE_DB_PASSWORD` and `ORACLE_DB_DSN`. On a local Oracle AI Database Free container, connect as a regular
+   user and not as `SYSTEM`: the `SYSTEM` tablespace cannot hold the `JSON` columns the vector store creates
+   (`ORA-43853`). As `SYSDBA`, connected to the `FREEPDB1` pluggable database:
+
+    ```sql
+    create user raguser identified by "<password>" default tablespace users quota unlimited on users;
+    grant connect, resource, db_developer_role, create mining model to raguser;
+    grant execute on dbms_vector to raguser;
+    grant execute on utl_file to raguser;
+    grant read, write on directory data_pump_dir to raguser;
+    ```
+
+5. Load the in-database embedding model `ALL_MINILM_L12_V2`:
+
+    ```bash
+    python -m src.load_model
+    ```
+
+    When the app starts with a working Oracle connection, its log shows `Using Oracle AI Database 26ai for vector storage`.
+    `Falling back to ChromaDB` means the Oracle connection or the embedding model is not usable.
+
 ## 1. Getting Started
 
 You can launch this solution in multiple ways:

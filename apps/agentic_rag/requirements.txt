@@ -5,19 +5,19 @@ chromadb
 python-dotenv
 openai
 pydantic
-fastapi
+fastapi>=0.136  # lower bound: without it, pip 24 backtracks through old releases for over 25 minutes
 uvicorn
 python-multipart
 torch
 pyyaml
 trafilatura
 gradio>=6.7.0,<7.0
-open-webui
+open-webui>=0.13.3  # lower bound, same reason
 lxml_html_clean
 langchain
 gitingest
 ollama
-oracledb
+oracledb<26  # 26.x raises DPY-3013 (str to CLOB) in langchain-oracledb's OracleEmbeddings
 sentence-transformers
 pytest
 pytest-asyncio

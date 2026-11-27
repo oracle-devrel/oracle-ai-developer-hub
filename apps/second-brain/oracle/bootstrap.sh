@@ -7,8 +7,9 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 # read ONLY the two passwords from .env — sourcing the whole file executes it as shell,
-# which breaks on any unquoted value with a space (and runs more than a bootstrap should)
-env_val() { grep -m1 "^$1=" .env 2>/dev/null | cut -d= -f2-; }
+# which breaks on any unquoted value with a space (and runs more than a bootstrap should).
+# An inline "  # comment" after the value is dropped, as docker compose does.
+env_val() { grep -m1 "^$1=" .env 2>/dev/null | cut -d= -f2- | sed -E 's/[[:space:]]+#.*$//'; }
 ORA="$(env_val ORACLE_PWD)"; ORA="${ORA:-${ORACLE_PWD:-CHANGE_ME_SysPwd1}}"
 APP="$(env_val APP_PWD)";    APP="${APP:-${APP_PWD:-CHANGE_ME_AppPwd1}}"
 DSN="localhost:1521/FREEPDB1"

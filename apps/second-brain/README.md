@@ -104,12 +104,14 @@ python3.12 -m venv .venv
 # 3. Config (the CHANGE_ME_* placeholders work for the local sandbox; set your own for anything real)
 cp oracle/.env.example oracle/.env
 
-# 4. Start Oracle AI Database 26ai (Free container image) locally
+# 4. Download the in-DB embedding model first (if the container starts before oracle/models
+#    exists, Docker creates that folder owned by root and the download fails)
+./oracle/download-model.sh
+
+# 5. Start Oracle AI Database 26ai (Free container image) locally
 docker-compose -f oracle/docker-compose.yml up -d
 
-# 5. Download the in-DB embedding model, then bootstrap the database
-#    (waits for healthy, applies schema, loads the ONNX model)
-./oracle/download-model.sh
+# 6. Bootstrap the database (waits for healthy, applies schema, loads the ONNX model)
 ./oracle/bootstrap.sh
 ```
 

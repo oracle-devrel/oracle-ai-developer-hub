@@ -28,6 +28,16 @@ class _InDBOnnxEmbedder:
     def __init__(self, conn):
         self.conn = conn
 
+    @property
+    def embedding_dimension(self) -> int:
+        # OAMP reads this when it sets up its vector columns.
+        return settings.vector_dim
+
+    @property
+    def max_input_tokens(self) -> int:
+        # all-MiniLM-L12-v2 truncates its input at 256 word pieces.
+        return 256
+
     def embed(self, texts, *, is_query=False):
         out = []
         cur = self.conn.cursor()

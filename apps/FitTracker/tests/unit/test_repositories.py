@@ -148,7 +148,7 @@ class TestUserRepository:
         repo = UserRepository()
         assert repo.duality_view == "users_dv"
 
-    @patch("fittrack.repositories.base.execute_json_query")
+    @patch("fittrack.repositories.user.execute_json_query")
     def test_find_by_email(self, mock_query):
         """find_by_email should query by email."""
         from fittrack.repositories.user import UserRepository
@@ -161,7 +161,7 @@ class TestUserRepository:
         assert result is not None
         assert result["email"] == "test@example.com"
 
-    @patch("fittrack.repositories.base.execute_json_query")
+    @patch("fittrack.repositories.user.execute_json_query")
     def test_find_by_email_case_insensitive(self, mock_query):
         """find_by_email should be case insensitive."""
         from fittrack.repositories.user import UserRepository
@@ -189,8 +189,8 @@ class TestUserRepository:
 
         assert len(result) == 2
 
-    @patch("fittrack.repositories.base.execute_dml")
-    @patch("fittrack.repositories.base.execute_json_query")
+    @patch("fittrack.repositories.user.execute_dml")
+    @patch("fittrack.repositories.user.execute_json_query")
     def test_update_point_balance_with_optimistic_locking(self, mock_query, mock_dml):
         """update_point_balance should use optimistic locking."""
         from fittrack.repositories.user import UserRepository
@@ -230,7 +230,7 @@ class TestProfileRepository:
         assert result is not None
         assert result["user_id"] == "u1"
 
-    @patch("fittrack.repositories.base.execute_json_query")
+    @patch("fittrack.repositories.profile.execute_json_query")
     def test_find_by_tier(self, mock_query):
         """find_by_tier should filter by tier_code."""
         from fittrack.repositories.profile import ProfileRepository
@@ -256,7 +256,7 @@ class TestConnectionRepository:
         repo = ConnectionRepository()
         assert repo.duality_view == "tracker_connections_dv"
 
-    @patch("fittrack.repositories.base.execute_json_query")
+    @patch("fittrack.repositories.connection.execute_json_query")
     def test_find_by_user_and_provider(self, mock_query):
         """find_by_user_and_provider should filter by both."""
         from fittrack.repositories.connection import ConnectionRepository
@@ -318,7 +318,7 @@ class TestActivityRepository:
 
         assert len(result) >= 0
 
-    @patch("fittrack.repositories.base.execute_query_one")
+    @patch("fittrack.repositories.activity.execute_query_one")
     def test_calculate_daily_totals(self, mock_query):
         """calculate_daily_totals should aggregate by type."""
         from fittrack.repositories.activity import ActivityRepository
@@ -353,7 +353,7 @@ class TestTransactionRepository:
 
         assert len(result) >= 0
 
-    @patch("fittrack.repositories.base.execute_query_one")
+    @patch("fittrack.repositories.transaction.execute_query_one")
     def test_calculate_balance(self, mock_query):
         """calculate_balance should sum transactions."""
         from fittrack.repositories.transaction import TransactionRepository
@@ -473,7 +473,7 @@ class TestTicketRepository:
 
         assert len(result) >= 0
 
-    @patch("fittrack.repositories.base.count_json_documents")
+    @patch("fittrack.repositories.ticket.count_json_documents")
     def test_count_by_drawing(self, mock_count):
         """count_by_drawing should count tickets for drawing."""
         from fittrack.repositories.ticket import TicketRepository
@@ -485,7 +485,7 @@ class TestTicketRepository:
 
         assert result == 100
 
-    @patch("fittrack.repositories.base.count_json_documents")
+    @patch("fittrack.repositories.ticket.count_json_documents")
     def test_count_by_user_and_drawing(self, mock_count):
         """count_by_user_and_drawing should count user's tickets in drawing."""
         from fittrack.repositories.ticket import TicketRepository

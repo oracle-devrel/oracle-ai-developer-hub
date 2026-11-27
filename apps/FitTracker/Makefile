@@ -113,7 +113,11 @@ test-watch:
 
 db-migrate:
 	@echo "Running database migrations..."
-	PYTHONPATH=src python -m fittrack.db.migrate
+	@for f in migrations/*.sql; do \
+		echo "Applying $$f"; \
+		(echo "WHENEVER SQLERROR EXIT SQL.SQLCODE"; cat $$f; echo "EXIT") | \
+			docker compose exec -T oracle sqlplus -S -L fittrack/FitTrack2026!@//localhost:1521/FREEPDB1 || exit 1; \
+	done
 
 db-seed:
 	@echo "Seeding database with synthetic data..."

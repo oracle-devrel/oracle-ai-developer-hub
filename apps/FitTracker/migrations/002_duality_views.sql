@@ -258,7 +258,6 @@ SELECT JSON {
         }
         FROM prizes p WITH NOINSERT NOUPDATE NODELETE
         WHERE p.drawing_id = d.id
-        ORDER BY p.rank
     ]
 }
 FROM drawings d WITH NOINSERT NOUPDATE NODELETE;

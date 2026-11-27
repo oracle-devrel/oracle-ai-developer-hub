@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import {
   fetchServerSentEvents,
   useChat,
@@ -11,4 +12,7 @@ const chatOptions = createChatClientOptions({
 
 export type ChatMessages = InferChatMessages<typeof chatOptions>
 
-export const useAIChat = () => useChat(chatOptions)
+export const useAIChat = () => {
+  const threadId = useId()
+  return useChat({ ...chatOptions, threadId })
+}

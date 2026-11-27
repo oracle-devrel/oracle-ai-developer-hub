@@ -1,5 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { chat, maxIterations, toServerSentEventsResponse } from '@tanstack/ai'
+import {
+  chat,
+  chatParamsFromRequestBody,
+  maxIterations,
+  toServerSentEventsResponse,
+} from '@tanstack/ai'
 import { anthropicText } from '@tanstack/ai-anthropic'
 import { openaiText } from '@tanstack/ai-openai'
 import { geminiText } from '@tanstack/ai-gemini'
@@ -43,8 +48,9 @@ export const Route = createFileRoute('/api/ai/chat')({
         const abortController = new AbortController()
 
         try {
-          const body = await request.json()
-          const { messages } = body
+          const { messages, threadId } = await chatParamsFromRequestBody(
+            await request.json(),
+          )
 
           let provider: string = 'ollama'
           let model: string = 'mistral:7b'
@@ -75,6 +81,7 @@ export const Route = createFileRoute('/api/ai/chat')({
             systemPrompts: [SYSTEM_PROMPT],
             agentLoopStrategy: maxIterations(10),
             messages,
+            threadId,
             abortController,
           })
 

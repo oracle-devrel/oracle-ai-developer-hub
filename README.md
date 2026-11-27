@@ -12,7 +12,21 @@ It is for developers and AI engineers who want working code to start from. If yo
 
 ## Quick start
 
-Run vector search, hybrid search, RAG, and agent memory on a local Oracle AI Database. You need Docker and Python 3.11 or newer. There is no sign-up and no API key: an ONNX model inside the database creates the embeddings.
+Run vector search, hybrid search, RAG, and agent memory on a local Oracle AI Database. There is no sign-up and no API key: an ONNX model inside the database creates the embeddings.
+
+The shortest way needs only Docker. One command builds a small Python image, starts the database, prepares it, and runs the first example. The first run downloads the database image (about 0.9 GB) and takes a few minutes.
+
+```bash
+git clone https://github.com/oracle-devrel/oracle-ai-developer-hub.git
+cd oracle-ai-developer-hub/quickstart
+docker compose up --attach quickstart
+```
+
+Or open the quick start in GitHub Codespaces, where the database runs next to the editor:
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/oracle-devrel/oracle-ai-developer-hub?devcontainer_path=.devcontainer%2Fquickstart%2Fdevcontainer.json)
+
+To run the same steps in your own Python environment, you need Docker and Python 3.11 or newer:
 
 1. Start the database. The first start downloads about 0.9 GB.
 
@@ -35,7 +49,7 @@ Run vector search, hybrid search, RAG, and agent memory on a local Oracle AI Dat
 
 The example loads six sentences and searches them for "money back". The sentence about refunds comes first, although it shares no word with the query. A hybrid search then puts the sentence with an exact error code first.
 
-A vector search with LangChain takes a few lines. Save this as `snippet.py` in the same folder and run `python snippet.py`; it prints the refund sentence.
+A vector search with LangChain takes a few lines. Save this as `snippet.py` in the same folder and run `python snippet.py`, or `docker compose run --rm quickstart python snippet.py` if you started with Docker Compose. It prints the refund sentence.
 
 ```python
 import os
@@ -45,7 +59,9 @@ from langchain_core.embeddings import Embeddings
 from langchain_oracledb.vectorstores import DistanceStrategy, OracleVS
 
 conn = oracledb.connect(
-    user="quickstart", password=os.environ["ORACLE_PWD"], dsn="localhost:1521/FREEPDB1"
+    user="quickstart",
+    password=os.environ["ORACLE_PWD"],
+    dsn=os.environ.get("ORACLE_DSN", "localhost:1521/FREEPDB1"),
 )
 
 

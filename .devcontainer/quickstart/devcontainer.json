@@ -1,0 +1,13 @@
+{
+  "name": "Oracle AI Database quick start",
+  "dockerComposeFile": ["../../quickstart/compose.yaml", "compose.yaml"],
+  "service": "workspace",
+  "runServices": ["database", "workspace"],
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "postCreateCommand": "pip install -r quickstart/requirements.txt",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  }
+}

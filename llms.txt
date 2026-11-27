@@ -17,6 +17,7 @@ Names and packages that older tutorials often get wrong:
 ## Start here
 
 - [Quick start](https://oracle-devrel.github.io/oracle-ai-developer-hub/quickstart/README.md): scripts for vector and hybrid search, RAG, and agent memory that run on a local database with no API key
+- [Quick start with Docker Compose](https://raw.githubusercontent.com/oracle-devrel/oracle-ai-developer-hub/main/quickstart/compose.yaml): `docker compose up --attach quickstart` in the `quickstart` folder starts the database, prepares it and runs the first example, with only Docker installed
 - [Quick start script: vector and hybrid search](https://raw.githubusercontent.com/oracle-devrel/oracle-ai-developer-hub/main/quickstart/vector_and_hybrid_search.py): a `VECTOR` column, a vector index and `DBMS_HYBRID_VECTOR.SEARCH` in SQL, then the same through `OracleVS` and `OracleHybridSearchRetriever`
 - [Quick start script: RAG](https://raw.githubusercontent.com/oracle-devrel/oracle-ai-developer-hub/main/quickstart/rag.py): in-database chunking and embeddings, `OracleVS`, and a LangChain chain
 - [Quick start script: LangGraph agent memory](https://raw.githubusercontent.com/oracle-devrel/oracle-ai-developer-hub/main/quickstart/agent_memory_langgraph.py): `OracleSaver` for thread state and `OracleStore` for long-term facts

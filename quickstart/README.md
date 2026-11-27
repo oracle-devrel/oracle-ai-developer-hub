@@ -28,6 +28,80 @@ Each example script is self-contained: you can read, copy or run it on its own a
 This was tested on Linux (x86-64) only. The image is also published for arm64, but that was not
 tested.
 
+## One command with Docker Compose
+
+This is an alternative to the step-by-step path below, which uses `docker run` and a local virtual
+environment. Use one or the other. With Docker Compose you need only Docker: the Python packages
+live in a small image, and the scripts in this folder are mounted into it.
+
+```bash
+git clone https://github.com/oracle-devrel/oracle-ai-developer-hub.git
+cd oracle-ai-developer-hub/quickstart
+docker compose up --attach quickstart
+```
+
+Compose builds the Python image, starts Oracle AI Database Free, waits until it is healthy, runs
+`setup_database.py` and then `vector_and_hybrid_search.py`, and returns to the prompt when the
+script is done. The database container keeps running. With the database image already downloaded,
+the first run took two to three minutes on a Linux test machine: about half of that to build the
+Python image, the rest to start the database, prepare it and run the example. The end of the
+output:
+
+```text
+quickstart-1  | LangChain vector search for 'money back' (category = billing):
+quickstart-1  |   Premium customers can request a full refund within 30 days.
+quickstart-1  |   Annual plans are billed once a year and prorated on cancellation.
+quickstart-1  | LangChain hybrid search for 'ORA-51803 vector dimensions':
+quickstart-1  |   score 80.9  Error ORA-51803 means the vector has a different number of dimensions.
+quickstart-1  |   score 47.6  Critical incidents are answered within one hour.
+quickstart-1  |   score 47.1  Annual plans are billed once a year and prorated on cancellation.
+
+quickstart-1 exited with code 0
+```
+
+Without `--attach quickstart`, `docker compose up` also works, but it keeps printing the database
+log and does not return until you press Ctrl+C, which stops the database too. Running the command
+again is safe: setup does nothing the second time.
+
+Run the other examples against the same database. The password and the address of the database are
+already set inside the container:
+
+```bash
+docker compose run --rm quickstart python rag.py
+docker compose run --rm quickstart python agent_memory_langgraph.py --reset "My name is Ada"
+docker compose run --rm quickstart python agent_memory_sdk.py remember --reset "The user prefers answers in French."
+docker compose run --rm quickstart python agent_memory_sdk.py recall "What language does the user want?"
+```
+
+The output is the same as in the steps below. Edits to the scripts apply at once, because the folder
+is mounted into the container.
+
+If port 1521 on your machine is taken, publish the database on another port. The scripts talk to
+the database over the Compose network, so only the published port changes:
+
+```bash
+QUICKSTART_DB_PORT=1522 docker compose up --attach quickstart
+```
+
+To remove the containers, the network and the database data:
+
+```bash
+docker compose down -v
+```
+
+### GitHub Codespaces
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/oracle-devrel/oracle-ai-developer-hub?devcontainer_path=.devcontainer%2Fquickstart%2Fdevcontainer.json)
+
+The button opens a codespace with Python and the database as a second container, with the
+environment variables set. When it is ready, open the terminal and run:
+
+```bash
+cd quickstart
+python setup_database.py
+python vector_and_hybrid_search.py
+```
+
 ## Run it
 
 The commands below are for a Bash shell. The output shown is from a new container and a new virtual

@@ -1,0 +1,26 @@
+# Runs the quick start with one command: docker compose up
+# It starts Oracle AI Database Free, prepares it (setup_database.py) and prints the results of
+# vector_and_hybrid_search.py. Other examples: docker compose run --rm quickstart python rag.py
+# Remove everything: docker compose down -v
+name: oracle-ai-quickstart
+
+services:
+  database:
+    image: container-registry.oracle.com/database/free:latest-lite
+    environment:
+      ORACLE_PWD: ${ORACLE_PWD:-Quickstart2026}
+    ports:
+      - "127.0.0.1:${QUICKSTART_DB_PORT:-1521}:1521"
+
+  quickstart:
+    build: .
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - .:/quickstart:ro
+    environment:
+      ORACLE_PWD: ${ORACLE_PWD:-Quickstart2026}
+      ORACLE_DSN: database:1521/FREEPDB1
+      PYTHONDONTWRITEBYTECODE: "1"
+    command: sh -c "python setup_database.py && python vector_and_hybrid_search.py"

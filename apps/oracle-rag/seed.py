@@ -53,7 +53,7 @@ PDF_FILE_NAME = "ai-vector-search-users-guide.pdf"  # legacy, kept for reference
 DOCUMENTS = [
     {
         "url": (
-            "https://docs.oracle.com/en/database/oracle/oracle-database/23/"
+            "https://docs.oracle.com/cd/G47991_01/"
             "vecse/ai-vector-search-users-guide.pdf"
         ),
         "filename": "ai-vector-search-users-guide.pdf",
@@ -69,7 +69,7 @@ DOCUMENTS = [
     },
     {
         "url": (
-            "https://docs.oracle.com/en/database/oracle/oracle-database/23/"
+            "https://docs.oracle.com/cd/G47991_01/"
             "cncpt/database-concepts.pdf"
         ),
         "filename": "database-concepts.pdf",

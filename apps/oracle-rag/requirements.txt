@@ -1,4 +1,5 @@
-oracledb>=2.5.0
+# <26: OracleEmbeddings with provider=database fails with DPY-3013 (str for DB_TYPE_CLOB) on 26.x
+oracledb>=2.5.0,<26
 langchain>=1.0.0
 langchain-core>=1.0.0
 langchain-community>=0.4.0

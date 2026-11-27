@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@langchain/community": "^0.3.49",
+    "@langchain/core": "^0.3.58",
     "@langchain/openai": "^0.6.2",
     "langchain": "^0.3.30",
     "lucide-react": "^0.344.0",

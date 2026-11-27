@@ -31,7 +31,13 @@ import time
 from pathlib import Path
 
 import pytest
-from langchain_core.embeddings import Embeddings
+
+try:
+    from langchain_core.embeddings import Embeddings
+except ImportError:
+    # The smoke suite runs with only pytest installed; only the integration
+    # fixtures use DeterministicEmbedding, and they need the full requirements.
+    Embeddings = object
 
 # ---------------------------------------------------------------------------
 # Path setup: make src/ importable for all tests in this project.

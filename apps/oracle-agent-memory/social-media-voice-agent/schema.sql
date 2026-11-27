@@ -1,6 +1,6 @@
 -- oracle-agent-memory schema
 -- Run against an Oracle Database 26ai instance (Autonomous, on-prem, or container).
--- The vector dimension (1024) matches OCI's cohere.embed-english-v3.0 model.
+-- The vector dimension (1536) matches the default output of OCI's cohere.embed-v4.0 model.
 -- If you swap embedding models, update the dimension to match.
 
 -- Episodic memory: every post you've ever written
@@ -10,7 +10,7 @@ CREATE TABLE posts (
     platform      VARCHAR2(32) NOT NULL,
     topic         VARCHAR2(256),
     content       CLOB NOT NULL,
-    embedding     VECTOR(1024, FLOAT32),
+    embedding     VECTOR(1536, FLOAT32),
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_deleted    NUMBER(1) DEFAULT 0
 );

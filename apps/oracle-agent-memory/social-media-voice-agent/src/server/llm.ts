@@ -12,11 +12,11 @@ const compartmentId = process.env.OCI_COMPARTMENT_ID!;
 // once the unversioned alias is deprecated. Override via env vars if these
 // stop working; check the Console at Analytics & AI → Generative AI → Pretrained
 // Foundational Models for what's currently available in your region.
-const EMBED_MODEL = process.env.OCI_EMBED_MODEL_ID ?? 'cohere.embed-english-v3.0';
-const CHAT_MODEL  = process.env.OCI_CHAT_MODEL_ID  ?? 'cohere.command-r-plus-08-2024';
+const EMBED_MODEL = process.env.OCI_EMBED_MODEL_ID ?? 'cohere.embed-v4.0';
+const CHAT_MODEL  = process.env.OCI_CHAT_MODEL_ID  ?? 'cohere.command-a-03-2025';
 
 /**
- * Embed one or more texts into 1024-dim vectors using OCI's hosted Cohere model.
+ * Embed one or more texts into 1536-dim vectors using OCI's hosted Cohere model.
  */
 export async function embed(texts: string[]): Promise<number[][]> {
   const res = await client.embedText({

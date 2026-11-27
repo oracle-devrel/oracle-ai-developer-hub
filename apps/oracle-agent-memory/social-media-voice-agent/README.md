@@ -15,7 +15,7 @@ All three live in the same Oracle AI Database 26ai instance. Vectors, JSON, and 
 ## Stack
 
 - Backend: Node.js + Express, TypeScript, `oracledb` driver
-- LLM: OCI Generative AI via `oci-generativeaiinference` (defaults to `cohere.command-r-plus-08-2024` for chat and `cohere.embed-english-v3.0` for embeddings; override with `OCI_CHAT_MODEL_ID` / `OCI_EMBED_MODEL_ID` if those rotate)
+- LLM: OCI Generative AI via `oci-generativeaiinference` (defaults to `cohere.command-a-03-2025` for chat and `cohere.embed-v4.0` for embeddings; override with `OCI_CHAT_MODEL_ID` / `OCI_EMBED_MODEL_ID` if those rotate)
 - Frontend: React + Vite, TypeScript
 - Database: Oracle AI Database 26ai
 
@@ -52,6 +52,14 @@ npm run dev      # starts server (3001) + Vite client (5173)
 ### Path B: Existing database
 
 If you already have an Oracle AI Database 26ai instance:
+
+`npm run schema` creates an HNSW vector index, which needs the database's vector memory pool. Autonomous AI Database manages it for you. On Oracle AI Database Free or any other self-managed instance, connect as `SYSDBA`, set the pool size, and restart the database before you run `npm run schema`. Without it, index creation fails with `ORA-51962`:
+
+```sql
+ALTER SYSTEM SET vector_memory_size = 512M SCOPE=SPFILE;
+```
+
+Then continue:
 
 ```bash
 git clone <repo-url> oracle-agent-memory
